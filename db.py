@@ -30,6 +30,10 @@ class Task(SQLObject):
         otherColumn="property_id")
 
     def setPropertyDict(self, dct):
+        """
+        Defines properties of a task.
+        Dict is of the form: propertyName => value
+        """
         for taskProperty in TaskProperty.selectBy(task=self):
             taskProperty.destroySelf()
 
@@ -38,6 +42,10 @@ class Task(SQLObject):
             TaskProperty(task=self, property=property, value=value)
 
     def getPropertyDict(self):
+        """
+        Returns all properties of a task as a dict of the form:
+        propertyName => value
+        """
         dct = {}
         for property in TaskProperty.selectBy(task=self):
             dct[property.property.name] = property.value
