@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import sys
 from optparse import OptionParser
 
 from sqlobject import *
@@ -29,9 +28,6 @@ def main():
     if len(args) > 0:
         cmd.onecmd(" ".join(args))
     else:
-        for line in sys.stdin.readlines():
-            line = line.strip()
-            cmd.onecmd(line)
         cmd.cmdloop()
 
 
