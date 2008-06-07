@@ -137,9 +137,22 @@ class YCmd(Cmd):
         taskId = int(line)
         task = Task.get(taskId)
 
-        # Code copied from yagtd
+        # Create task line
+        dct = task.getPropertyDict()
+        tokens = []
+        for propertyName, value in dct.items():
+            tokens.append("-p")
+            if value:
+                tokens.append(propertyName + "=" + str(value))
+            else:
+                tokens.append(propertyName)
+        tokens.append(task.title)
+        taskLine = " ".join(tokens)
+
+        # Setup readline
+        # (Code copied from yagtd)
         def pre_input_hook():
-            readline.insert_text(task.title)
+            readline.insert_text(taskLine)
             readline.redisplay()
 
             # Unset the hook again
@@ -153,7 +166,14 @@ class YCmd(Cmd):
         #   but remove_history_item is 0-based
         readline.remove_history_item(readline.get_current_history_length() - 1)
 
-        task.title = line
+        # Update task
+        title, propertyDict = utils.extractProperties(line)
+        for propertyName in propertyDict.keys():
+            property = utils.getOrCreateProperty(propertyName)
+            if not property:
+                return
+        task.title = title
+        task.setPropertyDict(propertyDict)
 
 
     def do_p_list(self, line):
