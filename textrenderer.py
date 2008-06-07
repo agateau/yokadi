@@ -20,7 +20,14 @@ class TextRenderer(object):
 
 
     def renderTaskDetails(self, task):
-        keywords = ", ".join([x.name for x in task.keywords])
+        keywordDict = task.getKeywordDict()
+        keywordArray = []
+        for name, value in keywordDict.items():
+            txt = name
+            if value:
+                txt += "=" + str(value)
+            keywordArray.append(txt)
+        keywords = ", ".join(keywordArray)
         fields = [
             ("Title", task.title),
             ("Created", task.creationDate),
