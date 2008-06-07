@@ -29,6 +29,14 @@ class Task(SQLObject):
         joinColumn="task_id",
         otherColumn="property_id")
 
+    def setPropertyDict(self, dct):
+        for taskProperty in TaskProperty.selectBy(task=self):
+            taskProperty.destroySelf()
+
+        for name, value in dct.items():
+            property = Property.selectBy(name=name)[0]
+            TaskProperty(task=self, property=property, value=value)
+
     def getPropertyDict(self):
         dct = {}
         for property in TaskProperty.selectBy(task=self):
