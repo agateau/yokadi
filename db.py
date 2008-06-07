@@ -1,24 +1,24 @@
 from sqlobject import *
 
-class Project(SQLObject):
+class Keyword(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
-    name = StringCol()
-    tasks = MultipleJoin('Task')
+    name = UnicodeCol(alternateID=True)
+    tasks = RelatedJoin("Task")
 
 class Task(SQLObject):
-    title = StringCol()
+    title = UnicodeCol(alternateID=True)
     creationDate = DateTimeCol()
-    description = StringCol()
+    description = UnicodeCol()
     status = EnumCol(enumValues=['new', 'started', 'done'])
-    project = ForeignKey('Project')
+    keywords = RelatedJoin("Keyword")
 
     def toUtf8(self):
-        title = unicode(self.title, "utf-8")
-        text = u"%03d %-40s status=%s %s" % (self.id, title, self.status[0].upper(), self.creationDate)
+        title = self.title[:60]
+        text = u"%03d %-60s status=%s %s" % (self.id, title, self.status[0].upper(), self.creationDate)
         return text.encode("utf-8")
 
 def createTables():
-    Project.createTable()
+    Keyword.createTable()
     Task.createTable()
 # vi: ts=4 sw=4 et

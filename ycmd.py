@@ -2,33 +2,27 @@ from cmd import Cmd
 from datetime import datetime
 
 from db import *
+import utils
 
 class YCmd(Cmd):
     def __init__(self):
         Cmd.__init__(self)
         Cmd.prompt = "yokadi> "
-        self.interactive = True
 
     def do_t_add(self, line):
-        """Add new task to a project. Will prompt to create project if it does not exists.
-        t_add Project Task description"""
-        projectName, rest = line.split(" ", 1)
-        results = Project.select(Project.q.name ==  projectName)
-        lst = list(results)
-        if len(lst) > 0:
-            prj = lst[0]
-        else:
-            while self.interactive:
-                answer = raw_input("Project '%s' does not exist, create it (y/n)? " % projectName)
-                if answer == "n":
-                    return
-                if answer == "y":
-                    break
-            prj = Project(name=projectName)
-            print "Added project '%s'" % projectName
-
-        task = Task(creationDate = datetime.now(), title=rest, description="", status="new", project=prj)
-        print "Added task '%s' (%d)" % (rest, task.id)
+        """Add new task. Will prompt to create keywords if they do not exist.
+        t_add [-k keyword1] [-k keyword2] Task description"""
+        title, keywordNames = utils.extractKeywords(line)
+        keywordSet = set()
+        for keywordName in keywordNames:
+            keyword = utils.getOrCreateKeyword(keywordName)
+            if not keyword:
+                return
+            keywordSet.add(keyword)
+        task = Task(creationDate = datetime.now(), title=title, description="", status="new")
+        for keyword in keywordSet:
+            task.addKeyword(keyword)
+        print "Added task '%s' (%d)" % (title, task.id)
 
     def do_t_mark_started(self, line):
         taskId = int(line)
@@ -65,27 +59,64 @@ class YCmd(Cmd):
         Task.delete(taskId)
 
     def do_t_list(self, line):
+        """List tasks assigned specific keywords, or all tasks if no keyword is
+        specified.
+        t_list [keyword1] [keyword2]
+        """
         line = line.strip()
         if line != "":
-            crit = [Project.q.name == line]
+            keywordSet = set([Keyword.byName(x) for x in line.split(" ")])
         else:
-            crit = []
+            keywordSet = None
 
-        prjList = Project.select(*crit)
+        # FIXME: Optimize
+        for task in Task.select():
+            if keywordSet:
+                taskKeywordSet = set(task.keywords)
+                if not keywordSet.issubset(taskKeywordSet):
+                    continue
 
-        for prj in prjList:
-            print
-            print "Project: %s" % prj.name
-            for task in prj.tasks:
-                if task.status != 'done':
-                    print task.toUtf8()
+            if task.status != 'done':
+                print task.toUtf8()
 
-    def do_p_list(self, line):
-        results = Project.select()
-        for prj in results:
-            print prj.name
+    def do_k_list(self, line):
+        """List all keywords"""
+        for keyword in Keyword.select():
+            print keyword.name
+
+
+    def do_import_yagtd(self, line):
+        """Import a line from yagtd"""
+        print "Importing '%s'..." % line
+        line = line.replace("@", "-k c/")
+        line = line.replace("p:", "-k p/")
+        line, complete = utils.extractYagtdField(line, "C:")
+        line, creationDate = utils.extractYagtdField(line, "S:")
+
+        if complete == "100":
+            status = "done"
+        elif complete == "0" or complete is None:
+            status = "new"
+        else:
+            status = "started"
+
+        if creationDate:
+            creationDate = datetime.strptime(creationDate, '%Y-%m-%d')
+        else:
+            creationDate = datetime.now()
+
+        title, keywordNames = utils.extractKeywords(line)
+        keywordSet = set()
+        for keywordName in keywordNames:
+            keyword = utils.getOrCreateKeyword(keywordName, interactive=False)
+            keywordSet.add(keyword)
+        task = Task(creationDate = creationDate, title=title, description="", status=status)
+        for keyword in keywordSet:
+            task.addKeyword(keyword)
+
 
     def do_EOF(self, line):
+        """Quit"""
         print
         return True
 # vi: ts=4 sw=4 et

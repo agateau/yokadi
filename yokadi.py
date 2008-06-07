@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 from optparse import OptionParser
 
 from sqlobject import *
@@ -16,10 +17,6 @@ def main():
     parser.add_option("--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
-    parser.add_option("--no-prompt", dest="interactive",
-                      action="store_false", dest="interactive", default=True,
-                      help="Do not ask questions")
-
     (options, args) = parser.parse_args()
 
     dbFileName = os.path.abspath(options.filename)
@@ -31,10 +28,12 @@ def main():
         db.createTables()
 
     cmd = YCmd()
-    cmd.interactive = options.interactive
     if len(args) > 0:
         cmd.onecmd(" ".join(args))
     else:
+        for line in sys.stdin.readlines():
+            line = line.strip()
+            cmd.onecmd(line)
         cmd.cmdloop()
 
 
