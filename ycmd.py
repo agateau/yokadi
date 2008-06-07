@@ -83,6 +83,28 @@ class YCmd(Cmd):
             if task.status != 'done':
                 self.renderer.renderTaskListRow(task)
 
+    def do_t_prop_set(self, line):
+        """Set a task property
+        t_prop_set id property [value]"""
+
+        # Parse line
+        line = utils.simplifySpaces(line)
+        tokens = line.split(" ")
+        taskId = int(tokens[0])
+        propertyName = tokens[1]
+        if len(tokens) > 2:
+            value = int(tokens[2])
+        else:
+            value = None
+
+        # Get task and property
+        task = Task.get(taskId)
+        keyword = utils.getOrCreateKeyword(propertyName)
+        if not keyword:
+            return
+
+        # Assign property
+        property = TaskKeyword(task=task, keyword=keyword, value=value)
 
     def do_t_show(self, line):
         """Display details of a task
