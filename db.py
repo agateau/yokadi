@@ -10,10 +10,12 @@ class Property(SQLObject):
         joinColumn="property_id",
         otherColumn="task_id")
 
+
 class TaskProperty(SQLObject):
     task = ForeignKey("Task")
     property = ForeignKey("Property")
     value = IntCol(default=None)
+
 
 class Task(SQLObject):
     title = UnicodeCol(alternateID=True)
