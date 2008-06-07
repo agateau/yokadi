@@ -84,7 +84,7 @@ class YCmd(Cmd):
 
         # FIXME: Optimize
         self.renderer.renderTaskListHeader()
-        for task in Task.select():
+        for task in Task.select(orderBy=-Task.q.urgency):
             if propertySet:
                 taskPropertySet = set(task.properties)
                 if not propertySet.issubset(taskPropertySet):
