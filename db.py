@@ -14,7 +14,9 @@ class Task(SQLObject):
     keywords = RelatedJoin("Keyword")
 
     def toUtf8(self):
-        title = self.title[:60]
+        title = self.title
+        if len(title) > 60:
+            title = title[:59] + ">"
         text = u"%03d %-60s status=%s %s" % (self.id, title, self.status[0].upper(), self.creationDate)
         return text.encode("utf-8")
 
