@@ -132,18 +132,9 @@ class YCmd(Cmd):
         task = Task.get(taskId)
 
         # Create task line
-        dct = task.getPropertyDict()
-        tokens = []
-        for propertyName, value in dct.items():
-            tokens.append("-p")
-            if value:
-                tokens.append(propertyName + "=" + str(value))
-            else:
-                tokens.append(propertyName)
-        tokens.append(task.title)
-        taskLine = " ".join(tokens)
+        taskLine = parseutils.createTaskLine(task.title, task.getPropertyDict())
 
-        # Setup readline
+        # Edit task line with readline
         # (Code copied from yagtd)
         def pre_input_hook():
             readline.insert_text(taskLine)

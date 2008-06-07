@@ -28,6 +28,17 @@ def extractProperties(line):
     return line, propertyDict
 
 
+def createTaskLine(title, propertyDict):
+    tokens = []
+    for propertyName, value in propertyDict.items():
+        tokens.append("-p")
+        if value:
+            tokens.append(propertyName + "=" + str(value))
+        else:
+            tokens.append(propertyName)
+    tokens.append(title)
+    return " ".join(tokens)
+
 
 def extractYagtdField(line, field):
     textParts = []
