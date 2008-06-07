@@ -7,7 +7,7 @@ import utils
 class YCmd(Cmd):
     def __init__(self):
         Cmd.__init__(self)
-        Cmd.prompt = "yokadi> "
+        self.prompt = "yokadi> "
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
