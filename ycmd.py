@@ -128,6 +128,7 @@ class YCmd(Cmd):
         line, complete = utils.extractYagtdField(line, "C:")
         line, creationDate = utils.extractYagtdField(line, "S:")
         line, urgency = utils.extractYagtdField(line, "U:")
+        line, bug = utils.extractYagtdField(line, "bug:")
         line, duration = utils.extractYagtdField(line, "T:")
         line, importance = utils.extractYagtdField(line, "I:")
 
@@ -146,18 +147,27 @@ class YCmd(Cmd):
         urgency = int(urgency)
 
         title, propertyNames = utils.extractProperties(line)
-        propertySet = set()
-        for propertyName in propertyNames:
-            property = utils.getOrCreateProperty(propertyName, interactive=False)
-            propertySet.add(property)
+
+        # Create task
         task = Task(
             creationDate = creationDate,
             title=title,
             description="",
             urgency=urgency,
             status=status)
+
+        # Create properties
+        propertySet = set()
+        for propertyName in propertyNames:
+            property = utils.getOrCreateProperty(propertyName, interactive=False)
+            propertySet.add(property)
         for property in propertySet:
             task.addProperty(property)
+
+        if bug:
+            bug = int(bug)
+            property = utils.getOrCreateProperty("bug", interactive=False)
+            TaskProperty(task=task, property=property, value=bug)
 
 
     def do_EOF(self, line):
