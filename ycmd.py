@@ -3,11 +3,14 @@ from datetime import datetime
 
 from db import *
 import utils
+from textrenderer import TextRenderer
 
 class YCmd(Cmd):
+    __slots__ = ["renderer"]
     def __init__(self):
         Cmd.__init__(self)
         self.prompt = "yokadi> "
+        self.renderer = TextRenderer()
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
@@ -78,6 +81,15 @@ class YCmd(Cmd):
 
             if task.status != 'done':
                 print task.toUtf8()
+
+
+    def do_t_show(self, line):
+        """Display details of a task
+        t_show id"""
+        taskId = int(line)
+        task = Task.get(taskId)
+        self.renderer.renderTaskDetails(task)
+
 
     def do_k_list(self, line):
         """List all keywords"""
