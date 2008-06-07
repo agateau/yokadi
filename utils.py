@@ -48,6 +48,15 @@ def getOrCreateProperty(propertyName, interactive=True):
     return property
 
 
+def createMissingProperties(lst):
+    """Create all properties from lst which does not exist
+    Returns True, if ok, False if user canceled"""
+    for propertyName in lst:
+        if not getOrCreateProperty(propertyName):
+            return False
+    return True
+
+
 def extractYagtdField(line, field):
     textParts = []
     regExp = re.compile(field + "([^ ]+)")

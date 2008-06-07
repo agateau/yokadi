@@ -19,20 +19,13 @@ class YCmd(Cmd):
         title, propertyDict = utils.extractProperties(line)
 
         # Create missing properties
-        propertySet = set()
-        for propertyName in propertyDict.keys():
-            property = utils.getOrCreateProperty(propertyName)
-            if not property:
-                return
-            propertySet.add(property)
+        if not utils.createMissingProperties(propertyDict.keys()):
+            return
 
         # Create task
         task = Task(creationDate = datetime.now(), title=title, description="", status="new")
+        task.setPropertyDict(propertyDict)
 
-        # Assign properties to task
-        for property in propertySet:
-            value = propertyDict[property.name]
-            TaskProperty(task=task, property=property, value=value)
         print "Added task '%s' (%d)" % (title, task.id)
 
     def do_t_set_urgency(self, line):
@@ -168,10 +161,8 @@ class YCmd(Cmd):
 
         # Update task
         title, propertyDict = utils.extractProperties(line)
-        for propertyName in propertyDict.keys():
-            property = utils.getOrCreateProperty(propertyName)
-            if not property:
-                return
+        if not utils.createMissingProperties(propertyDict.keys()):
+            return
         task.title = title
         task.setPropertyDict(propertyDict)
 
