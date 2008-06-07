@@ -1,5 +1,6 @@
 from cmd import Cmd
 from datetime import datetime
+import readline
 
 from db import *
 import utils
