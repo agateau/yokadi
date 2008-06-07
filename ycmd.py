@@ -16,17 +16,33 @@ class YCmd(Cmd):
     def do_t_add(self, line):
         """Add new task. Will prompt to create properties if they do not exist.
         t_add [-p property1] [-p property2] Task description"""
-        title, propertyNames = utils.extractProperties(line)
+        title, propertyDict = utils.extractProperties(line)
+
+        # Create missing properties
         propertySet = set()
-        for propertyName in propertyNames:
+        for propertyName in propertyDict.keys():
             property = utils.getOrCreateProperty(propertyName)
             if not property:
                 return
             propertySet.add(property)
+
+        # Create task
         task = Task(creationDate = datetime.now(), title=title, description="", status="new")
+
+        # Assign properties to task
         for property in propertySet:
-            task.addProperty(property)
+            value = propertyDict[property.name]
+            TaskProperty(task=task, property=property, value=value)
         print "Added task '%s' (%d)" % (title, task.id)
+
+    def do_t_set_urgency(self, line):
+        """Defines urgency of a task (0 -> 100)
+        t_set_urgency id value"""
+        tokens = line.split(" ")
+        taskId = int(tokens[0])
+        urgency = int(tokens[1])
+        task = Task.get(taskId)
+        task.urgency = urgency
 
     def do_t_mark_started(self, line):
         taskId = int(line)

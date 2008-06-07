@@ -9,26 +9,24 @@ def simplifySpaces(line):
     return line
 
 
+gPropertyRe=re.compile("-p *([^ =]+)(?:=(\d+))?")
 def extractProperties(line):
-    def popToken():
-        token = tokens[0].strip()
-        del tokens[0]
-        return token
     """Parse line of form:
-    bla bla -p property1 -p property2 blob
-    returns a tuple of ("bla bla blob", set(property1, property2,...))"""
-    textParts = []
-    propertySet = set()
-    tokens = line.split(" ")
-    while len(tokens) > 0:
-        token = popToken()
-        if token == "-p":
-            property = popToken()
-            propertySet.add(property)
+    some text -p property1 -p property2=12 some other text
+    returns a tuple of ("some text some other text", {property1: None, property2:12})"""
+    def fixPropertyValue(value):
+        if value != '':
+            return int(value)
         else:
-            textParts.append(token)
-    text = " ".join(textParts)
-    return (text, propertySet)
+            return None
+
+    matches = gPropertyRe.findall(line)
+    matches = [(x, fixPropertyValue(y)) for x,y in matches]
+    propertyDict = dict(matches)
+
+    line = gPropertyRe.subn("", line)[0]
+    line = simplifySpaces(line)
+    return line, propertyDict
 
 
 def getOrCreateProperty(propertyName, interactive=True):
