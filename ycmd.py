@@ -4,6 +4,7 @@ import readline
 
 from db import *
 import utils
+import parseutils
 from textrenderer import TextRenderer
 
 class YCmd(Cmd):
@@ -16,7 +17,7 @@ class YCmd(Cmd):
     def do_t_add(self, line):
         """Add new task. Will prompt to create properties if they do not exist.
         t_add [-p property1] [-p property2] Task description"""
-        title, propertyDict = utils.extractProperties(line)
+        title, propertyDict = parseutils.extractProperties(line)
 
         # Create missing properties
         if not utils.createMissingProperties(propertyDict.keys()):
@@ -98,7 +99,7 @@ class YCmd(Cmd):
         t_prop_set id property [value]"""
 
         # Parse line
-        line = utils.simplifySpaces(line)
+        line = parseutils.simplifySpaces(line)
         tokens = line.split(" ")
         taskId = int(tokens[0])
         propertyName = tokens[1]
@@ -160,7 +161,7 @@ class YCmd(Cmd):
         readline.remove_history_item(readline.get_current_history_length() - 1)
 
         # Update task
-        title, propertyDict = utils.extractProperties(line)
+        title, propertyDict = parseutils.extractProperties(line)
         if not utils.createMissingProperties(propertyDict.keys()):
             return
         task.title = title
@@ -178,12 +179,12 @@ class YCmd(Cmd):
         print "Importing '%s'..." % line
         line = line.replace("@", "-p c/")
         line = line.replace("p:", "-p p/")
-        line, complete = utils.extractYagtdField(line, "C:")
-        line, creationDate = utils.extractYagtdField(line, "S:")
-        line, urgency = utils.extractYagtdField(line, "U:")
-        line, bug = utils.extractYagtdField(line, "bug:")
-        line, duration = utils.extractYagtdField(line, "T:")
-        line, importance = utils.extractYagtdField(line, "I:")
+        line, complete = parseutils.extractYagtdField(line, "C:")
+        line, creationDate = parseutils.extractYagtdField(line, "S:")
+        line, urgency = parseutils.extractYagtdField(line, "U:")
+        line, bug = parseutils.extractYagtdField(line, "bug:")
+        line, duration = parseutils.extractYagtdField(line, "T:")
+        line, importance = parseutils.extractYagtdField(line, "I:")
 
         if complete == "100":
             status = "done"
@@ -199,7 +200,7 @@ class YCmd(Cmd):
 
         urgency = int(urgency)
 
-        title, propertyNames = utils.extractProperties(line)
+        title, propertyNames = parseutils.extractProperties(line)
 
         # Create task
         task = Task(
