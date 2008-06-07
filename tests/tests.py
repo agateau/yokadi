@@ -11,7 +11,7 @@ gTaskLineToParsedStructList = [
 class ParseUtilsTests(unittest.TestCase):
     def testExtractProperties(self):
         for src, dst in gTaskLineToParsedStructList:
-            result = parseutils.extractProperties(src)
+            result = parseutils.parseTaskLine(src)
             self.assertEqual(result, dst)
 
     def testCreateTaskLine(self):
@@ -20,7 +20,7 @@ class ParseUtilsTests(unittest.TestCase):
             # original task line because there are many ways to write the same
             # taskLine.
             taskLine = parseutils.createTaskLine(*parsedStruct)
-            result = parseutils.extractProperties(taskLine)
+            result = parseutils.parseTaskLine(taskLine)
             self.assertEqual(result, parsedStruct)
 
 

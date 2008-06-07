@@ -17,7 +17,7 @@ class YCmd(Cmd):
     def do_t_add(self, line):
         """Add new task. Will prompt to create properties if they do not exist.
         t_add [-p property1] [-p property2] Task description"""
-        title, propertyDict = parseutils.extractProperties(line)
+        title, propertyDict = parseutils.parseTaskLine(line)
 
         # Create missing properties
         if not utils.createMissingProperties(propertyDict.keys()):
@@ -152,7 +152,7 @@ class YCmd(Cmd):
         readline.remove_history_item(readline.get_current_history_length() - 1)
 
         # Update task
-        title, propertyDict = parseutils.extractProperties(line)
+        title, propertyDict = parseutils.parseTaskLine(line)
         if not utils.createMissingProperties(propertyDict.keys()):
             return
         task.title = title
@@ -191,7 +191,7 @@ class YCmd(Cmd):
 
         urgency = int(urgency)
 
-        title, propertyNames = parseutils.extractProperties(line)
+        title, propertyNames = parseutils.parseTaskLine(line)
 
         # Create task
         task = Task(

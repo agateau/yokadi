@@ -9,7 +9,7 @@ def simplifySpaces(line):
 
 
 gPropertyRe=re.compile("-p *([^ =]+)(?:=(\d+))?")
-def extractProperties(line):
+def parseTaskLine(line):
     """Parse line of form:
     some text -p property1 -p property2=12 some other text
     returns a tuple of ("some text some other text", {property1: None, property2:12})"""
