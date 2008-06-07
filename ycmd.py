@@ -105,6 +105,8 @@ class YCmd(Cmd):
         line = line.replace("p:", "-k p/")
         line, complete = utils.extractYagtdField(line, "C:")
         line, creationDate = utils.extractYagtdField(line, "S:")
+        line, duration = utils.extractYagtdField(line, "T:")
+        line, importance = utils.extractYagtdField(line, "I:")
 
         if complete == "100":
             status = "done"
