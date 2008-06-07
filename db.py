@@ -10,6 +10,7 @@ class Task(SQLObject):
     title = UnicodeCol(alternateID=True)
     creationDate = DateTimeCol()
     description = UnicodeCol()
+    urgency = IntCol()
     status = EnumCol(enumValues=['new', 'started', 'done'])
     keywords = RelatedJoin("Keyword")
 

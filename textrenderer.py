@@ -1,8 +1,8 @@
-TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(status)-1s|%(creationDate)-19s"
+TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-19s"
 
 class TextRenderer(object):
     def renderTaskListHeader(self):
-        line = TASK_LIST_FORMAT % dict(id="ID", title="Title", status="S", creationDate="Date")
+        line = TASK_LIST_FORMAT % dict(id="ID", title="Title", urgency="U", status="S", creationDate="Date")
         print line
         print "-" * len(line)
 
@@ -14,8 +14,9 @@ class TextRenderer(object):
 
         status = task.status[0].upper()
         creationDate = task.creationDate
+        urgency = int(task.urgency)
 
-        print TASK_LIST_FORMAT % dict(id=str(task.id), title=title, status=status, creationDate=creationDate)
+        print TASK_LIST_FORMAT % dict(id=str(task.id), title=title, urgency=urgency, status=status, creationDate=creationDate)
 
 
     def renderTaskDetails(self, task):

@@ -105,6 +105,7 @@ class YCmd(Cmd):
         line = line.replace("p:", "-k p/")
         line, complete = utils.extractYagtdField(line, "C:")
         line, creationDate = utils.extractYagtdField(line, "S:")
+        line, urgency = utils.extractYagtdField(line, "U:")
         line, duration = utils.extractYagtdField(line, "T:")
         line, importance = utils.extractYagtdField(line, "I:")
 
@@ -120,12 +121,19 @@ class YCmd(Cmd):
         else:
             creationDate = datetime.now()
 
+        urgency = int(urgency)
+
         title, keywordNames = utils.extractKeywords(line)
         keywordSet = set()
         for keywordName in keywordNames:
             keyword = utils.getOrCreateKeyword(keywordName, interactive=False)
             keywordSet.add(keyword)
-        task = Task(creationDate = creationDate, title=title, description="", status=status)
+        task = Task(
+            creationDate = creationDate,
+            title=title,
+            description="",
+            urgency=urgency,
+            status=status)
         for keyword in keywordSet:
             task.addKeyword(keyword)
 
