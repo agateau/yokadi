@@ -115,6 +115,31 @@ class YCmd(Cmd):
         self.renderer.renderTaskDetails(task)
 
 
+    def do_t_edit(self, line):
+        """Edit a task
+        t_edit id"""
+        taskId = int(line)
+        task = Task.get(taskId)
+
+        # Code copied from yagtd
+        def pre_input_hook():
+            readline.insert_text(task.title)
+            readline.redisplay()
+
+            # Unset the hook again
+            readline.set_pre_input_hook(None)
+
+        readline.set_pre_input_hook(pre_input_hook)
+
+        line = raw_input("edit> ")
+        # Remove edited line from history:
+        #   oddly, get_history_item is 1-based,
+        #   but remove_history_item is 0-based
+        readline.remove_history_item(readline.get_current_history_length() - 1)
+
+        task.title = line
+
+
     def do_p_list(self, line):
         """List all properties"""
         for property in Property.select():
