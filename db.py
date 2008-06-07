@@ -1,18 +1,18 @@
 from sqlobject import *
 
-class Keyword(SQLObject):
+class Property(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
     name = UnicodeCol(alternateID=True, notNone=True)
     tasks = RelatedJoin("Task",
         createRelatedTable=False,
-        intermediateTable="task_keyword",
-        joinColumn="keyword_id",
+        intermediateTable="task_property",
+        joinColumn="property_id",
         otherColumn="task_id")
 
-class TaskKeyword(SQLObject):
+class TaskProperty(SQLObject):
     task = ForeignKey("Task")
-    keyword = ForeignKey("Keyword")
+    property = ForeignKey("Property")
     value = IntCol(default=None)
 
 class Task(SQLObject):
@@ -21,21 +21,21 @@ class Task(SQLObject):
     description = UnicodeCol(default="", notNone=True)
     urgency = IntCol(default=0, notNone=True)
     status = EnumCol(enumValues=['new', 'started', 'done'])
-    keywords = RelatedJoin("Keyword",
+    properties = RelatedJoin("Property",
         createRelatedTable=False,
-        intermediateTable="task_keyword",
+        intermediateTable="task_property",
         joinColumn="task_id",
-        otherColumn="keyword_id")
+        otherColumn="property_id")
 
-    def getKeywordDict(self):
+    def getPropertyDict(self):
         dct = {}
-        for property in TaskKeyword.selectBy(task=self):
-            dct[property.keyword.name] = property.value
+        for property in TaskProperty.selectBy(task=self):
+            dct[property.property.name] = property.value
         return dct
 
 
 def createTables():
-    Keyword.createTable()
+    Property.createTable()
     Task.createTable()
-    TaskKeyword.createTable()
+    TaskProperty.createTable()
 # vi: ts=4 sw=4 et

@@ -20,19 +20,19 @@ class TextRenderer(object):
 
 
     def renderTaskDetails(self, task):
-        keywordDict = task.getKeywordDict()
-        keywordArray = []
-        for name, value in keywordDict.items():
+        propertyDict = task.getPropertyDict()
+        propertyArray = []
+        for name, value in propertyDict.items():
             txt = name
             if value:
                 txt += "=" + str(value)
-            keywordArray.append(txt)
-        keywords = ", ".join(keywordArray)
+            propertyArray.append(txt)
+        properties = ", ".join(propertyArray)
         fields = [
             ("Title", task.title),
             ("Created", task.creationDate),
             ("Status", task.status),
-            ("Keywords", keywords),
+            ("Properties", properties),
             ]
 
         maxWidth = max([len(x) for x,y in fields])

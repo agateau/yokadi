@@ -13,18 +13,18 @@ class YCmd(Cmd):
         self.renderer = TextRenderer()
 
     def do_t_add(self, line):
-        """Add new task. Will prompt to create keywords if they do not exist.
-        t_add [-k keyword1] [-k keyword2] Task description"""
-        title, keywordNames = utils.extractKeywords(line)
-        keywordSet = set()
-        for keywordName in keywordNames:
-            keyword = utils.getOrCreateKeyword(keywordName)
-            if not keyword:
+        """Add new task. Will prompt to create properties if they do not exist.
+        t_add [-p property1] [-p property2] Task description"""
+        title, propertyNames = utils.extractProperties(line)
+        propertySet = set()
+        for propertyName in propertyNames:
+            property = utils.getOrCreateProperty(propertyName)
+            if not property:
                 return
-            keywordSet.add(keyword)
+            propertySet.add(property)
         task = Task(creationDate = datetime.now(), title=title, description="", status="new")
-        for keyword in keywordSet:
-            task.addKeyword(keyword)
+        for property in propertySet:
+            task.addProperty(property)
         print "Added task '%s' (%d)" % (title, task.id)
 
     def do_t_mark_started(self, line):
@@ -62,22 +62,22 @@ class YCmd(Cmd):
         Task.delete(taskId)
 
     def do_t_list(self, line):
-        """List tasks assigned specific keywords, or all tasks if no keyword is
+        """List tasks assigned specific properties, or all tasks if no property is
         specified.
-        t_list [keyword1] [keyword2]
+        t_list [property1] [property2]
         """
         line = line.strip()
         if line != "":
-            keywordSet = set([Keyword.byName(x) for x in line.split(" ")])
+            propertySet = set([Property.byName(x) for x in line.split(" ")])
         else:
-            keywordSet = None
+            propertySet = None
 
         # FIXME: Optimize
         self.renderer.renderTaskListHeader()
         for task in Task.select():
-            if keywordSet:
-                taskKeywordSet = set(task.keywords)
-                if not keywordSet.issubset(taskKeywordSet):
+            if propertySet:
+                taskPropertySet = set(task.properties)
+                if not propertySet.issubset(taskPropertySet):
                     continue
 
             if task.status != 'done':
@@ -99,12 +99,12 @@ class YCmd(Cmd):
 
         # Get task and property
         task = Task.get(taskId)
-        keyword = utils.getOrCreateKeyword(propertyName)
-        if not keyword:
+        property = utils.getOrCreateProperty(propertyName)
+        if not property:
             return
 
         # Assign property
-        property = TaskKeyword(task=task, keyword=keyword, value=value)
+        property = TaskProperty(task=task, property=property, value=value)
 
     def do_t_show(self, line):
         """Display details of a task
@@ -114,17 +114,17 @@ class YCmd(Cmd):
         self.renderer.renderTaskDetails(task)
 
 
-    def do_k_list(self, line):
-        """List all keywords"""
-        for keyword in Keyword.select():
-            print keyword.name
+    def do_p_list(self, line):
+        """List all properties"""
+        for property in Property.select():
+            print property.name
 
 
     def do_import_yagtd(self, line):
         """Import a line from yagtd"""
         print "Importing '%s'..." % line
-        line = line.replace("@", "-k c/")
-        line = line.replace("p:", "-k p/")
+        line = line.replace("@", "-p c/")
+        line = line.replace("p:", "-p p/")
         line, complete = utils.extractYagtdField(line, "C:")
         line, creationDate = utils.extractYagtdField(line, "S:")
         line, urgency = utils.extractYagtdField(line, "U:")
@@ -145,19 +145,19 @@ class YCmd(Cmd):
 
         urgency = int(urgency)
 
-        title, keywordNames = utils.extractKeywords(line)
-        keywordSet = set()
-        for keywordName in keywordNames:
-            keyword = utils.getOrCreateKeyword(keywordName, interactive=False)
-            keywordSet.add(keyword)
+        title, propertyNames = utils.extractProperties(line)
+        propertySet = set()
+        for propertyName in propertyNames:
+            property = utils.getOrCreateProperty(propertyName, interactive=False)
+            propertySet.add(property)
         task = Task(
             creationDate = creationDate,
             title=title,
             description="",
             urgency=urgency,
             status=status)
-        for keyword in keywordSet:
-            task.addKeyword(keyword)
+        for property in propertySet:
+            task.addProperty(property)
 
 
     def do_EOF(self, line):

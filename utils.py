@@ -9,45 +9,45 @@ def simplifySpaces(line):
     return line
 
 
-def extractKeywords(line):
+def extractProperties(line):
     def popToken():
         token = tokens[0].strip()
         del tokens[0]
         return token
     """Parse line of form:
-    bla bla -k keyword1 -k keyword2 blob
-    returns a tuple of ("bla bla blob", set(keyword1, keyword2,...))"""
+    bla bla -p property1 -p property2 blob
+    returns a tuple of ("bla bla blob", set(property1, property2,...))"""
     textParts = []
-    keywordSet = set()
+    propertySet = set()
     tokens = line.split(" ")
     while len(tokens) > 0:
         token = popToken()
-        if token == "-k":
-            keyword = popToken()
-            keywordSet.add(keyword)
+        if token == "-p":
+            property = popToken()
+            propertySet.add(property)
         else:
             textParts.append(token)
     text = " ".join(textParts)
-    return (text, keywordSet)
+    return (text, propertySet)
 
 
-def getOrCreateKeyword(keywordName, interactive=True):
-    """Returns keyword associated with keywordName, or prompt to create it if
+def getOrCreateProperty(propertyName, interactive=True):
+    """Returns property associated with propertyName, or prompt to create it if
     it does not exist. If user does not want to create it, returns None."""
-    result = Keyword.selectBy(name=keywordName)
+    result = Property.selectBy(name=propertyName)
     result = list(result)
     if len(result):
         return result[0]
 
     while interactive:
-        answer = raw_input("Keyword '%s' does not exist, create it (y/n)? " % keywordName)
+        answer = raw_input("Property '%s' does not exist, create it (y/n)? " % propertyName)
         if answer == "n":
             return None
         if answer == "y":
             break
-    keyword = Keyword(name=keywordName)
-    print "Added keyword '%s'" % keywordName
-    return keyword
+    property = Property(name=propertyName)
+    print "Added property '%s'" % propertyName
+    return property
 
 
 def extractYagtdField(line, field):
