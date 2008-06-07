@@ -73,6 +73,7 @@ class YCmd(Cmd):
             keywordSet = None
 
         # FIXME: Optimize
+        self.renderer.renderTaskListHeader()
         for task in Task.select():
             if keywordSet:
                 taskKeywordSet = set(task.keywords)
@@ -80,7 +81,7 @@ class YCmd(Cmd):
                     continue
 
             if task.status != 'done':
-                print task.toUtf8()
+                self.renderer.renderTaskListRow(task)
 
 
     def do_t_show(self, line):
