@@ -6,11 +6,13 @@ from db import *
 import utils
 import parseutils
 from textrenderer import TextRenderer
+from bugcmd import BugCmd
 
-class YCmd(Cmd):
+class YCmd(Cmd,BugCmd):
     __slots__ = ["renderer"]
     def __init__(self):
         Cmd.__init__(self)
+        BugCmd.__init__(self)
         self.prompt = "yokadi> "
         self.renderer = TextRenderer()
 
