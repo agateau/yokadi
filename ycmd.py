@@ -16,7 +16,7 @@ class YCmd(Cmd):
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create properties if they do not exist.
-        t_add [-p property1] [-p property2] Task description"""
+        t_add projectName [-p property1] [-p property2] Task description"""
         title, propertyDict = parseutils.parseTaskLine(line)
 
         # Create missing properties
