@@ -18,15 +18,7 @@ class YCmd(Cmd):
         """Add new task. Will prompt to create properties if they do not exist.
         t_add projectName [-p property1] [-p property2] Task description"""
         title, propertyDict = parseutils.parseTaskLine(line)
-
-        # Create missing properties
-        if not utils.createMissingProperties(propertyDict.keys()):
-            return
-
-        # Create task
-        task = Task(creationDate = datetime.now(), title=title, description="", status="new")
-        task.setPropertyDict(propertyDict)
-
+        task = utils.addTask(title, propertyDict)
         print "Added task '%s' (%d)" % (title, task.id)
 
     def do_t_set_urgency(self, line):

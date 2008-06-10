@@ -1,4 +1,20 @@
+from datetime import datetime
+
+
 from db import *
+
+
+def addTask(title, propertyDict):
+    """Adds a task based on title and propertyDict.
+    Returns task on success, None if cancelled."""
+    # Create missing properties
+    if not createMissingProperties(propertyDict.keys()):
+        return None
+
+    # Create task
+    task = Task(creationDate = datetime.now(), title=title, description="", status="new")
+    task.setPropertyDict(propertyDict)
+    return task
 
 
 def getOrCreateProperty(propertyName, interactive=True):
