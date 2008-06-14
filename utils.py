@@ -1,5 +1,7 @@
 from datetime import datetime
-
+import os
+import subprocess
+import tempfile
 
 from db import *
 
@@ -43,4 +45,24 @@ def createMissingProperties(lst):
         if not getOrCreateProperty(propertyName):
             return False
     return True
+
+
+def editText(text):
+    """Edit text with external editor
+    returns a tuple (success, newText)"""
+    (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
+    try:
+        fl = file(name, "w")
+        fl.write(text)
+        fl.close()
+        retcode = subprocess.call(["vim", name])
+        if retcode != 0:
+            return (False, text)
+        newText = file(name).read()
+        return (True, newText)
+    finally:
+        os.close(fd)
+        os.unlink(name)
+
+
 # vi: ts=4 sw=4 et

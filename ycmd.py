@@ -24,6 +24,17 @@ class YCmd(Cmd,BugCmd):
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
 
+    def do_t_describe(self, line):
+        """Starts an editor to enter a longer description of a task
+        t_annotate id"""
+        taskId = int(line)
+        task = Task.get(taskId)
+        ok, description = utils.editText(task.description)
+        if ok:
+            task.description = description
+        else:
+            print "Starting editor failed"
+
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100)
         t_set_urgency id value"""
