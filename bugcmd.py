@@ -72,6 +72,8 @@ class BugCmd(object):
             propertyDict[LIKELIHOOD_PROPERTY_NAME] = likelihood
 
         task = utils.addTask(title, propertyDict)
+        if not task:
+            return
 
         maxUrgency = LIKELIHOOD_LIST[-1][0] * SEVERITY_LIST[-1][0]
         task.urgency = 100 * likelihood * severity / maxUrgency

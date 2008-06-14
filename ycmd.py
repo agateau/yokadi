@@ -21,7 +21,8 @@ class YCmd(Cmd,BugCmd):
         t_add projectName [-p property1] [-p property2] Task description"""
         title, propertyDict = parseutils.parseTaskLine(line)
         task = utils.addTask(title, propertyDict)
-        print "Added task '%s' (id=%d)" % (title, task.id)
+        if task:
+            print "Added task '%s' (id=%d)" % (title, task.id)
 
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100)
