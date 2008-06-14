@@ -55,7 +55,7 @@ class YCmd(Cmd,BugCmd):
         idStringList = tokens[0]
         cmd = tokens[1]
         if len(tokens) == 3:
-            args = tokens[3]
+            args = tokens[2]
         else:
             args = ""
         ids = [int(x) for x in idStringList.split(",")]
