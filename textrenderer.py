@@ -27,6 +27,7 @@ class TextRenderer(object):
             if value:
                 txt += "=" + str(value)
             propertyArray.append(txt)
+            propertyArray.sort()
         properties = ", ".join(propertyArray)
         fields = [
             ("Title", task.title),
