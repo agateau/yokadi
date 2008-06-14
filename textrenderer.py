@@ -9,8 +9,14 @@ class TextRenderer(object):
 
     def renderTaskListRow(self, task):
         title = task.title
-        if len(title) > 60:
-            title = title[:59] + ">"
+        hasDescription = task.description != ""
+        maxLength = 60
+        if hasDescription:
+            maxLength -=1
+        if len(title) > maxLength:
+            title = title[:maxLength - 1] + ">"
+        if hasDescription:
+            title = title.ljust(maxLength) + "*"
 
         status = task.status[0].upper()
         creationDate = task.creationDate
@@ -40,3 +46,7 @@ class TextRenderer(object):
         format="%" + str(maxWidth) + "s: %s"
         for caption, value in fields:
             print format % (caption, value)
+
+        if task.description != '':
+            print
+            print task.description
