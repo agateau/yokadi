@@ -48,6 +48,11 @@ def enterInt(prompt):
             print "ERROR: Invalid value"
 
 
+def computeUrgency(likelihood, severity):
+    maxUrgency = LIKELIHOOD_LIST[-1][0] * SEVERITY_LIST[-1][0]
+    return 100 * likelihood * severity / maxUrgency
+
+
 class BugCmd(object):
     def __init__(self):
         for name in PROPERTY_NAMES:
@@ -75,8 +80,7 @@ class BugCmd(object):
         if not task:
             return
 
-        maxUrgency = LIKELIHOOD_LIST[-1][0] * SEVERITY_LIST[-1][0]
-        task.urgency = 100 * likelihood * severity / maxUrgency
+        task.urgency = computeUrgency(likelihood, severity)
 
         print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
 
