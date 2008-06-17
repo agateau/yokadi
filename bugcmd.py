@@ -1,5 +1,6 @@
 import parseutils
 import utils
+from db import *
 
 SEVERITY_PROPERTY_NAME = "severity"
 LIKELIHOOD_PROPERTY_NAME = "likelihood"
@@ -24,21 +25,29 @@ LIKELIHOOD_LIST = [
     (5, "Will affect all users"),
     ]
 
-def selectFromList(prompt, lst):
+def selectFromList(prompt, lst, default):
     for score, caption in lst:
         print "%d: %s" % (score, caption)
     minStr = str(lst[0][0])
     maxStr = str(lst[-1][0])
+    if default is None:
+        line = ""
+    else:
+        line = str(default)
     while True:
-        answer = raw_input(prompt + ": ")
+        answer = utils.editLine(line, prompt = prompt + ": ")
         if minStr <= answer and answer <= maxStr:
             return int(answer)
         print "ERROR: Wrong value"
 
 
-def enterInt(prompt):
+def enterInt(prompt, default):
+    if default is None:
+        line = ""
+    else:
+        line = str(default)
     while True:
-        answer = raw_input(prompt + ": ")
+        answer = utils.editLine(line, prompt = prompt + ": ")
         if answer == "":
             return None
         try:
@@ -48,9 +57,29 @@ def enterInt(prompt):
             print "ERROR: Invalid value"
 
 
-def computeUrgency(likelihood, severity):
+def computeUrgency(propertyDict):
+    likelihood = propertyDict[LIKELIHOOD_PROPERTY_NAME]
+    severity = propertyDict[SEVERITY_PROPERTY_NAME]
     maxUrgency = LIKELIHOOD_LIST[-1][0] * SEVERITY_LIST[-1][0]
     return 100 * likelihood * severity / maxUrgency
+
+
+def editBugProperties(propertyDict):
+    severity = propertyDict.get(SEVERITY_PROPERTY_NAME, None)
+    likelihood = propertyDict.get(LIKELIHOOD_PROPERTY_NAME, None)
+    bug = propertyDict.get(BUG_PROPERTY_NAME, None)
+
+    severity = selectFromList("Severity", SEVERITY_LIST, severity)
+    likelihood = selectFromList("Likelihood", LIKELIHOOD_LIST, likelihood)
+    bug = enterInt("bug", bug)
+
+    propertyDict[BUG_PROPERTY_NAME] = bug
+
+    if severity:
+        propertyDict[SEVERITY_PROPERTY_NAME] = severity
+
+    if likelihood:
+        propertyDict[LIKELIHOOD_PROPERTY_NAME] = likelihood
 
 
 class BugCmd(object):
@@ -64,24 +93,36 @@ class BugCmd(object):
         bug_add projectName [-p property1] [-p property2] Bug description
         """
         title, propertyDict = parseutils.parseTaskLine(line)
-        severity = selectFromList("Severity", SEVERITY_LIST)
-        likelihood = selectFromList("Likelihood", LIKELIHOOD_LIST)
-        bug = enterInt("bug")
-
-        propertyDict[BUG_PROPERTY_NAME] = bug
-
-        if severity:
-            propertyDict[SEVERITY_PROPERTY_NAME] = severity
-
-        if likelihood:
-            propertyDict[LIKELIHOOD_PROPERTY_NAME] = likelihood
+        editBugProperties(propertyDict)
 
         task = utils.addTask(title, propertyDict)
         if not task:
             return
 
-        task.urgency = computeUrgency(likelihood, severity)
+        task.urgency = computeUrgency(propertyDict)
 
         print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
+
+
+    def do_bug_edit(self, line):
+        """Edit a bug.
+        bug_edit id"""
+        taskId = int(line)
+        task = Task.get(taskId)
+
+        # Create task line
+        taskLine = parseutils.createTaskLine(task.title, task.getPropertyDict())
+
+        # Edit
+        line = utils.editLine(taskLine)
+        title, propertyDict = parseutils.parseTaskLine(line)
+        editBugProperties(propertyDict)
+
+        # Update bug
+        if not utils.createMissingProperties(propertyDict.keys()):
+            return
+        task.title = title
+        task.setPropertyDict(propertyDict)
+        task.urgency = computeUrgency(propertyDict)
 
 # vi: ts=4 sw=4 et
