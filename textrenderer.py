@@ -39,6 +39,7 @@ class TextRenderer(object):
             ("Title", task.title),
             ("Created", task.creationDate),
             ("Status", task.status),
+            ("Urgency", task.urgency),
             ("Properties", properties),
             ]
 
