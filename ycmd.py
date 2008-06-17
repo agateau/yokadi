@@ -1,6 +1,5 @@
 from cmd import Cmd
 from datetime import datetime
-import readline
 
 from db import *
 import utils
@@ -140,22 +139,8 @@ class YCmd(Cmd,BugCmd):
         # Create task line
         taskLine = parseutils.createTaskLine(task.title, task.getPropertyDict())
 
-        # Edit task line with readline
-        # (Code copied from yagtd)
-        def pre_input_hook():
-            readline.insert_text(taskLine)
-            readline.redisplay()
-
-            # Unset the hook again
-            readline.set_pre_input_hook(None)
-
-        readline.set_pre_input_hook(pre_input_hook)
-
-        line = raw_input("edit> ")
-        # Remove edited line from history:
-        #   oddly, get_history_item is 1-based,
-        #   but remove_history_item is 0-based
-        readline.remove_history_item(readline.get_current_history_length() - 1)
+        # Edit
+        line = utils.editLine(taskLine)
 
         # Update task
         title, propertyDict = parseutils.parseTaskLine(line)
