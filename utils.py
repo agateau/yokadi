@@ -66,7 +66,7 @@ def editText(text):
         os.unlink(name)
 
 
-def editLine(line):
+def editLine(line, prompt="edit> "):
     """Edit a line using readline"""
     # Init readline
     # (Code copied from yagtd)
@@ -79,11 +79,13 @@ def editLine(line):
 
     readline.set_pre_input_hook(pre_input_hook)
 
-    line = raw_input("edit> ")
+    line = raw_input(prompt)
     # Remove edited line from history:
     #   oddly, get_history_item is 1-based,
     #   but remove_history_item is 0-based
-    readline.remove_history_item(readline.get_current_history_length() - 1)
+    length = readline.get_current_history_length()
+    if length > 0:
+        readline.remove_history_item(length - 1)
 
     return line
 # vi: ts=4 sw=4 et
