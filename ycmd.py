@@ -108,11 +108,7 @@ class YCmd(Cmd,BugCmd):
             if len(taskList) == 0:
                 continue
 
-            if len(projectList) > 1:
-                # FIXME: Use self.renderer
-                print
-                print project.name
-            self.renderer.renderTaskListHeader()
+            self.renderer.renderTaskListHeader(project.name)
             for task in taskList:
                 self.renderer.renderTaskListRow(task)
 
