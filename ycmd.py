@@ -94,13 +94,13 @@ class YCmd(Cmd,BugCmd):
         else:
             propertySet = None
 
-        # FIXME: Optimize
         for project in projectList:
             taskList = Task.select(AND(Task.q.projectID == project.id,
                                        Task.q.status    != 'done'),
                                    orderBy=-Task.q.urgency)
 
             if propertySet:
+                # FIXME: Optimize
                 taskList = [x for x in taskList if propertySet.issubset(set(x.properties))]
             else:
                 taskList = list(taskList)
