@@ -14,6 +14,10 @@ def main():
     parser.add_option("--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
+    parser.add_option("--create-only",
+                      dest="createOnly", default=False, action="store_true",
+                      help="Just create an empty database")
+
     (options, args) = parser.parse_args()
 
     dbFileName = os.path.abspath(options.filename)
@@ -23,6 +27,9 @@ def main():
     if not os.path.exists(dbFileName):
         print "Creating database"
         db.createTables()
+
+    if options.createOnly:
+        return
 
     cmd = YCmd()
     if len(args) > 0:
