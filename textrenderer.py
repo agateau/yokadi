@@ -52,3 +52,4 @@ class TextRenderer(object):
         if task.description != '':
             print
             print task.description
+# vi: ts=4 sw=4 et
