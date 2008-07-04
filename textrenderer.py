@@ -36,6 +36,7 @@ class TextRenderer(object):
             propertyArray.sort()
         properties = ", ".join(propertyArray)
         fields = [
+            ("Project", task.project.name),
             ("Title", task.title),
             ("Created", task.creationDate),
             ("Status", task.status),

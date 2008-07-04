@@ -18,8 +18,8 @@ class YCmd(Cmd,BugCmd):
     def do_t_add(self, line):
         """Add new task. Will prompt to create properties if they do not exist.
         t_add projectName [-p property1] [-p property2] Task description"""
-        title, propertyDict = parseutils.parseTaskLine(line)
-        task = utils.addTask(title, propertyDict)
+        projectName, title, propertyDict = parseutils.parseTaskLine(line)
+        task = utils.addTask(projectName, title, propertyDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
 
@@ -78,25 +78,42 @@ class YCmd(Cmd,BugCmd):
         Task.delete(taskId)
 
     def do_t_list(self, line):
-        """List tasks assigned specific properties, or all tasks if no property is
-        specified.
-        t_list [property1] [property2]
+        """List tasks by project and/or properties.
+        <project_name> can be '*' to list all projects.
+        t_list <project_name> [<property1> [<property2>]...]
         """
-        line = line.strip()
-        if line != "":
-            propertySet = set([Property.byName(x) for x in line.split(" ")])
+        tokens = line.strip().split(' ')
+        projectName = tokens[0]
+        if projectName != '*':
+            projectList = Project.selectBy(name=projectName)
+        else:
+            projectList = Project.select()
+
+        if len(tokens) > 1:
+            propertySet = set([Property.byName(x) for x in tokens[1:]])
         else:
             propertySet = None
 
         # FIXME: Optimize
-        self.renderer.renderTaskListHeader()
-        for task in Task.select(orderBy=-Task.q.urgency):
-            if propertySet:
-                taskPropertySet = set(task.properties)
-                if not propertySet.issubset(taskPropertySet):
-                    continue
+        for project in projectList:
+            taskList = Task.select(AND(Task.q.projectID == project.id,
+                                       Task.q.status    != 'done'),
+                                   orderBy=-Task.q.urgency)
 
-            if task.status != 'done':
+            if propertySet:
+                taskList = [x for x in taskList if propertySet.issubset(set(x.properties))]
+            else:
+                taskList = list(taskList)
+
+            if len(taskList) == 0:
+                continue
+
+            if len(projectList) > 1:
+                # FIXME: Use self.renderer
+                print
+                print project.name
+            self.renderer.renderTaskListHeader()
+            for task in taskList:
                 self.renderer.renderTaskListRow(task)
 
     def do_t_prop_set(self, line):
@@ -137,15 +154,16 @@ class YCmd(Cmd,BugCmd):
         task = Task.get(taskId)
 
         # Create task line
-        taskLine = parseutils.createTaskLine(task.title, task.getPropertyDict())
+        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getPropertyDict())
 
         # Edit
         line = utils.editLine(taskLine)
 
         # Update task
-        title, propertyDict = parseutils.parseTaskLine(line)
+        projectName, title, propertyDict = parseutils.parseTaskLine(line)
         if not utils.createMissingProperties(propertyDict.keys()):
             return
+        task.project = utils.getOrCreateProject(projectName)
         task.title = title
         task.setPropertyDict(propertyDict)
 

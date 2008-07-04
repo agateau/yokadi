@@ -5,7 +5,7 @@ sys.path.append("..")
 import parseutils
 
 gTaskLineToParsedStructList = [
-    ("project some text -p property1 -p property2=12 some other text", ("some text some other text", {"p/project":None, "property1":None, "property2":12} )),
+    ("project some text -p property1 -p property2=12 some other text", ("project", "some text some other text", {"property1":None, "property2":12} )),
     ]
 
 class ParseUtilsTests(unittest.TestCase):

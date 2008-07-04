@@ -1,5 +1,11 @@
 from sqlobject import *
 
+class Project(SQLObject):
+    class sqlmeta:
+        defaultOrder = "name"
+    name = UnicodeCol(notNone=True)
+
+
 class Property(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
@@ -23,6 +29,7 @@ class Task(SQLObject):
     description = UnicodeCol(default="", notNone=True)
     urgency = IntCol(default=0, notNone=True)
     status = EnumCol(enumValues=['new', 'started', 'done'])
+    project = ForeignKey("Project")
     properties = RelatedJoin("Property",
         createRelatedTable=False,
         intermediateTable="task_property",
@@ -53,6 +60,7 @@ class Task(SQLObject):
 
 
 def createTables():
+    Project.createTable()
     Property.createTable()
     Task.createTable()
     TaskProperty.createTable()
