@@ -92,10 +92,10 @@ class BugCmd(object):
         """Add a bug-type task. Will create a task and ask additional info.
         bug_add projectName [-p property1] [-p property2] Bug description
         """
-        title, propertyDict = parseutils.parseTaskLine(line)
+        projectName, title, propertyDict = parseutils.parseTaskLine(line)
         editBugProperties(propertyDict)
 
-        task = utils.addTask(title, propertyDict)
+        task = utils.addTask(projectName, title, propertyDict)
         if not task:
             return
 
@@ -111,16 +111,17 @@ class BugCmd(object):
         task = Task.get(taskId)
 
         # Create task line
-        taskLine = parseutils.createTaskLine(task.title, task.getPropertyDict())
+        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getPropertyDict())
 
         # Edit
         line = utils.editLine(taskLine)
-        title, propertyDict = parseutils.parseTaskLine(line)
+        projectName, title, propertyDict = parseutils.parseTaskLine(line)
         editBugProperties(propertyDict)
 
         # Update bug
         if not utils.createMissingProperties(propertyDict.keys()):
             return
+        task.project = utils.getOrCreateProject(projectName)
         task.title = title
         task.setPropertyDict(propertyDict)
         task.urgency = computeUrgency(propertyDict)
