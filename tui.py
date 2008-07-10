@@ -11,7 +11,8 @@ def editText(text):
         fl = file(name, "w")
         fl.write(text)
         fl.close()
-        retcode = subprocess.call(["vim", name])
+        editor = os.environ.get("EDITOR", "vi")
+        retcode = subprocess.call([editor, name])
         if retcode != 0:
             return (False, text)
         newText = file(name).read()
