@@ -208,56 +208,6 @@ class YCmd(Cmd,BugCmd):
             print property.name
 
 
-    def do_import_yagtd(self, line):
-        """Import a line from yagtd"""
-        print "Importing '%s'..." % line
-        line = line.replace("@", "-p c/")
-        line = line.replace("p:", "-p p/")
-        line, complete = parseutils.extractYagtdField(line, "C:")
-        line, creationDate = parseutils.extractYagtdField(line, "S:")
-        line, urgency = parseutils.extractYagtdField(line, "U:")
-        line, bug = parseutils.extractYagtdField(line, "bug:")
-        line, duration = parseutils.extractYagtdField(line, "T:")
-        line, importance = parseutils.extractYagtdField(line, "I:")
-
-        if complete == "100":
-            status = "done"
-        elif complete == "0" or complete is None:
-            status = "new"
-        else:
-            status = "started"
-
-        if creationDate:
-            creationDate = datetime.strptime(creationDate, '%Y-%m-%d')
-        else:
-            creationDate = datetime.now()
-
-        urgency = int(urgency)
-
-        title, propertyNames = parseutils.parseTaskLine(line)
-
-        # Create task
-        task = Task(
-            creationDate = creationDate,
-            title=title,
-            description="",
-            urgency=urgency,
-            status=status)
-
-        # Create properties
-        propertySet = set()
-        for propertyName in propertyNames:
-            property = utils.getOrCreateProperty(propertyName, interactive=False)
-            propertySet.add(property)
-        for property in propertySet:
-            task.addProperty(property)
-
-        if bug:
-            bug = int(bug)
-            property = utils.getOrCreateProperty("bug", interactive=False)
-            TaskProperty(task=task, property=property, value=bug)
-
-
     def do_EOF(self, line):
         """Quit."""
         print
