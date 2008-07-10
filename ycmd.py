@@ -4,6 +4,7 @@ from datetime import datetime
 from db import *
 import utils
 import parseutils
+import tui
 from textrenderer import TextRenderer
 from bugcmd import BugCmd
 
@@ -28,7 +29,7 @@ class YCmd(Cmd,BugCmd):
         t_annotate id"""
         taskId = int(line)
         task = Task.get(taskId)
-        ok, description = utils.editText(task.description)
+        ok, description = tui.editText(task.description)
         if ok:
             task.description = description
         else:
@@ -153,7 +154,7 @@ class YCmd(Cmd,BugCmd):
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getPropertyDict())
 
         # Edit
-        line = utils.editLine(taskLine)
+        line = tui.editLine(taskLine)
 
         # Update task
         projectName, title, propertyDict = parseutils.parseTaskLine(line)

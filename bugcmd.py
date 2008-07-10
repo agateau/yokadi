@@ -1,5 +1,6 @@
 import parseutils
 import utils
+import tui
 from db import *
 
 SEVERITY_PROPERTY_NAME = "severity"
@@ -35,7 +36,7 @@ def selectFromList(prompt, lst, default):
     else:
         line = str(default)
     while True:
-        answer = utils.editLine(line, prompt = prompt + ": ")
+        answer = tui.editLine(line, prompt = prompt + ": ")
         if minStr <= answer and answer <= maxStr:
             return int(answer)
         print "ERROR: Wrong value"
@@ -47,7 +48,7 @@ def enterInt(prompt, default):
     else:
         line = str(default)
     while True:
-        answer = utils.editLine(line, prompt = prompt + ": ")
+        answer = tui.editLine(line, prompt = prompt + ": ")
         if answer == "":
             return None
         try:
@@ -114,7 +115,7 @@ class BugCmd(object):
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getPropertyDict())
 
         # Edit
-        line = utils.editLine(taskLine)
+        line = tui.editLine(taskLine)
         projectName, title, propertyDict = parseutils.parseTaskLine(line)
         editBugProperties(propertyDict)
 
