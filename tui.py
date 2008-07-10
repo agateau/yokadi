@@ -44,4 +44,35 @@ def editLine(line, prompt="edit> "):
 
     return line
 
+
+def selectFromList(prompt, lst, default):
+    for score, caption in lst:
+        print "%d: %s" % (score, caption)
+    minStr = str(lst[0][0])
+    maxStr = str(lst[-1][0])
+    if default is None:
+        line = ""
+    else:
+        line = str(default)
+    while True:
+        answer = editLine(line, prompt = prompt + ": ")
+        if minStr <= answer and answer <= maxStr:
+            return int(answer)
+        print "ERROR: Wrong value"
+
+
+def enterInt(prompt, default):
+    if default is None:
+        line = ""
+    else:
+        line = str(default)
+    while True:
+        answer = editLine(line, prompt = prompt + ": ")
+        if answer == "":
+            return None
+        try:
+            value = int(answer)
+            return value
+        except ValueError:
+            print "ERROR: Invalid value"
 # vi: ts=4 sw=4 et

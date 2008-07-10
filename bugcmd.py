@@ -26,38 +26,6 @@ LIKELIHOOD_LIST = [
     (5, "Will affect all users"),
     ]
 
-def selectFromList(prompt, lst, default):
-    for score, caption in lst:
-        print "%d: %s" % (score, caption)
-    minStr = str(lst[0][0])
-    maxStr = str(lst[-1][0])
-    if default is None:
-        line = ""
-    else:
-        line = str(default)
-    while True:
-        answer = tui.editLine(line, prompt = prompt + ": ")
-        if minStr <= answer and answer <= maxStr:
-            return int(answer)
-        print "ERROR: Wrong value"
-
-
-def enterInt(prompt, default):
-    if default is None:
-        line = ""
-    else:
-        line = str(default)
-    while True:
-        answer = tui.editLine(line, prompt = prompt + ": ")
-        if answer == "":
-            return None
-        try:
-            value = int(answer)
-            return value
-        except ValueError:
-            print "ERROR: Invalid value"
-
-
 def computeUrgency(propertyDict):
     likelihood = propertyDict[LIKELIHOOD_PROPERTY_NAME]
     severity = propertyDict[SEVERITY_PROPERTY_NAME]
@@ -70,9 +38,9 @@ def editBugProperties(propertyDict):
     likelihood = propertyDict.get(LIKELIHOOD_PROPERTY_NAME, None)
     bug = propertyDict.get(BUG_PROPERTY_NAME, None)
 
-    severity = selectFromList("Severity", SEVERITY_LIST, severity)
-    likelihood = selectFromList("Likelihood", LIKELIHOOD_LIST, likelihood)
-    bug = enterInt("bug", bug)
+    severity = tui.selectFromList("Severity", SEVERITY_LIST, severity)
+    likelihood = tui.selectFromList("Likelihood", LIKELIHOOD_LIST, likelihood)
+    bug = tui.enterInt("bug", bug)
 
     propertyDict[BUG_PROPERTY_NAME] = bug
 
