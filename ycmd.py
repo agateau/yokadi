@@ -18,15 +18,15 @@ class YCmd(Cmd,BugCmd):
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create properties if they do not exist.
-        t_add projectName [-p property1] [-p property2] Task description"""
+        t_add <projectName> [-p <property1>] [-p <property2>] <Task description>"""
         projectName, title, propertyDict = parseutils.parseTaskLine(line)
         task = utils.addTask(projectName, title, propertyDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
 
     def do_t_describe(self, line):
-        """Starts an editor to enter a longer description of a task
-        t_annotate id"""
+        """Starts an editor to enter a longer description of a task.
+        t_describe <id>"""
         taskId = int(line)
         task = Task.get(taskId)
         ok, description = tui.editText(task.description)
@@ -36,8 +36,8 @@ class YCmd(Cmd,BugCmd):
             print "Starting editor failed"
 
     def do_t_set_urgency(self, line):
-        """Defines urgency of a task (0 -> 100)
-        t_set_urgency id value"""
+        """Defines urgency of a task (0 -> 100).
+        t_set_urgency <id> <value>"""
         tokens = line.split(" ")
         taskId = int(tokens[0])
         urgency = int(tokens[1])
@@ -45,23 +45,29 @@ class YCmd(Cmd,BugCmd):
         task.urgency = urgency
 
     def do_t_mark_started(self, line):
+        """Mark task as started.
+        t_mark_started <id>"""
         taskId = int(line)
         task = Task.get(taskId)
         task.status = 'started'
 
     def do_t_mark_done(self, line):
+        """Mark task as done.
+        t_mark_done <id>"""
         taskId = int(line)
         task = Task.get(taskId)
         task.status = 'done'
 
     def do_t_mark_new(self, line):
+        """Mark task as new (not started).
+        t_mark_new <id>"""
         taskId = int(line)
         task = Task.get(taskId)
         task.status = 'new'
 
     def do_t_apply(self, line):
-        """Apply command to several tasks:
-        t_apply id1,id2,id3 command [args]"""
+        """Apply a command to several tasks.
+        t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
         tokens = line.split(" ", 2)
         idStringList = tokens[0]
         cmd = tokens[1]
@@ -75,6 +81,8 @@ class YCmd(Cmd,BugCmd):
             self.onecmd(line.strip())
 
     def do_t_remove(self, line):
+        """Delete a task.
+        t_remove <id>"""
         taskId = int(line)
         Task.delete(taskId)
 
@@ -115,9 +123,10 @@ class YCmd(Cmd,BugCmd):
 
     def do_t_reorder(self, line):
         """Reorder tasks of a project.
-        Starts an editor with the task list, change the order of the lines and
-        save, the urgency field will be updated to match the order.
-        """
+        It works by starting an editor with the task list: you can then change
+        the order of the lines and save the list. The urgency field will be
+        updated to match the order.
+        t_reorder <project_name>"""
         project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),
@@ -142,8 +151,8 @@ class YCmd(Cmd,BugCmd):
 
 
     def do_t_prop_set(self, line):
-        """Set a task property
-        t_prop_set id property [value]"""
+        """Set a task property.
+        t_prop_set <id> <property> [<value>]"""
 
         # Parse line
         line = parseutils.simplifySpaces(line)
@@ -165,16 +174,16 @@ class YCmd(Cmd,BugCmd):
         property = TaskProperty(task=task, property=property, value=value)
 
     def do_t_show(self, line):
-        """Display details of a task
-        t_show id"""
+        """Display details of a task.
+        t_show <id>"""
         taskId = int(line)
         task = Task.get(taskId)
         self.renderer.renderTaskDetails(task)
 
 
     def do_t_edit(self, line):
-        """Edit a task
-        t_edit id"""
+        """Edit a task.
+        t_edit <id>"""
         taskId = int(line)
         task = Task.get(taskId)
 
@@ -194,7 +203,7 @@ class YCmd(Cmd,BugCmd):
 
 
     def do_p_list(self, line):
-        """List all properties"""
+        """List all properties."""
         for property in Property.select():
             print property.name
 
@@ -250,7 +259,7 @@ class YCmd(Cmd,BugCmd):
 
 
     def do_EOF(self, line):
-        """Quit"""
+        """Quit."""
         print
         return True
 # vi: ts=4 sw=4 et

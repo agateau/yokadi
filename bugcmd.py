@@ -59,7 +59,7 @@ class BugCmd(object):
 
     def do_bug_add(self, line):
         """Add a bug-type task. Will create a task and ask additional info.
-        bug_add projectName [-p property1] [-p property2] Bug description
+        bug_add <project_name> [-p <property1>] [-p <property2>] <Bug description>
         """
         projectName, title, propertyDict = parseutils.parseTaskLine(line)
         editBugProperties(propertyDict)
@@ -75,7 +75,7 @@ class BugCmd(object):
 
     def do_bug_edit(self, line):
         """Edit a bug.
-        bug_edit id"""
+        bug_edit <id>"""
         taskId = int(line)
         task = Task.get(taskId)
 
