@@ -113,6 +113,34 @@ class YCmd(Cmd,BugCmd):
             for task in taskList:
                 self.renderer.renderTaskListRow(task)
 
+    def do_t_reorder(self, line):
+        """Reorder tasks of a project.
+        Starts an editor with the task list, change the order of the lines and
+        save, the urgency field will be updated to match the order.
+        """
+        project = Project.byName(line)
+        taskList = Task.select(AND(Task.q.projectID == project.id,
+                                   Task.q.status    != 'done'),
+                               orderBy=-Task.q.urgency)
+        lines = [ "%d,%s" % (x.id, x.title) for x in taskList]
+        ok, text = tui.editText("\n".join(lines))
+        if not ok:
+            return
+
+        ids = []
+        for line in text.split("\n"):
+            line = line.strip()
+            if not "," in line:
+                continue
+            id = int(line.split(",")[0])
+            ids.append(id)
+
+        ids.reverse()
+        for urgency, id in enumerate(ids):
+            task = Task.get(id)
+            task.urgency = urgency
+
+
     def do_t_prop_set(self, line):
         """Set a task property
         t_prop_set id property [value]"""
