@@ -3,7 +3,7 @@ from sqlobject import *
 class Project(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
-    name = UnicodeCol(notNone=True)
+    name = UnicodeCol(alternateID=True, notNone=True)
 
 
 class Property(SQLObject):
