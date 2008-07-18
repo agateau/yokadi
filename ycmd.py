@@ -202,6 +202,18 @@ class YCmd(Cmd,BugCmd):
         task.setPropertyDict(propertyDict)
 
 
+    def do_t_set_project(self, line):
+        """Set task's project.
+        t_set_project <id> <project>"""
+        tokens = line.split(" ")
+        taskId = int(tokens[0])
+        projectName = tokens[1]
+
+        task = Task.get(taskId)
+        task.project = utils.getOrCreateProject(projectName)
+        print "Moved task '%s' to project '%s'" % (task.title, projectName)
+
+
     def do_p_list(self, line):
         """List all properties."""
         for property in Property.select():
