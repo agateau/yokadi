@@ -17,10 +17,10 @@ class YCmd(Cmd,BugCmd):
         self.renderer = TextRenderer()
 
     def do_t_add(self, line):
-        """Add new task. Will prompt to create properties if they do not exist.
-        t_add <projectName> [-p <property1>] [-p <property2>] <Task description>"""
-        projectName, title, propertyDict = parseutils.parseTaskLine(line)
-        task = utils.addTask(projectName, title, propertyDict)
+        """Add new task. Will prompt to create keywords if they do not exist.
+        t_add <projectName> [-p <keyword1>] [-p <keyword2>] <Task description>"""
+        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        task = utils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
 
@@ -87,9 +87,9 @@ class YCmd(Cmd,BugCmd):
         Task.delete(taskId)
 
     def do_t_list(self, line):
-        """List tasks by project and/or properties.
+        """List tasks by project and/or keywords.
         <project_name> can be '*' to list all projects.
-        t_list <project_name> [<property1> [<property2>]...]
+        t_list <project_name> [<keyword1> [<keyword2>]...]
         """
         tokens = line.strip().split(' ')
         projectName = tokens[0]
@@ -99,18 +99,18 @@ class YCmd(Cmd,BugCmd):
             projectList = Project.select()
 
         if len(tokens) > 1:
-            propertySet = set([Property.byName(x) for x in tokens[1:]])
+            keywordSet = set([Keyword.byName(x) for x in tokens[1:]])
         else:
-            propertySet = None
+            keywordSet = None
 
         for project in projectList:
             taskList = Task.select(AND(Task.q.projectID == project.id,
                                        Task.q.status    != 'done'),
                                    orderBy=-Task.q.urgency)
 
-            if propertySet:
+            if keywordSet:
                 # FIXME: Optimize
-                taskList = [x for x in taskList if propertySet.issubset(set(x.properties))]
+                taskList = [x for x in taskList if keywordSet.issubset(set(x.keywords))]
             else:
                 taskList = list(taskList)
 
@@ -151,27 +151,27 @@ class YCmd(Cmd,BugCmd):
 
 
     def do_t_prop_set(self, line):
-        """Set a task property.
-        t_prop_set <id> <property> [<value>]"""
+        """Set a task keyword.
+        t_prop_set <id> <keyword> [<value>]"""
 
         # Parse line
         line = parseutils.simplifySpaces(line)
         tokens = line.split(" ")
         taskId = int(tokens[0])
-        propertyName = tokens[1]
+        keywordName = tokens[1]
         if len(tokens) > 2:
             value = int(tokens[2])
         else:
             value = None
 
-        # Get task and property
+        # Get task and keyword
         task = Task.get(taskId)
-        property = utils.getOrCreateProperty(propertyName)
-        if not property:
+        keyword = utils.getOrCreateKeyword(keywordName)
+        if not keyword:
             return
 
-        # Assign property
-        property = TaskProperty(task=task, property=property, value=value)
+        # Assign keyword
+        keyword = TaskKeyword(task=task, keyword=keyword, value=value)
 
     def do_t_show(self, line):
         """Display details of a task.
@@ -188,18 +188,18 @@ class YCmd(Cmd,BugCmd):
         task = Task.get(taskId)
 
         # Create task line
-        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getPropertyDict())
+        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
 
         # Edit
         line = tui.editLine(taskLine)
 
         # Update task
-        projectName, title, propertyDict = parseutils.parseTaskLine(line)
-        if not utils.createMissingProperties(propertyDict.keys()):
+        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        if not utils.createMissingKeywords(keywordDict.keys()):
             return
         task.project = utils.getOrCreateProject(projectName)
         task.title = title
-        task.setPropertyDict(propertyDict)
+        task.setKeywordDict(keywordDict)
 
 
     def do_t_set_project(self, line):
@@ -215,9 +215,9 @@ class YCmd(Cmd,BugCmd):
 
 
     def do_p_list(self, line):
-        """List all properties."""
-        for property in Property.select():
-            print property.name
+        """List all keywords."""
+        for keyword in Keyword.select():
+            print keyword.name
 
 
     def do_EOF(self, line):

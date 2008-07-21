@@ -8,12 +8,12 @@ def simplifySpaces(line):
     return line
 
 
-gPropertyRe=re.compile("-p *([^ =]+)(?:=(\d+))?")
+gKeywordRe=re.compile("-p *([^ =]+)(?:=(\d+))?")
 def parseTaskLine(line):
     """Parse line of form:
-    project some text -p property1 -p property2=12 some other text
-    returns a tuple of ("project", "some text some other text", {property1: None, property2:12})"""
-    def fixPropertyValue(value):
+    project some text -p keyword1 -p keyword2=12 some other text
+    returns a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
+    def fixKeywordValue(value):
         if value != '':
             return int(value)
         else:
@@ -23,25 +23,25 @@ def parseTaskLine(line):
     line = simplifySpaces(line)
     project, line = line.split(" ", 1)
 
-    # Extract properties
-    matches = gPropertyRe.findall(line)
-    matches = [(x, fixPropertyValue(y)) for x,y in matches]
-    propertyDict = dict(matches)
+    # Extract keywords
+    matches = gKeywordRe.findall(line)
+    matches = [(x, fixKeywordValue(y)) for x,y in matches]
+    keywordDict = dict(matches)
 
-    # Erase properties
-    line = gPropertyRe.subn("", line)[0]
+    # Erase keywords
+    line = gKeywordRe.subn("", line)[0]
     line = simplifySpaces(line)
-    return project, line, propertyDict
+    return project, line, keywordDict
 
 
-def createTaskLine(projectName, title, propertyDict):
+def createTaskLine(projectName, title, keywordDict):
     tokens = []
-    for propertyName, value in propertyDict.items():
+    for keywordName, value in keywordDict.items():
         tokens.append("-p")
         if value:
-            tokens.append(propertyName + "=" + str(value))
+            tokens.append(keywordName + "=" + str(value))
         else:
-            tokens.append(propertyName)
+            tokens.append(keywordName)
 
     tokens.insert(0, projectName)
 

@@ -6,20 +6,20 @@ class Project(SQLObject):
     name = UnicodeCol(alternateID=True, notNone=True)
 
 
-class Property(SQLObject):
+class Keyword(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
     name = UnicodeCol(alternateID=True, notNone=True)
     tasks = RelatedJoin("Task",
         createRelatedTable=False,
-        intermediateTable="task_property",
-        joinColumn="property_id",
+        intermediateTable="task_keyword",
+        joinColumn="keyword_id",
         otherColumn="task_id")
 
 
-class TaskProperty(SQLObject):
+class TaskKeyword(SQLObject):
     task = ForeignKey("Task")
-    property = ForeignKey("Property")
+    keyword = ForeignKey("Keyword")
     value = IntCol(default=None)
 
 
@@ -30,38 +30,38 @@ class Task(SQLObject):
     urgency = IntCol(default=0, notNone=True)
     status = EnumCol(enumValues=['new', 'started', 'done'])
     project = ForeignKey("Project")
-    properties = RelatedJoin("Property",
+    keywords = RelatedJoin("Keyword",
         createRelatedTable=False,
-        intermediateTable="task_property",
+        intermediateTable="task_keyword",
         joinColumn="task_id",
-        otherColumn="property_id")
+        otherColumn="keyword_id")
 
-    def setPropertyDict(self, dct):
+    def setKeywordDict(self, dct):
         """
-        Defines properties of a task.
-        Dict is of the form: propertyName => value
+        Defines keywords of a task.
+        Dict is of the form: keywordName => value
         """
-        for taskProperty in TaskProperty.selectBy(task=self):
-            taskProperty.destroySelf()
+        for taskKeyword in TaskKeyword.selectBy(task=self):
+            taskKeyword.destroySelf()
 
         for name, value in dct.items():
-            property = Property.selectBy(name=name)[0]
-            TaskProperty(task=self, property=property, value=value)
+            keyword = Keyword.selectBy(name=name)[0]
+            TaskKeyword(task=self, keyword=keyword, value=value)
 
-    def getPropertyDict(self):
+    def getKeywordDict(self):
         """
-        Returns all properties of a task as a dict of the form:
-        propertyName => value
+        Returns all keywords of a task as a dict of the form:
+        keywordName => value
         """
         dct = {}
-        for property in TaskProperty.selectBy(task=self):
-            dct[property.property.name] = property.value
+        for keyword in TaskKeyword.selectBy(task=self):
+            dct[keyword.keyword.name] = keyword.value
         return dct
 
 
 def createTables():
     Project.createTable()
-    Property.createTable()
+    Keyword.createTable()
     Task.createTable()
-    TaskProperty.createTable()
+    TaskKeyword.createTable()
 # vi: ts=4 sw=4 et

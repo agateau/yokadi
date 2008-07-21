@@ -5,11 +5,11 @@ sys.path.append("..")
 import parseutils
 
 gTaskLineToParsedStructList = [
-    ("project some text -p property1 -p property2=12 some other text", ("project", "some text some other text", {"property1":None, "property2":12} )),
+    ("project some text -p keyword1 -p keyword2=12 some other text", ("project", "some text some other text", {"keyword1":None, "keyword2":12} )),
     ]
 
 class ParseUtilsTests(unittest.TestCase):
-    def testExtractProperties(self):
+    def testExtractKeywords(self):
         for src, dst in gTaskLineToParsedStructList:
             result = parseutils.parseTaskLine(src)
             self.assertEqual(result, dst)

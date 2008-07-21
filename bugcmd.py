@@ -26,49 +26,49 @@ LIKELIHOOD_LIST = [
     (5, "Will affect all users"),
     ]
 
-def computeUrgency(propertyDict):
-    likelihood = propertyDict[LIKELIHOOD_PROPERTY_NAME]
-    severity = propertyDict[SEVERITY_PROPERTY_NAME]
+def computeUrgency(keywordDict):
+    likelihood = keywordDict[LIKELIHOOD_PROPERTY_NAME]
+    severity = keywordDict[SEVERITY_PROPERTY_NAME]
     maxUrgency = LIKELIHOOD_LIST[-1][0] * SEVERITY_LIST[-1][0]
     return 100 * likelihood * severity / maxUrgency
 
 
-def editBugProperties(propertyDict):
-    severity = propertyDict.get(SEVERITY_PROPERTY_NAME, None)
-    likelihood = propertyDict.get(LIKELIHOOD_PROPERTY_NAME, None)
-    bug = propertyDict.get(BUG_PROPERTY_NAME, None)
+def editBugKeywords(keywordDict):
+    severity = keywordDict.get(SEVERITY_PROPERTY_NAME, None)
+    likelihood = keywordDict.get(LIKELIHOOD_PROPERTY_NAME, None)
+    bug = keywordDict.get(BUG_PROPERTY_NAME, None)
 
     severity = tui.selectFromList("Severity", SEVERITY_LIST, severity)
     likelihood = tui.selectFromList("Likelihood", LIKELIHOOD_LIST, likelihood)
     bug = tui.enterInt("bug", bug)
 
-    propertyDict[BUG_PROPERTY_NAME] = bug
+    keywordDict[BUG_PROPERTY_NAME] = bug
 
     if severity:
-        propertyDict[SEVERITY_PROPERTY_NAME] = severity
+        keywordDict[SEVERITY_PROPERTY_NAME] = severity
 
     if likelihood:
-        propertyDict[LIKELIHOOD_PROPERTY_NAME] = likelihood
+        keywordDict[LIKELIHOOD_PROPERTY_NAME] = likelihood
 
 
 class BugCmd(object):
     def __init__(self):
         for name in PROPERTY_NAMES:
-            utils.getOrCreateProperty(name, interactive=False)
+            utils.getOrCreateKeyword(name, interactive=False)
 
 
     def do_bug_add(self, line):
         """Add a bug-type task. Will create a task and ask additional info.
-        bug_add <project_name> [-p <property1>] [-p <property2>] <Bug description>
+        bug_add <project_name> [-p <keyword1>] [-p <keyword2>] <Bug description>
         """
-        projectName, title, propertyDict = parseutils.parseTaskLine(line)
-        editBugProperties(propertyDict)
+        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        editBugKeywords(keywordDict)
 
-        task = utils.addTask(projectName, title, propertyDict)
+        task = utils.addTask(projectName, title, keywordDict)
         if not task:
             return
 
-        task.urgency = computeUrgency(propertyDict)
+        task.urgency = computeUrgency(keywordDict)
 
         print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
 
@@ -80,19 +80,19 @@ class BugCmd(object):
         task = Task.get(taskId)
 
         # Create task line
-        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getPropertyDict())
+        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
 
         # Edit
         line = tui.editLine(taskLine)
-        projectName, title, propertyDict = parseutils.parseTaskLine(line)
-        editBugProperties(propertyDict)
+        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        editBugKeywords(keywordDict)
 
         # Update bug
-        if not utils.createMissingProperties(propertyDict.keys()):
+        if not utils.createMissingKeywords(keywordDict.keys()):
             return
         task.project = utils.getOrCreateProject(projectName)
         task.title = title
-        task.setPropertyDict(propertyDict)
-        task.urgency = computeUrgency(propertyDict)
+        task.setKeywordDict(keywordDict)
+        task.urgency = computeUrgency(keywordDict)
 
 # vi: ts=4 sw=4 et
