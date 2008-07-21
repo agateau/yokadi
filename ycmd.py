@@ -50,6 +50,7 @@ class YCmd(Cmd,BugCmd):
         taskId = int(line)
         task = Task.get(taskId)
         task.status = 'started'
+        task.doneDate = None
 
     def do_t_mark_done(self, line):
         """Mark task as done.
@@ -57,6 +58,7 @@ class YCmd(Cmd,BugCmd):
         taskId = int(line)
         task = Task.get(taskId)
         task.status = 'done'
+        task.doneDate = datetime.now()
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
@@ -64,6 +66,7 @@ class YCmd(Cmd,BugCmd):
         taskId = int(line)
         task = Task.get(taskId)
         task.status = 'new'
+        task.doneDate = None
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.

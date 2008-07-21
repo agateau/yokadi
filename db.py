@@ -26,6 +26,7 @@ class TaskKeyword(SQLObject):
 class Task(SQLObject):
     title = UnicodeCol(alternateID=True)
     creationDate = DateTimeCol(notNone=True)
+    doneDate = DateTimeCol(default=None)
     description = UnicodeCol(default="", notNone=True)
     urgency = IntCol(default=0, notNone=True)
     status = EnumCol(enumValues=['new', 'started', 'done'])
