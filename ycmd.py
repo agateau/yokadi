@@ -91,15 +91,12 @@ class YCmd(Cmd,BugCmd):
 
     def do_t_list(self, line):
         """List tasks by project and/or keywords.
-        <project_name> can be '*' to list all projects.
+        <project_name> can be '%' to list all projects.
         t_list <project_name> [<keyword1> [<keyword2>]...]
         """
         tokens = line.strip().split(' ')
         projectName = tokens[0]
-        if projectName != '*':
-            projectList = Project.selectBy(name=projectName)
-        else:
-            projectList = Project.select()
+        projectList = Project.select(LIKE(Project.q.name, projectName + '%'))
 
         if len(tokens) > 1:
             keywordSet = set([Keyword.byName(x) for x in tokens[1:]])
