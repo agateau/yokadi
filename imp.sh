@@ -7,14 +7,17 @@ log() {
 
 cp ~/doc/todo.db test0.db
 
-log "Upgrading"
-python v1imp.py --db test0.db
+#log "Python upgrading"
+#python v1imp.py --db test0.db
 
 log "Dumping"
 sqlite3 test0.db <<EOF
 .output test.sql
 .dump
 EOF
+
+log "Shell upgrading"
+./prop2kw.sh test.sql
 
 sed  '/CREATE TABLE/,/);/d' test.sql > test-nocreate.sql
 
