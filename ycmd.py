@@ -214,7 +214,7 @@ class YCmd(Cmd,BugCmd):
         print "Moved task '%s' to project '%s'" % (task.title, projectName)
 
 
-    def do_p_list(self, line):
+    def do_k_list(self, line):
         """List all keywords."""
         for keyword in Keyword.select():
             print keyword.name
