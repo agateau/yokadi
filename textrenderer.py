@@ -46,6 +46,11 @@ class TextRenderer(object):
             ("Keywords", keywords),
             ]
 
+        if task.status == "done":
+            fields.append(
+                ("Done", task.doneDate),
+                )
+
         maxWidth = max([len(x) for x,y in fields])
         format="%" + str(maxWidth) + "s: %s"
         for caption, value in fields:
