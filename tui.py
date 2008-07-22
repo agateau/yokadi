@@ -27,7 +27,7 @@ def editLine(line, prompt="edit> "):
     # Init readline
     # (Code copied from yagtd)
     def pre_input_hook():
-        readline.insert_text(line)
+        readline.insert_text(line.encode("utf-8"))
         readline.redisplay()
 
         # Unset the hook again
