@@ -8,10 +8,10 @@ def simplifySpaces(line):
     return line
 
 
-gKeywordRe=re.compile("-p *([^ =]+)(?:=(\d+))?")
+gKeywordRe=re.compile("-k *([^ =]+)(?:=(\d+))?")
 def parseTaskLine(line):
     """Parse line of form:
-    project some text -p keyword1 -p keyword2=12 some other text
+    project some text -k keyword1 -k keyword2=12 some other text
     returns a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
     def fixKeywordValue(value):
         if value != '':
@@ -37,7 +37,7 @@ def parseTaskLine(line):
 def createTaskLine(projectName, title, keywordDict):
     tokens = []
     for keywordName, value in keywordDict.items():
-        tokens.append("-p")
+        tokens.append("-k")
         if value:
             tokens.append(keywordName + "=" + str(value))
         else:
