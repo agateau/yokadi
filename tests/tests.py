@@ -1,3 +1,4 @@
+# encoding: utf-8
 import sys
 import unittest
 
@@ -6,6 +7,7 @@ import parseutils
 
 gTaskLineToParsedStructList = [
     ("project some text -k keyword1 -k keyword2=12 some other text", ("project", "some text some other text", {"keyword1":None, "keyword2":12} )),
+    ("project ééé", ("project", "ééé", {} )),
     ]
 
 class ParseUtilsTests(unittest.TestCase):
