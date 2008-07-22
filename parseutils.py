@@ -47,20 +47,4 @@ def createTaskLine(projectName, title, keywordDict):
 
     tokens.append(title)
     return " ".join(tokens)
-
-
-def extractYagtdField(line, field):
-    textParts = []
-    regExp = re.compile(field + "([^ ]+)")
-    lst = regExp.findall(line)
-    if len(lst) == 1:
-        field = lst[0]
-    elif len(lst) == 0:
-        field = None
-    else:
-        raise Exception("Multiple '%s' fields found" % field)
-
-    line = regExp.subn("", line)[0]
-    line = simplifySpaces(line)
-    return line, field
 # vi: ts=4 sw=4 et
