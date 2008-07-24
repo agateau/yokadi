@@ -91,12 +91,15 @@ class YCmd(Cmd,BugCmd):
 
     def do_t_list(self, line):
         """List tasks by project and/or keywords.
-        <project_name> can be '%' to list all projects.
         t_list <project_name> [<keyword1> [<keyword2>]...]
+
+        '%' can be used as a wildcard in the project name:
+        - To list projects starting with "foo", use "foo%".
+        - To list all projects, use "%".
         """
         tokens = line.strip().split(' ')
         projectName = tokens[0]
-        projectList = Project.select(LIKE(Project.q.name, projectName + '%'))
+        projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if len(tokens) > 1:
             keywordSet = set([Keyword.byName(x) for x in tokens[1:]])
