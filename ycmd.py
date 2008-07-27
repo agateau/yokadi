@@ -8,6 +8,18 @@ import tui
 from textrenderer import TextRenderer
 from bugcmd import BugCmd
 
+class ProjectCompleter(object):
+    def __init__(self, position):
+        self.position = position
+
+
+    def __call__(self, text, line, begidx, endidx):
+        if parseutils.computeCompleteParameterPosition(text, line, begidx, endidx) == self.position:
+            return utils.getProjectNamesStartingWith(text)
+        else:
+            return []
+
+
 class YCmd(Cmd,BugCmd):
     __slots__ = ["renderer"]
     def __init__(self):
@@ -23,6 +35,8 @@ class YCmd(Cmd,BugCmd):
         task = utils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
+
+    complete_t_add = ProjectCompleter(1)
 
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
@@ -124,6 +138,8 @@ class YCmd(Cmd,BugCmd):
             for task in taskList:
                 self.renderer.renderTaskListRow(task)
 
+    complete_t_list = ProjectCompleter(1)
+
     def do_t_reorder(self, line):
         """Reorder tasks of a project.
         It works by starting an editor with the task list: you can then change
@@ -204,6 +220,8 @@ class YCmd(Cmd,BugCmd):
         task.title = title
         task.setKeywordDict(keywordDict)
 
+    complete_t_edit = ProjectCompleter(1)
+
 
     def do_t_set_project(self, line):
         """Set task's project.
@@ -215,6 +233,7 @@ class YCmd(Cmd,BugCmd):
         task = Task.get(taskId)
         task.project = utils.getOrCreateProject(projectName)
         print "Moved task '%s' to project '%s'" % (task.title, projectName)
+    complete_t_set_project = ProjectCompleter(2)
 
 
     def do_k_list(self, line):

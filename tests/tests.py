@@ -26,6 +26,16 @@ class ParseUtilsTests(unittest.TestCase):
             self.assertEqual(result, parsedStruct)
 
 
+    def testCompleteParameterPosition(self):
+        data = [
+                 (("bla", "t_add bla", 6, 10), 1),
+                 (("bli", "t_add bla bli", 10, 14), 2),
+               ]
+        for params, expectedResult in data:
+            result = parseutils.computeCompleteParameterPosition(*params)
+            self.assertEqual(result, expectedResult)
+
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -66,4 +66,8 @@ def createMissingKeywords(lst):
         if not getOrCreateKeyword(keywordName):
             return False
     return True
+
+
+def getProjectNamesStartingWith(text):
+    return [x.name for x in Project.select(LIKE(Project.q.name, text + "%"))]
 # vi: ts=4 sw=4 et
