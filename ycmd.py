@@ -249,7 +249,7 @@ class YCmd(Cmd,BugCmd):
         oldName = tokens[0]
         newName = tokens[1]
 
-        project = Project.selectBy(name=oldName)
+        project = Project.selectBy(name=oldName)[0]
         project.name = newName
         print "Renamed project '%s' to '%s'" % (oldName, newName)
     complete_p_rename = ProjectCompleter(1)
