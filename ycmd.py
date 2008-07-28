@@ -242,6 +242,25 @@ class YCmd(Cmd,BugCmd):
             print keyword.name
 
 
+    def do_p_rename(self, line):
+        """Rename project.
+        p_rename <old_name> <new_name>"""
+        tokens = line.split(" ")
+        oldName = tokens[0]
+        newName = tokens[1]
+
+        project = Project.selectBy(name=oldName)
+        project.name = newName
+        print "Renamed project '%s' to '%s'" % (oldName, newName)
+    complete_p_rename = ProjectCompleter(1)
+
+
+    def do_p_list(self, line):
+        """List all projects."""
+        for project in Project.select():
+            print project.name
+
+
     def do_EOF(self, line):
         """Quit."""
         print
