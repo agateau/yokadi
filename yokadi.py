@@ -8,13 +8,15 @@ from sqlobject import *
 import db
 from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
+from keywordcmd import KeywordCmd
 from bugcmd import BugCmd
 
-class YokadiCmd(Cmd, TaskCmd, ProjectCmd, BugCmd):
+class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)
         ProjectCmd.__init__(self)
+        KeywordCmd.__init__(self)
         BugCmd.__init__(self)
         self.prompt = "yokadi> "
 
