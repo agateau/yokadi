@@ -24,6 +24,12 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         """Executed when input is empty. Reimplemented to do nothing."""
         return
 
+    def default(self, line):
+        if line.isdigit():
+            self.do_t_show(line)
+        else:
+            Cmd.default(self, line)
+
     def do_EOF(self, line):
         """Quit."""
         print
