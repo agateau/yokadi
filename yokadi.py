@@ -20,6 +20,10 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         BugCmd.__init__(self)
         self.prompt = "yokadi> "
 
+    def emptyline(self):
+        """Executed when input is empty. Reimplemented to do nothing."""
+        return
+
     def do_EOF(self, line):
         """Quit."""
         print
