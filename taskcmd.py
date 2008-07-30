@@ -153,6 +153,8 @@ class TaskCmd(object):
             task = Task.get(id)
             task.urgency = urgency
 
+    complete_t_reorder = ProjectCompleter(1)
+
 
     def do_t_prop_set(self, line):
         """Set a task keyword.
