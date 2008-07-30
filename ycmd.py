@@ -7,18 +7,7 @@ import parseutils
 import tui
 from textrenderer import TextRenderer
 from bugcmd import BugCmd
-
-class ProjectCompleter(object):
-    def __init__(self, position):
-        self.position = position
-
-
-    def __call__(self, text, line, begidx, endidx):
-        if parseutils.computeCompleteParameterPosition(text, line, begidx, endidx) == self.position:
-            return utils.getProjectNamesStartingWith(text)
-        else:
-            return []
-
+from completers import *
 
 class YCmd(Cmd,BugCmd):
     __slots__ = ["renderer"]
