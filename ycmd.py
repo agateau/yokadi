@@ -209,8 +209,6 @@ class YCmd(Cmd,BugCmd):
         task.title = title
         task.setKeywordDict(keywordDict)
 
-    complete_t_edit = ProjectCompleter(1)
-
 
     def do_t_set_project(self, line):
         """Set task's project.
