@@ -156,29 +156,6 @@ class TaskCmd(object):
     complete_t_reorder = ProjectCompleter(1)
 
 
-    def do_t_prop_set(self, line):
-        """Set a task keyword.
-        t_prop_set <id> <keyword> [<value>]"""
-
-        # Parse line
-        line = parseutils.simplifySpaces(line)
-        tokens = line.split(" ")
-        taskId = int(tokens[0])
-        keywordName = tokens[1]
-        if len(tokens) > 2:
-            value = int(tokens[2])
-        else:
-            value = None
-
-        # Get task and keyword
-        task = Task.get(taskId)
-        keyword = utils.getOrCreateKeyword(keywordName)
-        if not keyword:
-            return
-
-        # Assign keyword
-        keyword = TaskKeyword(task=task, keyword=keyword, value=value)
-
     def do_t_show(self, line):
         """Display details of a task.
         t_show <id>"""
