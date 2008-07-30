@@ -6,8 +6,7 @@ from optparse import OptionParser
 from sqlobject import *
 
 import db
-#from taskcmd import TaskCmd
-from ycmd import TaskCmd
+from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from bugcmd import BugCmd
 
