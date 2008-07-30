@@ -2,6 +2,7 @@ import parseutils
 import utils
 import tui
 from db import *
+from completers import *
 
 SEVERITY_PROPERTY_NAME = "severity"
 LIKELIHOOD_PROPERTY_NAME = "likelihood"
@@ -71,6 +72,8 @@ class BugCmd(object):
         task.urgency = computeUrgency(keywordDict)
 
         print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
+
+    complete_bug_add = ProjectCompleter(1)
 
 
     def do_bug_edit(self, line):
