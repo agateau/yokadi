@@ -6,15 +6,11 @@ import utils
 import parseutils
 import tui
 from textrenderer import TextRenderer
-from bugcmd import BugCmd
 from completers import *
 
-class YCmd(Cmd,BugCmd):
+class TaskCmd(object):
     __slots__ = ["renderer"]
     def __init__(self):
-        Cmd.__init__(self)
-        BugCmd.__init__(self)
-        self.prompt = "yokadi> "
         self.renderer = TextRenderer()
 
     def do_t_add(self, line):
@@ -221,35 +217,4 @@ class YCmd(Cmd,BugCmd):
         task.project = utils.getOrCreateProject(projectName)
         print "Moved task '%s' to project '%s'" % (task.title, projectName)
     complete_t_set_project = ProjectCompleter(2)
-
-
-    def do_k_list(self, line):
-        """List all keywords."""
-        for keyword in Keyword.select():
-            print keyword.name
-
-
-    def do_p_rename(self, line):
-        """Rename project.
-        p_rename <old_name> <new_name>"""
-        tokens = line.split(" ")
-        oldName = tokens[0]
-        newName = tokens[1]
-
-        project = Project.selectBy(name=oldName)[0]
-        project.name = newName
-        print "Renamed project '%s' to '%s'" % (oldName, newName)
-    complete_p_rename = ProjectCompleter(1)
-
-
-    def do_p_list(self, line):
-        """List all projects."""
-        for project in Project.select():
-            print project.name
-
-
-    def do_EOF(self, line):
-        """Quit."""
-        print
-        return True
 # vi: ts=4 sw=4 et

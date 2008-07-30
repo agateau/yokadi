@@ -1,11 +1,28 @@
 #!/usr/bin/env python
 import os
+from cmd import Cmd
 from optparse import OptionParser
 
 from sqlobject import *
 
 import db
-from ycmd import YCmd
+#from taskcmd import TaskCmd
+from ycmd import TaskCmd
+from projectcmd import ProjectCmd
+from bugcmd import BugCmd
+
+class YokadiCmd(Cmd, TaskCmd, ProjectCmd, BugCmd):
+    def __init__(self):
+        Cmd.__init__(self)
+        TaskCmd.__init__(self)
+        ProjectCmd.__init__(self)
+        BugCmd.__init__(self)
+        self.prompt = "yokadi> "
+
+    def do_EOF(self, line):
+        """Quit."""
+        print
+        return True
 
 
 def main():
@@ -31,7 +48,7 @@ def main():
     if options.createOnly:
         return
 
-    cmd = YCmd()
+    cmd = YokadiCmd()
     if len(args) > 0:
         cmd.onecmd(" ".join(args))
     else:
