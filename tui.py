@@ -9,13 +9,13 @@ def editText(text):
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
     try:
         fl = file(name, "w")
-        fl.write(text)
+        fl.write(text.encode("utf-8"))
         fl.close()
         editor = os.environ.get("EDITOR", "vi")
         retcode = subprocess.call([editor, name])
         if retcode != 0:
             return (False, text)
-        newText = file(name).read()
+        newText = unicode(file(name).read(), "utf-8")
         return (True, newText)
     finally:
         os.close(fd)
