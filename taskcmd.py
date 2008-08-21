@@ -16,6 +16,9 @@ class TaskCmd(object):
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [-p <keyword1>] [-p <keyword2>] <Task description>"""
+        if not line:
+            print "Give at least a task name !"
+            return
         projectName, title, keywordDict = parseutils.parseTaskLine(line)
         task = utils.addTask(projectName, title, keywordDict)
         if task:
@@ -159,9 +162,15 @@ class TaskCmd(object):
     def do_t_show(self, line):
         """Display details of a task.
         t_show <id>"""
+        if not line:
+            print "Provide a task id"
+            return
         taskId = int(line)
-        task = Task.get(taskId)
-        self.renderer.renderTaskDetails(task)
+        try:
+            task = Task.get(taskId)
+            self.renderer.renderTaskDetails(task)
+        except SQLObjectNotFound:
+            print "Task %s does not exist. Use t_list to see all tasks" % taskId
 
 
     def do_t_edit(self, line):

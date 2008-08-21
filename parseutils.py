@@ -21,7 +21,13 @@ def parseTaskLine(line):
 
     # First extract project name
     line = simplifySpaces(line)
-    project, line = line.split(" ", 1)
+    if line.count(" "):
+        project, line = line.split(" ", 1)
+        
+    else:
+        #TODO: if project name is not given use a default project (first one or configured one)
+        print "Project name not given, using 'default' projet"
+        project="default"
 
     # Extract keywords
     matches = gKeywordRe.findall(line)
