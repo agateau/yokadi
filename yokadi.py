@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 from cmd import Cmd
 from optparse import OptionParser
 
@@ -60,11 +61,14 @@ def main():
         return
 
     cmd = YokadiCmd()
-    if len(args) > 0:
-        cmd.onecmd(" ".join(args))
-    else:
-        cmd.cmdloop()
-
+    try:
+        if len(args) > 0:
+            cmd.onecmd(" ".join(args))
+        else:
+            cmd.cmdloop()
+    except KeyboardInterrupt:
+        print "\n\tBreak !"
+        sys.exit(1)
 
 if __name__=="__main__":
     main()
