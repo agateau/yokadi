@@ -7,6 +7,7 @@ import parseutils
 import tui
 from textrenderer import TextRenderer
 from completers import *
+from utils import YokadiException
 
 class TaskCmd(object):
     __slots__ = ["renderer"]
@@ -221,7 +222,7 @@ class TaskCmd(object):
 
     def providesTaskId(self, line, existingTask=True):
         if not line:
-            print "Provide a task id"
+            raise YokadiException("Provide a task id")
             return False
         taskId = int(line)
         if existingTask:
@@ -229,7 +230,7 @@ class TaskCmd(object):
                 task = Task.get(taskId)
                 self.renderer.renderTaskDetails(task)
             except SQLObjectNotFound:
-                print "Task %s does not exist. Use t_list to see all tasks" % taskId
+                raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
                 return False
         return taskId
 # vi: ts=4 sw=4 et

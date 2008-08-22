@@ -70,4 +70,9 @@ def createMissingKeywords(lst):
 
 def getProjectNamesStartingWith(text):
     return [x.name for x in Project.select(LIKE(Project.q.name, text + "%"))]
+
+class YokadiException(Exception):
+    """Yokadi Exceptions"""
+    pass
+
 # vi: ts=4 sw=4 et

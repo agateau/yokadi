@@ -11,6 +11,7 @@ from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
 from bugcmd import BugCmd
+from utils import YokadiException
 
 class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
     def __init__(self):
@@ -36,6 +37,16 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         print
         return True
 
+    def onecmd(self, line):
+        """This method is subclassed just to be
+        able to encapsulate it with a try/except bloc"""
+        try:
+            return Cmd.onecmd(self, line)
+        except YokadiException, e:
+            print "*** Yokadi error ***\n\t%s" % e
+        except Exception, e:
+             print "*** Unhandled error (oups)***\n\t%s" % e
+             print "This is a bug of Yokadi, sorry"
 
 def main():
     parser = OptionParser()
