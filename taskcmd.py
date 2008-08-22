@@ -29,13 +29,14 @@ class TaskCmd(object):
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
-        taskId = int(line)
-        task = Task.get(taskId)
-        ok, description = tui.editText(task.description)
-        if ok:
-            task.description = description
-        else:
-            print "Starting editor failed"
+        taskId=self.providesTaskId(line, existingTask=True)
+        if taskId:
+            task = Task.get(taskId)
+            ok, description = tui.editText(task.description)
+            if ok:
+                task.description = description
+            else:
+                print "Starting editor failed"
 
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100).
@@ -57,10 +58,11 @@ class TaskCmd(object):
     def do_t_mark_done(self, line):
         """Mark task as done.
         t_mark_done <id>"""
-        taskId = int(line)
-        task = Task.get(taskId)
-        task.status = 'done'
-        task.doneDate = datetime.now()
+        taskId=self.providesTaskId(line, existingTask=True)
+        if taskId:
+            task = Task.get(taskId)
+            task.status = 'done'
+            task.doneDate = datetime.now()
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
@@ -88,8 +90,10 @@ class TaskCmd(object):
     def do_t_remove(self, line):
         """Delete a task.
         t_remove <id>"""
-        taskId = int(line)
-        Task.delete(taskId)
+        taskId=self.providesTaskId(line, existingTask=True)
+        if taskId:
+            Task.delete(taskId)
+        
 
     def do_t_list(self, line):
         """List tasks by project and/or keywords.
@@ -162,21 +166,19 @@ class TaskCmd(object):
     def do_t_show(self, line):
         """Display details of a task.
         t_show <id>"""
-        if not line:
-            print "Provide a task id"
-            return
-        taskId = int(line)
-        try:
+        taskId=self.providesTaskId(line, existingTask=True)
+        if taskId:
             task = Task.get(taskId)
             self.renderer.renderTaskDetails(task)
-        except SQLObjectNotFound:
-            print "Task %s does not exist. Use t_list to see all tasks" % taskId
 
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
-        taskId = int(line)
+        taskId=self.providesTaskId(line, existingTask=True)
+        if not taskId:
+            return
+        
         task = Task.get(taskId)
 
         # Create task line
@@ -205,4 +207,18 @@ class TaskCmd(object):
         task.project = utils.getOrCreateProject(projectName)
         print "Moved task '%s' to project '%s'" % (task.title, projectName)
     complete_t_set_project = ProjectCompleter(2)
+
+    def providesTaskId(self, line, existingTask=True):
+        if not line:
+            print "Provide a task id"
+            return False
+        taskId = int(line)
+        if existingTask:
+            try:
+                task = Task.get(taskId)
+                self.renderer.renderTaskDetails(task)
+            except SQLObjectNotFound:
+                print "Task %s does not exist. Use t_list to see all tasks" % taskId
+                return False
+        return taskId
 # vi: ts=4 sw=4 et
