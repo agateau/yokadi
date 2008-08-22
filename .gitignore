@@ -1,3 +1,7 @@
 *.pyc
 *.db
 .*.swp
+.py*
+.pydevproject
+.project
+.settings
