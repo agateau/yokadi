@@ -59,15 +59,18 @@ class TaskCmd(object):
         """Mark task as done.
         t_mark_done <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            task = Task.get(taskId)
-            task.status = 'done'
-            task.doneDate = datetime.now()
+        if not taskId:
+            return
+        task = Task.get(taskId)
+        task.status = 'done'
+        task.doneDate = datetime.now()
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
         t_mark_new <id>"""
-        taskId = int(line)
+        taskId=self.providesTaskId(line, existingTask=True)
+        if not taskId:
+            return
         task = Task.get(taskId)
         task.status = 'new'
         task.doneDate = None
