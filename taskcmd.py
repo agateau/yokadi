@@ -50,7 +50,9 @@ class TaskCmd(object):
     def do_t_mark_started(self, line):
         """Mark task as started.
         t_mark_started <id>"""
-        taskId = int(line)
+        taskId=self.providesTaskId(line, existingTask=True)
+        if not taskId:
+            return
         task = Task.get(taskId)
         task.status = 'started'
         task.doneDate = None
@@ -79,6 +81,9 @@ class TaskCmd(object):
         """Apply a command to several tasks.
         t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
         tokens = line.split(" ", 2)
+        if len(tokens)<2:
+            print "Give at least a task id and a command. See 'help t_apply'"
+            return
         idStringList = tokens[0]
         cmd = tokens[1]
         if len(tokens) == 3:
@@ -141,6 +146,9 @@ class TaskCmd(object):
         the order of the lines and save the list. The urgency field will be
         updated to match the order.
         t_reorder <project_name>"""
+        if not line:
+            print "Info: using default project"
+            line="default"
         project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),
