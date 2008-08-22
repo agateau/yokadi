@@ -83,7 +83,7 @@ class TaskCmd(object):
         t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
         tokens = line.split(" ", 2)
         if len(tokens)<2:
-            print "Give at least a task id and a command. See 'help t_apply'"
+            raise YokadiException("Give at least a task id and a command. See 'help t_apply'")
             return
         idStringList = tokens[0]
         cmd = tokens[1]
@@ -212,12 +212,15 @@ class TaskCmd(object):
         """Set task's project.
         t_set_project <id> <project>"""
         tokens = line.split(" ")
+        if len(tokens)!=2:
+            raise YokadiException("You should give two arguments: <task id> <project>")
         taskId = int(tokens[0])
         projectName = tokens[1]
 
         task = Task.get(taskId)
         task.project = utils.getOrCreateProject(projectName)
-        print "Moved task '%s' to project '%s'" % (task.title, projectName)
+        if task.project:
+            print "Moved task '%s' to project '%s'" % (task.title, projectName)
     complete_t_set_project = ProjectCompleter(2)
 
     def providesTaskId(self, line, existingTask=True):
