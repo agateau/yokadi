@@ -114,6 +114,9 @@ class TaskCmd(object):
         """
         tokens = line.strip().split(' ')
         projectName = tokens[0]
+        if not projectName:
+            # Take all project if none provided
+            projectName="%"
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if len(tokens) > 1:
