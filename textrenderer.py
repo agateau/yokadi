@@ -2,8 +2,8 @@
 """
 Helper functions to render formated text on screen
 
-@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
-@license: undefined
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
 """
 
 import colors as C

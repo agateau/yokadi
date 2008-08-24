@@ -1,3 +1,11 @@
+# -*- coding: UTF-8 -*-
+"""
+Task related commands.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
+@license: GPLv3
+"""
 from cmd import Cmd
 from datetime import datetime
 

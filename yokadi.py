@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-""" Command line oriented, sqlite powered, todo list
+"""
+Command line oriented, sqlite powered, todo list
+
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: undefined
+@license: GPLv3
 """
 
 import os

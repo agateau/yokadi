@@ -1,7 +1,9 @@
 # -*- coding: UTF-8 -*-
-""" Database access layer using sqlobject
+"""
+Database access layer using sqlobject
+
 @author: Aurélien Gâteau <aurelien@.gateau@free.fr>
-@license: undefined
+@license: GPLv3
 """
 
 from sqlobject import *
