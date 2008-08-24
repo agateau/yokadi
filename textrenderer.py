@@ -14,8 +14,8 @@ class TextRenderer(object):
     def renderTaskListHeader(self, projectName):
         line = TASK_LIST_FORMAT % dict(id="ID", title="Title", urgency="U", status="S", creationDate="Date")
         print
-        print projectName.center(90)
-        print line
+        print C.CYAN+projectName.center(90)+C.RESET
+        print C.BOLD+line+C.RESET
         print "-" * len(line)
 
 
@@ -31,8 +31,16 @@ class TextRenderer(object):
             title = title.ljust(maxLength) + "*"
 
         status = task.status[0].upper()
+        if status=="S":
+            status=C.BOLD+status+C.RESET
         creationDate = task.creationDate
-        urgency = int(task.urgency)
+
+        if int(task.urgency)>75:
+            urgency=C.RED+str(task.urgency)+" "+C.RESET
+        elif int(task.urgency)>50:
+            urgency=C.PURPLE+str(task.urgency)+" "+C.RESET
+        else:
+            urgency=task.urgency
 
         print TASK_LIST_FORMAT % dict(id=str(task.id), title=title, urgency=urgency, status=status, creationDate=creationDate)
 
