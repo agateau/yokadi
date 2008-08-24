@@ -237,13 +237,11 @@ class TaskCmd(object):
     def providesTaskId(self, line, existingTask=True):
         if not line:
             raise YokadiException("Provide a task id")
-            return False
         taskId = int(line)
         if existingTask:
             try:
                 task = Task.get(taskId)
             except SQLObjectNotFound:
                 raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
-                return False
         return taskId
 # vi: ts=4 sw=4 et
