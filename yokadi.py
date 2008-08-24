@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+""" Command line oriented, sqlite powered, todo list
+@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
+@license: undefined
+"""
+
 import os
 import sys
 from cmd import Cmd

@@ -1,3 +1,13 @@
+# -*- coding: UTF-8 -*-
+"""
+Helper functions to render formated text on screen
+
+@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
+@license: undefined
+"""
+
+import colors as C
+
 TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-19s"
 
 class TextRenderer(object):
@@ -38,12 +48,12 @@ class TextRenderer(object):
             keywordArray.sort()
         keywords = ", ".join(keywordArray)
         fields = [
-            ("Project", task.project.name),
-            ("Title", task.title),
-            ("Created", task.creationDate),
-            ("Status", task.status),
-            ("Urgency", task.urgency),
-            ("Keywords", keywords),
+            (C.BOLD+"Project"+C.RESET, task.project.name),
+            (C.BOLD+"Title"+C.RESET, task.title),
+            (C.BOLD+"Created"+C.RESET, task.creationDate),
+            (C.BOLD+"Status"+C.RESET, task.status),
+            (C.BOLD+"Urgency"+C.RESET, task.urgency),
+            (C.BOLD+"Keywords"+C.RESET, keywords),
             ]
 
         if task.status == "done":

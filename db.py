@@ -1,3 +1,9 @@
+# -*- coding: UTF-8 -*-
+""" Database access layer using sqlobject
+@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
+@license: undefined
+"""
+
 from sqlobject import *
 
 class Project(SQLObject):
