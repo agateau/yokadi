@@ -39,13 +39,12 @@ class TaskCmd(object):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            task = Task.get(taskId)
-            ok, description = tui.editText(task.description)
-            if ok:
-                task.description = description
-            else:
-                print "Starting editor failed"
+        task = Task.get(taskId)
+        ok, description = tui.editText(task.description)
+        if ok:
+            task.description = description
+        else:
+            print "Starting editor failed"
 
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100).
@@ -60,8 +59,6 @@ class TaskCmd(object):
         """Mark task as started.
         t_mark_started <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
         task = Task.get(taskId)
         task.status = 'started'
         task.doneDate = None
@@ -70,8 +67,6 @@ class TaskCmd(object):
         """Mark task as done.
         t_mark_done <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
         task = Task.get(taskId)
         task.status = 'done'
         task.doneDate = datetime.now()
@@ -80,8 +75,6 @@ class TaskCmd(object):
         """Mark task as new (not started).
         t_mark_new <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
         task = Task.get(taskId)
         task.status = 'new'
         task.doneDate = None
@@ -108,8 +101,7 @@ class TaskCmd(object):
         """Delete a task.
         t_remove <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            Task.delete(taskId)
+        Task.delete(taskId)
         
 
     def do_t_list(self, line):
@@ -190,18 +182,14 @@ class TaskCmd(object):
         """Display details of a task.
         t_show <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            task = Task.get(taskId)
-            self.renderer.renderTaskDetails(task)
+        task = Task.get(taskId)
+        self.renderer.renderTaskDetails(task)
 
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
-        
         task = Task.get(taskId)
 
         # Create task line
