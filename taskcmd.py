@@ -227,7 +227,8 @@ class TaskCmd(object):
     complete_t_set_project = ProjectCompleter(2)
 
     def providesTaskId(self, line, existingTask=True):
-        if not line:
+        """Verify that a taskId was provided and optionaly checks if the task exists"""
+        if not line.isdigit():
             raise YokadiException("Provide a task id")
             return False
         taskId = int(line)
