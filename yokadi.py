@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """ Command line oriented, sqlite powered, todo list
-@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: undefined
 """
 
 import os
 import sys
+import readline
 from cmd import Cmd
 from optparse import OptionParser
 
@@ -27,6 +28,8 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         KeywordCmd.__init__(self)
         BugCmd.__init__(self)
         self.prompt = "yokadi> "
+        self.historyPath=os.path.expandvars("$HOME/.yokadi_history")
+        self.loadHistory()
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""
@@ -53,6 +56,26 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         except Exception, e:
              print "*** Unhandled error (oups)***\n\t%s" % e
              print "This is a bug of Yokadi, sorry"
+
+    def loadHistory(self):
+        """Tries to load previous history list from disk"""
+        try:
+            readline.read_history_file(self.historyPath)
+        except Exception, e:
+            # Cannot load any previous history. Start from a clear one
+            pass
+
+    def writeHistory(self):
+        """Writes shell history to disk"""
+        try:
+            # Open r/w and close file to create one if needed
+            historyFile=file(self.historyPath, "w")
+            historyFile.close()
+            readline.set_history_length(1000)
+            readline.write_history_file(self.historyPath)
+        except Exception, e:
+            raise YokadiException("Fail to save history to %s. Error was:\n\t%s"
+                        % (self.historyPath, e))
 
 def main():
     parser = OptionParser()
@@ -86,6 +109,8 @@ def main():
     except KeyboardInterrupt:
         print "\n\tBreak !"
         sys.exit(1)
+    # Save history
+    cmd.writeHistory()
 
 if __name__=="__main__":
     main()
