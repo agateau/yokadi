@@ -231,7 +231,6 @@ class TaskCmd(object):
         if existingTask:
             try:
                 task = Task.get(taskId)
-                self.renderer.renderTaskDetails(task)
             except SQLObjectNotFound:
                 raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
                 return False
