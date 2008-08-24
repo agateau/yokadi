@@ -1,8 +1,15 @@
-# encoding: utf-8
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+""" Yokadi unit tests
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: undefined
+"""
+
 import sys
+from os.path import dirname, join, pardir
 import unittest
 
-sys.path.append("..")
+sys.path.append(join(dirname(sys.argv[0]), pardir))
 import parseutils
 
 gTaskLineToParsedStructList = [
