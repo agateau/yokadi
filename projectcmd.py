@@ -1,6 +1,14 @@
-from db import *
+# -*- coding: UTF-8 -*-
+"""
+Project related functions
 
+@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
+@license: undefined
+"""
+
+from db import *
 from completers import *
+from utils import YokadiException
 
 
 class ProjectCmd(object):
@@ -8,6 +16,8 @@ class ProjectCmd(object):
         """Rename project.
         p_rename <old_name> <new_name>"""
         tokens = line.split(" ")
+        if len(tokens)!=2:
+            raise YokadiException("You must provide two arguments: old_name and new_name")
         oldName = tokens[0]
         newName = tokens[1]
 
