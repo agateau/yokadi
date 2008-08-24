@@ -19,6 +19,7 @@ from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
 from bugcmd import BugCmd
 from utils import YokadiException
+import colors as C
 
 class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
     def __init__(self):
@@ -52,9 +53,9 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         try:
             return Cmd.onecmd(self, line)
         except YokadiException, e:
-            print "*** Yokadi error ***\n\t%s" % e
+            print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
         except Exception, e:
-             print "*** Unhandled error (oups)***\n\t%s" % e
+             print C.RED+C.BOLD+"*** Unhandled error (oups)***\n\t%s" % e + C.RESET
              print "This is a bug of Yokadi, sorry"
 
     def loadHistory(self):
