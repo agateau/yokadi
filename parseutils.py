@@ -1,3 +1,10 @@
+# -*- coding: UTF-8 -*-
+"""
+Parse utilities. Used to manipulate command line text.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
 import re
 
 

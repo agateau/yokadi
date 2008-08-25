@@ -1,3 +1,10 @@
+# -*- coding: UTF-8 -*-
+"""
+Keyword related commands.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
 from db import *
 
 

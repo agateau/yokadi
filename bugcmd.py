@@ -1,3 +1,10 @@
+# -*- coding: UTF-8 -*-
+"""
+Bug related commands.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
 import parseutils
 import utils
 import tui

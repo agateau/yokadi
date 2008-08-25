@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-""" Yokadi unit tests
+"""
+Yokadi unit tests
+
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: undefined
+@license: GPLv3
 """
 
 import sys

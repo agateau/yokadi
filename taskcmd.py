@@ -1,3 +1,11 @@
+# -*- coding: UTF-8 -*-
+"""
+Task related commands.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
+@license: GPLv3
+"""
 from cmd import Cmd
 from datetime import datetime
 
@@ -34,13 +42,12 @@ class TaskCmd(object):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            task = Task.get(taskId)
-            ok, description = tui.editText(task.description)
-            if ok:
-                task.description = description
-            else:
-                print "Starting editor failed"
+        task = Task.get(taskId)
+        ok, description = tui.editText(task.description)
+        if ok:
+            task.description = description
+        else:
+            print "Starting editor failed"
 
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100).
@@ -55,8 +62,6 @@ class TaskCmd(object):
         """Mark task as started.
         t_mark_started <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
         task = Task.get(taskId)
         task.status = 'started'
         task.doneDate = None
@@ -65,8 +70,6 @@ class TaskCmd(object):
         """Mark task as done.
         t_mark_done <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
         task = Task.get(taskId)
         task.status = 'done'
         task.doneDate = datetime.now()
@@ -75,8 +78,6 @@ class TaskCmd(object):
         """Mark task as new (not started).
         t_mark_new <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
         task = Task.get(taskId)
         task.status = 'new'
         task.doneDate = None
@@ -103,8 +104,7 @@ class TaskCmd(object):
         """Delete a task.
         t_remove <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            Task.delete(taskId)
+        Task.delete(taskId)
         
 
     def do_t_list(self, line):
@@ -185,18 +185,14 @@ class TaskCmd(object):
         """Display details of a task.
         t_show <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if taskId:
-            task = Task.get(taskId)
-            self.renderer.renderTaskDetails(task)
+        task = Task.get(taskId)
+        self.renderer.renderTaskDetails(task)
 
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
         taskId=self.providesTaskId(line, existingTask=True)
-        if not taskId:
-            return
-        
         task = Task.get(taskId)
 
         # Create task line
@@ -286,13 +282,11 @@ class TaskCmd(object):
         """Verify that a taskId was provided and optionaly checks if the task exists"""
         if not line.isdigit():
             raise YokadiException("Provide a task id")
-            return False
         taskId = int(line)
         if existingTask:
             try:
                 task = Task.get(taskId)
             except SQLObjectNotFound:
                 raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
-                return False
         return taskId
 # vi: ts=4 sw=4 et

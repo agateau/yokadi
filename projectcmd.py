@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-Project related functions
+Project related commands.
 
-@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
-@license: undefined
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
 """
 
 from db import *

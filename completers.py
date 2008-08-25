@@ -1,3 +1,10 @@
+# -*- coding: UTF-8 -*-
+"""
+Implementation of completers for various Yokadi objects.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
 import parseutils
 import utils
 

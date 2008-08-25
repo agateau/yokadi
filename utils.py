@@ -1,3 +1,10 @@
+# -*- coding: UTF-8 -*-
+"""
+Misc utilities. Should probably be splitted.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
 from datetime import datetime
 
 from db import *

@@ -1,8 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
 Helper functions to build CLI applications
-@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
-@license: undefined
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
 """
 
 import os
