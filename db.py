@@ -32,6 +32,7 @@ class TaskKeyword(SQLObject):
 class Task(SQLObject):
     title = UnicodeCol(alternateID=True)
     creationDate = DateTimeCol(notNone=True)
+    dueDate = DateTimeCol(default=None)
     doneDate = DateTimeCol(default=None)
     description = UnicodeCol(default="", notNone=True)
     urgency = IntCol(default=0, notNone=True)

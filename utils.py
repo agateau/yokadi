@@ -71,6 +71,26 @@ def createMissingKeywords(lst):
 def getProjectNamesStartingWith(text):
     return [x.name for x in Project.select(LIKE(Project.q.name, text + "%"))]
 
+def guessDateFormat(tDate):
+    """Guess and return format of date as a string"""
+    if tDate.count("/")==2:
+        fDate="%d/%m/%Y"
+    elif tDate.count("/")==1:
+        fDate="%d/%m"
+    else:
+        fDate="%d"
+    return fDate
+
+def guessTimeFormat(tTime):
+    """Guess and return format of time as a string"""
+    if tTime.count(":")==2:
+        fTime="%H:%M:%S"
+    elif tTime.count(":")==1:
+        fTime="%H:%M"
+    else:
+        fTime="%H"
+    return fTime
+
 class YokadiException(Exception):
     """Yokadi Exceptions"""
     pass
