@@ -235,10 +235,18 @@ class TaskCmd(object):
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
         taskId=self.providesTaskId(taskId, True)
+
+        if line.lower()=="none":
+            task = Task.get(taskId)
+            task.dueDate=None
+            return
+
         #TODO: make all the date stuff in a separate function to be reusable easily (set_creation_date ?)
         today=datetime.today().replace(microsecond=0)
+
         # Initialise dueDate to now (may be now + fixe delta ?)
         dueDate=today # Safe because datetime objects are immutables
+
         if line.startswith("+"):
             #Delta/relative date and/or time
             line=line.upper().strip("+")
