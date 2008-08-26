@@ -228,39 +228,41 @@ class TaskCmd(object):
     def do_t_set_due(self, line):
         """Set task's due date
         t_set_due_date <id> <date>"""
+        # Date & Time format
+        fDate=None
+        fTime=None
         if len(line.split())<2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
         taskId=self.providesTaskId(taskId, True)
         #TODO: make all the date stuff in a separate function to be reusable easily (set_creation_date ?)
+        today=datetime.today()
         # Initialise dueDate to now (may be now + fixe delta ?)
-        dueDate=datetime.today()
+        dueDate=today # Safe because datetime objects are immutables
         if line.startswith("+"):
-            #Delta
+            #Delta/relative date and/or time
             line=line.upper().strip("+")
             try:
                 if   line.endswith("W"):
-                    dueDate=datetime.today()+timedelta(days=float(line[0:-1])*7)
+                    dueDate=today+timedelta(days=float(line[0:-1])*7)
                 elif line.endswith("D"):
-                    dueDate=datetime.today()+timedelta(days=float(line[0:-1]))
+                    dueDate=today+timedelta(days=float(line[0:-1]))
                 elif line.endswith("H"):
-                    dueDate=datetime.today()+timedelta(hours=float(line[0:-1]))
+                    dueDate=today+timedelta(hours=float(line[0:-1]))
                 elif line.endswith("M"):
-                    dueDate=datetime.today()+timedelta(minutes=float(line[0:-1]))
+                    dueDate=today+timedelta(minutes=float(line[0:-1]))
                 else:
                     raise YokadiException("Unable to understand time shift. See help t_set_due")
             except ValueError:
                 raise YokadiException("Timeshift must be a float or an integer")
         else:
-            #Absolute
+            #Absolute date and/or time
             if " " in line:
                 # We assume user give date & time
                 tDate, tTime=line.split()
-                # Date parsing
                 fDate=guessDateFormat(tDate)
                 fTime=guessTimeFormat(tTime)
                 try:
-                    print "(DEBUG)->format detected: %s %s" % (fDate, fTime)
                     dueDate=datetime(*strptime(line, "%s %s" % (fDate, fTime))[0:5])
                 except Exception, e:
                     raise YokadiException("Unable to understand date & time format:\t%s" % e)
@@ -268,18 +270,25 @@ class TaskCmd(object):
                 if ":" in line:
                     fTime=guessTimeFormat(line)
                     tTime=datetime(*strptime(line, fTime)[0:5]).time()
-                    tDate=datetime.today()
-                    dueDate=datetime.combine(tDate, tTime)
+                    dueDate=datetime.combine(today, tTime)
                 else:
-                    #BUG: if year or month is not provided default (Jan 1900) is used instead of current month & year
                     fDate=guessDateFormat(line)
                     dueDate=datetime(*strptime(line, fDate)[0:5])
+            if fDate:
+                # Set year and/or month to current date if not given
+                if not "%Y" in fDate:
+                    dueDate=dueDate.replace(year=today.year)
+                if not "%M" in fDate:
+                    dueDate=dueDate.replace(month=today.month)
         # Set the due date
         task = Task.get(taskId)
         task.dueDate=dueDate
 
     def providesTaskId(self, line, existingTask=True):
-        """Verify that a taskId was provided and optionaly checks if the task exists"""
+        """Verify that a taskId was provided and optionaly checks if the task exists
+        @param line: taskId string
+        @param existingTask: wether to check if task really exists
+        @return: taskId as an int"""
         if not line.isdigit():
             raise YokadiException("Provide a task id")
         taskId = int(line)
