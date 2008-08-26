@@ -59,6 +59,7 @@ class TextRenderer(object):
             (C.BOLD+"Project"+C.RESET, task.project.name),
             (C.BOLD+"Title"+C.RESET, task.title),
             (C.BOLD+"Created"+C.RESET, task.creationDate),
+            (C.BOLD+"Due"+C.RESET, task.dueDate),
             (C.BOLD+"Status"+C.RESET, task.status),
             (C.BOLD+"Urgency"+C.RESET, task.urgency),
             (C.BOLD+"Keywords"+C.RESET, keywords),
