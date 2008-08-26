@@ -236,7 +236,7 @@ class TaskCmd(object):
         taskId, line=line.strip().split(" ", 1)
         taskId=self.providesTaskId(taskId, True)
         #TODO: make all the date stuff in a separate function to be reusable easily (set_creation_date ?)
-        today=datetime.today()
+        today=datetime.today().replace(microsecond=0)
         # Initialise dueDate to now (may be now + fixe delta ?)
         dueDate=today # Safe because datetime objects are immutables
         if line.startswith("+"):
