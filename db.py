@@ -68,10 +68,17 @@ class Task(SQLObject):
             dct[keyword.keyword.name] = keyword.value
         return dct
 
+class Config(SQLObject):
+    """yokadi config"""
+    class sqlmeta:
+        defaultOrder = "name"
+    name  = UnicodeCol(alternateID=True, notNone=True)
+    value = UnicodeCol()
 
 def createTables():
     Project.createTable()
     Keyword.createTable()
     Task.createTable()
     TaskKeyword.createTable()
+    Config.createTable()
 # vi: ts=4 sw=4 et

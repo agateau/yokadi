@@ -23,6 +23,11 @@ from bugcmd import BugCmd
 from utils import YokadiException
 import colors as C
 
+# Yokadi database version needed for this code
+# If database config keyDB_VERSION differ from this one
+# a database migration is required
+DB_VERSION="1"
+
 class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
     def __init__(self):
         Cmd.__init__(self)
@@ -99,6 +104,29 @@ def main():
     if not os.path.exists(dbFileName):
         print "Creating database"
         db.createTables()
+        # Set database version according to current yokadi release
+        db.Config(name="DB_VERSION", value=DB_VERSION)
+    else:
+        # Ensure Config table exist
+        if not db.Config.tableExists():
+            # So we have juste migrated from a yokadi without Config
+            print "Configuration table does not exist. Creating it"
+            db.Config.createTable()
+            db.Config(name="DB_VERSION", value="1")
+        # Check that the current database version is aligned with Yokadi code
+        try:
+            version=db.Config.byName("DB_VERSION").value
+        except SQLObjectNotFound:
+            # Ok, we have a Config table but no DB_VERSION key. Quite strange. Default to version 1
+            print "Oups. Config table does not have the DB_VERSION key. Creating it with default value 1"
+            db.Config(name="DB_VERSION", value="1")
+            version="1"
+        if version!=DB_VERSION:
+            print C.BOLD+C.RED+"Your database version is %s wether your Yokadi code wants version %s." \
+                % (version, DB_VERSION) + C.RESET
+            print "Please, run the update.py script to migrate your database prior to running Yokadi"
+            sys.exit(1)
+
 
     if options.createOnly:
         return
