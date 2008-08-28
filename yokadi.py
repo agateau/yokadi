@@ -10,6 +10,7 @@ Command line oriented, sqlite powered, todo list
 import os
 import sys
 import readline
+import traceback
 from cmd import Cmd
 from optparse import OptionParser
 
@@ -63,7 +64,13 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
             print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
         except Exception, e:
              print C.RED+C.BOLD+"*** Unhandled error (oups)***\n\t%s" % e + C.RESET
-             print "This is a bug of Yokadi, sorry"
+             print C.BOLD+"This is a bug of Yokadi, sorry."
+             print "Send the above message by email to Yokadi developers to help them make Yokadi better."+C.RESET
+             cut="---------------------8<----------------------------------------------"
+             print cut
+             traceback.print_exc()
+             print cut
+             print
 
     def loadHistory(self):
         """Tries to load previous history list from disk"""
