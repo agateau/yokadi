@@ -12,4 +12,5 @@ class KeywordCmd(object):
     def do_k_list(self, line):
         """List all keywords."""
         for keyword in Keyword.select():
-            print keyword.name
+            tasks=", ".join(str(task.id) for task in keyword.tasks)
+            print "%s (tasks: %s)" % (keyword.name, tasks)
