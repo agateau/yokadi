@@ -16,6 +16,7 @@ import tui
 from textrenderer import TextRenderer
 from completers import *
 from utils import YokadiException, guessDateFormat, guessTimeFormat
+import colors as C
 
 from datetime import date, datetime, time, timedelta
 from time import strptime
@@ -123,7 +124,13 @@ class TaskCmd(object):
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if len(tokens) > 1:
-            keywordSet = set([Keyword.byName(x) for x in tokens[1:]])
+            keywordSet = set()
+            for k in tokens[1:]:
+                try:
+                    keywordSet.add(Keyword.byName(k))
+                except SQLObjectNotFound:
+                    print C.RED+"Warning: Keyword %s is unknown." % k + C.RESET
+
         else:
             keywordSet = None
 
