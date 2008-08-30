@@ -6,8 +6,6 @@ Task related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-from cmd import Cmd
-from datetime import datetime
 
 from db import *
 import utils
@@ -18,7 +16,7 @@ from completers import *
 from utils import YokadiException, guessDateFormat, guessTimeFormat
 import colors as C
 
-from datetime import date, datetime, time, timedelta
+from datetime import datetime, timedelta
 from time import strptime
 
 class TaskCmd(object):
@@ -33,6 +31,8 @@ class TaskCmd(object):
             print "Give at least a task name !"
             return
         projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        if not title:
+            raise YokadiException("You should give a task title")
         task = utils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)

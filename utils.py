@@ -6,7 +6,7 @@ Misc utilities. Should probably be splitted.
 @license: GPLv3
 """
 from datetime import datetime
-
+from sqlobject.dberrors import DuplicateEntryError
 from db import *
 
 
@@ -23,8 +23,11 @@ def addTask(projectName, title, keywordDict):
         return None
 
     # Create task
-    task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
-    task.setKeywordDict(keywordDict)
+    try:
+        task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
+        task.setKeywordDict(keywordDict)
+    except DuplicateEntryError:
+        raise YokadiException("A task named %s already exist. Please find another name" % title)
     return task
 
 
