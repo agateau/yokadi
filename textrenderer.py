@@ -84,7 +84,7 @@ class TextRenderer(object):
 
         if task.status == "done":
             fields.append(
-                ("Done", task.doneDate),
+                (C.BOLD+"Done"+C.RESET, task.doneDate),
                 )
 
         maxWidth = max([len(x) for x,y in fields])
