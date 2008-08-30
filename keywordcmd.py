@@ -7,7 +7,7 @@ Keyword related commands.
 """
 from db import *
 from utils import YokadiException
-
+from sqlobject.dberrors import DuplicateEntryError
 
 class KeywordCmd(object):
     def do_k_list(self, line):
@@ -21,8 +21,11 @@ class KeywordCmd(object):
         if not line:
             raise YokadiException("You should provide at least a keyword name")
         for keyword in line.split():
-            Keyword(name=keyword)
-            print "Keyword %s has been created" % keyword
+            try:
+                Keyword(name=keyword)
+                print "Keyword %s has been created" % keyword
+            except DuplicateEntryError:
+                print "Keyword %s already exist" % keyword
 
     def do_k_remove(self, line):
         """Remove a keyword"""
