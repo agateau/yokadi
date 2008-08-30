@@ -7,7 +7,8 @@ Misc utilities. Should probably be splitted.
 """
 from datetime import datetime
 from sqlobject.dberrors import DuplicateEntryError
-from db import *
+from sqlobject import LIKE
+from db import Keyword, Project, Task
 
 
 def addTask(projectName, title, keywordDict):

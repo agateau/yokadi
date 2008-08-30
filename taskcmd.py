@@ -7,12 +7,13 @@ Task related commands.
 @license: GPLv3
 """
 
-from db import *
+from db import Keyword, Project, Task
+from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
 import parseutils
 import tui
 from textrenderer import TextRenderer
-from completers import *
+from completers import ProjectCompleter
 from utils import YokadiException, guessDateFormat, guessTimeFormat
 import colors as C
 

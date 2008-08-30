@@ -6,8 +6,8 @@ Project related commands.
 @license: GPLv3
 """
 
-from db import *
-from completers import *
+from db import Project
+from completers import ProjectCompleter
 from utils import YokadiException
 
 

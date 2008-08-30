@@ -8,8 +8,8 @@ Bug related commands.
 import parseutils
 import utils
 import tui
-from db import *
-from completers import *
+from db import Task
+from completers import ProjectCompleter
 
 SEVERITY_PROPERTY_NAME = "severity"
 LIKELIHOOD_PROPERTY_NAME = "likelihood"

@@ -5,9 +5,10 @@ Keyword related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPLv3
 """
-from db import *
+from db import Keyword
 from utils import YokadiException
 from sqlobject.dberrors import DuplicateEntryError
+from sqlobject import LIKE
 
 class KeywordCmd(object):
     def do_k_list(self, line):

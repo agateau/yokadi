@@ -6,7 +6,7 @@ Database access layer using sqlobject
 @license: GPLv3
 """
 
-from sqlobject import *
+from sqlobject import DateTimeCol, EnumCol, ForeignKey, IntCol, RelatedJoin, SQLObject, UnicodeCol
 
 class Project(SQLObject):
     class sqlmeta:

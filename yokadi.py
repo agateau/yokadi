@@ -14,7 +14,7 @@ import traceback
 from cmd import Cmd
 from optparse import OptionParser
 
-from sqlobject import *
+from sqlobject import connectionForURI, sqlhub, SQLObjectNotFound
 
 import db
 from taskcmd import TaskCmd
