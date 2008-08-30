@@ -54,6 +54,10 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         """Quit."""
         print
         return True
+    #Some alias
+    do_quit=do_EOF
+    do_q=do_EOF
+    do_exit=do_EOF
 
     def onecmd(self, line):
         """This method is subclassed just to be
@@ -62,15 +66,17 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
             return Cmd.onecmd(self, line)
         except YokadiException, e:
             print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
+        except KeyboardInterrupt:
+            print C.RED+C.BOLD+"*** Break ***"+C.RESET
         except Exception, e:
-             print C.RED+C.BOLD+"*** Unhandled error (oups)***\n\t%s" % e + C.RESET
-             print C.BOLD+"This is a bug of Yokadi, sorry."
-             print "Send the above message by email to Yokadi developers to help them make Yokadi better."+C.RESET
-             cut="---------------------8<----------------------------------------------"
-             print cut
-             traceback.print_exc()
-             print cut
-             print
+            print C.RED+C.BOLD+"*** Unhandled error (oups)***\n\t%s" % e + C.RESET
+            print C.BOLD+"This is a bug of Yokadi, sorry."
+            print "Send the above message by email to Yokadi developers to help them make Yokadi better."+C.RESET
+            cut="---------------------8<----------------------------------------------"
+            print cut
+            traceback.print_exc()
+            print cut
+            print
 
     def loadHistory(self):
         """Tries to load previous history list from disk"""
@@ -145,7 +151,7 @@ def main():
         else:
             cmd.cmdloop()
     except KeyboardInterrupt:
-        print "\n\tBreak !"
+        print "\n\tBreak ! (the nice way to quit is 'quit' or 'EOF' (ctrl-d)"
         sys.exit(1)
     # Save history
     cmd.writeHistory()
