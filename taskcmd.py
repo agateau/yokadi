@@ -89,7 +89,6 @@ class TaskCmd(object):
         tokens = line.split(" ", 2)
         if len(tokens)<2:
             raise YokadiException("Give at least a task id and a command. See 'help t_apply'")
-            return
         idStringList = tokens[0]
         cmd = tokens[1]
         if len(tokens) == 3:
