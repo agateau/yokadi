@@ -86,8 +86,7 @@ class BugCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        taskId = int(line)
-        task = Task.get(taskId)
+        task = utils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
