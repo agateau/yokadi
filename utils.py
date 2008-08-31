@@ -35,7 +35,7 @@ def getTaskFromId(line, existingTask=True):
     """Verify that a taskId was provided and optionaly checks if the task exists
     @param line: taskId string
     @param existingTask: wether to check if task really exists
-    @return: Task instance"""
+    @return: Task instance or None if existingTask is False"""
     if not line.isdigit():
         raise YokadiException("Provide a task id")
     taskId = int(line)
@@ -44,6 +44,8 @@ def getTaskFromId(line, existingTask=True):
             task = Task.get(taskId)
         except SQLObjectNotFound:
             raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
+    else:
+        task=None
     return task
 
 def getOrCreateKeyword(keywordName, interactive=True):
