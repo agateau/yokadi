@@ -43,8 +43,7 @@ class TaskCmd(object):
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         ok, description = tui.editText(task.description)
         if ok:
             task.description = description
@@ -55,32 +54,33 @@ class TaskCmd(object):
         """Defines urgency of a task (0 -> 100).
         t_set_urgency <id> <value>"""
         tokens = line.split(" ")
-        taskId = int(tokens[0])
-        urgency = int(tokens[1])
-        task = Task.get(taskId)
-        task.urgency = urgency
+        if len(tokens)!=2:
+            raise YokadiException("You must provide a taskId and an urgency value") 
+        task = utils.getTaskFromId(tokens[0])
+        if tokens[1].isdigit():
+            urgency = int(tokens[1])
+            task.urgency = urgency
+        else:
+            raise YokadiException("Task urgency must be a digit")
 
     def do_t_mark_started(self, line):
         """Mark task as started.
         t_mark_started <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         task.status = 'started'
         task.doneDate = None
 
     def do_t_mark_done(self, line):
         """Mark task as done.
         t_mark_done <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         task.status = 'done'
         task.doneDate = datetime.now()
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
         t_mark_new <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         task.status = 'new'
         task.doneDate = None
 
@@ -104,9 +104,9 @@ class TaskCmd(object):
     def do_t_remove(self, line):
         """Delete a task.
         t_remove <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        Task.delete(taskId)
-        
+        task=utils.getTaskFromId(line)
+        task.destroySelf()
+
 
     def do_t_list(self, line):
         """List tasks by project and/or keywords.
@@ -191,16 +191,14 @@ class TaskCmd(object):
     def do_t_show(self, line):
         """Display details of a task.
         t_show <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         self.renderer.renderTaskDetails(task)
 
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
@@ -223,10 +221,9 @@ class TaskCmd(object):
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        taskId = int(tokens[0])
+        task=utils.getTaskFromId(tokens[0])
         projectName = tokens[1]
 
-        task = Task.get(taskId)
         task.project = utils.getOrCreateProject(projectName)
         if task.project:
             print "Moved task '%s' to project '%s'" % (task.title, projectName)
@@ -241,10 +238,9 @@ class TaskCmd(object):
         if len(line.split())<2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
-        taskId=self.providesTaskId(taskId, True)
+        task=utils.getTaskFromId(taskId)
 
         if line.lower()=="none":
-            task = Task.get(taskId)
             task.dueDate=None
             return
 
@@ -296,21 +292,5 @@ class TaskCmd(object):
                 if not "%M" in fDate:
                     dueDate=dueDate.replace(month=today.month)
         # Set the due date
-        task = Task.get(taskId)
         task.dueDate=dueDate
-
-    def providesTaskId(self, line, existingTask=True):
-        """Verify that a taskId was provided and optionaly checks if the task exists
-        @param line: taskId string
-        @param existingTask: wether to check if task really exists
-        @return: taskId as an int"""
-        if not line.isdigit():
-            raise YokadiException("Provide a task id")
-        taskId = int(line)
-        if existingTask:
-            try:
-                task = Task.get(taskId)
-            except SQLObjectNotFound:
-                raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
-        return taskId
 # vi: ts=4 sw=4 et
