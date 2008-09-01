@@ -10,6 +10,7 @@ import os
 import readline
 import subprocess
 import tempfile
+import colors as C
 
 def editText(text):
     """Edit text with external editor
@@ -67,7 +68,7 @@ def selectFromList(prompt, lst, default):
         answer = editLine(line, prompt = prompt + ": ")
         if minStr <= answer and answer <= maxStr:
             return int(answer)
-        print "ERROR: Wrong value"
+        print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
 
 
 def enterInt(prompt, default):
@@ -83,5 +84,5 @@ def enterInt(prompt, default):
             value = int(answer)
             return value
         except ValueError:
-            print "ERROR: Invalid value"
+            print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
 # vi: ts=4 sw=4 et
