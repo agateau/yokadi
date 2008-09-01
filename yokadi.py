@@ -29,7 +29,7 @@ import colors as C
 # Yokadi database version needed for this code
 # If database config keyDB_VERSION differ from this one
 # a database migration is required
-DB_VERSION="1"
+DB_VERSION="2"
 
 # Default user encoding. Used to decode all input strings
 ENCODING=locale.getpreferredencoding()
@@ -126,14 +126,14 @@ def main():
         print "Creating database"
         db.createTables()
         # Set database version according to current yokadi release
-        db.Config(name="DB_VERSION", value=DB_VERSION)
+        db.Config(name="DB_VERSION", value=DB_VERSION, system=True)
     else:
         # Ensure Config table exist
         if not db.Config.tableExists():
             # So we have juste migrated from a yokadi without Config
             print "Configuration table does not exist. Creating it"
             db.Config.createTable()
-            db.Config(name="DB_VERSION", value="1")
+            db.Config(name="DB_VERSION", value="1", system=True)
         # Check that the current database version is aligned with Yokadi code
         try:
             version=db.Config.byName("DB_VERSION").value

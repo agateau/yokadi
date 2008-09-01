@@ -6,7 +6,7 @@ Database access layer using sqlobject
 @license: GPLv3
 """
 
-from sqlobject import DateTimeCol, EnumCol, ForeignKey, IntCol, RelatedJoin, SQLObject, UnicodeCol
+from sqlobject import BoolCol, DateTimeCol, EnumCol, ForeignKey, IntCol, RelatedJoin, SQLObject, UnicodeCol
 
 class Project(SQLObject):
     class sqlmeta:
@@ -74,6 +74,7 @@ class Config(SQLObject):
         defaultOrder = "name"
     name  = UnicodeCol(alternateID=True, notNone=True)
     value = UnicodeCol()
+    system = BoolCol(default=False)
 
 def createTables():
     Project.createTable()
