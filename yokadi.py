@@ -21,6 +21,7 @@ import db
 from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
+from confcmd import ConfCmd
 from bugcmd import BugCmd
 from utils import YokadiException
 import colors as C
@@ -34,7 +35,7 @@ DB_VERSION="1"
 ENCODING=locale.getpreferredencoding()
 
 
-class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
+class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)
