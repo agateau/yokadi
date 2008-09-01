@@ -11,6 +11,7 @@ import os
 import sys
 import readline
 import traceback
+import locale
 from cmd import Cmd
 from optparse import OptionParser
 
@@ -28,6 +29,10 @@ import colors as C
 # If database config keyDB_VERSION differ from this one
 # a database migration is required
 DB_VERSION="1"
+
+# Default user encoding. Used to decode all input strings
+ENCODING=locale.getpreferredencoding()
+
 
 class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
     def __init__(self):
@@ -63,6 +68,8 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         """This method is subclassed just to be
         able to encapsulate it with a try/except bloc"""
         try:
+            # Decode user input
+            line=line.decode(ENCODING)
             return Cmd.onecmd(self, line)
         except YokadiException, e:
             print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
