@@ -7,7 +7,7 @@ Misc utilities. Should probably be splitted.
 """
 from datetime import datetime
 from sqlobject.dberrors import DuplicateEntryError
-from sqlobject import LIKE, SQLObjectNotFound
+from sqlobject import AND, LIKE, SQLObjectNotFound
 from db import Keyword, Project, Task
 
 
@@ -23,12 +23,13 @@ def addTask(projectName, title, keywordDict):
     if not project:
         return None
 
+    # Check a task with the same name does not exist in this project
+    if Task.select(AND(Task.q.title==title, Project.q.name==projectName)).count()!=0:
+        raise YokadiException("A task named %s already exists in this project. Please find another name" % title)
+
     # Create task
-    try:
-        task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
-        task.setKeywordDict(keywordDict)
-    except DuplicateEntryError:
-        raise YokadiException("A task named %s already exist. Please find another name" % title)
+    task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
+    task.setKeywordDict(keywordDict)
     return task
 
 def getTaskFromId(line, existingTask=True):
