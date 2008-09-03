@@ -23,13 +23,13 @@ def addTask(projectName, title, keywordDict):
     if not project:
         return None
 
-    # Check a task with the same name does not exist in this project
-    if Task.select(AND(Task.q.title==title, Project.q.name==projectName)).count()!=0:
+    # Create task
+    try:
+        task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
+        task.setKeywordDict(keywordDict)
+    except DuplicateEntryError:
         raise YokadiException("A task named %s already exists in this project. Please find another name" % title)
 
-    # Create task
-    task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
-    task.setKeywordDict(keywordDict)
     return task
 
 def getTaskFromId(line, existingTask=True):

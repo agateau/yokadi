@@ -6,7 +6,7 @@ Database access layer using sqlobject
 @license: GPLv3
 """
 
-from sqlobject import BoolCol, DateTimeCol, EnumCol, ForeignKey, IntCol, RelatedJoin, SQLObject, UnicodeCol
+from sqlobject import BoolCol, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, RelatedJoin, SQLObject, UnicodeCol
 
 class Project(SQLObject):
     class sqlmeta:
@@ -45,6 +45,7 @@ class Task(SQLObject):
         intermediateTable="task_keyword",
         joinColumn="task_id",
         otherColumn="keyword_id")
+    uniqTaskTitlePerProject=DatabaseIndex(title, project, unique=True)
 
     def setKeywordDict(self, dct):
         """
