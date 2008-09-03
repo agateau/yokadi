@@ -44,11 +44,8 @@ class TaskCmd(object):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
         task=utils.getTaskFromId(line)
-        ok, description = tui.editText(task.description)
-        if ok:
-            task.description = description
-        else:
-            print "Starting editor failed"
+        description = tui.editText(task.description)
+        task.description = description
 
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100).
@@ -168,9 +165,7 @@ class TaskCmd(object):
                                    Task.q.status    != 'done'),
                                orderBy=-Task.q.urgency)
         lines = [ "%d,%s" % (x.id, x.title) for x in taskList]
-        ok, text = tui.editText("\n".join(lines))
-        if not ok:
-            return
+        text = tui.editText("\n".join(lines))
 
         ids = []
         for line in text.split("\n"):

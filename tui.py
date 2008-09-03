@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 import locale
 import colors as C
-
+from utils import YokadiException
 
 # Default user encoding. Used to decode all input strings
 # This is a redefinition of yokadi.py ENCODING constant to avoid circular import
@@ -20,18 +20,21 @@ ENCODING=locale.getpreferredencoding()
 
 def editText(text):
     """Edit text with external editor
-    returns a tuple (success, newText)"""
+    @raise YokadiException: if editor cannot be started
+    @return: newText"""
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
     try:
-        fl = file(name, "w")
-        fl.write(text.encode(ENCODING))
-        fl.close()
-        editor = os.environ.get("EDITOR", "vi")
-        retcode = subprocess.call([editor, name])
-        if retcode != 0:
-            return (False, text)
-        newText = unicode(file(name).read(), ENCODING)
-        return (True, newText)
+        try:
+            fl = file(name, "w")
+            fl.write(text.encode(ENCODING))
+            fl.close()
+            editor = os.environ.get("EDITOR", "vi")
+            retcode = subprocess.call([editor, name])
+            if retcode != 0:
+                raise Exception()
+            return unicode(file(name).read(), ENCODING)
+        except:
+            raise YokadiException("Starting editor failed")
     finally:
         os.close(fd)
         os.unlink(name)
