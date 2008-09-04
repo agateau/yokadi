@@ -96,8 +96,13 @@ def createMissingKeywords(lst):
     return True
 
 
+#TODO: factorize those two functions and create a generic item startswith
 def getProjectNamesStartingWith(text):
     return [x.name for x in Project.select(LIKE(Project.q.name, text + "%"))]
+
+def getKeywordNamesStartingWith(text):
+    return [x.name for x in Keyword.select(LIKE(Keyword.q.name, text + "%"))]
+
 
 def guessDateFormat(tDate):
     """Guess and return format of date as a string"""

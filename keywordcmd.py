@@ -7,6 +7,7 @@ Keyword related commands.
 """
 from db import Keyword
 from utils import YokadiException
+from completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import LIKE
 
@@ -44,3 +45,5 @@ class KeywordCmd(object):
                     continue
             keyword.destroySelf()
             print "Keyword %s has been removed" % keyword.name
+
+    complete_k_remove = KeywordCompleter(1)

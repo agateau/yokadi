@@ -13,7 +13,7 @@ import utils
 import parseutils
 import tui
 from textrenderer import TextRenderer
-from completers import ProjectCompleter
+from completers import ProjectCompleter, t_listCompleter
 from utils import YokadiException, guessDateFormat, guessTimeFormat
 import colors as C
 
@@ -149,7 +149,7 @@ class TaskCmd(object):
             for task in taskList:
                 self.renderer.renderTaskListRow(task)
 
-    complete_t_list = ProjectCompleter(1)
+    complete_t_list = t_listCompleter
 
     def do_t_reorder(self, line):
         """Reorder tasks of a project.
