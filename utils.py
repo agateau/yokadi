@@ -95,14 +95,13 @@ def createMissingKeywords(lst):
             return False
     return True
 
-
-#TODO: factorize those two functions and create a generic item startswith
-def getProjectNamesStartingWith(text):
-    return [x.name for x in Project.select(LIKE(Project.q.name, text + "%"))]
-
-def getKeywordNamesStartingWith(text):
-    return [x.name for x in Keyword.select(LIKE(Keyword.q.name, text + "%"))]
-
+def getItemPropertiesStartingWith(item, field, text):
+    """Return a list of item.field starting with text
+    @param item: the object item, example : Task, Project, Keyword...
+    @param field: the item's field lookup : Project.q.name, Task.q.title, Keyword.q.name. Don't forget the magic q
+    @param text: The begining of the text as a str
+    @return: list of matching strings"""
+    return [x.name for x in item.select(LIKE(field, text + "%"))]
 
 def guessDateFormat(tDate):
     """Guess and return format of date as a string"""
