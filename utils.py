@@ -3,6 +3,7 @@
 Misc utilities. Should probably be splitted.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
 from datetime import datetime
@@ -13,7 +14,10 @@ from db import Keyword, Project, Task
 
 def addTask(projectName, title, keywordDict):
     """Adds a task based on title and keywordDict.
-    Returns task on success, None if cancelled."""
+    @param projectName: name of project as a string
+    @param title: task title as a string
+    @param keywordDict: dictionary of keywords (name : value)
+    @returns : Task instance on success, None if cancelled."""
     # Create missing keywords
     if not createMissingKeywords(keywordDict.keys()):
         return None
@@ -49,9 +53,13 @@ def getTaskFromId(line, existingTask=True):
         task=None
     return task
 
+#TODO: factorize the two following functions and make a generic one
 def getOrCreateKeyword(keywordName, interactive=True):
-    """Returns keyword associated with keywordName, or prompt to create it if
-    it does not exist. If user does not want to create it, returns None."""
+    """Get a keyword by its name. Create it if needed
+    @param keywordName: keyword name as a string
+    @param interactive: Ask user before creating keyword (this is the default)
+    @type interactive: Bool
+    @return: Keyword instance or None if user cancel creation"""
     result = Keyword.selectBy(name=keywordName)
     result = list(result)
     if len(result):
@@ -69,8 +77,11 @@ def getOrCreateKeyword(keywordName, interactive=True):
 
 
 def getOrCreateProject(projectName, interactive=True):
-    """Returns project associated with project, or prompt to create it if it
-    does not exist. If user does not want to create it, returns None."""
+    """Get a project by its name. Create it if needed
+    @param projectName: project name as a string
+    @param interactive: Ask user before creating project (this is the default)
+    @type interactive: Bool
+    @return: Project instance or None if user cancel creation"""
     result = Project.selectBy(name=projectName)
     result = list(result)
     if len(result):
@@ -89,7 +100,8 @@ def getOrCreateProject(projectName, interactive=True):
 
 def createMissingKeywords(lst):
     """Create all keywords from lst which does not exist
-    Returns True, if ok, False if user canceled"""
+    @param lst: list of keyword
+    @return: True, if ok, False if user canceled"""
     for keywordName in lst:
         if not getOrCreateKeyword(keywordName):
             return False
@@ -104,7 +116,9 @@ def getItemPropertiesStartingWith(item, field, text):
     return [x.name for x in item.select(LIKE(field, text + "%"))]
 
 def guessDateFormat(tDate):
-    """Guess and return format of date as a string"""
+    """Guess a date format.
+    @param tDate: date string like 30/08/2008 or 30/08 or 30
+    @return: date format as a string like %d/%m/%Y or %d/%m or %d"""
     if tDate.count("/")==2:
         fDate="%d/%m/%Y"
     elif tDate.count("/")==1:
@@ -114,7 +128,9 @@ def guessDateFormat(tDate):
     return fDate
 
 def guessTimeFormat(tTime):
-    """Guess and return format of time as a string"""
+    """Guess a time format.
+    @param tTime: time string like 12:30:45 or 12:30 or 12
+    @return: time format as a string like %H:%M:%S or %H:%M or %H"""
     if tTime.count(":")==2:
         fTime="%H:%M:%S"
     elif tTime.count(":")==1:
