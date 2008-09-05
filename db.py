@@ -12,6 +12,7 @@ class Project(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
     name = UnicodeCol(alternateID=True, notNone=True)
+    active = BoolCol(default=True)
 
 
 class Keyword(SQLObject):

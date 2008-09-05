@@ -132,6 +132,9 @@ class TaskCmd(object):
             keywordSet = None
 
         for project in projectList:
+            if not project.active:
+                print C.CYAN+"\nInfo"+C.RESET+": project %s is hidden because it is inactive. Use p_set_active to activate it\n" % project.name
+                continue
             taskList = Task.select(AND(Task.q.projectID == project.id,
                                        Task.q.status    != 'done'),
                                    orderBy=-Task.q.urgency)
