@@ -10,7 +10,7 @@ import colors as C
 from datetime import datetime
 from utils import formatTimeDelta
 
-TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-19s|%(timeLeft)-10s"
+TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-16s|%(timeLeft)-10s"
 
 class TextRenderer(object):
     def renderTaskListHeader(self, projectName):
@@ -36,7 +36,7 @@ class TextRenderer(object):
         status = task.status[0].upper()
         if status=="S":
             status=C.BOLD+status+C.RESET
-        creationDate = task.creationDate
+        creationDate = str(task.creationDate)[:-3]
         if task.dueDate:
             timeLeft=formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
         else:
