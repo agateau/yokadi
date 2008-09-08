@@ -7,7 +7,8 @@ Helper functions to render formated text on screen
 """
 
 import colors as C
-from datetime import datetime, timedelta
+from datetime import datetime
+from utils import formatTimeDelta
 
 TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-19s|%(timeLeft)-10s"
 
@@ -37,18 +38,7 @@ class TextRenderer(object):
             status=C.BOLD+status+C.RESET
         creationDate = task.creationDate
         if task.dueDate:
-            timeLeft=task.dueDate - datetime.today().replace(microsecond=0)
-            if timeLeft < timedelta(0):
-                # Negative timedelta are very confusing, so we manually put a "-" and show a positive timedelta 
-                timeLeft=C.RED+"-"+str(-timeLeft)+C.RESET
-            elif timeLeft < timedelta(1):
-                timeLeft=C.PURPLE+str(timeLeft)+C.RESET
-            elif timeLeft < timedelta(3):
-                # Hide seconds (remove the 3 last characters)
-                timeLeft=C.ORANGE+str(timeLeft)[:-3]+C.RESET
-            else:
-                # Hide hours and minutes when timeleft is important
-                timeLeft=str(timeLeft).split(",")[0]
+            timeLeft=formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
         else:
             timeLeft=""
         if int(task.urgency)>75:
