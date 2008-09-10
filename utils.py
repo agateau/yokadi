@@ -197,11 +197,24 @@ def exportTasks(format, filePath):
         csv_writer = csv.writer(out, dialect="excel")
         csv_writer.writerow(fields) # Header
         for task in Task.select():
+            #TODO: use a column per keyword to allow smarter spreadsheet reports
             row=list(unicode(task.__getattribute__(field)).encode(ENCODING) for field in fields if field!="keywords")
-            row.append(", ".join(list(("%s=%s" % k for k in task.getKeywordDict().items())))) # Keywords
+            row.append(task.getKeywordsAsString())
             csv_writer.writerow(row)
     elif format=="html":
-        print "export in HTML not implemented yet"
+        #TODO: make this fancier
+        out.write("""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+                <html><head><title>Yokadi tasks export</title>
+                <meta http-equiv="Content-Type" content="text/html; charset=%s">
+                </head><body><table>""" % ENCODING)
+        for task in Task.select():
+            out.write("<tr>\n")
+            row=list("<td>%s</td>" % unicode(task.__getattribute__(field)) for field in fields if field!="keywords")
+            row.append("<td>%s</td>" % task.getKeywordsAsString())
+            line=" ".join(row)
+            out.write(line.encode(ENCODING))
+            out.write("</tr>\n")
+        out.write("</table></body></html>\n")
     elif format=="xml":
         print "export in XML not implemented yet"
     else:

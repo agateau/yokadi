@@ -73,6 +73,12 @@ class Task(SQLObject):
             dct[keyword.keyword.name] = keyword.value
         return dct
 
+    def getKeywordsAsString(self):
+        """
+        Returns all keywords as a string like "key1=value1, key2=value2..."
+        """
+        return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
+
 class Config(SQLObject):
     """yokadi config"""
     class sqlmeta:
