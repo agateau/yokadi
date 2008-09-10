@@ -11,6 +11,7 @@ from db import Keyword, Project, Task
 from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
 import parseutils
+import sys
 import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter
@@ -291,4 +292,21 @@ class TaskCmd(object):
                     dueDate=dueDate.replace(month=today.month)
         # Set the due date
         task.dueDate=dueDate
+
+    def do_t_export(self, line):
+        """Export all tasks of all projects in various format
+            t_export csv mytasks.csv
+            t_export html mytasks.html
+            t_export xml mystasks.xml
+        If filename is ommited, tasks are printed on screen"""
+        line=line.split()
+        if   len(line)<1:
+            raise YokadiException("You should at least specify the format (csv, html or xml)")
+        elif len(line)==1:
+            filePath=None
+        else:
+            filePath=line[1]
+        format=line[0].lower()
+        utils.exportTasks(format, filePath)
+
 # vi: ts=4 sw=4 et

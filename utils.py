@@ -6,12 +6,18 @@ Misc utilities. Should probably be splitted.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
+import sys
+import csv
+import locale
 from datetime import datetime, timedelta
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from db import Keyword, Project, Task
 import colors as C
 
+# Default user encoding. Used to decode all input strings
+# This is a redefinition of yokadi.py ENCODING constant to avoid circular import
+ENCODING=locale.getpreferredencoding()
 
 def addTask(projectName, title, keywordDict):
     """Adds a task based on title and keywordDict.
@@ -177,6 +183,29 @@ def shortenTimeDelta(timeLeft, format):
     elif format=="datetime":
         # Hide seconds (remove the 3 last characters)
         return str(timeLeft)[:-3]
+
+def exportTasks(format, filePath):
+    """ to be done """
+    # List of exported fields
+    fields=["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
+    if filePath:
+        #TODO: open file with proper encoding
+        out=file(filePath, "w")
+    else:
+        out=sys.stdout
+    if  format=="csv":
+        csv_writer = csv.writer(out, dialect="excel")
+        csv_writer.writerow(fields) # Header
+        for task in Task.select():
+            row=list(unicode(task.__getattribute__(field)).encode(ENCODING) for field in fields if field!="keywords")
+            row.append(", ".join(list(("%s=%s" % k for k in task.getKeywordDict().items())))) # Keywords
+            csv_writer.writerow(row)
+    elif format=="html":
+        print "export in HTML not implemented yet"
+    elif format=="xml":
+        print "export in XML not implemented yet"
+    else:
+        raise YokadiException("Unknown format: %s. Use csv, html or xml" % format)
 
 class YokadiException(Exception):
     """Yokadi Exceptions"""

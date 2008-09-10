@@ -14,6 +14,9 @@ class Project(SQLObject):
     name = UnicodeCol(alternateID=True, notNone=True)
     active = BoolCol(default=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Keyword(SQLObject):
     class sqlmeta:
