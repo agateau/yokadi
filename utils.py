@@ -8,6 +8,7 @@ Misc utilities. Should probably be splitted.
 """
 import sys
 import csv
+from xml.dom.minidom import Document
 import locale
 from datetime import datetime, timedelta
 from sqlobject.dberrors import DuplicateEntryError
@@ -216,7 +217,22 @@ def exportTasks(format, filePath):
             out.write("</tr>\n")
         out.write("</table></body></html>\n")
     elif format=="xml":
-        print "export in XML not implemented yet"
+        doc = Document()
+        yokadi=doc.createElement("yokadi")
+        doc.appendChild(yokadi)
+        tasks=doc.createElement("tasks")
+        yokadi.appendChild(tasks)
+        for task in Task.select():
+            taskElement=doc.createElement("task")
+            for field in fields:
+                if field=="keywords": continue
+                taskElement.setAttribute(field, unicode(task.__getattribute__(field)))
+            for key, value in task.getKeywordDict().items():
+                keyword=doc.createElement("keyword")
+                keyword.setAttribute(key, unicode(value))
+                taskElement.appendChild(keyword)
+            tasks.appendChild(taskElement)
+        out.write(doc.toprettyxml(indent="    ", encoding=ENCODING))
     else:
         raise YokadiException("Unknown format: %s. Use csv, html or xml" % format)
 
