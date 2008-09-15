@@ -14,17 +14,31 @@ def simplifySpaces(line):
     line = line.strip()
     return line
 
+def parseParameters(line):
+    """Parse line of form -a -b -c some text
+    @return: ((a, b, c), some text)
+    """
+    parameters=[]
+    text=[]
+    line=simplifySpaces(line)
+    for word in line.split():
+        if word.startswith("-") and len(word)==2:
+            parameters.append(word[1])
+        else:
+            text.append(word)
+    return (parameters, " ".join(text))
+
+def fixKeywordValue(value):
+    if value != '':
+        return int(value)
+    else:
+        return None
 
 gKeywordRe=re.compile("-k *([^ =]+)(?:=(\d+))?")
 def parseTaskLine(line):
     """Parse line of form:
     project some text -k keyword1 -k keyword2=12 some other text
     returns a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
-    def fixKeywordValue(value):
-        if value != '':
-            return int(value)
-        else:
-            return None
 
     # First extract project name
     line = simplifySpaces(line)

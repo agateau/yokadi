@@ -107,13 +107,20 @@ class TaskCmd(object):
 
 
     def do_t_list(self, line):
-        """List tasks by project and/or keywords.
-        t_list <project_name> [<keyword1> [<keyword2>]...]
+        """List tasks filtered by project and/or keywords.
+        t_list [-adu] <project_name> [<keyword1> [<keyword2>]...]
 
         '%' can be used as a wildcard in the project name:
         - To list projects starting with "foo", use "foo%".
-        - To list all projects, use "%".
+
+        Parameters:
+        -a : all tasks (done and to be done)
+        -d : only done tasks
+        -u : top 5 urgent tasks of each project based on urgency
+        -t : top 5 urgent tasks of each project based on due date
         """
+        #BUG: completion based on parameter position is broken when parameter is given
+        parameters, line=parseutils.parseParameters(line)
         tokens = line.strip().split(' ')
         projectName = tokens[0]
         if not projectName:
@@ -132,13 +139,28 @@ class TaskCmd(object):
         else:
             keywordSet = None
 
+        # Filtering and sorting according to parameters
+        filters=[]
+        order=-Task.q.urgency
+        limit=None
+        if "d" in parameters:
+            filters.append(Task.q.status=='done')
+        if not "a" in parameters:
+            filters.append(Task.q.status!='done')
+        if "u" in parameters:
+            order=-Task.q.urgency
+            limit=5
+        if "t" in parameters:
+            filters.append(Task.q.dueDate!=None)
+            order=Task.q.dueDate
+            limit=5
+
         for project in projectList:
             if not project.active:
                 print C.CYAN+"\nInfo"+C.RESET+": project %s is hidden because it is inactive. Use p_set_active to activate it\n" % project.name
                 continue
-            taskList = Task.select(AND(Task.q.projectID == project.id,
-                                       Task.q.status    != 'done'),
-                                   orderBy=-Task.q.urgency)
+            taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
+                                   orderBy=order, limit=limit)
 
             if keywordSet:
                 # FIXME: Optimize
