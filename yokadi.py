@@ -54,7 +54,7 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd):
         if line.isdigit():
             self.do_t_show(line)
         else:
-            Cmd.default(self, line)
+            raise YokadiException("Unknown command. Use 'help' to see all available commands")
 
     def do_EOF(self, line):
         """Quit."""
