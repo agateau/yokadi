@@ -9,15 +9,22 @@ Helper functions to render formated text on screen
 import colors as C
 from datetime import datetime
 from utils import formatTimeDelta
-
-TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-16s|%(timeLeft)-10s"
+from db import Config
+from sqlobject import SQLObjectNotFound
 
 class TextRenderer(object):
+
+    def getTaskFormat(self):
+        """@return: task format as a string with placeholder"""
+        width=Config.byName("TEXT_WIDTH").value
+        return "%(id)-3s|%(title)-"+width+"s|%(urgency)-3s|%(status)-1s|%(creationDate)-16s|%(timeLeft)-10s"
+
     def renderTaskListHeader(self, projectName):
-        line = TASK_LIST_FORMAT % dict(id="ID", title="Title", urgency="U",
+        width=int(Config.byName("TEXT_WIDTH").value)
+        line = self.getTaskFormat() % dict(id="ID", title="Title", urgency="U",
                                        status="S", creationDate="Creation date", timeLeft="Time left")
         print
-        print C.CYAN+projectName.center(90)+C.RESET
+        print C.CYAN+projectName.center(30+width)+C.RESET
         print C.BOLD+line+C.RESET
         print "-" * len(line)
 
@@ -25,7 +32,7 @@ class TextRenderer(object):
     def renderTaskListRow(self, task):
         title = task.title
         hasDescription = task.description != ""
-        maxLength = 60
+        maxLength = int(Config.byName("TEXT_WIDTH").value)
         if hasDescription:
             maxLength -=1
         if len(title) > maxLength:
@@ -48,7 +55,7 @@ class TextRenderer(object):
         else:
             urgency=task.urgency
 
-        print TASK_LIST_FORMAT % dict(id=str(task.id), title=title, urgency=urgency, status=status,
+        print self.getTaskFormat() % dict(id=str(task.id), title=title, urgency=urgency, status=status,
                                        creationDate=creationDate, timeLeft=timeLeft)
 
 
