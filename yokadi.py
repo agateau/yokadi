@@ -106,6 +106,16 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd):
             raise YokadiException("Fail to save history to %s. Error was:\n\t%s"
                         % (self.historyPath, e))
 
+def setDefaultConfig():
+    """Set default config parameter in database if they (still) do not exist"""
+    #TODO: also set DB_VERSION here ?
+    defaultConfig={
+        "TEXT_WIDTH"    : ("60", False)}
+
+    for name, value in defaultConfig.items():
+        if db.Config.select(db.Config.q.name==name).count()==0:
+            db.Config(name=name, value=value[0], system=value[1])
+
 def main():
     parser = OptionParser()
 
@@ -148,9 +158,10 @@ def main():
             print "Please, run the update.py script to migrate your database prior to running Yokadi"
             sys.exit(1)
 
-
     if options.createOnly:
         return
+
+    setDefaultConfig() # Set default config parameters
 
     cmd = YokadiCmd()
     try:
