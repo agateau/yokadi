@@ -23,8 +23,10 @@ from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
+from commoncmd import CommonCmd
 from utils import YokadiException
 import colors as C
+from parseutils import parseParameters
 
 # Yokadi database version needed for this code
 # If database config keyDB_VERSION differ from this one
@@ -35,7 +37,7 @@ DB_VERSION="2"
 ENCODING=locale.getpreferredencoding()
 
 
-class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd):
+class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)

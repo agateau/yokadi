@@ -17,14 +17,16 @@ from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter
 from utils import YokadiException, guessDateFormat, guessTimeFormat
 import colors as C
+from commoncmd import CommonCmd
 
 from datetime import datetime, timedelta
 from time import strptime
 
-class TaskCmd(object):
+class TaskCmd(CommonCmd):
     __slots__ = ["renderer"]
     def __init__(self):
         self.renderer = TextRenderer()
+        CommonCmd.__init__(self)
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
@@ -32,7 +34,7 @@ class TaskCmd(object):
         if not line:
             print "Give at least a task name !"
             return
-        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        projectName, title, keywordDict = parseutils.parseTaskLine(self.rawline)
         if not title:
             raise YokadiException("You should give a task title")
         task = utils.addTask(projectName, title, keywordDict)
@@ -120,7 +122,7 @@ class TaskCmd(object):
         -t : top 5 urgent tasks of each project based on due date
         """
         #BUG: completion based on parameter position is broken when parameter is given
-        parameters, line=parseutils.parseParameters(line)
+        parameters=self.parameters
         tokens = line.strip().split(' ')
         projectName = tokens[0]
         if not projectName:
