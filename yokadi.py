@@ -112,7 +112,8 @@ def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     #TODO: also set DB_VERSION here ?
     defaultConfig={
-        "TEXT_WIDTH"    : ("60", False)}
+        "TEXT_WIDTH"    : ("60", False),
+        "DEFAULT_PROJECT" : ("default", False)}
 
     for name, value in defaultConfig.items():
         if db.Config.select(db.Config.q.name==name).count()==0:

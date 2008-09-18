@@ -7,7 +7,7 @@ Task related commands.
 @license: GPLv3
 """
 
-from db import Keyword, Project, Task
+from db import Config, Keyword, Project, Task
 from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
 import parseutils
@@ -186,8 +186,8 @@ class TaskCmd(CommonCmd):
         updated to match the order.
         t_reorder <project_name>"""
         if not line:
-            print "Info: using default project"
-            line="default"
+            line=Config.byName("DEFAULT_PROJECT").value
+            print "Info: using default project (%s)" % line
         project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),

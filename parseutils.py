@@ -6,7 +6,7 @@ Parse utilities. Used to manipulate command line text.
 @license: GPLv3
 """
 import re
-
+from db import Config
 
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):
@@ -46,9 +46,8 @@ def parseTaskLine(line):
         project, line = line.split(" ", 1)
         
     else:
-        #TODO: if project name is not given use a default project (first one or configured one)
-        print "Project name not given, using 'default' projet"
-        project="default"
+        project=Config.byName("DEFAULT_PROJECT").value
+        print "Project name not given, using default project (%s)" % project
 
     # Extract keywords
     matches = gKeywordRe.findall(line)
