@@ -9,6 +9,7 @@ Configuration management related commands.
 from db import Config
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from utils import YokadiException
+from completers import c_setCompleter
 import colors as C
 
 class ConfCmd(object):
@@ -42,3 +43,5 @@ class ConfCmd(object):
         else:
             p[0].value=value
             print "Parameter updated"
+
+    complete_c_set=c_setCompleter

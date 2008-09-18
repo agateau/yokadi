@@ -7,7 +7,7 @@ Implementation of completers for various Yokadi objects.
 """
 import parseutils
 import utils
-from db import Keyword, Project
+from db import Config, Keyword, Project
 
 class ProjectCompleter(object):
     def __init__(self, position):
@@ -37,5 +37,8 @@ def t_listCompleter(cmd, text, line, begidx, endidx):
         return utils.getItemPropertiesStartingWith(Project, Project.q.name, text) 
     elif parseutils.computeCompleteParameterPosition(text, line, begidx, endidx) >= 2 :
         return utils.getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)
+
+def c_setCompleter(cmd, text, line, begidx, endidx):
+    return utils.getItemPropertiesStartingWith(Config, Config.q.name, text)
 
 # vi: ts=4 sw=4 et
