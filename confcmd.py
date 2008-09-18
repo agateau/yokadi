@@ -7,18 +7,18 @@ Configuration management related commands.
 """
 
 from db import Config
+from commoncmd import CommonCmd
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from utils import YokadiException
-from completers import c_setCompleter
+from completers import confCompleter
 import colors as C
 
-class ConfCmd(object):
+class ConfCmd(CommonCmd):
 
     def do_c_get(self, line):
         """Display a configuration key. If no key is given, all keys are shown.
         Use -s switch to also display system parameters"""
-        if "-s" in line:
-            line=line.strip("-s")
+        if "s" in self.parameters:
             system=True
         else:
             system=False
@@ -30,6 +30,8 @@ class ConfCmd(object):
             print "\n".join(("%s => %s" % (x.name, x.value) for x in k))
         except SQLObjectNotFound:
             raise YokadiException("Configuration key %s does not exist" % line)
+
+    complete_c_get=confCompleter
 
     def do_c_set(self, line):
         """Set a configuration key to value : c_set <key> <value>"""
@@ -44,4 +46,4 @@ class ConfCmd(object):
             p[0].value=value
             print "Parameter updated"
 
-    complete_c_set=c_setCompleter
+    complete_c_set=confCompleter

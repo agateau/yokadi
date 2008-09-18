@@ -38,7 +38,7 @@ def t_listCompleter(cmd, text, line, begidx, endidx):
     elif parseutils.computeCompleteParameterPosition(text, line, begidx, endidx) >= 2 :
         return utils.getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)
 
-def c_setCompleter(cmd, text, line, begidx, endidx):
+def confCompleter(cmd, text, line, begidx, endidx):
     return utils.getItemPropertiesStartingWith(Config, Config.q.name, text)
 
 # vi: ts=4 sw=4 et
