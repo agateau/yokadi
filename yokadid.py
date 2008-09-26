@@ -11,8 +11,10 @@ import sys, os, time
 from datetime import datetime, timedelta
 from signal import SIGTERM, signal
 from sqlobject import AND, connectionForURI, sqlhub
+from subprocess import Popen, PIPE
 
-from db import Task
+from db import Config, Task
+
 try:
     from syslog import openlog, syslog, LOG_USER
     SYSLOG=True
@@ -34,6 +36,7 @@ class Log:
                 self.logfile=open("/tmp/yokadid-%s.log" % os.getpid(), "w+")
             except:
                 self.logfile=None
+
     def write(self, output):
         if SYSLOG:
             if output=="\n": return
@@ -82,19 +85,24 @@ def sigTermHandler(signal, stack):
     sys.exit(0)
 
 def eventLoop():
-    delta=timedelta(hours=8)
+    delta=timedelta(hours=int(Config.byName("ALARM_DELAY").value))
+    cmdTemplate=Config.byName("ALARM_CMD").value
+    #TODO: handle sighup to reload config
     triggeredTasks={}
     while True:
         time.sleep(DELAY)
         now=datetime.today().replace(microsecond=0)
         tasks=Task.select(AND(Task.q.dueDate < now+delta, Task.q.dueDate > now))
         for task in tasks:
-            if triggeredTasks.has_key(task.id):
-                if triggeredTasks[task.id]==task.dueDate:
-                    # This task with the same dueDate has already been triggered, skipping
-                    continue
+            if triggeredTasks.has_key(task.id) and triggeredTasks[task.id]==task.dueDate:
+                # This task with the same dueDate has already been triggered, skipping
+                continue
             print "Task %s is due soon" % task.title
-            #TODO: launch action for this due task
+            cmd=cmdTemplate.replace("{ID}", str(task.id))
+            cmd=cmd.replace("{TITLE}", task.title)
+            cmd=cmd.replace("{DATE}", str(task.dueDate))
+            process=Popen(cmd, shell=True)
+            #TODO: redirect stdout/stderr properly to Log (not so easy...)
             triggeredTasks[task.id]=task.dueDate
             
 
@@ -111,8 +119,12 @@ def main():
     # -f for foreground processing nofork
     # -d for time delta before warning
     # -x for command to execute when a task is due
+    # -k to kill running yokadid
     # argv[0] for databasename
-    
+
+    #TODO: check that yokadid is not already running for this database
+    #TODO: change unix process name to "yokadid"
+
     doubleFork()
     signal(SIGTERM, sigTermHandler)
     connectDatabase()
