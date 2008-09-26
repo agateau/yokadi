@@ -86,6 +86,7 @@ class Config(SQLObject):
     name  = UnicodeCol(alternateID=True, notNone=True)
     value = UnicodeCol()
     system = BoolCol(default=False)
+    desc = UnicodeCol()
 
 def createTables():
     Project.createTable()

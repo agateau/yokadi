@@ -112,12 +112,14 @@ def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     #TODO: also set DB_VERSION here ?
     defaultConfig={
-        "TEXT_WIDTH"    : ("60", False),
-        "DEFAULT_PROJECT" : ("default", False)}
+        "TEXT_WIDTH"      : ("60", False, "Width of task display output with t_list command"),
+        "DEFAULT_PROJECT" : ("default", False, "Default project used when no project name given"),
+        "ALARM_CMD"       : ("kdialog --msgbox 'task {TITLE} ({ID}) is due for {DATE}'",False, "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)")}
 
     for name, value in defaultConfig.items():
         if db.Config.select(db.Config.q.name==name).count()==0:
-            db.Config(name=name, value=value[0], system=value[1])
+            db.Config(name=name, value=value[0], system=value[1], desc=value[2])
 
 def main():
     parser = OptionParser()
@@ -146,14 +148,13 @@ def main():
             # So we have juste migrated from a yokadi without Config
             print "Configuration table does not exist. Creating it"
             db.Config.createTable()
-            db.Config(name="DB_VERSION", value="1", system=True)
         # Check that the current database version is aligned with Yokadi code
         try:
             version=db.Config.byName("DB_VERSION").value
         except SQLObjectNotFound:
             # Ok, we have a Config table but no DB_VERSION key. Quite strange. Default to version 1
             print "Oups. Config table does not have the DB_VERSION key. Creating it with default value 1"
-            db.Config(name="DB_VERSION", value="1")
+            db.Config(name="DB_VERSION", value="1", desc="Database schema release number")
             version="1"
         if version!=DB_VERSION:
             print C.BOLD+C.RED+"Your database version is %s wether your Yokadi code wants version %s." \

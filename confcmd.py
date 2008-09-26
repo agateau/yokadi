@@ -27,7 +27,7 @@ class ConfCmd(CommonCmd):
         try:
             k=Config.select(AND(LIKE(Config.q.name, line.strip()), Config.q.system==system))
             #TODO: a better output (using textrenderer ?) should be used !
-            print "\n".join(("%s => %s" % (x.name, x.value) for x in k))
+            print "\n".join(("%-15s => %-40s (%s)" % (x.name, x.value, x.desc) for x in k))
         except SQLObjectNotFound:
             raise YokadiException("Configuration key %s does not exist" % line)
 
