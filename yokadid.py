@@ -11,7 +11,8 @@ import sys, os, time
 from datetime import datetime, timedelta
 from signal import SIGTERM, signal
 from sqlobject import AND, connectionForURI, sqlhub
-from subprocess import Popen, PIPE
+from subprocess import Popen
+from optparse import OptionParser
 
 from db import Config, Task
 
@@ -106,29 +107,54 @@ def eventLoop():
             triggeredTasks[task.id]=task.dueDate
             
 
-def connectDatabase():
-    #Use a configuration file or parsing args
-    dbFileName="/home/fox/travail/yokadi.db"
+def connectDatabase(dbFileName):
     connectionString = 'sqlite:' + dbFileName
     connection = connectionForURI(connectionString)
     sqlhub.processConnection = connection
 
+def parseOptions():
+    parser = OptionParser()
     
-def main():
-    #TODO: parse options
-    # -f for foreground processing nofork
-    # -d for time delta before warning
-    # -x for command to execute when a task is due
-    # -k to kill running yokadid
-    # argv[0] for databasename
+    parser.add_option("-d", "--db", dest="filename",
+                      help="TODO database", metavar="FILE")
 
+    parser.add_option("-k", "--kill",
+                      dest="kill", default=False, action="store_true", 
+                      help="Kill Yokadi Daemon (you can specify database with -db if you run multiple Yokadid")
+
+    parser.add_option("-f", "--foreground",
+                      dest="foreground", default=False, action="store_true", 
+                      help="Don't fork background. Usefull for debug")
+
+    return parser.parse_args()
+
+
+def main():
     #TODO: check that yokadid is not already running for this database
     #TODO: change unix process name to "yokadid"
 
-    doubleFork()
+    (options, args) = parseOptions()
+
+    if not options.foreground:
+        doubleFork()
+
     signal(SIGTERM, sigTermHandler)
-    connectDatabase()
-    eventLoop()
+
+    if options.kill:
+        print "Not yet implemented. Use kill <pid> to exit properly Yokadid"
+        sys.exit(0)
+
+    if options.filename:
+        connectDatabase(options.filename)
+    else:
+        print "No database given, exiting"
+        sys.exit(1)
+
+    # Start the main event Loop
+    try:
+        eventLoop()
+    except KeyboardInterrupt:
+        print "\nExiting..."
 
 if __name__ == "__main__":
     main()
