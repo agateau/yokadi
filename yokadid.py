@@ -13,6 +13,7 @@ from signal import SIGTERM, SIGHUP, signal
 from sqlobject import AND
 from subprocess import Popen
 from optparse import OptionParser
+from commands import getoutput
 
 from db import Config, Task, connectDatabase
 
@@ -118,6 +119,25 @@ def eventLoop():
             #TODO: redirect stdout/stderr properly to Log (not so easy...)
             triggeredTasks[task.id]=task.dueDate
 
+def killYokadid(dbName):
+    """Kill Yokadi daemon
+    @param dbName: only kill Yokadid running for this database
+    """
+    selfpid=os.getpid()
+    for line in getoutput("ps -ef|grep python | grep [y]okadid.py ").split("\n"):
+        pid=int(line.split()[1])
+        if pid==selfpid:
+            continue
+        if dbName is None:
+            print "Killing Yokadid with pid %s" % pid
+            os.kill(pid, SIGTERM)
+        else:
+            if dbName in line:
+                #BUG: quite buggy. Killing foo database will also kill foobar.
+                # As we can have space in database path, it is not so easy to parse line...
+                print "Killing Yokadid with database %s and pid %s" % (dbName, pid)
+                os.kill(pid, SIGTERM)
+
 def parseOptions():
     parser = OptionParser()
     
@@ -136,7 +156,7 @@ def parseOptions():
 
 
 def main():
-    #TODO: check that yokadid is not already running for this database
+    #TODO: check that yokadid is not already running for this database ? Not very harmful...
     #TODO: change unix process name to "yokadid"
 
     # Make the event list global to allow communication with main event loop
@@ -144,15 +164,16 @@ def main():
 
     (options, args) = parseOptions()
 
-    if not options.foreground:
-        doubleFork()
+    if options.kill:
+        killYokadid(options.filename)
+        sys.exit(0)
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)
 
-    if options.kill:
-        print "Not yet implemented. Use kill <pid> to exit properly Yokadid"
-        sys.exit(0)
+
+    if not options.foreground:
+        doubleFork()
 
     if options.filename:
         connectDatabase(options.filename, createIfNeeded=False)
