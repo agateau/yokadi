@@ -111,6 +111,10 @@ def main():
 
     (options, args) = parser.parse_args()
 
+    if not options.filename:
+        print "You must provide a database with --db option"
+        sys.exit(1)
+
     db.connectDatabase(options.filename)
 
     if options.createOnly:
