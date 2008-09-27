@@ -154,7 +154,8 @@ def setDefaultConfig():
     defaultConfig={
         "TEXT_WIDTH"      : ("60", False, "Width of task display output with t_list command"),
         "DEFAULT_PROJECT" : ("default", False, "Default project used when no project name given"),
-        "ALARM_CMD"       : ("kdialog --msgbox 'task {TITLE} ({ID}) is due for {DATE}'",False, "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        "ALARM_CMD"       : ("kdialog --msgbox 'task {TITLE} ({ID}) is due for {DATE}' --title 'Yokadi Daemon'",False,
+                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
         "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)")}
 
     for name, value in defaultConfig.items():

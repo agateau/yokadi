@@ -10,10 +10,9 @@ Yokadi daemon. Used to monitor due tasks and warn user.
 import sys, os, time
 from datetime import datetime, timedelta
 from signal import SIGTERM, signal
-from sqlobject import AND, connectionForURI, sqlhub
+from sqlobject import AND
 from subprocess import Popen
 from optparse import OptionParser
-from os.path import abspath
 
 from db import Config, Task, connectDatabase
 

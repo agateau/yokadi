@@ -36,9 +36,10 @@ class ConfCmd(CommonCmd):
     def do_c_set(self, line):
         """Set a configuration key to value : c_set <key> <value>"""
         line=line.split()
-        if len(line)!=2:
+        if len(line)<2:
             raise YokadiException("You should provide two arguments : the parameter key and the value")
-        name, value=line
+        name=line[0]
+        value=" ".join(line[1:])
         p=Config.select(AND(Config.q.name==name, Config.q.system==False))
         if p.count()==0:
             print C.RED+"Sorry, no parameter match"+C.RESET

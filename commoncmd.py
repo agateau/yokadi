@@ -18,7 +18,6 @@ class CommonCmd(object):
 
     def precmd(self, line):
         # Parse parameters and store it
-        #BUG: this breaks t_add with keyword parameters
         m=GETLINE.match(line)
         if m:
             self.rawline=m.group(1)
