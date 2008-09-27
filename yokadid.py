@@ -9,7 +9,7 @@ Yokadi daemon. Used to monitor due tasks and warn user.
 
 import sys, os, time
 from datetime import datetime, timedelta
-from signal import SIGTERM, signal
+from signal import SIGTERM, SIGHUP, signal
 from sqlobject import AND
 from subprocess import Popen
 from optparse import OptionParser
@@ -24,6 +24,9 @@ except ImportError:
 
 # Daemon polling delay (in seconds)
 DELAY=5
+
+# Event sender to main loop
+event=[True, ""]
     
 class Log:
     """Send ouput to syslog if available, else defaulting to /tmp/yokadid.log"""
@@ -83,14 +86,23 @@ def sigTermHandler(signal, stack):
     """Handler when yokadid receive SIGTERM"""
     print "Receive SIGTERM. Exiting"
     print "End of yokadi Daemon"
-    sys.exit(0)
+    event[0]=False
+    event[1]="SIGTERM"
+
+def sigHupHandler(signal, stack):
+    """Handler when yokadid receive SIGHUP"""
+    print "Receive SIGHUP. Reloading configuration"
+    event[0]=False
+    event[1]="SIGHUP"
+
 
 def eventLoop():
+    """Main event loop"""
     delta=timedelta(hours=int(Config.byName("ALARM_DELAY").value))
     cmdTemplate=Config.byName("ALARM_CMD").value
     #TODO: handle sighup to reload config
     triggeredTasks={}
-    while True:
+    while event[0]:
         time.sleep(DELAY)
         now=datetime.today().replace(microsecond=0)
         tasks=Task.select(AND(Task.q.dueDate < now+delta, Task.q.dueDate > now))
@@ -105,7 +117,6 @@ def eventLoop():
             process=Popen(cmd, shell=True)
             #TODO: redirect stdout/stderr properly to Log (not so easy...)
             triggeredTasks[task.id]=task.dueDate
-            
 
 def parseOptions():
     parser = OptionParser()
@@ -128,12 +139,16 @@ def main():
     #TODO: check that yokadid is not already running for this database
     #TODO: change unix process name to "yokadid"
 
+    # Make the event list global to allow communication with main event loop
+    global event
+
     (options, args) = parseOptions()
 
     if not options.foreground:
         doubleFork()
 
     signal(SIGTERM, sigTermHandler)
+    signal(SIGHUP, sigHupHandler)
 
     if options.kill:
         print "Not yet implemented. Use kill <pid> to exit properly Yokadid"
@@ -151,7 +166,9 @@ def main():
 
     # Start the main event Loop
     try:
-        eventLoop()
+        while event[1]!="SIGTERM":
+            eventLoop()
+            event[0]=True
     except KeyboardInterrupt:
         print "\nExiting..."
 
