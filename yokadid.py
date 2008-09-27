@@ -13,8 +13,9 @@ from signal import SIGTERM, signal
 from sqlobject import AND, connectionForURI, sqlhub
 from subprocess import Popen
 from optparse import OptionParser
+from os.path import abspath
 
-from db import Config, Task
+from db import Config, Task, connectDatabase
 
 try:
     from syslog import openlog, syslog, LOG_USER
@@ -107,18 +108,6 @@ def eventLoop():
             triggeredTasks[task.id]=task.dueDate
             
 
-def connectDatabase(dbFileName):
-    if not os.access(dbFileName, os.R_OK):
-        print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
-        sys.exit(1)
-    connectionString = 'sqlite:' + dbFileName
-    connection = connectionForURI(connectionString)
-    sqlhub.processConnection = connection
-    # Basic tests :
-    if not (Task.tableExists() and Config.tableExists()):
-        print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
-        sys.exit(1)
-
 def parseOptions():
     parser = OptionParser()
     
@@ -152,7 +141,11 @@ def main():
         sys.exit(0)
 
     if options.filename:
-        connectDatabase(options.filename)
+        connectDatabase(options.filename, createIfNeeded=False)
+        # Basic tests :
+        if not (Task.tableExists() and Config.tableExists()):
+            print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
+            sys.exit(1)
     else:
         print "No database given, exiting"
         sys.exit(1)

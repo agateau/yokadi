@@ -15,23 +15,14 @@ import locale
 from cmd import Cmd
 from optparse import OptionParser
 
-from sqlobject import connectionForURI, sqlhub, SQLObjectNotFound
-
 import db
 from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
-from commoncmd import CommonCmd
 from utils import YokadiException
 import colors as C
-from parseutils import parseParameters
-
-# Yokadi database version needed for this code
-# If database config keyDB_VERSION differ from this one
-# a database migration is required
-DB_VERSION="2"
 
 # Default user encoding. Used to decode all input strings
 ENCODING=locale.getpreferredencoding()
@@ -108,19 +99,6 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
             raise YokadiException("Fail to save history to %s. Error was:\n\t%s"
                         % (self.historyPath, e))
 
-def setDefaultConfig():
-    """Set default config parameter in database if they (still) do not exist"""
-    #TODO: also set DB_VERSION here ?
-    defaultConfig={
-        "TEXT_WIDTH"      : ("60", False, "Width of task display output with t_list command"),
-        "DEFAULT_PROJECT" : ("default", False, "Default project used when no project name given"),
-        "ALARM_CMD"       : ("kdialog --msgbox 'task {TITLE} ({ID}) is due for {DATE}'",False, "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)")}
-
-    for name, value in defaultConfig.items():
-        if db.Config.select(db.Config.q.name==name).count()==0:
-            db.Config(name=name, value=value[0], system=value[1], desc=value[2])
-
 def main():
     parser = OptionParser()
 
@@ -133,39 +111,12 @@ def main():
 
     (options, args) = parser.parse_args()
 
-    dbFileName = os.path.abspath(options.filename)
-    connectionString = 'sqlite:' + dbFileName
-    connection = connectionForURI(connectionString)
-    sqlhub.processConnection = connection
-    if not os.path.exists(dbFileName):
-        print "Creating database"
-        db.createTables()
-        # Set database version according to current yokadi release
-        db.Config(name="DB_VERSION", value=DB_VERSION, system=True, desc="Database schema release number")
-    else:
-        # Ensure Config table exist
-        if not db.Config.tableExists():
-            # So we have juste migrated from a yokadi without Config
-            print "Configuration table does not exist. Creating it"
-            db.Config.createTable()
-        # Check that the current database version is aligned with Yokadi code
-        try:
-            version=db.Config.byName("DB_VERSION").value
-        except SQLObjectNotFound:
-            # Ok, we have a Config table but no DB_VERSION key. Quite strange. Default to version 1
-            print "Oups. Config table does not have the DB_VERSION key. Creating it with default value 1"
-            db.Config(name="DB_VERSION", value="1", system=True, desc="Database schema release number")
-            version="1"
-        if version!=DB_VERSION:
-            print C.BOLD+C.RED+"Your database version is %s wether your Yokadi code wants version %s." \
-                % (version, DB_VERSION) + C.RESET
-            print "Please, run the update.py script to migrate your database prior to running Yokadi"
-            sys.exit(1)
+    db.connectDatabase(options.filename)
 
     if options.createOnly:
         return
 
-    setDefaultConfig() # Set default config parameters
+    db.setDefaultConfig() # Set default config parameters
 
     cmd = YokadiCmd()
     try:
