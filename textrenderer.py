@@ -10,7 +10,6 @@ import colors as C
 from datetime import datetime
 from utils import formatTimeDelta
 from db import Config
-from sqlobject import SQLObjectNotFound
 
 class TextRenderer(object):
 

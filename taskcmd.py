@@ -303,11 +303,17 @@ class TaskCmd(CommonCmd):
             else:
                 if ":" in line:
                     fTime=guessTimeFormat(line)
-                    tTime=datetime(*strptime(line, fTime)[0:5]).time()
+                    try:
+                        tTime=datetime(*strptime(line, fTime)[0:5]).time()
+                    except ValueError:
+                        raise YokadiException("Invalid time format")
                     dueDate=datetime.combine(today, tTime)
                 else:
                     fDate=guessDateFormat(line)
-                    dueDate=datetime(*strptime(line, fDate)[0:5])
+                    try:
+                        dueDate=datetime(*strptime(line, fDate)[0:5])
+                    except ValueError:
+                        raise YokadiException("Invalid date format")
             if fDate:
                 # Set year and/or month to current date if not given
                 if not "%Y" in fDate:
