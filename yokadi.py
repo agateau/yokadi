@@ -141,7 +141,7 @@ def main():
         print "Creating database"
         db.createTables()
         # Set database version according to current yokadi release
-        db.Config(name="DB_VERSION", value=DB_VERSION, system=True)
+        db.Config(name="DB_VERSION", value=DB_VERSION, system=True, desc="Database schema release number")
     else:
         # Ensure Config table exist
         if not db.Config.tableExists():
@@ -154,7 +154,7 @@ def main():
         except SQLObjectNotFound:
             # Ok, we have a Config table but no DB_VERSION key. Quite strange. Default to version 1
             print "Oups. Config table does not have the DB_VERSION key. Creating it with default value 1"
-            db.Config(name="DB_VERSION", value="1", desc="Database schema release number")
+            db.Config(name="DB_VERSION", value="1", system=True, desc="Database schema release number")
             version="1"
         if version!=DB_VERSION:
             print C.BOLD+C.RED+"Your database version is %s wether your Yokadi code wants version %s." \
