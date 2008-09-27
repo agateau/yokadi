@@ -108,9 +108,16 @@ def eventLoop():
             
 
 def connectDatabase(dbFileName):
+    if not os.access(dbFileName, os.R_OK):
+        print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
+        sys.exit(1)
     connectionString = 'sqlite:' + dbFileName
     connection = connectionForURI(connectionString)
     sqlhub.processConnection = connection
+    # Basic tests :
+    if not (Task.tableExists() and Config.tableExists()):
+        print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
+        sys.exit(1)
 
 def parseOptions():
     parser = OptionParser()
