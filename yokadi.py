@@ -124,10 +124,10 @@ def setDefaultConfig():
 def main():
     parser = OptionParser()
 
-    parser.add_option("--db", dest="filename",
+    parser.add_option("-d", "--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
-    parser.add_option("--create-only",
+    parser.add_option("-c", "--create-only",
                       dest="createOnly", default=False, action="store_true",
                       help="Just create an empty database")
 
