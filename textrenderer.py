@@ -70,13 +70,13 @@ class TextRenderer(object):
             keywordArray.sort()
         keywords = ", ".join(keywordArray)
         fields = [
-            (C.BOLD+"Project"+C.RESET, task.project.name),
-            (C.BOLD+"Title"+C.RESET, task.title),
-            (C.BOLD+"Created"+C.RESET, task.creationDate),
-            (C.BOLD+"Due"+C.RESET, task.dueDate),
-            (C.BOLD+"Status"+C.RESET, task.status),
-            (C.BOLD+"Urgency"+C.RESET, task.urgency),
-            (C.BOLD+"Keywords"+C.RESET, keywords),
+            ("Project", task.project.name),
+            ("Title", task.title),
+            ("Created", task.creationDate),
+            ("Due", task.dueDate),
+            ("Status", task.status),
+            ("Urgency", task.urgency),
+            ("Keywords", keywords),
             ]
 
         if task.status == "done":
@@ -84,12 +84,19 @@ class TextRenderer(object):
                 (C.BOLD+"Done"+C.RESET, task.doneDate),
                 )
 
-        maxWidth = max([len(x) for x,y in fields])
-        format="%" + str(maxWidth) + "s: %s"
-        for caption, value in fields:
-            print format % (caption, value)
+        self.renderFields(fields)
 
         if task.description != '':
             print
             print task.description
+
+    def renderFields(self, fields):
+        """Print on screen tabular array represented by fields
+        @param fields: list of tuple (caption, value)
+        """
+        maxWidth = max([len(x) for x,y in fields])
+        format=C.BOLD+"%" + str(maxWidth) + "s"+C.RESET+": %s"
+        for caption, value in fields:
+            print format % (caption, value)
+
 # vi: ts=4 sw=4 et

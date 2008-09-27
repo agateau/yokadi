@@ -11,6 +11,7 @@ from commoncmd import CommonCmd
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from utils import YokadiException
 from completers import confCompleter
+from textrenderer import TextRenderer
 import colors as C
 
 class ConfCmd(CommonCmd):
@@ -26,8 +27,9 @@ class ConfCmd(CommonCmd):
             line="%"
         try:
             k=Config.select(AND(LIKE(Config.q.name, line.strip()), Config.q.system==system))
-            #TODO: a better output (using textrenderer ?) should be used !
-            print "\n".join(("%-15s => %-40s (%s)" % (x.name, x.value, x.desc) for x in k))
+            fields=[(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
+            t=TextRenderer()
+            t.renderFields(fields)
         except SQLObjectNotFound:
             raise YokadiException("Configuration key %s does not exist" % line)
 
