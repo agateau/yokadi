@@ -100,24 +100,30 @@ def sigHupHandler(signal, stack):
 def eventLoop():
     """Main event loop"""
     delta=timedelta(hours=int(Config.byName("ALARM_DELAY").value))
-    cmdTemplate=Config.byName("ALARM_CMD").value
-    #TODO: handle sighup to reload config
-    triggeredTasks={}
+    cmdDelayTemplate=Config.byName("ALARM_DELAY_CMD").value
+    cmdDueTemplate=Config.byName("ALARM_DUE_CMD").value
+    triggeredDelayTasks={}
+    triggeredDueTasks={}
     while event[0]:
         time.sleep(DELAY)
         now=datetime.today().replace(microsecond=0)
-        tasks=Task.select(AND(Task.q.dueDate < now+delta, Task.q.dueDate > now))
-        for task in tasks:
-            if triggeredTasks.has_key(task.id) and triggeredTasks[task.id]==task.dueDate:
-                # This task with the same dueDate has already been triggered, skipping
-                continue
-            print "Task %s is due soon" % task.title
-            cmd=cmdTemplate.replace("{ID}", str(task.id))
-            cmd=cmd.replace("{TITLE}", task.title)
-            cmd=cmd.replace("{DATE}", str(task.dueDate))
-            process=Popen(cmd, shell=True)
-            #TODO: redirect stdout/stderr properly to Log (not so easy...)
-            triggeredTasks[task.id]=task.dueDate
+        delayTasks=Task.select(AND(Task.q.dueDate < now+delta, Task.q.dueDate > now))
+        dueTasks=Task.select(Task.q.dueDate < now)
+        processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate)
+        processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate)
+
+def processTasks(tasks, triggeredTasks, cmdTemplate):
+    for task in tasks:
+        if triggeredTasks.has_key(task.id) and triggeredTasks[task.id]==task.dueDate:
+            # This task with the same dueDate has already been triggered, skipping
+            continue
+        print "Task %s is due soon" % task.title
+        cmd=cmdTemplate.replace("{ID}", str(task.id))
+        cmd=cmd.replace("{TITLE}", task.title)
+        cmd=cmd.replace("{DATE}", str(task.dueDate))
+        process=Popen(cmd, shell=True)
+        #TODO: redirect stdout/stderr properly to Log (not so easy...)
+        triggeredTasks[task.id]=task.dueDate
 
 def killYokadid(dbName):
     """Kill Yokadi daemon
