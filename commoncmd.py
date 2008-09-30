@@ -8,6 +8,11 @@ Common commands. Root of all *cmd modules
 
 from parseutils import parseParameters
 import re
+import locale
+
+# Default user encoding. Used to decode all input strings
+# This is a redefinition of yokadi.py ENCODING constant to avoid circular import
+ENCODING=locale.getpreferredencoding()
 
 GETLINE=re.compile("^\S+\s(.*)$")
 
@@ -20,7 +25,9 @@ class CommonCmd(object):
         # Parse parameters and store it
         m=GETLINE.match(line)
         if m:
-            self.rawline=m.group(1)
+            # Store rawline for commands that use special parameter handling
+            # Decode it with user encoding
+            self.rawline=m.group(1).decode(ENCODING)
         else:
             self.rawline=""
         self.parameters, line=parseParameters(line)
