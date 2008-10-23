@@ -27,6 +27,11 @@ import colors as C
 # Default user encoding. Used to decode all input strings
 ENCODING=locale.getpreferredencoding()
 
+# Force default encoding to prefered encoding
+# This is mandatory when yokadi output is piped in another command
+reload(sys)
+sys.setdefaultencoding(ENCODING)
+
 
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
     def __init__(self):
