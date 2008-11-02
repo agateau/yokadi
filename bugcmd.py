@@ -67,7 +67,7 @@ class BugCmd(object):
 
     def do_bug_add(self, line):
         """Add a bug-type task. Will create a task and ask additional info.
-        bug_add <project_name> [-p <keyword1>] [-p <keyword2>] <Bug description>
+        bug_add <project_name> [-k <keyword1>] [-k <keyword2>] <Bug description>
         """
         projectName, title, keywordDict = parseutils.parseTaskLine(line)
         editBugKeywords(keywordDict)
