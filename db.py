@@ -94,9 +94,9 @@ class Config(SQLObject):
     class sqlmeta:
         defaultOrder = "name"
     name  = UnicodeCol(alternateID=True, notNone=True)
-    value = UnicodeCol()
-    system = BoolCol(default=False)
-    desc = UnicodeCol()
+    value = UnicodeCol(default="", notNone=True)
+    system = BoolCol(default=False, notNone=True)
+    desc = UnicodeCol(default="", notNone=True)
 
 def createTables():
     Project.createTable()
