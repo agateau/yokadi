@@ -10,19 +10,30 @@ Command line oriented, sqlite powered, todo list
 import os
 import sys
 import readline
+import traceback
+import locale
 from cmd import Cmd
 from optparse import OptionParser
-
-from sqlobject import *
 
 import db
 from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
+from confcmd import ConfCmd
 from bugcmd import BugCmd
 from utils import YokadiException
+import colors as C
 
-class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
+# Default user encoding. Used to decode all input strings
+ENCODING=locale.getpreferredencoding()
+
+# Force default encoding to prefered encoding
+# This is mandatory when yokadi output is piped in another command
+reload(sys)
+sys.setdefaultencoding(ENCODING)
+
+
+class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)
@@ -41,23 +52,37 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
         if line.isdigit():
             self.do_t_show(line)
         else:
-            Cmd.default(self, line)
+            raise YokadiException("Unknown command. Use 'help' to see all available commands")
 
     def do_EOF(self, line):
         """Quit."""
         print
         return True
+    #Some alias
+    do_quit=do_EOF
+    do_q=do_EOF
+    do_exit=do_EOF
 
     def onecmd(self, line):
         """This method is subclassed just to be
         able to encapsulate it with a try/except bloc"""
         try:
+            # Decode user input
+            line=line.decode(ENCODING)
             return Cmd.onecmd(self, line)
         except YokadiException, e:
-            print "*** Yokadi error ***\n\t%s" % e
+            print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
+        except KeyboardInterrupt:
+            print C.RED+C.BOLD+"*** Break ***"+C.RESET
         except Exception, e:
-             print "*** Unhandled error (oups)***\n\t%s" % e
-             print "This is a bug of Yokadi, sorry"
+            print C.RED+C.BOLD+"*** Unhandled error (oups)***\n\t%s" % e + C.RESET
+            print C.BOLD+"This is a bug of Yokadi, sorry."
+            print "Send the above message by email to Yokadi developers to help them make Yokadi better."+C.RESET
+            cut="---------------------8<----------------------------------------------"
+            print cut
+            traceback.print_exc()
+            print cut
+            print
 
     def loadHistory(self):
         """Tries to load previous history list from disk"""
@@ -82,25 +107,25 @@ class YokadiCmd(Cmd, TaskCmd, ProjectCmd, KeywordCmd, BugCmd):
 def main():
     parser = OptionParser()
 
-    parser.add_option("--db", dest="filename",
+    parser.add_option("-d", "--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
-    parser.add_option("--create-only",
+    parser.add_option("-c", "--create-only",
                       dest="createOnly", default=False, action="store_true",
                       help="Just create an empty database")
 
     (options, args) = parser.parse_args()
 
-    dbFileName = os.path.abspath(options.filename)
-    connectionString = 'sqlite:' + dbFileName
-    connection = connectionForURI(connectionString)
-    sqlhub.processConnection = connection
-    if not os.path.exists(dbFileName):
-        print "Creating database"
-        db.createTables()
+    if not options.filename:
+        print "You must provide a database with --db option"
+        sys.exit(1)
+
+    db.connectDatabase(options.filename)
 
     if options.createOnly:
         return
+
+    db.setDefaultConfig() # Set default config parameters
 
     cmd = YokadiCmd()
     try:
@@ -109,7 +134,7 @@ def main():
         else:
             cmd.cmdloop()
     except KeyboardInterrupt:
-        print "\n\tBreak !"
+        print "\n\tBreak ! (the nice way to quit is 'quit' or 'EOF' (ctrl-d)"
         sys.exit(1)
     # Save history
     cmd.writeHistory()

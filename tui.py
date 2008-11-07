@@ -10,21 +10,31 @@ import os
 import readline
 import subprocess
 import tempfile
+import locale
+import colors as C
+from utils import YokadiException
+
+# Default user encoding. Used to decode all input strings
+# This is a redefinition of yokadi.py ENCODING constant to avoid circular import
+ENCODING=locale.getpreferredencoding()
 
 def editText(text):
     """Edit text with external editor
-    returns a tuple (success, newText)"""
+    @raise YokadiException: if editor cannot be started
+    @return: newText"""
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
     try:
-        fl = file(name, "w")
-        fl.write(text.encode("utf-8"))
-        fl.close()
-        editor = os.environ.get("EDITOR", "vi")
-        retcode = subprocess.call([editor, name])
-        if retcode != 0:
-            return (False, text)
-        newText = unicode(file(name).read(), "utf-8")
-        return (True, newText)
+        try:
+            fl = file(name, "w")
+            fl.write(text.encode(ENCODING))
+            fl.close()
+            editor = os.environ.get("EDITOR", "vi")
+            retcode = subprocess.call([editor, name])
+            if retcode != 0:
+                raise Exception()
+            return unicode(file(name).read(), ENCODING)
+        except:
+            raise YokadiException("Starting editor failed")
     finally:
         os.close(fd)
         os.unlink(name)
@@ -35,7 +45,7 @@ def editLine(line, prompt="edit> "):
     # Init readline
     # (Code copied from yagtd)
     def pre_input_hook():
-        readline.insert_text(line.encode("utf-8"))
+        readline.insert_text(line.encode(ENCODING))
         readline.redisplay()
 
         # Unset the hook again
@@ -51,7 +61,7 @@ def editLine(line, prompt="edit> "):
     if length > 0:
         readline.remove_history_item(length - 1)
 
-    return line
+    return line.decode(ENCODING)
 
 
 def selectFromList(prompt, lst, default):
@@ -67,7 +77,7 @@ def selectFromList(prompt, lst, default):
         answer = editLine(line, prompt = prompt + ": ")
         if minStr <= answer and answer <= maxStr:
             return int(answer)
-        print "ERROR: Wrong value"
+        print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
 
 
 def enterInt(prompt, default):
@@ -83,5 +93,5 @@ def enterInt(prompt, default):
             value = int(answer)
             return value
         except ValueError:
-            print "ERROR: Invalid value"
+            print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
 # vi: ts=4 sw=4 et

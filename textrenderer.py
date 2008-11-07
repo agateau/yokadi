@@ -7,14 +7,23 @@ Helper functions to render formated text on screen
 """
 
 import colors as C
-
-TASK_LIST_FORMAT="%(id)-3s|%(title)-60s|%(urgency)-3s|%(status)-1s|%(creationDate)-19s"
+from datetime import datetime
+from utils import formatTimeDelta
+from db import Config
 
 class TextRenderer(object):
+
+    def getTaskFormat(self):
+        """@return: task format as a string with placeholder"""
+        width=Config.byName("TEXT_WIDTH").value
+        return "%(id)-3s|%(title)-"+width+"s|%(urgency)-3s|%(status)-1s|%(creationDate)-16s|%(timeLeft)-10s"
+
     def renderTaskListHeader(self, projectName):
-        line = TASK_LIST_FORMAT % dict(id="ID", title="Title", urgency="U", status="S", creationDate="Date")
+        width=int(Config.byName("TEXT_WIDTH").value)
+        line = self.getTaskFormat() % dict(id="ID", title="Title", urgency="U",
+                                       status="S", creationDate="Creation date", timeLeft="Time left")
         print
-        print C.CYAN+projectName.center(90)+C.RESET
+        print C.CYAN+projectName.center(30+width)+C.RESET
         print C.BOLD+line+C.RESET
         print "-" * len(line)
 
@@ -22,7 +31,7 @@ class TextRenderer(object):
     def renderTaskListRow(self, task):
         title = task.title
         hasDescription = task.description != ""
-        maxLength = 60
+        maxLength = int(Config.byName("TEXT_WIDTH").value)
         if hasDescription:
             maxLength -=1
         if len(title) > maxLength:
@@ -33,8 +42,11 @@ class TextRenderer(object):
         status = task.status[0].upper()
         if status=="S":
             status=C.BOLD+status+C.RESET
-        creationDate = task.creationDate
-
+        creationDate = str(task.creationDate)[:-3]
+        if task.dueDate:
+            timeLeft=formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
+        else:
+            timeLeft=""
         if int(task.urgency)>75:
             urgency=C.RED+str(task.urgency)+" "+C.RESET
         elif int(task.urgency)>50:
@@ -42,7 +54,8 @@ class TextRenderer(object):
         else:
             urgency=task.urgency
 
-        print TASK_LIST_FORMAT % dict(id=str(task.id), title=title, urgency=urgency, status=status, creationDate=creationDate)
+        print self.getTaskFormat() % dict(id=str(task.id), title=title, urgency=urgency, status=status,
+                                       creationDate=creationDate, timeLeft=timeLeft)
 
 
     def renderTaskDetails(self, task):
@@ -56,25 +69,33 @@ class TextRenderer(object):
             keywordArray.sort()
         keywords = ", ".join(keywordArray)
         fields = [
-            (C.BOLD+"Project"+C.RESET, task.project.name),
-            (C.BOLD+"Title"+C.RESET, task.title),
-            (C.BOLD+"Created"+C.RESET, task.creationDate),
-            (C.BOLD+"Status"+C.RESET, task.status),
-            (C.BOLD+"Urgency"+C.RESET, task.urgency),
-            (C.BOLD+"Keywords"+C.RESET, keywords),
+            ("Project", task.project.name),
+            ("Title", task.title),
+            ("Created", task.creationDate),
+            ("Due", task.dueDate),
+            ("Status", task.status),
+            ("Urgency", task.urgency),
+            ("Keywords", keywords),
             ]
 
         if task.status == "done":
             fields.append(
-                ("Done", task.doneDate),
+                (C.BOLD+"Done"+C.RESET, task.doneDate),
                 )
 
-        maxWidth = max([len(x) for x,y in fields])
-        format="%" + str(maxWidth) + "s: %s"
-        for caption, value in fields:
-            print format % (caption, value)
+        self.renderFields(fields)
 
         if task.description != '':
             print
             print task.description
+
+    def renderFields(self, fields):
+        """Print on screen tabular array represented by fields
+        @param fields: list of tuple (caption, value)
+        """
+        maxWidth = max([len(x) for x,y in fields])
+        format=C.BOLD+"%" + str(maxWidth) + "s"+C.RESET+": %s"
+        for caption, value in fields:
+            print format % (caption, value)
+
 # vi: ts=4 sw=4 et

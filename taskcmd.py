@@ -6,21 +6,27 @@ Task related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-from cmd import Cmd
-from datetime import datetime
 
-from db import *
+from db import Config, Keyword, Project, Task
+from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
 import parseutils
+import sys
 import tui
 from textrenderer import TextRenderer
-from completers import *
-from utils import YokadiException
+from completers import ProjectCompleter, t_listCompleter
+from utils import YokadiException, guessDateFormat, guessTimeFormat
+import colors as C
+from commoncmd import CommonCmd
 
-class TaskCmd(object):
+from datetime import datetime, timedelta
+from time import strptime
+
+class TaskCmd(CommonCmd):
     __slots__ = ["renderer"]
     def __init__(self):
         self.renderer = TextRenderer()
+        CommonCmd.__init__(self)
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
@@ -28,7 +34,9 @@ class TaskCmd(object):
         if not line:
             print "Give at least a task name !"
             return
-        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        projectName, title, keywordDict = parseutils.parseTaskLine(self.rawline)
+        if not title:
+            raise YokadiException("You should give a task title")
         task = utils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
@@ -38,44 +46,41 @@ class TaskCmd(object):
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
-        ok, description = tui.editText(task.description)
-        if ok:
-            task.description = description
-        else:
-            print "Starting editor failed"
+        task=utils.getTaskFromId(line)
+        description = tui.editText(task.description)
+        task.description = description
 
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100).
         t_set_urgency <id> <value>"""
         tokens = line.split(" ")
-        taskId = int(tokens[0])
-        urgency = int(tokens[1])
-        task = Task.get(taskId)
-        task.urgency = urgency
+        if len(tokens)!=2:
+            raise YokadiException("You must provide a taskId and an urgency value") 
+        task = utils.getTaskFromId(tokens[0])
+        if tokens[1].isdigit():
+            urgency = int(tokens[1])
+            task.urgency = urgency
+        else:
+            raise YokadiException("Task urgency must be a digit")
 
     def do_t_mark_started(self, line):
         """Mark task as started.
         t_mark_started <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         task.status = 'started'
         task.doneDate = None
 
     def do_t_mark_done(self, line):
         """Mark task as done.
         t_mark_done <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         task.status = 'done'
         task.doneDate = datetime.now()
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
         t_mark_new <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         task.status = 'new'
         task.doneDate = None
 
@@ -85,7 +90,6 @@ class TaskCmd(object):
         tokens = line.split(" ", 2)
         if len(tokens)<2:
             raise YokadiException("Give at least a task id and a command. See 'help t_apply'")
-            return
         idStringList = tokens[0]
         cmd = tokens[1]
         if len(tokens) == 3:
@@ -100,18 +104,25 @@ class TaskCmd(object):
     def do_t_remove(self, line):
         """Delete a task.
         t_remove <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        Task.delete(taskId)
-        
+        task=utils.getTaskFromId(line)
+        task.destroySelf()
+
 
     def do_t_list(self, line):
-        """List tasks by project and/or keywords.
-        t_list <project_name> [<keyword1> [<keyword2>]...]
+        """List tasks filtered by project and/or keywords.
+        t_list [-adu] <project_name> [<keyword1> [<keyword2>]...]
 
         '%' can be used as a wildcard in the project name:
         - To list projects starting with "foo", use "foo%".
-        - To list all projects, use "%".
+
+        Parameters:
+        -a : all tasks (done and to be done)
+        -d : only done tasks
+        -u : top 5 urgent tasks of each project based on urgency
+        -t : top 5 urgent tasks of each project based on due date
         """
+        #BUG: completion based on parameter position is broken when parameter is given
+        parameters=self.parameters
         tokens = line.strip().split(' ')
         projectName = tokens[0]
         if not projectName:
@@ -120,14 +131,38 @@ class TaskCmd(object):
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if len(tokens) > 1:
-            keywordSet = set([Keyword.byName(x) for x in tokens[1:]])
+            keywordSet = set()
+            for k in tokens[1:]:
+                try:
+                    keywordSet.add(Keyword.byName(k))
+                except SQLObjectNotFound:
+                    print C.RED+"Warning: Keyword %s is unknown." % k + C.RESET
+
         else:
             keywordSet = None
 
+        # Filtering and sorting according to parameters
+        filters=[]
+        order=-Task.q.urgency
+        limit=None
+        if "d" in parameters:
+            filters.append(Task.q.status=='done')
+        if not "a" in parameters:
+            filters.append(Task.q.status!='done')
+        if "u" in parameters:
+            order=-Task.q.urgency
+            limit=5
+        if "t" in parameters:
+            filters.append(Task.q.dueDate!=None)
+            order=Task.q.dueDate
+            limit=5
+
         for project in projectList:
-            taskList = Task.select(AND(Task.q.projectID == project.id,
-                                       Task.q.status    != 'done'),
-                                   orderBy=-Task.q.urgency)
+            if not project.active:
+                print C.CYAN+"\nInfo"+C.RESET+": project %s is hidden because it is inactive. Use p_set_active to activate it\n" % project.name
+                continue
+            taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
+                                   orderBy=order, limit=limit)
 
             if keywordSet:
                 # FIXME: Optimize
@@ -142,7 +177,7 @@ class TaskCmd(object):
             for task in taskList:
                 self.renderer.renderTaskListRow(task)
 
-    complete_t_list = ProjectCompleter(1)
+    complete_t_list = t_listCompleter
 
     def do_t_reorder(self, line):
         """Reorder tasks of a project.
@@ -151,16 +186,14 @@ class TaskCmd(object):
         updated to match the order.
         t_reorder <project_name>"""
         if not line:
-            print "Info: using default project"
-            line="default"
+            line=Config.byName("DEFAULT_PROJECT").value
+            print "Info: using default project (%s)" % line
         project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),
                                orderBy=-Task.q.urgency)
         lines = [ "%d,%s" % (x.id, x.title) for x in taskList]
-        ok, text = tui.editText("\n".join(lines))
-        if not ok:
-            return
+        text = tui.editText("\n".join(lines))
 
         ids = []
         for line in text.split("\n"):
@@ -181,16 +214,14 @@ class TaskCmd(object):
     def do_t_show(self, line):
         """Display details of a task.
         t_show <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
         self.renderer.renderTaskDetails(task)
 
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
-        taskId=self.providesTaskId(line, existingTask=True)
-        task = Task.get(taskId)
+        task=utils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
@@ -213,23 +244,99 @@ class TaskCmd(object):
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        taskId = int(tokens[0])
+        task=utils.getTaskFromId(tokens[0])
         projectName = tokens[1]
 
-        task = Task.get(taskId)
         task.project = utils.getOrCreateProject(projectName)
         if task.project:
             print "Moved task '%s' to project '%s'" % (task.title, projectName)
     complete_t_set_project = ProjectCompleter(2)
 
-    def providesTaskId(self, line, existingTask=True):
-        if not line:
-            raise YokadiException("Provide a task id")
-        taskId = int(line)
-        if existingTask:
+    def do_t_set_due(self, line):
+        """Set task's due date
+        t_set_due_date <id> <date>"""
+        # Date & Time format
+        fDate=None
+        fTime=None
+        if len(line.split())<2:
+            raise YokadiException("Give a task id and time, date or date & time")
+        taskId, line=line.strip().split(" ", 1)
+        task=utils.getTaskFromId(taskId)
+
+        if line.lower()=="none":
+            task.dueDate=None
+            return
+
+        #TODO: make all the date stuff in a separate function to be reusable easily (set_creation_date ?)
+        today=datetime.today().replace(microsecond=0)
+
+        # Initialise dueDate to now (may be now + fixe delta ?)
+        dueDate=today # Safe because datetime objects are immutables
+
+        if line.startswith("+"):
+            #Delta/relative date and/or time
+            line=line.upper().strip("+")
             try:
-                task = Task.get(taskId)
-            except SQLObjectNotFound:
-                raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
-        return taskId
+                if   line.endswith("W"):
+                    dueDate=today+timedelta(days=float(line[0:-1])*7)
+                elif line.endswith("D"):
+                    dueDate=today+timedelta(days=float(line[0:-1]))
+                elif line.endswith("H"):
+                    dueDate=today+timedelta(hours=float(line[0:-1]))
+                elif line.endswith("M"):
+                    dueDate=today+timedelta(minutes=float(line[0:-1]))
+                else:
+                    raise YokadiException("Unable to understand time shift. See help t_set_due")
+            except ValueError:
+                raise YokadiException("Timeshift must be a float or an integer")
+        else:
+            #Absolute date and/or time
+            if " " in line:
+                # We assume user give date & time
+                tDate, tTime=line.split()
+                fDate=guessDateFormat(tDate)
+                fTime=guessTimeFormat(tTime)
+                try:
+                    dueDate=datetime(*strptime(line, "%s %s" % (fDate, fTime))[0:5])
+                except Exception, e:
+                    raise YokadiException("Unable to understand date & time format:\t%s" % e)
+            else:
+                if ":" in line:
+                    fTime=guessTimeFormat(line)
+                    try:
+                        tTime=datetime(*strptime(line, fTime)[0:5]).time()
+                    except ValueError:
+                        raise YokadiException("Invalid time format")
+                    dueDate=datetime.combine(today, tTime)
+                else:
+                    fDate=guessDateFormat(line)
+                    try:
+                        dueDate=datetime(*strptime(line, fDate)[0:5])
+                    except ValueError:
+                        raise YokadiException("Invalid date format")
+            if fDate:
+                # Set year and/or month to current date if not given
+                if not "%Y" in fDate:
+                    dueDate=dueDate.replace(year=today.year)
+                if not "%M" in fDate:
+                    dueDate=dueDate.replace(month=today.month)
+        # Set the due date
+        task.dueDate=dueDate
+
+    def do_t_export(self, line):
+        """Export all tasks of all projects in various format
+            t_export csv mytasks.csv
+            t_export html mytasks.html
+            t_export xml mystasks.xml
+        If filename is ommited, tasks are printed on screen"""
+        line=line.split()
+        if   len(line)<1:
+            raise YokadiException("You should at least specify the format (csv, html or xml)")
+        elif len(line)==1:
+            filePath=None
+        else:
+            filePath=line[1]
+        format=line[0].lower()
+        utils.exportTasks(format, filePath)
+
 # vi: ts=4 sw=4 et

@@ -8,8 +8,8 @@ Bug related commands.
 import parseutils
 import utils
 import tui
-from db import *
-from completers import *
+from db import Task
+from completers import ProjectCompleter
 
 SEVERITY_PROPERTY_NAME = "severity"
 LIKELIHOOD_PROPERTY_NAME = "likelihood"
@@ -86,8 +86,7 @@ class BugCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        taskId = int(line)
-        task = Task.get(taskId)
+        task = utils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
