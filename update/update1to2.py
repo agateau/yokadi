@@ -34,6 +34,8 @@ def alterProjectTable():
     class Project(SQLObject):
         pass
     Project.addColumn(BoolCol("active", default=True), changeSchema=True)
+    for project in Project.select():
+        project.active = True
 
 
 def alterTaskTable():
