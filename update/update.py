@@ -41,30 +41,32 @@ def createFinalDb(workFileName, finalFileName):
 
 
 def main():
+    # Parse args
     parser = OptionParser()
 
-    parser.add_option("-d", "--db", dest="fileName",
-                      help="TODO database", metavar="FILE")
-
+    parser.usage = "%prog <path/to/old.db> <path/to/updated.db>"
     (options, args) = parser.parse_args()
+    if len(args) != 2:
+        parser.error("Wrong argument count")
 
-    if not options.fileName:
-        print "You must provide a database with --db option"
-        sys.exit(1)
+    dbFileName = args[0]
+    newDbFileName = args[1]
+    if not os.path.exists(dbFileName):
+        parser.error("'%s' does not exist" % dbFileName)
 
-    dbFileName = os.path.abspath(options.fileName)
+    if os.path.exists(newDbFileName):
+        parser.error("'%s' already exists" % newDbFileName)
 
+    dbFileName = os.path.abspath(dbFileName)
+
+    # Check version
     version = getVersion(dbFileName)
     print "Found version %d" % version
     if version == CURRENT_DB_VERSION:
         print "Nothing to do"
         return 0
 
-    newDbFileName = dbFileName + "-v%d" % CURRENT_DB_VERSION
-    if os.path.exists(newDbFileName):
-        print "Output database file (%s) already exists" % newDbFileName
-        return 1
-
+    # Start import
     workDbFileName = createWorkDb(dbFileName)
 
     while True:
