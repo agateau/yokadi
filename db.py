@@ -105,6 +105,18 @@ def createTables():
     TaskKeyword.createTable()
     Config.createTable()
 
+
+def getVersion():
+    if not Config.tableExists():
+        # There was no Config table in v1
+        return 1
+
+    try:
+        return Config.byName("DB_VERSION").value
+    except SQLObjectNotFound:
+        raise YokadiException("Configuration key DB_VERSION does not exist. This should not happen!")
+
+
 def connectDatabase(dbFileName, createIfNeeded=True):
     """Connect to database and create it if needed
     @param dbFileName: path to database file
@@ -128,20 +140,8 @@ def connectDatabase(dbFileName, createIfNeeded=True):
             print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
             sys.exit(1)
 
-    # Ensure Config table exist
-    if not Config.tableExists():
-        # So we have juste migrated from a yokadi without Config
-        print "Configuration table does not exist. Creating it"
-        Config.createTable()
-    # Check that the current database version is aligned with Yokadi code
-    try:
-        version=Config.byName("DB_VERSION").value
-    except SQLObjectNotFound:
-        # Ok, we have a Config table but no DB_VERSION key. Quite strange. Default to version 1
-        print "Oups. Config table does not have the DB_VERSION key. Creating it with default value 1"
-        Config(name="DB_VERSION", value="1", system=True, desc="Database schema release number")
-        version="1"
-
+    # Check version
+    version = getVersion()
     if version!=DB_VERSION:
         print C.BOLD+C.RED+"Your database version is %s wether your Yokadi code wants version %s." \
             % (version, DB_VERSION) + C.RESET
