@@ -1,0 +1,52 @@
+#!/usr/bin/env python
+# Generates a data-only sqlite dump, with insert statements including column
+# names.
+import os
+import re
+import subprocess
+import sys
+from pysqlite2 import dbapi2 as sqlite
+
+
+def getTableList(cx):
+    cursor = cx.cursor()
+    cursor.execute("select name from sqlite_master where type='table'")
+    return [x[0] for x in cursor.fetchall()]
+
+
+def getTableColumnList(cx, table):
+    cursor = cx.cursor()
+    cursor.execute("select * from %s" % table)
+    return [x[0] for x in cursor.description]
+
+
+def dumpTable(cx, dbFileName, table, fl):
+    rx = re.compile(u"^insert into %s values" % table, re.IGNORECASE)
+
+    columnList = getTableColumnList(cx, table)
+    newText = u"insert into %s(%s) values" % (table, ",".join(columnList))
+
+    child = subprocess.Popen(["sqlite3", dbFileName], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    child.stdin.write(".mode insert %s\nselect * from %s;\n" % (table, table))
+    child.stdin.close()
+
+    for line in child.stdout.readlines():
+        line = unicode(line, "utf-8")
+        line = rx.sub(newText, line)
+        fl.write(line.encode("utf-8"))
+
+
+def main():
+    dbFileName = sys.argv[1]
+    dumpFileName = sys.argv[2]
+    dumpFile = file(dumpFileName, "w")
+
+    cx = sqlite.connect(os.path.abspath(dbFileName))
+
+    for table in getTableList(cx):
+        dumpTable(cx, dbFileName, table, dumpFile)
+
+
+if __name__ == "__main__":
+    main()
+# vi: ts=4 sw=4 et
