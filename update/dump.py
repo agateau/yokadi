@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Generates a data-only sqlite dump, with insert statements including column
 # names.
 import os
@@ -36,15 +35,17 @@ def dumpTable(cx, dbFileName, table, fl):
         fl.write(line.encode("utf-8"))
 
 
+def dumpDatabase(dbFileName, dumpFile):
+    cx = sqlite.connect(os.path.abspath(dbFileName))
+    for table in getTableList(cx):
+        dumpTable(cx, dbFileName, table, dumpFile)
+
+
 def main():
     dbFileName = sys.argv[1]
     dumpFileName = sys.argv[2]
     dumpFile = file(dumpFileName, "w")
-
-    cx = sqlite.connect(os.path.abspath(dbFileName))
-
-    for table in getTableList(cx):
-        dumpTable(cx, dbFileName, table, dumpFile)
+    dumpDatabase(dbFileName, dumpFile)
 
 
 if __name__ == "__main__":

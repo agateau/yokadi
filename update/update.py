@@ -7,6 +7,7 @@ from optparse import OptionParser
 
 from sqlobject import connectionForURI
 
+import dump
 import update1to2
 
 CURRENT_DB_VERSION = 2
@@ -28,9 +29,9 @@ def createWorkDb(fileName):
 def createFinalDb(workFileName, finalFileName):
     dumpFileName = "dump.sql"
     print "Dumping into %s" % dumpFileName
-    err = subprocess.call(["/usr/bin/python", "dump.py", workFileName, dumpFileName])
-    if err != 0:
-        raise Exception("dump.py failed")
+    dumpFile = file(dumpFileName, "w")
+    dump.dumpDatabase(workFileName, dumpFile)
+    dumpFile.close()
 
     print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
     err = subprocess.call(["/usr/bin/python", "restore.py", finalFileName,
