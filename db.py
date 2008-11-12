@@ -13,9 +13,10 @@ import os, sys
 import colors as C
 
 # Yokadi database version needed for this code
-# If database config keyDB_VERSION differ from this one
+# If database config key DB_VERSION differ from this one
 # a database migration is required
-DB_VERSION="2"
+DB_VERSION = 2
+DB_VERSION_KEY = "DB_VERSION"
 
 
 class Project(SQLObject):
@@ -112,9 +113,9 @@ def getVersion():
         return 1
 
     try:
-        return Config.byName("DB_VERSION").value
+        return int(Config.byName(DB_VERSION_KEY).value)
     except SQLObjectNotFound:
-        raise YokadiException("Configuration key DB_VERSION does not exist. This should not happen!")
+        raise YokadiException("Configuration key '%s' does not exist. This should not happen!" % DB_VERSION_KEY)
 
 
 def connectDatabase(dbFileName, createIfNeeded=True):
@@ -135,15 +136,15 @@ def connectDatabase(dbFileName, createIfNeeded=True):
             print "Creating database"
             createTables()
             # Set database version according to current yokadi release
-            Config(name="DB_VERSION", value=DB_VERSION, system=True, desc="Database schema release number")
+            Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number")
         else:
             print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
             sys.exit(1)
 
     # Check version
     version = getVersion()
-    if version!=DB_VERSION:
-        print C.BOLD+C.RED+"Your database version is %s wether your Yokadi code wants version %s." \
+    if version != DB_VERSION:
+        print C.BOLD+C.RED+"Your database version is %d but Yokadi wants version %d." \
             % (version, DB_VERSION) + C.RESET
         print "Please, run the update.py script to migrate your database prior to running Yokadi"
         sys.exit(1)
