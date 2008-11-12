@@ -1,4 +1,27 @@
 #!/usr/bin/env python
+"""
+This script updates a Yokadi database to the latest version
+
+How the update process works (assuming current version is x and target version
+is x+n, database version x is old.db and database version x+n is new.db):
+
+- Create a copy of old.db
+- for v in range(x, x + n):
+-   run update<v>to<v+1>.updateDb()
+- Create a data-only SQL dump of the database
+- Create an empty database in new.db
+- Restore the dump in new.db
+
+The final dump/restore state ensures that:
+- All fields are created in the same order (when adding a new column, you can't
+  specify its position)
+- All constraints are in place (when adding a new column, you can't mark it
+  'non null')
+- The update process really creates the same structure as db.createDatabase()
+
+Restoring the dump is done in a separate script because we use Yokadi table
+definitions, but the update scripts might have defined them differently.
+"""
 import os
 import subprocess
 import sys
