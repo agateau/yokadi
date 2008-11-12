@@ -2,13 +2,13 @@
 """
 This script updates a Yokadi database to the latest version
 
-How the update process works (assuming current version is x and target version
-is x+n, database version x is old.db and database version x+n is new.db):
+Assuming current version is x and target version is x+n, database version x is
+old.db and database version x+n is new.db. The process goes like this:
 
-- Create a copy of old.db
+- Create a copy of old.db in work.db
 - for v in range(x, x + n):
--   run update<v>to<v+1>.updateDb()
-- Create a data-only SQL dump of the database
+-   run update<v>to<v+1> work.db
+- Create a data-only SQL dump of work.db
 - Create an empty database in new.db
 - Restore the dump in new.db
 
@@ -17,10 +17,12 @@ The final dump/restore state ensures that:
   specify its position)
 - All constraints are in place (when adding a new column, you can't mark it
   'non null')
-- The update process really creates the same structure as db.createDatabase()
+- The updated database has the exact same structure as a brand new database.
 
-Restoring the dump is done in a separate script because we use Yokadi table
-definitions, but the update scripts might have defined them differently.
+Updating from v to v+1 is done in separate scripts because these scripts may
+define SQLObject tables.  SQLObject can't handle table redefinitions, using
+separate scripts solves the problem.
+It also make it possible to write an update script in shell if needed.
 """
 import os
 import subprocess
