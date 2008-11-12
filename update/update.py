@@ -28,10 +28,12 @@ import sys
 import shutil
 from optparse import OptionParser
 
-from sqlobject import connectionForURI
+from sqlobject import *
 
 import dump
-import update1to2
+
+sys.path.append("..")
+import db
 
 CURRENT_DB_VERSION = 2
 
@@ -57,10 +59,11 @@ def createFinalDb(workFileName, finalFileName):
     dumpFile.close()
 
     print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
-    err = subprocess.call(["/usr/bin/python", "restore.py", finalFileName,
-    dumpFileName])
+    sqlhub.processConnection = connectionForURI("sqlite:" + finalFileName)
+    db.createTables()
+    err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
-        raise Exception("restore.py failed")
+        raise Exception("Dump restoration failed")
 
 
 def main():
@@ -72,15 +75,13 @@ def main():
     if len(args) != 2:
         parser.error("Wrong argument count")
 
-    dbFileName = args[0]
-    newDbFileName = args[1]
+    dbFileName    = os.path.abspath(args[0])
+    newDbFileName = os.path.abspath(args[1])
     if not os.path.exists(dbFileName):
         parser.error("'%s' does not exist" % dbFileName)
 
     if os.path.exists(newDbFileName):
         parser.error("'%s' already exists" % newDbFileName)
-
-    dbFileName = os.path.abspath(dbFileName)
 
     # Check version
     version = getVersion(dbFileName)
