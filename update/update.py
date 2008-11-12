@@ -96,9 +96,12 @@ def main():
         version = getVersion(workDbFileName)
         if version == CURRENT_DB_VERSION:
             break
-        mod = eval("update%dto%d" % (version, version + 1))
-        mod.updateDb(workDbFileName)
-        print "Updated to version %d" % (version + 1)
+        scriptFileName = os.path.abspath("update%dto%d" % (version, version + 1))
+        print "Running %s" % scriptFileName
+        err = subprocess.call([scriptFileName, workDbFileName])
+        if err != 0:
+            print "Update failed."
+            return 2
 
     createFinalDb(workDbFileName, newDbFileName)
 
