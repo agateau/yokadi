@@ -35,8 +35,6 @@ import dump
 sys.path.append("..")
 import db
 
-CURRENT_DB_VERSION = 2
-
 def getVersion(fileName):
     cx = connectionForURI('sqlite:' + fileName)
     if not cx.tableExists("config"):
@@ -86,7 +84,7 @@ def main():
     # Check version
     version = getVersion(dbFileName)
     print "Found version %d" % version
-    if version == CURRENT_DB_VERSION:
+    if version == db.DB_VERSION:
         print "Nothing to do"
         return 0
 
@@ -95,7 +93,7 @@ def main():
 
     while True:
         version = getVersion(workDbFileName)
-        if version == CURRENT_DB_VERSION:
+        if version == db.DB_VERSION:
             break
         scriptFileName = os.path.abspath("update%dto%d" % (version, version + 1))
         print "Running %s" % scriptFileName
