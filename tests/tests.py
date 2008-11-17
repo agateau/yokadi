@@ -15,8 +15,8 @@ sys.path.append(join(dirname(sys.argv[0]), pardir))
 import parseutils
 
 gTaskLineToParsedStructList = [
-    ("project some text -k keyword1 -k keyword2=12 some other text", ("project", "some text some other text", {"keyword1":None, "keyword2":12} )),
-    ("project ééé", ("project", "ééé", {} )),
+    (u"project some text -k keyword1 -k keyword2=12 some other text", (u"project", u"some text some other text", {u"keyword1":None, u"keyword2":12} )),
+    (u"project ééé", (u"project", u"ééé", {} )),
     ]
 
 class ParseUtilsTests(unittest.TestCase):

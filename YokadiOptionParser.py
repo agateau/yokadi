@@ -8,11 +8,13 @@ instead of calling sys.exit() in case of error
 """
 from optparse import OptionParser
 import shlex
+import utils
 
 class YokadiOptionParser(OptionParser):
     def parse_args(self, line):
-        args = shlex.split(line.encode("utf-8"))
-        return OptionParser.parse_args(self, args)
+        argv = shlex.split(line.encode(utils.ENCODING))
+        options, args = OptionParser.parse_args(self, argv)
+        return options, [unicode(x, utils.ENCODING) for x in args]
 
     def error(self):
         raise YokadiException("Parse error")

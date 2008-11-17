@@ -65,7 +65,7 @@ def parseTaskLine(line):
 def createTaskLine(projectName, title, keywordDict):
     tokens = []
     for keywordName, value in keywordDict.items():
-        tokens.append("-k")
+        tokens.append(u"-k")
         if value:
             tokens.append(keywordName + "=" + str(value))
         else:
@@ -74,7 +74,7 @@ def createTaskLine(projectName, title, keywordDict):
     tokens.insert(0, projectName)
 
     tokens.append(title)
-    return " ".join(tokens)
+    return u" ".join(tokens)
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
