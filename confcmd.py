@@ -13,20 +13,21 @@ from utils import YokadiException
 from completers import confCompleter
 from textrenderer import TextRenderer
 import colors as C
+from YokadiOptionParser import YokadiOptionParser
 
 class ConfCmd(CommonCmd):
 
     def do_c_get(self, line):
         """Display a configuration key. If no key is given, all keys are shown.
         Use -s switch to also display system parameters"""
-        if "s" in self.parameters:
-            system=True
-        else:
-            system=False
+        parser = YokadiOptionParser(ConfCmd.do_c_get.__doc__)
+        parser.add_option("-s", dest="system", default=False, action="store_true")
+        options, args = parser.parse_args(line)
+        line = u" ".join(args)
         if not line:
             line="%"
         try:
-            k=Config.select(AND(LIKE(Config.q.name, line.strip()), Config.q.system==system))
+            k=Config.select(AND(LIKE(Config.q.name, line), Config.q.system==options.system))
             fields=[(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
             t=TextRenderer()
             t.renderFields(fields)
