@@ -8,6 +8,8 @@ Parse utilities. Used to manipulate command line text.
 import re
 from db import Config
 
+from YokadiOptionParser import YokadiOptionParser
+
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):
     line = gSimplifySpaces.subn(" ", line)[0]
@@ -28,13 +30,7 @@ def parseParameters(line):
             text.append(word)
     return (parameters, " ".join(text))
 
-def fixKeywordValue(value):
-    if value != '':
-        return int(value)
-    else:
-        return None
 
-gKeywordRe=re.compile("-k *([^ =]+)(?:=(\d+))?")
 def parseTaskLine(line):
     """Parse line of form:
     project some text -k keyword1 -k keyword2=12 some other text
@@ -49,14 +45,20 @@ def parseTaskLine(line):
         project=Config.byName("DEFAULT_PROJECT").value
         print "Project name not given, using default project (%s)" % project
 
-    # Extract keywords
-    matches = gKeywordRe.findall(line)
-    matches = [(x, fixKeywordValue(y)) for x,y in matches]
-    keywordDict = dict(matches)
+    parser = YokadiOptionParser()
+    parser.add_option("-k", dest="keyword", action="append")
+    options, args = parser.parse_args(line)
 
-    # Erase keywords
-    line = gKeywordRe.subn("", line)[0]
-    line = simplifySpaces(line)
+    keywordDict = {}
+    if options.keyword:
+        for text in options.keyword:
+            if "=" in text:
+                keyword, value = text.split("=", 1)
+                value = int(value)
+            else:
+                keyword, value = text, None
+            keywordDict[keyword] = value
+    line = u" ".join(args)
     return project, line, keywordDict
 
 
