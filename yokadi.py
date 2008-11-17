@@ -22,6 +22,7 @@ from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from utils import YokadiException
+from YokadiOptionParser import YokadiOptionParserNormalExitException
 import colors as C
 
 # Default user encoding. Used to decode all input strings
@@ -70,6 +71,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
             # Decode user input
             line=line.decode(ENCODING)
             return Cmd.onecmd(self, line)
+        except YokadiOptionParserNormalExitException:
+            pass
         except YokadiException, e:
             print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
         except KeyboardInterrupt:
