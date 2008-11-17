@@ -17,16 +17,16 @@ from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter
 from utils import YokadiException, guessDateFormat, guessTimeFormat
 import colors as C
-from commoncmd import CommonCmd
 
 from datetime import datetime, timedelta
 from time import strptime
 
-class TaskCmd(CommonCmd):
+from YokadiOptionParser import YokadiOptionParser
+
+class TaskCmd(object):
     __slots__ = ["renderer"]
     def __init__(self):
         self.renderer = TextRenderer()
-        CommonCmd.__init__(self)
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
@@ -110,29 +110,34 @@ class TaskCmd(CommonCmd):
 
     def do_t_list(self, line):
         """List tasks filtered by project and/or keywords.
-        t_list [-adu] <project_name> [<keyword1> [<keyword2>]...]
+        t_list [options] <project_name> [<keyword1> [<keyword2>]...]
 
         '%' can be used as a wildcard in the project name:
         - To list projects starting with "foo", use "foo%".
 
         Parameters:
-        -a : all tasks (done and to be done)
-        -d : only done tasks
-        -u : top 5 urgent tasks of each project based on urgency
-        -t : top 5 urgent tasks of each project based on due date
+        -a, --all        : all tasks (done and to be done)
+        -d, --done       : only done tasks
+        -u, --top-urgent : top 5 urgent tasks of each project based on urgency
+        -t, --top-due    : top 5 urgent tasks of each project based on due date
         """
         #BUG: completion based on parameter position is broken when parameter is given
-        parameters=self.parameters
-        tokens = line.strip().split(' ')
-        projectName = tokens[0]
-        if not projectName:
+        parser = YokadiOptionParser(self.do_t_list.__doc__)
+        parser.add_option("-a", "--all",        dest="all",       default=False, action="store_true")
+        parser.add_option("-d", "--done",       dest="done",      default=False, action="store_true")
+        parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
+        parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
+        options, args = parser.parse_args(line)
+        if len(args) > 0:
+            projectName = args[0]
+        else:
             # Take all project if none provided
             projectName="%"
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
-        if len(tokens) > 1:
+        if len(args) > 1:
             keywordSet = set()
-            for k in tokens[1:]:
+            for k in args[1:]:
                 try:
                     keywordSet.add(Keyword.byName(k))
                 except SQLObjectNotFound:
@@ -145,14 +150,14 @@ class TaskCmd(CommonCmd):
         filters=[]
         order=-Task.q.urgency
         limit=None
-        if "d" in parameters:
+        if options.done:
             filters.append(Task.q.status=='done')
-        if not "a" in parameters:
+        elif not options.all:
             filters.append(Task.q.status!='done')
-        if "u" in parameters:
+        if options.topUrgent:
             order=-Task.q.urgency
             limit=5
-        if "t" in parameters:
+        if options.topDue:
             filters.append(Task.q.dueDate!=None)
             order=Task.q.dueDate
             limit=5

@@ -7,7 +7,6 @@ Configuration management related commands.
 """
 
 from db import Config
-from commoncmd import CommonCmd
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from utils import YokadiException
 from completers import confCompleter
@@ -15,7 +14,7 @@ from textrenderer import TextRenderer
 import colors as C
 from YokadiOptionParser import YokadiOptionParser
 
-class ConfCmd(CommonCmd):
+class ConfCmd(object):
 
     def do_c_get(self, line):
         """Display a configuration key. If no key is given, all keys are shown.
