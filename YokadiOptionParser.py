@@ -17,5 +17,5 @@ class YokadiOptionParser(OptionParser):
         return options, [unicode(x, utils.ENCODING) for x in args]
 
     def error(self):
-        raise YokadiException("Parse error")
+        raise utils.YokadiException("Parse error")
 # vi: ts=4 sw=4 et
