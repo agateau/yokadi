@@ -22,7 +22,7 @@ from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from utils import YokadiException
-from YokadiOptionParser import YokadiOptionParserNormalExitException
+from yokadioptionparser import YokadiOptionParserNormalExitException
 import colors as C
 
 # Default user encoding. Used to decode all input strings

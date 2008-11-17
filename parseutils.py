@@ -8,7 +8,7 @@ Parse utilities. Used to manipulate command line text.
 import re
 from db import Config
 
-from YokadiOptionParser import YokadiOptionParser
+from yokadioptionparser import YokadiOptionParser
 
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):

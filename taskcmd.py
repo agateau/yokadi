@@ -21,7 +21,7 @@ import colors as C
 from datetime import datetime, timedelta
 from time import strptime
 
-from YokadiOptionParser import YokadiOptionParser
+from yokadioptionparser import YokadiOptionParser
 
 class TaskCmd(object):
     __slots__ = ["renderer"]

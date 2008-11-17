@@ -12,7 +12,7 @@ from utils import YokadiException
 from completers import confCompleter
 from textrenderer import TextRenderer
 import colors as C
-from YokadiOptionParser import YokadiOptionParser
+from yokadioptionparser import YokadiOptionParser
 
 class ConfCmd(object):
 
