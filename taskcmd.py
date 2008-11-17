@@ -34,7 +34,7 @@ class TaskCmd(object):
         if not line:
             print "Give at least a task name !"
             return
-        projectName, title, keywordDict = parseutils.parseTaskLine(self.rawline)
+        projectName, title, keywordDict = parseutils.parseTaskLine(line)
         if not title:
             raise YokadiException("You should give a task title")
         task = utils.addTask(projectName, title, keywordDict)
