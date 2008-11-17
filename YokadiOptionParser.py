@@ -9,6 +9,7 @@ instead of calling sys.exit() in case of error
 from optparse import OptionParser
 import shlex
 import utils
+import sys
 
 """
 A dummy exception which makes it possible to have --help exit silently
