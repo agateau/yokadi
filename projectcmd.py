@@ -67,11 +67,11 @@ class ProjectCmd(object):
         project = projectByName(line)
         taskList = Task.select(Task.q.projectID == project.id)
         taskList = list(taskList)
-        print "Deleting project tasks:"
+        print "Removing project tasks:"
         for task in taskList:
             task.delete(task.id)
             print "- task %(id)-3s: %(title)-30s" % dict(id=str(task.id), title=str(task.title))
         project.delete(project.id)
-        print "Project deleted"
+        print "Project removed"
     complete_p_remove = ProjectCompleter(1)
 # vi: ts=4 sw=4 et
