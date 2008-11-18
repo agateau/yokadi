@@ -73,4 +73,5 @@ class ProjectCmd(object):
             print "- task %(id)-3s: %(title)-30s" % dict(id=str(task.id), title=str(task.title))
         project.delete(project.id)
         print "Project deleted"
+    complete_p_remove = ProjectCompleter(1)
 # vi: ts=4 sw=4 et
