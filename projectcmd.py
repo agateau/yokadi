@@ -6,7 +6,7 @@ Project related commands.
 @license: GPLv3
 """
 
-from db import Project
+from db import Project, Task
 from completers import ProjectCompleter
 from utils import YokadiException
 from sqlobject import SQLObjectNotFound
@@ -53,4 +53,19 @@ class ProjectCmd(object):
 
     complete_p_set_inactive = ProjectCompleter(1)
 
+    def do_p_remove(self, line):
+        """Remove a project and all its associated tasks
+        p_remove <project_name>"""
+        line = line.strip()
+        if len(line) == 0:
+            raise YokadiException("You should give one argument: <project_name>")
+        project = Project.byName(line)
+        taskList = Task.select(Task.q.projectID == project.id)
+        taskList = list(taskList)
+        print "Deleting project tasks:"
+        for task in taskList:
+            task.delete(task.id)
+            print "- task %(id)-3s: %(title)-30s" % dict(id=str(task.id), title=str(task.title))
+        project.delete(project.id)
+        print "Project deleted"
 # vi: ts=4 sw=4 et
