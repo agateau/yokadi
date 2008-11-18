@@ -44,22 +44,38 @@ def addTask(projectName, title, keywordDict):
 
     return task
 
-def getTaskFromId(line, existingTask=True):
-    """Verify that a taskId was provided and optionaly checks if the task exists
+def getTaskFromId(line, parameterName="id"):
+    """Returns a task given its id, or raise a YokadiException if it does not
+    exist.
     @param line: taskId string
-    @param existingTask: wether to check if task really exists
+    @param parameterName: name of the parameter to mention in exception
     @return: Task instance or None if existingTask is False"""
+    line = line.strip()
+    if len(line) == 0:
+        raise YokadiException("Missing <%s> parameter" % parameterName)
+
     if not line.isdigit():
-        raise YokadiException("Provide a task id")
+        raise YokadiException("<%s> should be a number" % parameterName)
     taskId = int(line)
-    if existingTask:
-        try:
-            task = Task.get(taskId)
-        except SQLObjectNotFound:
-            raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
-    else:
-        task=None
-    return task
+
+    try:
+        return Task.get(taskId)
+    except SQLObjectNotFound:
+        raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
+
+def getProjectFromName(name, parameterName="project_name"):
+    """
+    Helper function which returns a project given its name, or raise a
+    YokadiException if it does not exist.
+    """
+    name = name.strip()
+    if len(name) == 0:
+        raise YokadiException("Missing <%s> parameter" % parameterName)
+
+    try:
+        return Project.byName(name)
+    except SQLObjectNotFound:
+        raise YokadiException("Project '%s' not found. Use p_list to see all projects." % name)
 
 #TODO: factorize the two following functions and make a generic one
 def getOrCreateKeyword(keywordName, interactive=True):
