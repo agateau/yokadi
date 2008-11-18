@@ -105,7 +105,12 @@ class TaskCmd(object):
         """Delete a task.
         t_remove <id>"""
         task=utils.getTaskFromId(line)
+        projectId = task.project.id
         task.destroySelf()
+
+        # Delete project with no associated tasks
+        if Task.select(Task.q.projectID == projectId).count() == 0:
+            Project.delete(projectId)
 
 
     def do_t_list(self, line):
