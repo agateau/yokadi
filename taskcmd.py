@@ -223,9 +223,25 @@ class TaskCmd(object):
 
     def do_t_show(self, line):
         """Display details of a task.
-        t_show <id>"""
-        task=utils.getTaskFromId(line)
-        self.renderer.renderTaskDetails(task)
+        t_show [options] <id>
+
+        Parameters:
+        --output={all,summary,description} Output all (default), only summary,
+                                           or only description.
+        """
+        parser = YokadiOptionParser(self.do_t_show.__doc__)
+        parser.add_option("--output", dest="output", default="all")
+        options, args = parser.parse_args(line)
+
+        task=utils.getTaskFromId(' '.join(args))
+
+        if options.output in ("all", "summary"):
+            self.renderer.renderTaskSummary(task)
+
+        if options.output in ("all", "description") and task.description:
+            if options.output == "all":
+                print
+            print task.description
 
 
     def do_t_edit(self, line):

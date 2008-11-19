@@ -58,7 +58,7 @@ class TextRenderer(object):
                                        creationDate=creationDate, timeLeft=timeLeft)
 
 
-    def renderTaskDetails(self, task):
+    def renderTaskSummary(self, task):
         keywordDict = task.getKeywordDict()
         keywordArray = []
         for name, value in keywordDict.items():
@@ -85,9 +85,6 @@ class TextRenderer(object):
 
         self.renderFields(fields)
 
-        if task.description != '':
-            print
-            print task.description
 
     def renderFields(self, fields):
         """Print on screen tabular array represented by fields
