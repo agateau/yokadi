@@ -10,9 +10,13 @@ Yokadi unit tests
 import unittest
 
 from parseutilstestcase import ParseUtilsTestCase
+from yokadioptionparsertestcase import YokadiOptionParserTestCase
 
 def main():
-    testCases = [ParseUtilsTestCase]
+    testCases = [
+        ParseUtilsTestCase,
+        YokadiOptionParserTestCase,
+        ]
     suites = [unittest.TestLoader().loadTestsFromTestCase(x) for x in testCases]
     suite = unittest.TestSuite(suites)
     runner = unittest.TextTestRunner()
