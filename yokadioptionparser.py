@@ -7,7 +7,6 @@ instead of calling sys.exit() in case of error
 @license: GPLv3
 """
 from optparse import OptionParser
-import shlex
 import utils
 import sys
 
@@ -23,9 +22,8 @@ class YokadiOptionParser(OptionParser):
         self.help = help
 
     def parse_args(self, line):
-        argv = shlex.split(line.encode(utils.ENCODING))
-        options, args = OptionParser.parse_args(self, argv)
-        return options, [unicode(x, utils.ENCODING) for x in args]
+        argv = line.split(u" ")
+        return OptionParser.parse_args(self, argv)
 
     def exit(self, status=0, msg=None):
         if msg:
