@@ -21,7 +21,7 @@ gTaskLineToParsedStructList = [
     (u"   project this  one has  extra spaces  ", (u"project", u"this one has extra spaces", {} )),
     ]
 
-class ParseUtilsTests(unittest.TestCase):
+class ParseUtilsTestCase(unittest.TestCase):
     def testExtractKeywords(self):
         for src, dst in gTaskLineToParsedStructList:
             result = parseutils.parseTaskLine(src)
@@ -47,7 +47,13 @@ class ParseUtilsTests(unittest.TestCase):
             self.assertEqual(result, expectedResult)
 
 
+def main():
+    testCases = [ParseUtilsTestCase]
+    suites = [unittest.TestLoader().loadTestsFromTestCase(x) for x in testCases]
+    suite = unittest.TestSuite(suites)
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
 
 if __name__ == "__main__":
-    unittest.main()
+    main()
 # vi: ts=4 sw=4 et
