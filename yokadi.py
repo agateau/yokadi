@@ -120,8 +120,8 @@ def main():
     (options, args) = parser.parse_args()
 
     if not options.filename:
-        print "You must provide a database with --db option"
-        sys.exit(1)
+        options.filename=os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
+        print "Using default database (%s)" % options.filename
 
     db.connectDatabase(options.filename)
 
