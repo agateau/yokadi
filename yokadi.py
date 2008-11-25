@@ -22,11 +22,9 @@ from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from utils import YokadiException
+from utils import ENCODING
 from yokadioptionparser import YokadiOptionParserNormalExitException
 import colors as C
-
-# Default user encoding. Used to decode all input strings
-ENCODING=locale.getpreferredencoding()
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command

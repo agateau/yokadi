@@ -17,7 +17,8 @@ from db import Keyword, Project, Task
 import colors as C
 
 # Default user encoding. Used to decode all input strings
-# This is a redefinition of yokadi.py ENCODING constant to avoid circular import
+# This is the central yokadi definition of encoding - this constant is imported from all other modules
+# Beware of circular import definition when add dependencies to this module
 ENCODING=locale.getpreferredencoding()
 
 def addTask(projectName, title, keywordDict):

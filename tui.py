@@ -12,11 +12,7 @@ import subprocess
 import tempfile
 import locale
 import colors as C
-from utils import YokadiException
-
-# Default user encoding. Used to decode all input strings
-# This is a redefinition of yokadi.py ENCODING constant to avoid circular import
-ENCODING=locale.getpreferredencoding()
+from utils import YokadiException, ENCODING
 
 def editText(text):
     """Edit text with external editor
