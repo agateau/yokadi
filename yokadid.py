@@ -15,6 +15,13 @@ from subprocess import Popen
 from optparse import OptionParser
 from commands import getoutput
 
+from utils import ENCODING
+
+# Force default encoding to prefered encoding
+reload(sys)
+sys.setdefaultencoding(ENCODING)
+
+
 from db import Config, Task, connectDatabase
 
 try:
@@ -107,6 +114,7 @@ def eventLoop():
     while event[0]:
         time.sleep(DELAY)
         now=datetime.today().replace(microsecond=0)
+        #TODO: discard tasks of inactive project
         delayTasks=Task.select(AND(Task.q.dueDate < now+delta, Task.q.dueDate > now))
         dueTasks=Task.select(Task.q.dueDate < now)
         processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate)
