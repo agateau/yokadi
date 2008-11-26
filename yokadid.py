@@ -189,14 +189,15 @@ def main():
     if not options.foreground:
         doubleFork()
 
-    if options.filename:
-        connectDatabase(options.filename, createIfNeeded=False)
-        # Basic tests :
-        if not (Task.tableExists() and Config.tableExists()):
-            print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
-            sys.exit(1)
-    else:
-        print "No database given, exiting"
+    if not options.filename:
+        options.filename=os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
+        print "Using default database (%s)" % options.filename
+
+    connectDatabase(options.filename, createIfNeeded=False)
+    
+    # Basic tests :
+    if not (Task.tableExists() and Config.tableExists()):
+        print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
         sys.exit(1)
 
     # Start the main event Loop
