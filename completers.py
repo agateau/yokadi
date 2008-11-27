@@ -48,7 +48,7 @@ def taskIdCompleter(cmd, text, line, begidx, endidx):
     #TODO: filter on parameter position
     #TODO: potential performance issue with lots of tasks, find a better way to do it
     renderer=TextRenderer()
-    tasks=[x for x in Task.select() if str(x.id).startswith(text)]
+    tasks=[x for x in Task.select(Task.q.status!='done') if str(x.id).startswith(text)]
     print
     for task in tasks:
         renderer.renderTaskListRow(task)
