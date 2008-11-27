@@ -14,7 +14,7 @@ import parseutils
 import sys
 import tui
 from textrenderer import TextRenderer
-from completers import ProjectCompleter, t_listCompleter
+from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
 from utils import YokadiException, guessDateFormat, guessTimeFormat
 import colors as C
 
@@ -50,6 +50,8 @@ class TaskCmd(object):
         description = tui.editText(task.description)
         task.description = description
 
+    complete_t_describe = taskIdCompleter
+
     def do_t_set_urgency(self, line):
         """Defines urgency of a task (0 -> 100).
         t_set_urgency <id> <value>"""
@@ -63,12 +65,16 @@ class TaskCmd(object):
         else:
             raise YokadiException("Task urgency must be a digit")
 
+    complete_t_set_urgency = taskIdCompleter
+
     def do_t_mark_started(self, line):
         """Mark task as started.
         t_mark_started <id>"""
         task=utils.getTaskFromId(line)
         task.status = 'started'
         task.doneDate = None
+
+    complete_t_mark_started = taskIdCompleter
 
     def do_t_mark_done(self, line):
         """Mark task as done.
@@ -77,12 +83,16 @@ class TaskCmd(object):
         task.status = 'done'
         task.doneDate = datetime.now()
 
+    complete_t_mark_done = taskIdCompleter
+
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
         t_mark_new <id>"""
         task=utils.getTaskFromId(line)
         task.status = 'new'
         task.doneDate = None
+
+    complete_t_mark_new = taskIdCompleter
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
@@ -101,6 +111,8 @@ class TaskCmd(object):
             line = " ".join([cmd, str(id), args])
             self.onecmd(line.strip())
 
+    complete_t_apply = taskIdCompleter
+
     def do_t_remove(self, line):
         """Delete a task.
         t_remove <id>"""
@@ -112,6 +124,7 @@ class TaskCmd(object):
         if Task.select(Task.q.projectID == projectId).count() == 0:
             Project.delete(projectId)
 
+    complete_t_remove = taskIdCompleter
 
     def do_t_list(self, line):
         """List tasks filtered by project and/or keywords.
@@ -243,6 +256,7 @@ class TaskCmd(object):
                 print
             print task.description
 
+    complete_t_show = taskIdCompleter
 
     def do_t_edit(self, line):
         """Edit a task.
@@ -263,6 +277,8 @@ class TaskCmd(object):
         task.title = title
         task.setKeywordDict(keywordDict)
 
+
+    complete_t_edit = taskIdCompleter
 
     def do_t_set_project(self, line):
         """Set task's project.
@@ -348,6 +364,8 @@ class TaskCmd(object):
                     dueDate=dueDate.replace(month=today.month)
         # Set the due date
         task.dueDate=dueDate
+
+    complete_t_set_due = taskIdCompleter
 
     def do_t_export(self, line):
         """Export all tasks of all projects in various format
