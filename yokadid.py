@@ -111,12 +111,16 @@ def eventLoop():
     cmdDueTemplate=Config.byName("ALARM_DUE_CMD").value
     triggeredDelayTasks={}
     triggeredDueTasks={}
+    #TODO: discard tasks of inactive project
+    activeTaskFilter=[Task.q.status!="done"]
     while event[0]:
         time.sleep(DELAY)
         now=datetime.today().replace(microsecond=0)
-        #TODO: discard tasks of inactive project
-        delayTasks=Task.select(AND(Task.q.dueDate < now+delta, Task.q.dueDate > now))
-        dueTasks=Task.select(Task.q.dueDate < now)
+        delayTasks=Task.select(AND(Task.q.dueDate < now+delta,
+                                   Task.q.dueDate > now,
+                                   *activeTaskFilter))
+        dueTasks=Task.select(AND(Task.q.dueDate < now,
+                                 *activeTaskFilter))
         processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate)
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate)
 
@@ -127,7 +131,7 @@ def processTasks(tasks, triggeredTasks, cmdTemplate):
             continue
         print "Task %s is due soon" % task.title
         cmd=cmdTemplate.replace("{ID}", str(task.id))
-        cmd=cmd.replace("{TITLE}", task.title)
+        cmd=cmd.replace("{TITLE}", task.title.replace('"', '\"'))
         cmd=cmd.replace("{DATE}", str(task.dueDate))
         process=Popen(cmd, shell=True)
         #TODO: redirect stdout/stderr properly to Log (not so easy...)
