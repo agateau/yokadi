@@ -22,7 +22,7 @@ reload(sys)
 sys.setdefaultencoding(ENCODING)
 
 
-from db import Config, Task, connectDatabase
+from db import Config, Project, Task, connectDatabase
 
 try:
     from syslog import openlog, syslog, LOG_USER
@@ -111,8 +111,9 @@ def eventLoop():
     cmdDueTemplate=Config.byName("ALARM_DUE_CMD").value
     triggeredDelayTasks={}
     triggeredDueTasks={}
-    #TODO: discard tasks of inactive project
-    activeTaskFilter=[Task.q.status!="done"]
+    activeTaskFilter=[Task.q.status!="done",
+                      Task.q.projectID == Project.q.id,
+                      Project.q.active == True]
     while event[0]:
         time.sleep(DELAY)
         now=datetime.today().replace(microsecond=0)
