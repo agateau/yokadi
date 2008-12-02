@@ -30,6 +30,7 @@ It also make it possible to write an update script in shell if needed.
 """
 
 import os
+from os.path import abspath, dirname, join
 import subprocess
 import sys
 import shutil
@@ -39,7 +40,7 @@ from sqlobject import *
 
 import dump
 
-sys.path.append("..")
+sys.path.append(join(dirname(__file__),".."))
 import db
 
 def getVersion(fileName):
@@ -80,8 +81,8 @@ def main():
     if len(args) != 2:
         parser.error("Wrong argument count")
 
-    dbFileName    = os.path.abspath(args[0])
-    newDbFileName = os.path.abspath(args[1])
+    dbFileName    = abspath(args[0])
+    newDbFileName = abspath(args[1])
     if not os.path.exists(dbFileName):
         parser.error("'%s' does not exist" % dbFileName)
 
@@ -102,7 +103,7 @@ def main():
         version = getVersion(workDbFileName)
         if version == db.DB_VERSION:
             break
-        scriptFileName = os.path.abspath("update%dto%d" % (version, version + 1))
+        scriptFileName = join(dirname(__file__), "update%dto%d" % (version, version + 1))
         print "Running %s" % scriptFileName
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
