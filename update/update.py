@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 """
 This script updates a Yokadi database to the latest version
 
@@ -23,7 +24,11 @@ Updating from v to v+1 is done in separate scripts because these scripts may
 define SQLObject tables.  SQLObject can't handle table redefinitions, using
 separate scripts solves the problem.
 It also make it possible to write an update script in shell if needed.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
 """
+
 import os
 import subprocess
 import sys

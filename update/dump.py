@@ -1,5 +1,13 @@
-# Generates a data-only sqlite dump, with insert statements including column
-# names.
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+"""
+Generates a data-only sqlite dump, with insert statements including column
+names.
+
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
+
 import os
 import re
 import subprocess
