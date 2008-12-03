@@ -28,7 +28,7 @@ def createConfigTable():
 def alterProjectTable():
     class Project(SQLObject):
         pass
-    Project.addColumn(BoolCol("active", default=True), changeSchema=True)
+    Project.sqlmeta.addColumn(BoolCol("active", default=True), changeSchema=True)
     for project in Project.select():
         project.active = True
 
@@ -36,7 +36,7 @@ def alterProjectTable():
 def alterTaskTable():
     class Task(SQLObject):
         pass
-    Task.addColumn(DateTimeCol("dueDate", default=None), changeSchema=True)
+    Task.sqlmeta.addColumn(DateTimeCol("dueDate", default=None), changeSchema=True)
 
 
 def main():
