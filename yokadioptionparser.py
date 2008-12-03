@@ -23,6 +23,7 @@ class YokadiOptionParser(OptionParser):
 
     def parse_args(self, line):
         argv = line.split(u" ")
+        # Splitting an empty line gives us [""], not an empty array
         if argv == [u""]:
             argv = []
         return OptionParser.parse_args(self, argv)
