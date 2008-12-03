@@ -24,9 +24,13 @@ class Config(SQLObject):
 def createConfigTable():
     Config.createTable()
     rows = [
-        ("DB_VERSION"      , "2"       , True  , "Database schema release number")                   , 
-        ("TEXT_WIDTH"      , "60"      , False , "Width of task display output with t_list command") , 
-        ("DEFAULT_PROJECT" , "default" , False , "Default project used when no project name given")  , 
+        ("DB_VERSION"     , "2"      , True , "Database schema release number"),
+        ("TEXT_WIDTH"     , "60"     , False, "Width of task display output with t_list command"),
+        ("DEFAULT_PROJECT", "default", False, "Default project used when no project name given"),
+        ("ALARM_DELAY_CMD", '''kdialog --sorry "task {TITLE} ({ID}) is due for {DATE}" --title "Yokadi Daemon"''', False,
+                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        ("ALARM_DUE_CMD"  , '''kdialog --error "task {TITLE} ({ID}) should be done now" --title "Yokadi Daemon"''', False,
+                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY")
         ]
     for name, value, system, desc in rows:
         Config(name=name, value=value, system=system, desc=desc)
