@@ -153,6 +153,10 @@ class TaskCmd(object):
             projectName="%"
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
+        if projectList.count()==0:
+            # Try to find project starting by that name (usefull to get all child project)
+            projectList = Project.select(LIKE(Project.q.name, projectName+"%"))
+
         if len(args) > 1:
             keywordSet = set()
             for k in args[1:]:
