@@ -6,7 +6,6 @@ Task related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-
 from db import Config, Keyword, Project, Task
 from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
@@ -138,11 +137,17 @@ class TaskCmd(object):
 
         Parameters:
         -a, --all            : all tasks (done and to be done)
-        -d, --done           : only done tasks
+        -d, --done=[<range>] : only done tasks, optinally limited by <range>
+                               <range> can be:
+                               - today
+                               - thisweek
+                               - thismonth
         -u, --top-urgent     : top 5 urgent tasks of each project based on urgency
         -t, --top-due        : top 5 urgent tasks of each project based on due date
         -k <keyword>[=value] : only list tasks matching keyword
+
         """
+        doneRangeList= ["today", "thisweek", "thismonth"]
 
         def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
             # Returns true if taskKeywordDict is a subset of wantedKeywordDict
@@ -157,10 +162,25 @@ class TaskCmd(object):
                     return False
             return True
 
+        def createFilterFromRange(_range):
+            # Parse the _range string and return an SQLObject filter
+            minDate = datetime.now().date()
+            if _range == "today":
+                pass
+            elif _range == "thisweek":
+                minDate = minDate.replace(day = minDate.day - minDate.weekday())
+            elif _range == "thismonth":
+                minDate = minDate.replace(day = 1)
+            else:
+                raise YokadiException("Invalid range value '%s'" % _range)
+
+            return Task.q.doneDate>=minDate
+
+
         #BUG: completion based on parameter position is broken when parameter is given
         parser = YokadiOptionParser(self.do_t_list.__doc__)
         parser.add_option("-a", "--all",        dest="all",       default=False, action="store_true")
-        parser.add_option("-d", "--done",       dest="done",      default=False, action="store_true")
+        parser.add_option("-d", "--done",       dest="done",      default="")
         parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
         parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
         parser.add_option("-k",                 dest="keyword",   action="append")
@@ -196,8 +216,10 @@ class TaskCmd(object):
         filters=[]
         order=-Task.q.urgency
         limit=None
-        if options.done:
+        if options.done is not None:
             filters.append(Task.q.status=='done')
+            if options.done != "":
+                filters.append(createFilterFromRange(options.done))
         elif not options.all:
             filters.append(Task.q.status!='done')
         if options.topUrgent:
