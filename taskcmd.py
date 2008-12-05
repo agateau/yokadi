@@ -54,17 +54,19 @@ class TaskCmd(object):
     complete_t_describe = taskIdCompleter
 
     def do_t_set_urgency(self, line):
-        """Defines urgency of a task (0 -> 100).
+        """Defines urgency of a task.
         t_set_urgency <id> <value>"""
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You must provide a taskId and an urgency value") 
         task = utils.getTaskFromId(tokens[0])
-        if tokens[1].isdigit():
+        try:
+            # Do not use isdigit(), so that we can set negative urgency. This
+            # make it possible to stick tasks to the bottom of the list.
             urgency = int(tokens[1])
-            task.urgency = urgency
-        else:
+        except ValueError:
             raise YokadiException("Task urgency must be a digit")
+        task.urgency = urgency
 
     complete_t_set_urgency = taskIdCompleter
 
