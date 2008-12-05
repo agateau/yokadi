@@ -12,7 +12,8 @@ import subprocess
 import tempfile
 import locale
 import colors as C
-from utils import YokadiException, ENCODING
+from utils import ENCODING
+from yokadiexception import YokadiException
 
 def editText(text):
     """Edit text with external editor

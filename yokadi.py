@@ -21,7 +21,7 @@ from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
-from utils import YokadiException
+from yokadiexception import YokadiException
 from utils import ENCODING
 from yokadioptionparser import YokadiOptionParserNormalExitException
 import colors as C

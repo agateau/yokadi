@@ -7,13 +7,13 @@ instead of calling sys.exit() in case of error
 @license: GPLv3
 """
 from optparse import OptionParser
-import utils
 import sys
+from yokadiexception import YokadiException
 
 """
 A dummy exception which makes it possible to have --help exit silently
 """
-class YokadiOptionParserNormalExitException(utils.YokadiException):
+class YokadiOptionParserNormalExitException(YokadiException):
     pass
 
 class YokadiOptionParser(OptionParser):
@@ -34,11 +34,11 @@ class YokadiOptionParser(OptionParser):
         if status == 0:
             raise YokadiOptionParserNormalExitException()
         else:
-            raise utils.YokadiException(msg)
+            raise YokadiException(msg)
 
     def error(self, msg):
         self.print_usage(sys.stderr)
-        raise utils.YokadiException(msg)
+        raise YokadiException(msg)
 
     def print_help(self, file=None):
         print self.help

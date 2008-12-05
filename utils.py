@@ -15,6 +15,7 @@ from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from db import Keyword, Project, Task
 import colors as C
+from yokadiexception import YokadiException
 
 # Default user encoding. Used to decode all input strings
 # This is the central yokadi definition of encoding - this constant is imported from all other modules
@@ -252,9 +253,5 @@ def exportTasks(format, filePath):
         out.write(doc.toprettyxml(indent="    ", encoding=ENCODING))
     else:
         raise YokadiException("Unknown format: %s. Use csv, html or xml" % format)
-
-class YokadiException(Exception):
-    """Yokadi Exceptions"""
-    pass
 
 # vi: ts=4 sw=4 et

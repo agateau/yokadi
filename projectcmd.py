@@ -8,6 +8,7 @@ Project related commands.
 
 from db import Project, Task
 import utils
+from yokadiexception import YokadiException
 from completers import ProjectCompleter
 from sqlobject import SQLObjectNotFound
 
@@ -18,7 +19,7 @@ class ProjectCmd(object):
         p_rename <old_name> <new_name>"""
         tokens = line.split(" ")
         if len(tokens)!=2:
-            raise utils.YokadiException("You must provide two arguments: old_name and new_name")
+            raise YokadiException("You must provide two arguments: old_name and new_name")
         oldName = tokens[0]
         newName = tokens[1]
 

@@ -15,7 +15,8 @@ import sys
 import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
-from utils import YokadiException, guessDateFormat, guessTimeFormat
+from utils import guessDateFormat, guessTimeFormat
+from yokadiexception import YokadiException
 import colors as C
 
 from datetime import datetime, timedelta

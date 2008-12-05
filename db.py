@@ -11,6 +11,7 @@ from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, Enu
 import os, sys
 
 import colors as C
+from yokadiexception import YokadiException
 
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differ from this one

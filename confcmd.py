@@ -8,7 +8,7 @@ Configuration management related commands.
 
 from db import Config
 from sqlobject import AND, LIKE, SQLObjectNotFound
-from utils import YokadiException
+from yokadiexception import YokadiException
 from completers import confCompleter
 from textrenderer import TextRenderer
 import colors as C
