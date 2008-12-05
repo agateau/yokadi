@@ -128,23 +128,39 @@ class TaskCmd(object):
 
     def do_t_list(self, line):
         """List tasks filtered by project and/or keywords.
-        t_list [options] <project_name> [<keyword1> [<keyword2>]...]
+        t_list [options] <project_name>
 
         '%' can be used as a wildcard in the project name:
         - To list projects starting with "foo", use "foo%".
 
         Parameters:
-        -a, --all        : all tasks (done and to be done)
-        -d, --done       : only done tasks
-        -u, --top-urgent : top 5 urgent tasks of each project based on urgency
-        -t, --top-due    : top 5 urgent tasks of each project based on due date
+        -a, --all            : all tasks (done and to be done)
+        -d, --done           : only done tasks
+        -u, --top-urgent     : top 5 urgent tasks of each project based on urgency
+        -t, --top-due        : top 5 urgent tasks of each project based on due date
+        -k <keyword>[=value] : only list tasks matching keyword
         """
+
+        def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
+            # Returns true if taskKeywordDict is a subset of wantedKeywordDict
+            # taskKeywordDict is considered a subset of wantedKeywordDict if:
+            # 1. All wantedKeywordDict keys are in taskKeywordDict
+            # 2. All wantedKeywordDict valued keywords have the same value
+            #    in taskKeywordDict
+            for wantedKeyword, wantedValue in wantedKeywordDict.items():
+                if not wantedKeyword in taskKeywordDict:
+                    return False
+                if wantedValue and taskKeywordDict[wantedKeyword] != wantedValue:
+                    return False
+            return True
+
         #BUG: completion based on parameter position is broken when parameter is given
         parser = YokadiOptionParser(self.do_t_list.__doc__)
         parser.add_option("-a", "--all",        dest="all",       default=False, action="store_true")
         parser.add_option("-d", "--done",       dest="done",      default=False, action="store_true")
         parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
         parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
+        parser.add_option("-k",                 dest="keyword",   action="append")
         options, args = parser.parse_args(line)
         if len(args) > 0:
             projectName = args[0]
@@ -157,16 +173,21 @@ class TaskCmd(object):
             # Try to find project starting by that name (usefull to get all child project)
             projectList = Project.select(LIKE(Project.q.name, projectName+"%"))
 
-        if len(args) > 1:
-            keywordSet = set()
-            for k in args[1:]:
+        # Init keywordDict
+        # Keyword object => None or value
+        keywordDict = {}
+        if options.keyword:
+            for text in options.keyword:
+                if "=" in text:
+                    keyword, value = text.split("=", 1)
+                    value = int(value)
+                else:
+                    keyword, value = text, None
                 try:
-                    keywordSet.add(Keyword.byName(k))
+                    Keyword.byName(keyword)
+                    keywordDict[keyword] = value
                 except SQLObjectNotFound:
-                    print C.RED+"Warning: Keyword %s is unknown." % k + C.RESET
-
-        else:
-            keywordSet = None
+                    print C.RED+"Warning: Keyword %s is unknown." % keyword+ C.RESET
 
         # Filtering and sorting according to parameters
         filters=[]
@@ -191,9 +212,9 @@ class TaskCmd(object):
             taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
                                    orderBy=order, limit=limit)
 
-            if keywordSet:
+            if keywordDict:
                 # FIXME: Optimize
-                taskList = [x for x in taskList if keywordSet.issubset(set(x.keywords))]
+                taskList = [x for x in taskList if keywordsMatchDict(x.getKeywordDict(), keywordDict)]
             else:
                 taskList = list(taskList)
 
