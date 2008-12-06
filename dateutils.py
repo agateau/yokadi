@@ -8,8 +8,34 @@ Task related commands.
 from time import strptime
 from datetime import datetime, timedelta
 
-from utils import guessDateFormat, guessTimeFormat
 from yokadiexception import YokadiException
+
+
+def guessDateFormat(tDate):
+    """Guess a date format.
+    @param tDate: date string like 30/08/2008 or 30/08 or 30
+    @return: date format as a string like %d/%m/%Y or %d/%m or %d"""
+    if tDate.count("/")==2:
+        fDate="%d/%m/%Y"
+    elif tDate.count("/")==1:
+        fDate="%d/%m"
+    else:
+        fDate="%d"
+    return fDate
+
+
+def guessTimeFormat(tTime):
+    """Guess a time format.
+    @param tTime: time string like 12:30:45 or 12:30 or 12
+    @return: time format as a string like %H:%M:%S or %H:%M or %H"""
+    if tTime.count(":")==2:
+        fTime="%H:%M:%S"
+    elif tTime.count(":")==1:
+        fTime="%H:%M"
+    else:
+        fTime="%H"
+    return fTime
+
 
 def parseHumaneDateTime(line):
     # Date & Time format
