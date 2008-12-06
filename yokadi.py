@@ -105,6 +105,21 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
             raise YokadiException("Fail to save history to %s. Error was:\n\t%s"
                         % (self.historyPath, e))
 
+    def do_help(self, arg):
+        """
+        Overload do_help to show help from the command parser if it exists:
+        if there is a parser_foo() method, assume this method returns a
+        YokadiOptionParser for the do_foo() method and show the help of the
+        parser, instead of do_foo() docstring.
+        """
+        if hasattr(self, "parser_" + arg):
+            parserMethod = getattr(self, "parser_" + arg)
+            parserMethod().print_help(sys.stderr)
+        else:
+            print "Usage: ",
+            Cmd.do_help(self, arg)
+
+
 def main():
     parser = OptionParser()
 
