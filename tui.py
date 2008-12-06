@@ -91,4 +91,17 @@ def enterInt(prompt, default):
             return value
         except ValueError:
             print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
+
+
+def confirm(prompt):
+    while True:
+        answer = editLine("", prompt = prompt + " (y/n)? ")
+        answer = answer.lower()
+
+        if answer == "y":
+            return True
+        elif answer == "n":
+            return False
+        else:
+            print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
 # vi: ts=4 sw=4 et

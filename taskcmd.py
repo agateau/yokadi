@@ -6,7 +6,6 @@ Task related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-
 from db import Config, Keyword, Project, Task
 from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
@@ -15,12 +14,11 @@ import sys
 import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
-import utils
 from yokadiexception import YokadiException
 import colors as C
+import dateutils
 
-from datetime import datetime, timedelta
-from time import strptime
+from datetime import datetime, date, timedelta
 
 from yokadioptionparser import YokadiOptionParser
 
@@ -54,46 +52,51 @@ class TaskCmd(object):
     complete_t_describe = taskIdCompleter
 
     def do_t_set_urgency(self, line):
-        """Defines urgency of a task (0 -> 100).
+        """Defines urgency of a task.
         t_set_urgency <id> <value>"""
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You must provide a taskId and an urgency value") 
         task = utils.getTaskFromId(tokens[0])
-        if tokens[1].isdigit():
+        try:
+            # Do not use isdigit(), so that we can set negative urgency. This
+            # make it possible to stick tasks to the bottom of the list.
             urgency = int(tokens[1])
-            task.urgency = urgency
-        else:
+        except ValueError:
             raise YokadiException("Task urgency must be a digit")
+        task.urgency = urgency
 
     complete_t_set_urgency = taskIdCompleter
 
     def do_t_mark_started(self, line):
         """Mark task as started.
         t_mark_started <id>"""
-        task=utils.getTaskFromId(line)
-        task.status = 'started'
-        task.doneDate = None
+        self._t_set_status(line, 'started')
 
     complete_t_mark_started = taskIdCompleter
 
     def do_t_mark_done(self, line):
         """Mark task as done.
         t_mark_done <id>"""
-        task=utils.getTaskFromId(line)
-        task.status = 'done'
-        task.doneDate = datetime.now()
+        self._t_set_status(line, 'done')
 
     complete_t_mark_done = taskIdCompleter
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
         t_mark_new <id>"""
-        task=utils.getTaskFromId(line)
-        task.status = 'new'
-        task.doneDate = None
+        self._t_set_status(line, 'new')
 
     complete_t_mark_new = taskIdCompleter
+
+    def _t_set_status(self, line, status):
+        task=utils.getTaskFromId(line)
+        task.status = status
+        if status == 'done':
+            task.doneDate = datetime.now()
+        else:
+            task.doneDate = None
+        print "Task '%s' marked as %s" % (task.title, status)
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
@@ -116,10 +119,21 @@ class TaskCmd(object):
 
     def do_t_remove(self, line):
         """Delete a task.
-        t_remove <id>"""
-        task=utils.getTaskFromId(line)
+        t_remove [options] <id>
+
+        Parameters:
+        -f  Do not ask for confirmation
+        """
+        parser = YokadiOptionParser(self.do_t_remove.__doc__)
+        parser.add_option("-f", dest="force", default=False, action="store_true")
+        options, args = parser.parse_args(line)
+        task=utils.getTaskFromId(' '.join(args))
+        if not options.force:
+            if not tui.confirm("Remove task '%s'" % task.title):
+                return
         projectId = task.project.id
         task.destroySelf()
+        print "Task '%s' removed" % (task.title)
 
         # Delete project with no associated tasks
         if Task.select(Task.q.projectID == projectId).count() == 0:
@@ -136,12 +150,17 @@ class TaskCmd(object):
 
         Parameters:
         -a, --all            : all tasks (done and to be done)
-        -d, --done           : only done tasks
+        -d, --done=<range>   : only done tasks, <range> can be:
+                               - today
+                               - thisweek
+                               - thismonth
+                               - all
         -u, --top-urgent     : top 5 urgent tasks of each project based on urgency
         -t, --top-due        : top 5 urgent tasks of each project based on due date
         -k <keyword>[=value] : only list tasks matching keyword
         -r, --raw            : raw display (usefull for copy & paste in mail)
         """
+        doneRangeList= ["today", "thisweek", "thismonth"]
 
         def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
             # Returns true if taskKeywordDict is a subset of wantedKeywordDict
@@ -156,10 +175,25 @@ class TaskCmd(object):
                     return False
             return True
 
+        def createFilterFromRange(_range):
+            # Parse the _range string and return an SQLObject filter
+            minDate = date.today()
+            if _range == "today":
+                pass
+            elif _range == "thisweek":
+                minDate -= timedelta(minDate.weekday())
+            elif _range == "thismonth":
+                minDate = minDate.replace(day = 1)
+            else:
+                raise YokadiException("Invalid range value '%s'" % _range)
+
+            return Task.q.doneDate>=minDate
+
+
         #BUG: completion based on parameter position is broken when parameter is given
         parser = YokadiOptionParser(self.do_t_list.__doc__)
         parser.add_option("-a", "--all",        dest="all",       default=False, action="store_true")
-        parser.add_option("-d", "--done",       dest="done",      default=False, action="store_true")
+        parser.add_option("-d", "--done",       dest="done")
         parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
         parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
         parser.add_option("-k",                 dest="keyword",   action="append")
@@ -198,6 +232,8 @@ class TaskCmd(object):
         limit=None
         if options.done:
             filters.append(Task.q.status=='done')
+            if options.done != "all":
+                filters.append(createFilterFromRange(options.done))
         elif not options.all:
             filters.append(Task.q.status!='done')
         if options.topUrgent:
@@ -217,7 +253,7 @@ class TaskCmd(object):
 
             if keywordDict:
                 # FIXME: Optimize
-                taskList = [x for x in taskList if keywordsMatchDict(x.getKeywordDict(), keywordDict)]
+                taskList = [x for x in taskList if keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict)]
             else:
                 taskList = list(taskList)
 
@@ -331,9 +367,6 @@ class TaskCmd(object):
     def do_t_set_due(self, line):
         """Set task's due date
         t_set_due_date <id> <date>"""
-        # Date & Time format
-        fDate=None
-        fTime=None
         if len(line.split())<2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
@@ -341,63 +374,8 @@ class TaskCmd(object):
 
         if line.lower()=="none":
             task.dueDate=None
-            return
-
-        #TODO: make all the date stuff in a separate function to be reusable easily (set_creation_date ?)
-        today=datetime.today().replace(microsecond=0)
-
-        # Initialise dueDate to now (may be now + fixe delta ?)
-        dueDate=today # Safe because datetime objects are immutables
-
-        if line.startswith("+"):
-            #Delta/relative date and/or time
-            line=line.upper().strip("+")
-            try:
-                if   line.endswith("W"):
-                    dueDate=today+timedelta(days=float(line[0:-1])*7)
-                elif line.endswith("D"):
-                    dueDate=today+timedelta(days=float(line[0:-1]))
-                elif line.endswith("H"):
-                    dueDate=today+timedelta(hours=float(line[0:-1]))
-                elif line.endswith("M"):
-                    dueDate=today+timedelta(minutes=float(line[0:-1]))
-                else:
-                    raise YokadiException("Unable to understand time shift. See help t_set_due")
-            except ValueError:
-                raise YokadiException("Timeshift must be a float or an integer")
         else:
-            #Absolute date and/or time
-            if " " in line:
-                # We assume user give date & time
-                tDate, tTime=line.split()
-                fDate=utils.guessDateFormat(tDate)
-                fTime=utils.guessTimeFormat(tTime)
-                try:
-                    dueDate=datetime(*strptime(line, "%s %s" % (fDate, fTime))[0:5])
-                except Exception, e:
-                    raise YokadiException("Unable to understand date & time format:\t%s" % e)
-            else:
-                if ":" in line:
-                    fTime=utils.guessTimeFormat(line)
-                    try:
-                        tTime=datetime(*strptime(line, fTime)[0:5]).time()
-                    except ValueError:
-                        raise YokadiException("Invalid time format")
-                    dueDate=datetime.combine(today, tTime)
-                else:
-                    fDate=utils.guessDateFormat(line)
-                    try:
-                        dueDate=datetime(*strptime(line, fDate)[0:5])
-                    except ValueError:
-                        raise YokadiException("Invalid date format")
-            if fDate:
-                # Set year and/or month to current date if not given
-                if not "%Y" in fDate:
-                    dueDate=dueDate.replace(year=today.year)
-                if not "%M" in fDate:
-                    dueDate=dueDate.replace(month=today.month)
-        # Set the due date
-        task.dueDate=dueDate
+            task.dueDate = dateutils.parseHumaneDateTime(line)
 
     complete_t_set_due = taskIdCompleter
 
