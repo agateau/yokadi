@@ -8,11 +8,11 @@ Misc utilities. Should probably be splitted.
 """
 import sys
 import csv
-from xml.dom.minidom import Document
+import xml
 import locale
 from datetime import datetime, timedelta
 from sqlobject.dberrors import DuplicateEntryError
-from sqlobject import AND, LIKE, SQLObjectNotFound
+from sqlobject import LIKE, SQLObjectNotFound
 from db import Keyword, Project, Task
 import colors as C
 from yokadiexception import YokadiException
@@ -173,7 +173,7 @@ def exportTasks(format, filePath):
             out.write("</tr>\n")
         out.write("</table></body></html>\n")
     elif format=="xml":
-        doc = Document()
+        doc = xml.dom.minidom.Document()
         yokadi=doc.createElement("yokadi")
         doc.appendChild(yokadi)
         tasks=doc.createElement("tasks")
