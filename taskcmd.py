@@ -137,11 +137,11 @@ class TaskCmd(object):
 
         Parameters:
         -a, --all            : all tasks (done and to be done)
-        -d, --done=[<range>] : only done tasks, optinally limited by <range>
-                               <range> can be:
+        -d, --done=<range>   : only done tasks, <range> can be:
                                - today
                                - thisweek
                                - thismonth
+                               - all
         -u, --top-urgent     : top 5 urgent tasks of each project based on urgency
         -t, --top-due        : top 5 urgent tasks of each project based on due date
         -k <keyword>[=value] : only list tasks matching keyword
@@ -180,7 +180,7 @@ class TaskCmd(object):
         #BUG: completion based on parameter position is broken when parameter is given
         parser = YokadiOptionParser(self.do_t_list.__doc__)
         parser.add_option("-a", "--all",        dest="all",       default=False, action="store_true")
-        parser.add_option("-d", "--done",       dest="done",      default="")
+        parser.add_option("-d", "--done",       dest="done")
         parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
         parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
         parser.add_option("-k",                 dest="keyword",   action="append")
@@ -216,9 +216,9 @@ class TaskCmd(object):
         filters=[]
         order=-Task.q.urgency
         limit=None
-        if options.done is not None:
+        if options.done:
             filters.append(Task.q.status=='done')
-            if options.done != "":
+            if options.done != "all":
                 filters.append(createFilterFromRange(options.done))
         elif not options.all:
             filters.append(Task.q.status!='done')
