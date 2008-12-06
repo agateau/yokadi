@@ -140,6 +140,7 @@ class TaskCmd(object):
         -u, --top-urgent     : top 5 urgent tasks of each project based on urgency
         -t, --top-due        : top 5 urgent tasks of each project based on due date
         -k <keyword>[=value] : only list tasks matching keyword
+        -r, --raw            : raw display (usefull for copy & paste in mail)
         """
 
         def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
@@ -162,6 +163,7 @@ class TaskCmd(object):
         parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
         parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
         parser.add_option("-k",                 dest="keyword",   action="append")
+        parser.add_option("-r", "--raw",        dest="raw",       default=False, action="store_true")
         options, args = parser.parse_args(line)
         if len(args) > 0:
             projectName = args[0]
@@ -222,9 +224,15 @@ class TaskCmd(object):
             if len(taskList) == 0:
                 continue
 
-            self.renderer.renderTaskListHeader(project.name)
-            for task in taskList:
-                self.renderer.renderTaskListRow(task)
+            if options.raw:
+                print "*** %s ***" % project.name
+                for task in taskList:
+                    print "  - %s" % task.title
+                print
+            else:
+                self.renderer.renderTaskListHeader(project.name)
+                for task in taskList:
+                    self.renderer.renderTaskListRow(task)
 
     complete_t_list = t_listCompleter
 
