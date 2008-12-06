@@ -18,7 +18,7 @@ from utils import guessDateFormat, guessTimeFormat
 from yokadiexception import YokadiException
 import colors as C
 
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from time import strptime
 
 from yokadioptionparser import YokadiOptionParser
@@ -164,11 +164,11 @@ class TaskCmd(object):
 
         def createFilterFromRange(_range):
             # Parse the _range string and return an SQLObject filter
-            minDate = datetime.now().date()
+            minDate = date.today()
             if _range == "today":
                 pass
             elif _range == "thisweek":
-                minDate = minDate.replace(day = minDate.day - minDate.weekday())
+                minDate -= timedelta(minDate.weekday())
             elif _range == "thismonth":
                 minDate = minDate.replace(day = 1)
             else:
