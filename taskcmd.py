@@ -302,11 +302,15 @@ class TaskCmd(object):
         t_show [options] <id>
 
         Parameters:
-        --output={all,summary,description} Output all (default), only summary,
-                                           or only description.
+        --output={all,summary,description} 
         """
         parser = YokadiOptionParser(self.do_t_show.__doc__)
-        parser.add_option("--output", dest="output", default="all")
+        choices = ["all", "summary", "description"]
+        parser.add_option("--output", dest="output", type="choice",
+                          choices=choices,
+                          default="all",
+                          help="<output> can be one of %s" % ",".join(choices),
+                          metavar="<output>")
         options, args = parser.parse_args(line)
 
         task=utils.getTaskFromId(' '.join(args))
