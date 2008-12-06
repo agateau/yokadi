@@ -8,7 +8,7 @@ Helper functions to render formated text on screen
 
 import colors as C
 from datetime import datetime
-from utils import formatTimeDelta
+import dateutils
 from db import Config
 
 class TextRenderer(object):
@@ -44,7 +44,7 @@ class TextRenderer(object):
             status=C.BOLD+status+C.RESET
         creationDate = str(task.creationDate)[:-3]
         if task.dueDate:
-            timeLeft=formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
+            timeLeft=dateutils.formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
         else:
             timeLeft=""
         if int(task.urgency)>75:
