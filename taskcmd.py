@@ -206,8 +206,8 @@ class TaskCmd(object):
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count()==0:
-            # Try to find project starting by that name (usefull to get all child project)
-            projectList = Project.select(LIKE(Project.q.name, projectName+"%"))
+            print C.RED + "Error: Found no project matching '%s'" % projectName + C.RESET
+            return
 
         # Init keywordDict
         # Keyword object => None or value
