@@ -15,7 +15,7 @@ import sys
 import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
-from utils import guessDateFormat, guessTimeFormat
+import utils
 from yokadiexception import YokadiException
 import colors as C
 
@@ -362,22 +362,22 @@ class TaskCmd(object):
             if " " in line:
                 # We assume user give date & time
                 tDate, tTime=line.split()
-                fDate=guessDateFormat(tDate)
-                fTime=guessTimeFormat(tTime)
+                fDate=utils.guessDateFormat(tDate)
+                fTime=utils.guessTimeFormat(tTime)
                 try:
                     dueDate=datetime(*strptime(line, "%s %s" % (fDate, fTime))[0:5])
                 except Exception, e:
                     raise YokadiException("Unable to understand date & time format:\t%s" % e)
             else:
                 if ":" in line:
-                    fTime=guessTimeFormat(line)
+                    fTime=utils.guessTimeFormat(line)
                     try:
                         tTime=datetime(*strptime(line, fTime)[0:5]).time()
                     except ValueError:
                         raise YokadiException("Invalid time format")
                     dueDate=datetime.combine(today, tTime)
                 else:
-                    fDate=guessDateFormat(line)
+                    fDate=utils.guessDateFormat(line)
                     try:
                         dueDate=datetime(*strptime(line, fDate)[0:5])
                     except ValueError:
