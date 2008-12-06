@@ -1,11 +1,11 @@
 # -*- coding: UTF-8 -*-
 """
-Task related commands.
+Date utilities.
 
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-from time import strptime
+import time
 from datetime import datetime, timedelta
 
 import colors as C
@@ -72,21 +72,21 @@ def parseHumaneDateTime(line):
             fDate=guessDateFormat(tDate)
             fTime=guessTimeFormat(tTime)
             try:
-                dueDate=datetime(*strptime(line, "%s %s" % (fDate, fTime))[0:5])
+                dueDate=datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
             except Exception, e:
                 raise YokadiException("Unable to understand date & time format:\t%s" % e)
         else:
             if ":" in line:
                 fTime=guessTimeFormat(line)
                 try:
-                    tTime=datetime(*strptime(line, fTime)[0:5]).time()
+                    tTime=datetime(*time.strptime(line, fTime)[0:5]).time()
                 except ValueError:
                     raise YokadiException("Invalid time format")
                 dueDate=datetime.combine(today, tTime)
             else:
                 fDate=guessDateFormat(line)
                 try:
-                    dueDate=datetime(*strptime(line, fDate)[0:5])
+                    dueDate=datetime(*time.strptime(line, fDate)[0:5])
                 except ValueError:
                     raise YokadiException("Invalid date format")
         if fDate:
