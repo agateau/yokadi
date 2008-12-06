@@ -119,10 +119,21 @@ class TaskCmd(object):
 
     def do_t_remove(self, line):
         """Delete a task.
-        t_remove <id>"""
-        task=utils.getTaskFromId(line)
+        t_remove [options] <id>
+
+        Parameters:
+        -f  Do not ask for confirmation
+        """
+        parser = YokadiOptionParser(self.do_t_remove.__doc__)
+        parser.add_option("-f", dest="force", default=False, action="store_true")
+        options, args = parser.parse_args(line)
+        task=utils.getTaskFromId(' '.join(args))
+        if not options.force:
+            if not tui.confirm("Remove task '%s'" % task.title):
+                return
         projectId = task.project.id
         task.destroySelf()
+        print "Task '%s' removed" % (task.title)
 
         # Delete project with no associated tasks
         if Task.select(Task.q.projectID == projectId).count() == 0:
