@@ -71,29 +71,32 @@ class TaskCmd(object):
     def do_t_mark_started(self, line):
         """Mark task as started.
         t_mark_started <id>"""
-        task=utils.getTaskFromId(line)
-        task.status = 'started'
-        task.doneDate = None
+        self._t_set_status(line, 'started')
 
     complete_t_mark_started = taskIdCompleter
 
     def do_t_mark_done(self, line):
         """Mark task as done.
         t_mark_done <id>"""
-        task=utils.getTaskFromId(line)
-        task.status = 'done'
-        task.doneDate = datetime.now()
+        self._t_set_status(line, 'done')
 
     complete_t_mark_done = taskIdCompleter
 
     def do_t_mark_new(self, line):
         """Mark task as new (not started).
         t_mark_new <id>"""
-        task=utils.getTaskFromId(line)
-        task.status = 'new'
-        task.doneDate = None
+        self._t_set_status(line, 'new')
 
     complete_t_mark_new = taskIdCompleter
+
+    def _t_set_status(self, line, status):
+        task=utils.getTaskFromId(line)
+        task.status = status
+        if status == 'done':
+            task.doneDate = datetime.now()
+        else:
+            task.doneDate = None
+        print "Task '%s' marked as %s" % (task.title, status)
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
