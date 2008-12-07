@@ -117,15 +117,16 @@ class TaskCmd(object):
 
     complete_t_apply = taskIdCompleter
 
-    def do_t_remove(self, line):
-        """Delete a task.
-        t_remove [options] <id>
+    def parser_t_remove(self):
+        parser = YokadiOptionParser()
+        parser.set_usage("t_remove [options] <id>")
+        parser.set_description("Delete a task.")
+        parser.add_option("-f", dest="force", default=False, action="store_true",
+                          help="Skip confirmation prompt")
+        return parser
 
-        Parameters:
-        -f  Do not ask for confirmation
-        """
-        parser = YokadiOptionParser(self.do_t_remove.__doc__)
-        parser.add_option("-f", dest="force", default=False, action="store_true")
+    def do_t_remove(self, line):
+        parser = self.parser_t_remove()
         options, args = parser.parse_args(line)
         task=utils.getTaskFromId(' '.join(args))
         if not options.force:
@@ -141,25 +142,43 @@ class TaskCmd(object):
 
     complete_t_remove = taskIdCompleter
 
+
+    def parser_t_list(self):
+        parser = YokadiOptionParser()
+        parser.set_usage("t_list [options] <project_name>")
+        parser.set_description(
+            "List tasks filtered by project and/or keywords. "
+            "'%' can be used as a wildcard in the project name: "
+            "to list projects starting with 'foo', use 'foo%'.")
+
+        parser.add_option("-a", "--all", dest="all",
+                          default=False, action="store_true",
+                          help="all tasks (done and to be done)")
+
+        rangeList = ["today", "thisweek", "thismonth", "all"]
+        parser.add_option("-d", "--done", dest="done",
+                          help="only done tasks. <range> must be one of %s" % ", ".join(rangeList),
+                          metavar="<range>")
+
+        parser.add_option("-u", "--top-urgent", dest="topUrgent",
+                          default=False, action="store_true",
+                          help="top 5 urgent tasks of each project based on urgency")
+
+        parser.add_option("-t", "--top-due", dest="topDue",
+                          default=False, action="store_true",
+                          help="top 5 urgent tasks of each project based on due date")
+
+        parser.add_option("-k", "--keyword", dest="keyword",
+                          action="append",
+                          help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
+                          metavar="<keyword>[=<value>]")
+
+        parser.add_option("-r", "--raw", dest="raw",
+                          default=False, action="store_true",
+                          help="raw display (usefull for copy & paste in mail)")
+        return parser
+
     def do_t_list(self, line):
-        """List tasks filtered by project and/or keywords.
-        t_list [options] <project_name>
-
-        '%' can be used as a wildcard in the project name:
-        - To list projects starting with "foo", use "foo%".
-
-        Parameters:
-        -a, --all            : all tasks (done and to be done)
-        -d, --done=<range>   : only done tasks, <range> can be:
-                               - today
-                               - thisweek
-                               - thismonth
-                               - all
-        -u, --top-urgent     : top 5 urgent tasks of each project based on urgency
-        -t, --top-due        : top 5 urgent tasks of each project based on due date
-        -k <keyword>[=value] : only list tasks matching keyword
-        -r, --raw            : raw display (usefull for copy & paste in mail)
-        """
         doneRangeList= ["today", "thisweek", "thismonth"]
 
         def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
@@ -191,13 +210,7 @@ class TaskCmd(object):
 
 
         #BUG: completion based on parameter position is broken when parameter is given
-        parser = YokadiOptionParser(self.do_t_list.__doc__)
-        parser.add_option("-a", "--all",        dest="all",       default=False, action="store_true")
-        parser.add_option("-d", "--done",       dest="done")
-        parser.add_option("-u", "--top-urgent", dest="topUrgent", default=False, action="store_true")
-        parser.add_option("-t", "--top-due",    dest="topDue",    default=False, action="store_true")
-        parser.add_option("-k",                 dest="keyword",   action="append")
-        parser.add_option("-r", "--raw",        dest="raw",       default=False, action="store_true")
+        parser = self.parser_t_list()
         options, args = parser.parse_args(line)
         if len(args) > 0:
             projectName = args[0]
@@ -207,8 +220,8 @@ class TaskCmd(object):
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count()==0:
-            # Try to find project starting by that name (usefull to get all child project)
-            projectList = Project.select(LIKE(Project.q.name, projectName+"%"))
+            print C.RED + "Error: Found no project matching '%s'" % projectName + C.RESET
+            return
 
         # Init keywordDict
         # Keyword object => None or value
@@ -304,16 +317,20 @@ class TaskCmd(object):
     complete_t_reorder = ProjectCompleter(1)
 
 
-    def do_t_show(self, line):
-        """Display details of a task.
-        t_show [options] <id>
+    def parser_t_show(self):
+        parser = YokadiOptionParser()
+        parser.set_usage("t_show [options] <id>")
+        parser.set_description("Display details of a task.")
+        choices = ["all", "summary", "description"]
+        parser.add_option("--output", dest="output", type="choice",
+                          choices=choices,
+                          default="all",
+                          help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
+                          metavar="<output>")
+        return parser
 
-        Parameters:
-        --output={all,summary,description} Output all (default), only summary,
-                                           or only description.
-        """
-        parser = YokadiOptionParser(self.do_t_show.__doc__)
-        parser.add_option("--output", dest="output", default="all")
+    def do_t_show(self, line):
+        parser = self.parser_t_show()
         options, args = parser.parse_args(line)
 
         task=utils.getTaskFromId(' '.join(args))

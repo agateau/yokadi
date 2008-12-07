@@ -16,11 +16,16 @@ from yokadioptionparser import YokadiOptionParser
 
 class ConfCmd(object):
 
+    def parser_c_get(self):
+        parser = YokadiOptionParser()
+        parser.set_usage("c_get [options] [<key>]")
+        parser.set_description("Display the value of a configuration key. If no key is given, all keys are shown.")
+        parser.add_option("-s", dest="system", default=False, action="store_true",
+                          help="Display value of system keys instead of user ones")
+        return parser
+
     def do_c_get(self, line):
-        """Display a configuration key. If no key is given, all keys are shown.
-        Use -s switch to also display system parameters"""
-        parser = YokadiOptionParser(ConfCmd.do_c_get.__doc__)
-        parser.add_option("-s", dest="system", default=False, action="store_true")
+        parser = self.parser_c_get()
         options, args = parser.parse_args(line)
         line = u" ".join(args)
         if not line:
