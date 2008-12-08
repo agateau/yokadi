@@ -13,4 +13,12 @@ class YokadiOptionParserTestCase(unittest.TestCase):
         options, args = parser.parse_args(u'')
         self.assertEqual(args, [])
 
+    def testQuote(self):
+        parser = YokadiOptionParser()
+        src = u"There's a quote here"
+        options, args = parser.parse_args(src)
+        # Recreate the line
+        line = " ".join(args)
+        self.assertEqual(line, src)
+
 # vi: ts=4 sw=4 et
