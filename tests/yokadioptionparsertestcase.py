@@ -21,4 +21,15 @@ class YokadiOptionParserTestCase(unittest.TestCase):
         line = " ".join(args)
         self.assertEqual(line, src)
 
+    def testDash(self):
+        parser = YokadiOptionParser()
+        srcs = ["foo-bar", "foo - bar", "foo -bar"]
+        for src in srcs:
+            options, args = parser.parse_args(src)
+            # Recreate the line
+            line = " ".join(args)
+            if src.startswith("-- "):
+                src = src[3:]
+            self.assertEqual(line, src)
+
 # vi: ts=4 sw=4 et
