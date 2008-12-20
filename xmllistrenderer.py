@@ -13,7 +13,8 @@ import tui
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
 
 class XmlListRenderer(object):
-    def __init__(self):
+    def __init__(self, out):
+        self.out = out
         self.doc = dom.Document()
         self.rootElement = self.doc.createElement("yokadi")
         self.doc.appendChild(self.rootElement)
@@ -44,7 +45,6 @@ class XmlListRenderer(object):
 
 
     def end(self):
-        # FIXME: Make it possible to pass the output stream
         # FIXME: Shouldn't we use utf-8 only for xml output?
-        sys.stdout.write(self.doc.toprettyxml(indent="    ", encoding=tui.ENCODING))
+        self.out.write(self.doc.toprettyxml(indent="    ", encoding=tui.ENCODING))
 # vi: ts=4 sw=4 et

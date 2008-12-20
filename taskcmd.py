@@ -177,6 +177,9 @@ class TaskCmd(object):
         parser.add_option("--format", dest="format",
                           type="choice", default="text", choices=["text","xml"],
                           help="how should the task list be formated")
+        parser.add_option("-o", "--output", dest="output",
+                          help="Output task list to <file>",
+                          metavar="<file>")
         return parser
 
     def do_t_list(self, line):
@@ -259,8 +262,12 @@ class TaskCmd(object):
             limit=5
 
         # Instantiate renderer
+        if options.output:
+            out = open(options.output, "w")
+        else:
+            out = sys.stdout
         renderers = dict(text=TextListRenderer, xml=XmlListRenderer)
-        renderer = renderers[options.format]()
+        renderer = renderers[options.format](out)
 
         # Fill the renderer
         hiddenProjectNames = []

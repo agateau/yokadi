@@ -12,6 +12,10 @@ from db import Config
 
 
 class TextListRenderer(object):
+    def __init__(self, out):
+        self.out = out
+
+
     def addTaskList(self, project, taskList):
         self._renderTaskListHeader(project.name)
         for task in taskList:
@@ -32,10 +36,10 @@ class TextListRenderer(object):
         width=int(Config.byName("TEXT_WIDTH").value)
         line = self._getTaskFormat() % dict(id="ID", title="Title", urgency="U",
                                        status="S", creationDate="Creation date", timeLeft="Time left")
-        print
-        print C.CYAN+projectName.center(30+width)+C.RESET
-        print C.BOLD+line+C.RESET
-        print "-" * len(line)
+        print >>self.out
+        print >>self.out, C.CYAN+projectName.center(30+width)+C.RESET
+        print >>self.out, C.BOLD+line+C.RESET
+        print >>self.out, "-" * len(line)
 
 
     def _renderTaskListRow(self, task):
@@ -64,6 +68,6 @@ class TextListRenderer(object):
         else:
             urgency=task.urgency
 
-        print self._getTaskFormat() % dict(id=str(task.id), title=title, urgency=urgency, status=status,
+        print >>self.out, self._getTaskFormat() % dict(id=str(task.id), title=title, urgency=urgency, status=status,
                                        creationDate=creationDate, timeLeft=timeLeft)
 # vi: ts=4 sw=4 et
