@@ -19,6 +19,7 @@ from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
+from csvlistrenderer import CsvListRenderer
 import colors as C
 import dateutils
 
@@ -28,7 +29,8 @@ from yokadioptionparser import YokadiOptionParser
 
 gRendererClassDict = dict(
     text=TextListRenderer,
-    xml=XmlListRenderer)
+    xml=XmlListRenderer,
+    csv=CsvListRenderer)
 
 class TaskCmd(object):
     __slots__ = ["renderer"]
