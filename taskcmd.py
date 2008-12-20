@@ -7,12 +7,13 @@ Task related commands.
 @license: GPLv3
 """
 import os
+import sys
+
+from sqlobject import SQLObjectNotFound, LIKE, AND
 
 from db import Config, Keyword, Project, Task
-from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
 import parseutils
-import sys
 import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
