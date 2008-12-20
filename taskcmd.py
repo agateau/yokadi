@@ -435,20 +435,4 @@ class TaskCmd(object):
 
     complete_t_set_due = taskIdCompleter
 
-    def do_t_export(self, line):
-        """Export all tasks of all projects in various format
-            t_export csv mytasks.csv
-            t_export html mytasks.html
-            t_export xml mystasks.xml
-        If filename is ommited, tasks are printed on screen"""
-        line=line.split()
-        if   len(line)<1:
-            raise YokadiException("You should at least specify the format (csv, html or xml)")
-        elif len(line)==1:
-            filePath=None
-        else:
-            filePath=line[1]
-        format=line[0].lower()
-        utils.exportTasks(format, filePath)
-
 # vi: ts=4 sw=4 et
