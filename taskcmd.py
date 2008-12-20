@@ -22,6 +22,7 @@ from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
 from htmllistrenderer import HtmlListRenderer
+from plainlistrenderer import PlainListRenderer
 import colors as C
 import dateutils
 
@@ -33,7 +34,9 @@ gRendererClassDict = dict(
     text=TextListRenderer,
     xml=XmlListRenderer,
     csv=CsvListRenderer,
-    html=HtmlListRenderer)
+    html=HtmlListRenderer,
+    plain=PlainListRenderer,
+    )
 
 class TaskCmd(object):
     __slots__ = ["renderer"]
