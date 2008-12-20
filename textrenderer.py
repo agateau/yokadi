@@ -79,9 +79,7 @@ class TextRenderer(object):
             ]
 
         if task.status == "done":
-            fields.append(
-                (C.BOLD+"Done"+C.RESET, task.doneDate),
-                )
+            fields.append(("Done", task.doneDate))
 
         self.renderFields(fields)
 
