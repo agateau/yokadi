@@ -16,6 +16,7 @@ from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
+from xmllistrenderer import XmlListRenderer
 import colors as C
 import dateutils
 
@@ -173,6 +174,9 @@ class TaskCmd(object):
                           action="append",
                           help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
                           metavar="<keyword>[=<value>]")
+        parser.add_option("--format", dest="format",
+                          type="choice", default="text", choices=["text","xml"],
+                          help="how should the task list be formated")
         return parser
 
     def do_t_list(self, line):
@@ -254,8 +258,12 @@ class TaskCmd(object):
             order=Task.q.dueDate
             limit=5
 
+        # Instantiate renderer
+        renderers = dict(text=TextListRenderer, xml=XmlListRenderer)
+        renderer = renderers[options.format]()
+
+        # Fill the renderer
         hiddenProjectNames = []
-        renderer = TextListRenderer()
         for project in projectList:
             if not project.active:
                 hiddenProjectNames.append(project.name)
