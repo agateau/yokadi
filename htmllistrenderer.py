@@ -3,6 +3,7 @@
 HTML rendering of t_list output
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "keywords"]
