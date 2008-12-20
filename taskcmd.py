@@ -6,6 +6,8 @@ Task related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
+import os
+
 from db import Config, Keyword, Project, Task
 from sqlobject import SQLObjectNotFound, LIKE, AND
 import utils
@@ -175,7 +177,7 @@ class TaskCmd(object):
                           help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
                           metavar="<keyword>[=<value>]")
         parser.add_option("--format", dest="format",
-                          type="choice", default="text", choices=["text","xml"],
+                          type="choice", default="auto", choices=["auto", "text","xml"],
                           help="how should the task list be formated")
         parser.add_option("-o", "--output", dest="output",
                           help="Output task list to <file>",
@@ -184,6 +186,7 @@ class TaskCmd(object):
 
     def do_t_list(self, line):
         doneRangeList= ["today", "thisweek", "thismonth"]
+        rendererClassDict = dict(text=TextListRenderer, xml=XmlListRenderer)
 
         def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
             # Returns true if taskKeywordDict is a subset of wantedKeywordDict
@@ -212,6 +215,19 @@ class TaskCmd(object):
 
             return Task.q.doneDate>=minDate
 
+        def selectRendererClass():
+            if options.format != "auto":
+                return rendererClassDict[options.format]
+
+            defaultRendererClass = TextListRenderer
+            if not options.output:
+                return defaultRendererClass
+
+            ext = os.path.splitext(options.output)[1]
+            if not ext:
+                return defaultRendererClass
+
+            return rendererClassDict.get(ext[1:], defaultRendererClass)
 
         #BUG: completion based on parameter position is broken when parameter is given
         parser = self.parser_t_list()
@@ -261,13 +277,15 @@ class TaskCmd(object):
             order=Task.q.dueDate
             limit=5
 
-        # Instantiate renderer
+        # Define output
         if options.output:
             out = open(options.output, "w")
         else:
             out = sys.stdout
-        renderers = dict(text=TextListRenderer, xml=XmlListRenderer)
-        renderer = renderers[options.format](out)
+
+        # Instantiate renderer
+        rendererClass = selectRendererClass()
+        renderer = rendererClass(out)
 
         # Fill the renderer
         hiddenProjectNames = []
