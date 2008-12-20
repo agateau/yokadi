@@ -26,6 +26,10 @@ from datetime import datetime, date, timedelta
 
 from yokadioptionparser import YokadiOptionParser
 
+gRendererClassDict = dict(
+    text=TextListRenderer,
+    xml=XmlListRenderer)
+
 class TaskCmd(object):
     __slots__ = ["renderer"]
     def __init__(self):
@@ -176,9 +180,12 @@ class TaskCmd(object):
                           action="append",
                           help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
                           metavar="<keyword>[=<value>]")
+
+        formatList = ["auto"] + gRendererClassDict.keys()
         parser.add_option("--format", dest="format",
-                          type="choice", default="auto", choices=["auto", "text","xml"],
-                          help="how should the task list be formated")
+                          type="choice", default="auto", choices=formatList,
+                          help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
+                          metavar="<format>")
         parser.add_option("-o", "--output", dest="output",
                           help="Output task list to <file>",
                           metavar="<file>")
@@ -186,7 +193,6 @@ class TaskCmd(object):
 
     def do_t_list(self, line):
         doneRangeList= ["today", "thisweek", "thismonth"]
-        rendererClassDict = dict(text=TextListRenderer, xml=XmlListRenderer)
 
         def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
             # Returns true if taskKeywordDict is a subset of wantedKeywordDict
@@ -217,7 +223,7 @@ class TaskCmd(object):
 
         def selectRendererClass():
             if options.format != "auto":
-                return rendererClassDict[options.format]
+                return gRendererClassDict[options.format]
 
             defaultRendererClass = TextListRenderer
             if not options.output:
@@ -227,7 +233,7 @@ class TaskCmd(object):
             if not ext:
                 return defaultRendererClass
 
-            return rendererClassDict.get(ext[1:], defaultRendererClass)
+            return gRendererClassDict.get(ext[1:], defaultRendererClass)
 
         #BUG: completion based on parameter position is broken when parameter is given
         parser = self.parser_t_list()
