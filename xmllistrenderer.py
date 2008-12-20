@@ -34,15 +34,24 @@ class XmlListRenderer(object):
             taskElement.setAttribute("id", unicode(task.id))
 
             for field in TASK_FIELDS:
-                if field=="keywords": continue
-                taskElement.setAttribute(field, unicode(task.__getattribute__(field)))
+                if field == "keywords":
+                    self._exportKeywords(taskElement, task.getKeywordDict())
+                elif field == "description":
+                    if task.description:
+                        descriptionElement = self.doc.createElement("description")
+                        taskElement.appendChild(descriptionElement)
+                        descriptionElement.appendChild(self.doc.createTextNode(task.description))
+                else:
+                    taskElement.setAttribute(field, unicode(task.__getattribute__(field)))
 
-            for key, value in task.getKeywordDict().items():
-                keywordElement=self.doc.createElement("keyword")
-                taskElement.appendChild(keywordElement)
-                keywordElement.setAttribute("name", unicode(key))
-                if value:
-                    keywordElement.setAttribute("value", unicode(value))
+
+    def _exportKeywords(self, taskElement, keywordDict):
+        for key, value in keywordDict.items():
+            keywordElement=self.doc.createElement("keyword")
+            taskElement.appendChild(keywordElement)
+            keywordElement.setAttribute("name", unicode(key))
+            if value:
+                keywordElement.setAttribute("value", unicode(value))
 
 
     def end(self):
