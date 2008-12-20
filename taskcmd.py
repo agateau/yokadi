@@ -253,9 +253,10 @@ class TaskCmd(object):
             order=Task.q.dueDate
             limit=5
 
+        hiddenProjectNames = []
         for project in projectList:
             if not project.active:
-                print C.CYAN+"\nInfo"+C.RESET+": project %s is hidden because it is inactive. Use p_set_active to activate it\n" % project.name
+                hiddenProjectNames.append(project.name)
                 continue
             taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
                                    orderBy=order, limit=limit)
@@ -272,6 +273,9 @@ class TaskCmd(object):
             self.renderer.renderTaskListHeader(project.name)
             for task in taskList:
                 self.renderer.renderTaskListRow(task)
+
+        if len(hiddenProjectNames) > 0:
+            print C.CYAN+"\nInfo"+C.RESET+": hidden projects: %s" % ", ".join(hiddenProjectNames)
 
     complete_t_list = t_listCompleter
 
