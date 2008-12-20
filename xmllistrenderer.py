@@ -11,7 +11,7 @@ from xml.dom import minidom as dom
 
 import tui
 
-TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
+TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "keywords"]
 
 class XmlListRenderer(object):
     def __init__(self, out):
