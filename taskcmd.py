@@ -15,6 +15,7 @@ import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
 from yokadiexception import YokadiException
+from textlistrenderer import TextListRenderer
 import colors as C
 import dateutils
 
@@ -254,6 +255,7 @@ class TaskCmd(object):
             limit=5
 
         hiddenProjectNames = []
+        renderer = TextListRenderer()
         for project in projectList:
             if not project.active:
                 hiddenProjectNames.append(project.name)
@@ -270,9 +272,8 @@ class TaskCmd(object):
             if len(taskList) == 0:
                 continue
 
-            self.renderer.renderTaskListHeader(project.name)
-            for task in taskList:
-                self.renderer.renderTaskListRow(task)
+            renderer.addTaskList(project, taskList)
+        renderer.end()
 
         if len(hiddenProjectNames) > 0:
             print C.CYAN+"\nInfo"+C.RESET+": hidden projects: %s" % ", ".join(hiddenProjectNames)
