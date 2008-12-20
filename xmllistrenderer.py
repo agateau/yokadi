@@ -25,13 +25,13 @@ class XmlListRenderer(object):
         projectElement = self.doc.createElement("project")
         self.rootElement.appendChild(projectElement)
         projectElement.setAttribute("name", project.name)
-
-        tasksElement = self.doc.createElement("tasks")
-        projectElement.appendChild(tasksElement)
+        projectElement.setAttribute("id", unicode(project.id))
 
         for task in taskList:
             taskElement = self.doc.createElement("task")
-            tasksElement.appendChild(taskElement)
+            projectElement.appendChild(taskElement)
+
+            taskElement.setAttribute("id", unicode(task.id))
 
             for field in TASK_FIELDS:
                 if field=="keywords": continue
@@ -40,9 +40,9 @@ class XmlListRenderer(object):
             for key, value in task.getKeywordDict().items():
                 keywordElement=self.doc.createElement("keyword")
                 taskElement.appendChild(keywordElement)
-                keywordElement.setAttribute(key, unicode(value))
-
-            tasksElement.appendChild(taskElement)
+                keywordElement.setAttribute("name", unicode(key))
+                if value:
+                    keywordElement.setAttribute("value", unicode(value))
 
 
     def end(self):
