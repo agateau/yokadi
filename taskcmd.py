@@ -190,7 +190,7 @@ class TaskCmd(object):
                           metavar="<keyword>[=<value>]")
 
         formatList = ["auto"] + gRendererClassDict.keys()
-        parser.add_option("--format", dest="format",
+        parser.add_option("-f", "--format", dest="format",
                           type="choice", default="auto", choices=formatList,
                           help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
                           metavar="<format>")
