@@ -1,10 +1,11 @@
-#!/usr/bin/env python
 # -*- coding: UTF-8 -*-
-import sys
-import unittest
-from os.path import dirname, join, pardir
+"""
+Parser utilities test cases
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
 
-sys.path.append(join(dirname(sys.argv[0]), pardir))
+import unittest
 import parseutils
 
 gTaskLineToParsedStructList = [

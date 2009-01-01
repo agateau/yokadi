@@ -1,11 +1,13 @@
 # -*- coding: UTF-8 -*-
-import sys
-from os.path import dirname, join, pardir
+"""
+Yokadi parser test cases
+@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@license: GPLv3
+"""
+
 import unittest
 
-sys.path.append(join(dirname(sys.argv[0]), pardir))
 from yokadioptionparser import YokadiOptionParser
-
 
 class YokadiOptionParserTestCase(unittest.TestCase):
     def testEmptyLine(self):
