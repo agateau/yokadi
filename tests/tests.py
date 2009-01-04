@@ -12,16 +12,6 @@ import unittest
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
 
-def main():
-    testCases = [
-        ParseUtilsTestCase,
-        YokadiOptionParserTestCase,
-        ]
-    suites = [unittest.TestLoader().loadTestsFromTestCase(x) for x in testCases]
-    suite = unittest.TestSuite(suites)
-    runner = unittest.TextTestRunner()
-    runner.run(suite)
-
 if __name__ == "__main__":
-    main()
+    unittest.main()
 # vi: ts=4 sw=4 et
