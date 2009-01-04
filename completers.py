@@ -8,7 +8,6 @@ Implementation of completers for various Yokadi objects.
 import parseutils
 import utils
 from db import Config, Keyword, Project, Task
-from textrenderer import TextRenderer
 
 class ProjectCompleter(object):
     def __init__(self, position):
@@ -47,11 +46,11 @@ def confCompleter(cmd, text, line, begidx, endidx):
 def taskIdCompleter(cmd, text, line, begidx, endidx):
     #TODO: filter on parameter position
     #TODO: potential performance issue with lots of tasks, find a better way to do it
-    renderer=TextRenderer()
     tasks=[x for x in Task.select(Task.q.status!='done') if str(x.id).startswith(text)]
     print
     for task in tasks:
-        renderer.renderTaskListRow(task)
+        # Move that in a renderer class ?
+        print "%s: %s / %s" % (task.id, task.project.name, task.title)
     return [str(x.id) for x in tasks]
 
 # vi: ts=4 sw=4 et
