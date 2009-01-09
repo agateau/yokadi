@@ -6,21 +6,37 @@ Task related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-from db import Config, Keyword, Project, Task
+import os
+import sys
+
 from sqlobject import SQLObjectNotFound, LIKE, AND
+
+from db import Config, Keyword, Project, Task
 import utils
 import parseutils
-import sys
 import tui
 from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
 from yokadiexception import YokadiException
+from textlistrenderer import TextListRenderer
+from xmllistrenderer import XmlListRenderer
+from csvlistrenderer import CsvListRenderer
+from htmllistrenderer import HtmlListRenderer
+from plainlistrenderer import PlainListRenderer
 import colors as C
 import dateutils
 
 from datetime import datetime, date, timedelta
 
 from yokadioptionparser import YokadiOptionParser
+
+gRendererClassDict = dict(
+    text=TextListRenderer,
+    xml=XmlListRenderer,
+    csv=CsvListRenderer,
+    html=HtmlListRenderer,
+    plain=PlainListRenderer,
+    )
 
 class TaskCmd(object):
     __slots__ = ["renderer"]
@@ -173,9 +189,14 @@ class TaskCmd(object):
                           help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
                           metavar="<keyword>[=<value>]")
 
-        parser.add_option("-r", "--raw", dest="raw",
-                          default=False, action="store_true",
-                          help="raw display (usefull for copy & paste in mail)")
+        formatList = ["auto"] + gRendererClassDict.keys()
+        parser.add_option("-f", "--format", dest="format",
+                          type="choice", default="auto", choices=formatList,
+                          help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
+                          metavar="<format>")
+        parser.add_option("-o", "--output", dest="output",
+                          help="Output task list to <file>",
+                          metavar="<file>")
         return parser
 
     def do_t_list(self, line):
@@ -208,6 +229,19 @@ class TaskCmd(object):
 
             return Task.q.doneDate>=minDate
 
+        def selectRendererClass():
+            if options.format != "auto":
+                return gRendererClassDict[options.format]
+
+            defaultRendererClass = TextListRenderer
+            if not options.output:
+                return defaultRendererClass
+
+            ext = os.path.splitext(options.output)[1]
+            if not ext:
+                return defaultRendererClass
+
+            return gRendererClassDict.get(ext[1:], defaultRendererClass)
 
         #BUG: completion based on parameter position is broken when parameter is given
         parser = self.parser_t_list()
@@ -257,9 +291,21 @@ class TaskCmd(object):
             order=Task.q.dueDate
             limit=5
 
+        # Define output
+        if options.output:
+            out = open(options.output, "w")
+        else:
+            out = sys.stdout
+
+        # Instantiate renderer
+        rendererClass = selectRendererClass()
+        renderer = rendererClass(out)
+
+        # Fill the renderer
+        hiddenProjectNames = []
         for project in projectList:
             if not project.active:
-                print C.CYAN+"\nInfo"+C.RESET+": project %s is hidden because it is inactive. Use p_set_active to activate it\n" % project.name
+                hiddenProjectNames.append(project.name)
                 continue
             taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
                                    orderBy=order, limit=limit)
@@ -273,15 +319,11 @@ class TaskCmd(object):
             if len(taskList) == 0:
                 continue
 
-            if options.raw:
-                print "*** %s ***" % project.name
-                for task in taskList:
-                    print "  - %s" % task.title
-                print
-            else:
-                self.renderer.renderTaskListHeader(project.name)
-                for task in taskList:
-                    self.renderer.renderTaskListRow(task)
+            renderer.addTaskList(project, taskList)
+        renderer.end()
+
+        if len(hiddenProjectNames) > 0:
+            print C.CYAN+"\nInfo"+C.RESET+": hidden projects: %s" % ", ".join(hiddenProjectNames)
 
     complete_t_list = t_listCompleter
 
@@ -395,21 +437,5 @@ class TaskCmd(object):
             task.dueDate = dateutils.parseHumaneDateTime(line)
 
     complete_t_set_due = taskIdCompleter
-
-    def do_t_export(self, line):
-        """Export all tasks of all projects in various format
-            t_export csv mytasks.csv
-            t_export html mytasks.html
-            t_export xml mystasks.xml
-        If filename is ommited, tasks are printed on screen"""
-        line=line.split()
-        if   len(line)<1:
-            raise YokadiException("You should at least specify the format (csv, html or xml)")
-        elif len(line)==1:
-            filePath=None
-        else:
-            filePath=line[1]
-        format=line[0].lower()
-        utils.exportTasks(format, filePath)
 
 # vi: ts=4 sw=4 et

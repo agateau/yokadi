@@ -6,13 +6,12 @@ Misc utilities. Should probably be splitted.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-import sys
-import csv
-import xml
 import locale
 from datetime import datetime, timedelta
+
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import LIKE, SQLObjectNotFound
+
 from db import Keyword, Project, Task
 import colors as C
 from yokadiexception import YokadiException
@@ -140,56 +139,5 @@ def getItemPropertiesStartingWith(item, field, text):
     @param text: The begining of the text as a str
     @return: list of matching strings"""
     return [x.name for x in item.select(LIKE(field, text + "%"))]
-
-def exportTasks(format, filePath):
-    """ to be done """
-    # List of exported fields
-    fields=["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
-    if filePath:
-        #TODO: open file with proper encoding
-        out=file(filePath, "w")
-    else:
-        out=sys.stdout
-    if  format=="csv":
-        csv_writer = csv.writer(out, dialect="excel")
-        csv_writer.writerow(fields) # Header
-        for task in Task.select():
-            #TODO: use a column per keyword to allow smarter spreadsheet reports
-            row=list(unicode(task.__getattribute__(field)).encode(ENCODING) for field in fields if field!="keywords")
-            row.append(task.getKeywordsAsString())
-            csv_writer.writerow(row)
-    elif format=="html":
-        #TODO: make this fancier
-        out.write("""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-                <html><head><title>Yokadi tasks export</title>
-                <meta http-equiv="Content-Type" content="text/html; charset=%s">
-                </head><body><table>""" % ENCODING)
-        for task in Task.select():
-            out.write("<tr>\n")
-            row=list("<td>%s</td>" % unicode(task.__getattribute__(field)) for field in fields if field!="keywords")
-            row.append("<td>%s</td>" % task.getKeywordsAsString())
-            line=" ".join(row)
-            out.write(line.encode(ENCODING))
-            out.write("</tr>\n")
-        out.write("</table></body></html>\n")
-    elif format=="xml":
-        doc = xml.dom.minidom.Document()
-        yokadi=doc.createElement("yokadi")
-        doc.appendChild(yokadi)
-        tasks=doc.createElement("tasks")
-        yokadi.appendChild(tasks)
-        for task in Task.select():
-            taskElement=doc.createElement("task")
-            for field in fields:
-                if field=="keywords": continue
-                taskElement.setAttribute(field, unicode(task.__getattribute__(field)))
-            for key, value in task.getKeywordDict().items():
-                keyword=doc.createElement("keyword")
-                keyword.setAttribute(key, unicode(value))
-                taskElement.appendChild(keyword)
-            tasks.appendChild(taskElement)
-        out.write(doc.toprettyxml(indent="    ", encoding=ENCODING))
-    else:
-        raise YokadiException("Unknown format: %s. Use csv, html or xml" % format)
 
 # vi: ts=4 sw=4 et

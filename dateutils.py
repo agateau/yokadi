@@ -39,27 +39,33 @@ def guessTimeFormat(tTime):
 
 
 def parseHumaneDateTime(line):
+    """Parse human date and time and return structured datetime object
+    Datetime  can be absolute (23/10/2008 10:38) or relative (+5M, +3H, +1D, +6W)
+    @param line: human date / time
+    @type line: str
+    @return: datetime object"""
+
     # Date & Time format
     fDate=None
     fTime=None
 
     today=datetime.today().replace(microsecond=0)
 
-    # Initialise dueDate to now (may be now + fixe delta ?)
-    dueDate=today # Safe because datetime objects are immutables
+    # Initialise date to now (may be now + fixe delta ?)
+    date=today # Safe because datetime objects are immutables
 
     if line.startswith("+"):
         #Delta/relative date and/or time
         line=line.upper().strip("+")
         try:
             if   line.endswith("W"):
-                dueDate=today+timedelta(days=float(line[0:-1])*7)
+                date=today+timedelta(days=float(line[0:-1])*7)
             elif line.endswith("D"):
-                dueDate=today+timedelta(days=float(line[0:-1]))
+                date=today+timedelta(days=float(line[0:-1]))
             elif line.endswith("H"):
-                dueDate=today+timedelta(hours=float(line[0:-1]))
+                date=today+timedelta(hours=float(line[0:-1]))
             elif line.endswith("M"):
-                dueDate=today+timedelta(minutes=float(line[0:-1]))
+                date=today+timedelta(minutes=float(line[0:-1]))
             else:
                 raise YokadiException("Unable to understand time shift. See help t_set_due")
         except ValueError:
@@ -72,7 +78,7 @@ def parseHumaneDateTime(line):
             fDate=guessDateFormat(tDate)
             fTime=guessTimeFormat(tTime)
             try:
-                dueDate=datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
+                date=datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
             except Exception, e:
                 raise YokadiException("Unable to understand date & time format:\t%s" % e)
         else:
@@ -82,21 +88,21 @@ def parseHumaneDateTime(line):
                     tTime=datetime(*time.strptime(line, fTime)[0:5]).time()
                 except ValueError:
                     raise YokadiException("Invalid time format")
-                dueDate=datetime.combine(today, tTime)
+                date=datetime.combine(today, tTime)
             else:
                 fDate=guessDateFormat(line)
                 try:
-                    dueDate=datetime(*time.strptime(line, fDate)[0:5])
+                    date=datetime(*time.strptime(line, fDate)[0:5])
                 except ValueError:
                     raise YokadiException("Invalid date format")
         if fDate:
             # Set year and/or month to current date if not given
             if not "%Y" in fDate:
-                dueDate=dueDate.replace(year=today.year)
+                date=date.replace(year=today.year)
             if not "%M" in fDate:
-                dueDate=dueDate.replace(month=today.month)
+                date=date.replace(month=today.month)
 
-    return dueDate
+    return date
 
 
 def formatTimeDelta(timeLeft):
