@@ -270,7 +270,8 @@ class TaskCmd(object):
                     Keyword.byName(keyword)
                     keywordDict[keyword] = value
                 except SQLObjectNotFound:
-                    tui.warning("Keyword %s is unknown." % keyword)
+                    tui.error("Keyword %s is unknown." % keyword)
+                    return
 
         # Filtering and sorting according to parameters
         filters=[]
