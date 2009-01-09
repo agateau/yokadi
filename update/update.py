@@ -3,28 +3,6 @@
 """
 This script updates a Yokadi database to the latest version
 
-Assuming current version is x and target version is x+n, database version x is
-old.db and database version x+n is new.db. The process goes like this:
-
-- Create a copy of old.db in work.db
-- for v in range(x, x + n):
--   run update<v>to<v+1> work.db
-- Create a data-only SQL dump of work.db
-- Create an empty database in new.db
-- Restore the dump in new.db
-
-The final dump/restore state ensures that:
-- All fields are created in the same order (when adding a new column, you can't
-  specify its position)
-- All constraints are in place (when adding a new column, you can't mark it
-  'non null')
-- The updated database has the exact same structure as a brand new database.
-
-Updating from v to v+1 is done in separate scripts because these scripts may
-define SQLObject tables.  SQLObject can't handle table redefinitions, using
-separate scripts solves the problem.
-It also make it possible to write an update script in shell if needed.
-
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPLv3
 """
@@ -76,7 +54,7 @@ def main():
     # Parse args
     parser = OptionParser()
 
-    parser.usage = "%prog <path/to/old.db> <path/to/updated.db>"
+    parser.usage = "%prog <path/to/current.db> <path/to/updated.db>"
     (options, args) = parser.parse_args()
     if len(args) != 2:
         parser.error("Wrong argument count")
