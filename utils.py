@@ -16,11 +16,6 @@ from db import Keyword, Project, Task
 import colors as C
 from yokadiexception import YokadiException
 
-# Default user encoding. Used to decode all input strings
-# This is the central yokadi definition of encoding - this constant is imported from all other modules
-# Beware of circular import definition when add dependencies to this module
-ENCODING=locale.getpreferredencoding()
-
 def addTask(projectName, title, keywordDict):
     """Adds a task based on title and keywordDict.
     @param projectName: name of project as a string

@@ -22,14 +22,14 @@ from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from yokadiexception import YokadiException
-from utils import ENCODING
 from yokadioptionparser import YokadiOptionParserNormalExitException
+import tui
 import colors as C
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command
 reload(sys)
-sys.setdefaultencoding(ENCODING)
+sys.setdefaultencoding(tui.ENCODING)
 
 
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
@@ -67,7 +67,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
         able to encapsulate it with a try/except bloc"""
         try:
             # Decode user input
-            line=line.decode(ENCODING)
+            line=line.decode(tui.ENCODING)
             return Cmd.onecmd(self, line)
         except YokadiOptionParserNormalExitException:
             pass

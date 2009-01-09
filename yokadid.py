@@ -15,11 +15,11 @@ from subprocess import Popen
 from optparse import OptionParser
 from commands import getoutput
 
-from utils import ENCODING
+import tui
 
 # Force default encoding to prefered encoding
 reload(sys)
-sys.setdefaultencoding(ENCODING)
+sys.setdefaultencoding(tui.ENCODING)
 
 
 from db import Config, Project, Task, connectDatabase

@@ -12,8 +12,12 @@ import subprocess
 import tempfile
 import locale
 import colors as C
-from utils import ENCODING
 from yokadiexception import YokadiException
+
+# Default user encoding. Used to decode all input strings
+# This is the central yokadi definition of encoding - this constant is imported from all other modules
+# Beware of circular import definition when add dependencies to this module
+ENCODING=locale.getpreferredencoding()
 
 def editText(text):
     """Edit text with external editor
