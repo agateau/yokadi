@@ -22,9 +22,8 @@ from keywordcmd import KeywordCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from yokadiexception import YokadiException
-from yokadioptionparser import YokadiOptionParserNormalExitException
 import tui
-import colors as C
+from yokadioptionparser import YokadiOptionParserNormalExitException
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command
@@ -72,13 +71,13 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
         except YokadiOptionParserNormalExitException:
             pass
         except YokadiException, e:
-            print C.RED+C.BOLD+"*** Yokadi error ***\n\t%s" % e + C.RESET
+            tui.error("*** Yokadi error ***\n\t%s" % e)
         except KeyboardInterrupt:
-            print C.RED+C.BOLD+"*** Break ***"+C.RESET
+            print "*** Break ***"
         except Exception, e:
-            print C.RED+C.BOLD+"*** Unhandled error (oups)***\n\t%s" % e + C.RESET
-            print C.BOLD+"This is a bug of Yokadi, sorry."
-            print "Send the above message by email to Yokadi developers to help them make Yokadi better."+C.RESET
+            tui.error("Unhandled exception (oups)\n\t%s" % e)
+            print "This is a bug of Yokadi, sorry."
+            print "Send the above message by email to Yokadi developers to help them make Yokadi better."
             cut="---------------------8<----------------------------------------------"
             print cut
             traceback.print_exc()

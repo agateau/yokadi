@@ -13,7 +13,6 @@ from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import LIKE, SQLObjectNotFound
 
 from db import Keyword, Project, Task
-import colors as C
 from yokadiexception import YokadiException
 
 def addTask(projectName, title, keywordDict):

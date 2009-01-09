@@ -11,7 +11,7 @@ from sqlobject import AND, LIKE, SQLObjectNotFound
 from yokadiexception import YokadiException
 from completers import confCompleter
 from textrenderer import TextRenderer
-import colors as C
+import tui
 from yokadioptionparser import YokadiOptionParser
 
 class ConfCmd(object):
@@ -49,7 +49,7 @@ class ConfCmd(object):
         value=" ".join(line[1:])
         p=Config.select(AND(Config.q.name==name, Config.q.system==False))
         if p.count()==0:
-            print C.RED+"Sorry, no parameter match"+C.RESET
+            tui.error("Sorry, no parameter match")
         else:
             p[0].value=value
             print "Parameter updated"

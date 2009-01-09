@@ -23,7 +23,6 @@ from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
 from htmllistrenderer import HtmlListRenderer
 from plainlistrenderer import PlainListRenderer
-import colors as C
 import dateutils
 
 from datetime import datetime, date, timedelta
@@ -254,7 +253,7 @@ class TaskCmd(object):
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count()==0:
-            print C.RED + "Error: Found no project matching '%s'" % projectName + C.RESET
+            tui.error("Found no project matching '%s'" % projectName)
             return
 
         # Init keywordDict
@@ -271,7 +270,7 @@ class TaskCmd(object):
                     Keyword.byName(keyword)
                     keywordDict[keyword] = value
                 except SQLObjectNotFound:
-                    print C.RED+"Warning: Keyword %s is unknown." % keyword+ C.RESET
+                    tui.warning("Keyword %s is unknown." % keyword)
 
         # Filtering and sorting according to parameters
         filters=[]
@@ -323,7 +322,7 @@ class TaskCmd(object):
         renderer.end()
 
         if len(hiddenProjectNames) > 0:
-            print C.CYAN+"\nInfo"+C.RESET+": hidden projects: %s" % ", ".join(hiddenProjectNames)
+            tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
     complete_t_list = t_listCompleter
 
@@ -335,7 +334,7 @@ class TaskCmd(object):
         t_reorder <project_name>"""
         if not line:
             line=Config.byName("DEFAULT_PROJECT").value
-            print "Info: using default project (%s)" % line
+            tui.info("using default project (%s)" % line)
         project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),

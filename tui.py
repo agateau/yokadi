@@ -78,7 +78,7 @@ def selectFromList(prompt, lst, default):
         answer = editLine(line, prompt = prompt + ": ")
         if minStr <= answer and answer <= maxStr:
             return int(answer)
-        print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
+        error("Wrong value")
 
 
 def enterInt(prompt, default):
@@ -94,7 +94,7 @@ def enterInt(prompt, default):
             value = int(answer)
             return value
         except ValueError:
-            print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
+            error("Wrong value")
 
 
 def confirm(prompt):
@@ -107,5 +107,17 @@ def confirm(prompt):
         elif answer == "n":
             return False
         else:
-            print C.BOLD+C.RED+"ERROR: Wrong value"+C.RESET
+            error("Wrong value")
+
+
+def error(message):
+    print C.BOLD + C.RED + "Error: %s" % message + C.RESET
+
+
+def warning(message):
+    print C.RED + "Warning: " + C.RESET + message
+
+
+def info(message):
+    print C.CYAN + "Info: " + C.RESET + message
 # vi: ts=4 sw=4 et

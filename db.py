@@ -10,8 +10,8 @@ from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, Enu
      RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol
 import os, sys
 
-import colors as C
 from yokadiexception import YokadiException
+import tui
 
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differ from this one
@@ -145,8 +145,8 @@ def connectDatabase(dbFileName, createIfNeeded=True):
     # Check version
     version = getVersion()
     if version != DB_VERSION:
-        print C.BOLD+C.RED+"Your database version is %d but Yokadi wants version %d." \
-            % (version, DB_VERSION) + C.RESET
+        tui.error("Your database version is %d but Yokadi wants version %d." \
+            % (version, DB_VERSION))
         print "Please, run the update.py script to migrate your database prior to running Yokadi"
         sys.exit(1)
 
