@@ -9,8 +9,10 @@ Helper functions to build CLI applications
 import os
 import readline
 import subprocess
+import sys
 import tempfile
 import locale
+
 import colors as C
 from yokadiexception import YokadiException
 
@@ -111,13 +113,13 @@ def confirm(prompt):
 
 
 def error(message):
-    print C.BOLD + C.RED + "Error: %s" % message + C.RESET
+    print >>sys.stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
 
 
 def warning(message):
-    print C.RED + "Warning: " + C.RESET + message
+    print >>sys.stderr, C.RED + "Warning: " + C.RESET + message
 
 
 def info(message):
-    print C.CYAN + "Info: " + C.RESET + message
+    print >>sys.stderr, C.CYAN + "Info: " + C.RESET + message
 # vi: ts=4 sw=4 et
