@@ -8,6 +8,7 @@ instead of calling sys.exit() in case of error
 """
 from optparse import OptionParser
 import sys
+
 from yokadiexception import YokadiException
 
 """

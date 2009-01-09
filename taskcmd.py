@@ -8,11 +8,13 @@ Task related commands.
 """
 import os
 import sys
+from datetime import datetime, date, timedelta
 
 from sqlobject import SQLObjectNotFound, LIKE, AND
 
 from db import Config, Keyword, Project, Task
 import utils
+import dateutils
 import parseutils
 import tui
 from textrenderer import TextRenderer
@@ -23,9 +25,6 @@ from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
 from htmllistrenderer import HtmlListRenderer
 from plainlistrenderer import PlainListRenderer
-import dateutils
-
-from datetime import datetime, date, timedelta
 
 from yokadioptionparser import YokadiOptionParser
 

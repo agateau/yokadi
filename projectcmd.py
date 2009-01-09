@@ -5,12 +5,12 @@ Project related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPLv3
 """
+from sqlobject import SQLObjectNotFound
 
 from db import Project, Task
 import utils
 from yokadiexception import YokadiException
 from completers import ProjectCompleter
-from sqlobject import SQLObjectNotFound
 
 
 class ProjectCmd(object):

@@ -6,8 +6,8 @@ Parse utilities. Used to manipulate command line text.
 @license: GPLv3
 """
 import re
-from db import Config
 
+from db import Config
 from yokadioptionparser import YokadiOptionParser
 
 gSimplifySpaces = re.compile("  +")

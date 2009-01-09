@@ -7,13 +7,16 @@ Yokadi daemon. Used to monitor due tasks and warn user.
 @license: GPLv3
 """
 
-import sys, os, time
+import sys
+import os
+import time
 from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
-from sqlobject import AND
 from subprocess import Popen
 from optparse import OptionParser
 from commands import getoutput
+
+from sqlobject import AND
 
 import tui
 

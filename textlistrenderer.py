@@ -5,8 +5,9 @@ Text rendering of t_list output
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPLv3
 """
-import colors as C
 from datetime import datetime
+
+import colors as C
 import dateutils
 from db import Config
 
