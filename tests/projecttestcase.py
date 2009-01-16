@@ -12,7 +12,10 @@ import testutils
 from db import Project
 from projectcmd import ProjectCmd
 
-class ProjectTestCase(testutils.DbTestCase):
+class ProjectTestCase(unittest.TestCase):
+    def setUp(self):
+        testutils.clearDatabase()
+
     def testRename(self):
         project = Project(name="src")
         id = project.id

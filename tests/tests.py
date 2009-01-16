@@ -9,15 +9,26 @@ Yokadi unit tests
 """
 
 import unittest
-from os.path import dirname, join, pardir
+import os
 import sys
-sys.path.append(join(dirname(__file__), pardir))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+import db
 
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
 from dateutilstestcase import DateUtilsTestCase
 from projecttestcase import ProjectTestCase
 
-if __name__ == "__main__":
+DB_FILENAME = "unittest.db"
+
+def main():
+    if os.path.exists(DB_FILENAME):
+        os.unlink(DB_FILENAME)
+    db.connectDatabase(DB_FILENAME)
+
     unittest.main()
+
+if __name__ == "__main__":
+    main()
 # vi: ts=4 sw=4 et
