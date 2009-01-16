@@ -8,9 +8,23 @@ Project related commands.
 from sqlobject import SQLObjectNotFound
 
 from db import Project, Task
-import utils
 from yokadiexception import YokadiException
 from completers import ProjectCompleter
+
+
+def getProjectFromName(name, parameterName="project_name"):
+    """
+    Helper function which returns a project given its name, or raise a
+    YokadiException if it does not exist.
+    """
+    name = name.strip()
+    if len(name) == 0:
+        raise YokadiException("Missing <%s> parameter" % parameterName)
+
+    try:
+        return Project.byName(name)
+    except SQLObjectNotFound:
+        raise YokadiException("Project '%s' not found. Use p_list to see all projects." % name)
 
 
 class ProjectCmd(object):
@@ -23,7 +37,7 @@ class ProjectCmd(object):
         oldName = tokens[0]
         newName = tokens[1]
 
-        project = utils.getProjectFromName(oldName, "old_name")
+        project = getProjectFromName(oldName, "old_name")
         project.name = newName
         print "Renamed project '%s' to '%s'" % (oldName, newName)
     complete_p_rename = ProjectCompleter(1)
@@ -39,18 +53,18 @@ class ProjectCmd(object):
 
     def do_p_set_active(self, line):
         """Activate the given project"""
-        utils.getProjectFromName(line).active=True
+        getProjectFromName(line).active=True
     complete_p_set_active = ProjectCompleter(1)
 
     def do_p_set_inactive(self, line):
         """Desactivate the given project"""
-        utils.getProjectFromName(line).active=False
+        getProjectFromName(line).active=False
     complete_p_set_inactive = ProjectCompleter(1)
 
     def do_p_remove(self, line):
         """Remove a project and all its associated tasks
         p_remove <project_name>"""
-        project = utils.getProjectFromName(line)
+        project = getProjectFromName(line)
         taskList = Task.select(Task.q.projectID == project.id)
         taskList = list(taskList)
         print "Removing project tasks:"

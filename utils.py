@@ -58,20 +58,6 @@ def getTaskFromId(line, parameterName="id"):
     except SQLObjectNotFound:
         raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
 
-def getProjectFromName(name, parameterName="project_name"):
-    """
-    Helper function which returns a project given its name, or raise a
-    YokadiException if it does not exist.
-    """
-    name = name.strip()
-    if len(name) == 0:
-        raise YokadiException("Missing <%s> parameter" % parameterName)
-
-    try:
-        return Project.byName(name)
-    except SQLObjectNotFound:
-        raise YokadiException("Project '%s' not found. Use p_list to see all projects." % name)
-
 #TODO: factorize the two following functions and make a generic one
 def getOrCreateKeyword(keywordName, interactive=True):
     """Get a keyword by its name. Create it if needed
