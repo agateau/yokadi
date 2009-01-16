@@ -20,6 +20,7 @@ from yokadioptionparsertestcase import YokadiOptionParserTestCase
 from dateutilstestcase import DateUtilsTestCase
 from projecttestcase import ProjectTestCase
 from completerstestcase import CompletersTestCase
+from tasktestcase import TaskTestCase
 
 DB_FILENAME = "unittest.db"
 
