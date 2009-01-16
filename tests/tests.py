@@ -16,6 +16,7 @@ sys.path.append(join(dirname(__file__), pardir))
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
 from dateutilstestcase import DateUtilsTestCase
+from projecttestcase import ProjectTestCase
 
 if __name__ == "__main__":
     unittest.main()
