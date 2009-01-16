@@ -112,6 +112,16 @@ def confirm(prompt):
             error("Wrong value")
 
 
+def renderFields(fields):
+    """Print on screen tabular array represented by fields
+    @param fields: list of tuple (caption, value)
+    """
+    maxWidth = max([len(x) for x,y in fields])
+    format=C.BOLD+"%" + str(maxWidth) + "s"+C.RESET+": %s"
+    for caption, value in fields:
+        print format % (caption, value)
+
+
 def error(message):
     print >>sys.stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
 

@@ -10,7 +10,6 @@ from db import Config
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from yokadiexception import YokadiException
 from completers import confCompleter
-from textrenderer import TextRenderer
 import tui
 from yokadioptionparser import YokadiOptionParser
 
@@ -33,8 +32,7 @@ class ConfCmd(object):
         try:
             k=Config.select(AND(LIKE(Config.q.name, line), Config.q.system==options.system))
             fields=[(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
-            t=TextRenderer()
-            t.renderFields(fields)
+            tui.renderFields(fields)
         except SQLObjectNotFound:
             raise YokadiException("Configuration key %s does not exist" % line)
 

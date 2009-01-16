@@ -17,7 +17,6 @@ import dbutils
 import dateutils
 import parseutils
 import tui
-from textrenderer import TextRenderer
 from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
@@ -37,10 +36,6 @@ gRendererClassDict = dict(
     )
 
 class TaskCmd(object):
-    __slots__ = ["renderer"]
-    def __init__(self):
-        self.renderer = TextRenderer()
-
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [-k <keyword1>] [-k <keyword2>] <Task description>"""
@@ -377,7 +372,29 @@ class TaskCmd(object):
         task=dbutils.getTaskFromId(' '.join(args))
 
         if options.output in ("all", "summary"):
-            self.renderer.renderTaskSummary(task)
+            keywordDict = task.getKeywordDict()
+            keywordArray = []
+            for name, value in keywordDict.items():
+                txt = name
+                if value:
+                    txt += "=" + str(value)
+                keywordArray.append(txt)
+                keywordArray.sort()
+            keywords = ", ".join(keywordArray)
+            fields = [
+                ("Project", task.project.name),
+                ("Title", task.title),
+                ("Created", task.creationDate),
+                ("Due", task.dueDate),
+                ("Status", task.status),
+                ("Urgency", task.urgency),
+                ("Keywords", keywords),
+                ]
+
+            if task.status == "done":
+                fields.append(("Done", task.doneDate))
+
+            tui.renderFields(fields)
 
         if options.output in ("all", "description") and task.description:
             if options.output == "all":
