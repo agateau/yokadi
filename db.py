@@ -101,12 +101,12 @@ class Config(SQLObject):
     system = BoolCol(default=False, notNone=True)
     desc = UnicodeCol(default="", notNone=True)
 
+
+TABLE_LIST = [Project, Keyword, Task, TaskKeyword, Config]
+
 def createTables():
-    Project.createTable()
-    Keyword.createTable()
-    Task.createTable()
-    TaskKeyword.createTable()
-    Config.createTable()
+    for table in TABLE_LIST:
+        table.createTable()
 
 
 def getVersion():
