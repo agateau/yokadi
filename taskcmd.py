@@ -13,7 +13,7 @@ from datetime import datetime, date, timedelta
 from sqlobject import SQLObjectNotFound, LIKE, AND
 
 from db import Config, Keyword, Project, Task
-import utils
+import dbutils
 import dateutils
 import parseutils
 import tui
@@ -50,7 +50,7 @@ class TaskCmd(object):
         projectName, title, keywordDict = parseutils.parseTaskLine(line)
         if not title:
             raise YokadiException("You should give a task title")
-        task = utils.addTask(projectName, title, keywordDict)
+        task = dbutils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
 
@@ -59,7 +59,7 @@ class TaskCmd(object):
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
-        task=utils.getTaskFromId(line)
+        task=dbutils.getTaskFromId(line)
         description = tui.editText(task.description)
         task.description = description
 
@@ -71,7 +71,7 @@ class TaskCmd(object):
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You must provide a taskId and an urgency value") 
-        task = utils.getTaskFromId(tokens[0])
+        task = dbutils.getTaskFromId(tokens[0])
         try:
             # Do not use isdigit(), so that we can set negative urgency. This
             # make it possible to stick tasks to the bottom of the list.
@@ -104,7 +104,7 @@ class TaskCmd(object):
     complete_t_mark_new = taskIdCompleter
 
     def _t_set_status(self, line, status):
-        task=utils.getTaskFromId(line)
+        task=dbutils.getTaskFromId(line)
         task.status = status
         if status == 'done':
             task.doneDate = datetime.now()
@@ -142,7 +142,7 @@ class TaskCmd(object):
     def do_t_remove(self, line):
         parser = self.parser_t_remove()
         options, args = parser.parse_args(line)
-        task=utils.getTaskFromId(' '.join(args))
+        task=dbutils.getTaskFromId(' '.join(args))
         if not options.force:
             if not tui.confirm("Remove task '%s'" % task.title):
                 return
@@ -374,7 +374,7 @@ class TaskCmd(object):
         parser = self.parser_t_show()
         options, args = parser.parse_args(line)
 
-        task=utils.getTaskFromId(' '.join(args))
+        task=dbutils.getTaskFromId(' '.join(args))
 
         if options.output in ("all", "summary"):
             self.renderer.renderTaskSummary(task)
@@ -389,7 +389,7 @@ class TaskCmd(object):
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
-        task=utils.getTaskFromId(line)
+        task=dbutils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
@@ -399,9 +399,9 @@ class TaskCmd(object):
 
         # Update task
         projectName, title, keywordDict = parseutils.parseTaskLine(line)
-        if not utils.createMissingKeywords(keywordDict.keys()):
+        if not dbutils.createMissingKeywords(keywordDict.keys()):
             return
-        task.project = utils.getOrCreateProject(projectName)
+        task.project = dbutils.getOrCreateProject(projectName)
         task.title = title
         task.setKeywordDict(keywordDict)
 
@@ -414,10 +414,10 @@ class TaskCmd(object):
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        task=utils.getTaskFromId(tokens[0])
+        task=dbutils.getTaskFromId(tokens[0])
         projectName = tokens[1]
 
-        task.project = utils.getOrCreateProject(projectName)
+        task.project = dbutils.getOrCreateProject(projectName)
         if task.project:
             print "Moved task '%s' to project '%s'" % (task.title, projectName)
     complete_t_set_project = ProjectCompleter(2)
@@ -428,7 +428,7 @@ class TaskCmd(object):
         if len(line.split())<2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
-        task=utils.getTaskFromId(taskId)
+        task=dbutils.getTaskFromId(taskId)
 
         if line.lower()=="none":
             task.dueDate=None

@@ -6,7 +6,7 @@ Bug related commands.
 @license: GPLv3
 """
 import parseutils
-import utils
+import dbutils
 import tui
 from db import Task
 from completers import ProjectCompleter
@@ -62,7 +62,7 @@ def editBugKeywords(keywordDict):
 class BugCmd(object):
     def __init__(self):
         for name in PROPERTY_NAMES:
-            utils.getOrCreateKeyword(name, interactive=False)
+            dbutils.getOrCreateKeyword(name, interactive=False)
 
 
     def do_bug_add(self, line):
@@ -72,7 +72,7 @@ class BugCmd(object):
         projectName, title, keywordDict = parseutils.parseTaskLine(line)
         editBugKeywords(keywordDict)
 
-        task = utils.addTask(projectName, title, keywordDict)
+        task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             return
 
@@ -86,7 +86,7 @@ class BugCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        task = utils.getTaskFromId(line)
+        task = dbutils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
@@ -97,9 +97,9 @@ class BugCmd(object):
         editBugKeywords(keywordDict)
 
         # Update bug
-        if not utils.createMissingKeywords(keywordDict.keys()):
+        if not dbutils.createMissingKeywords(keywordDict.keys()):
             return
-        task.project = utils.getOrCreateProject(projectName)
+        task.project = dbutils.getOrCreateProject(projectName)
         task.title = title
         task.setKeywordDict(keywordDict)
         task.urgency = computeUrgency(keywordDict)

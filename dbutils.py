@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 """
-Misc utilities. Should probably be splitted.
+Database utilities.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
