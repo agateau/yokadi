@@ -75,9 +75,4 @@ def createTaskLine(projectName, title, keywordDict):
 
     tokens.append(title)
     return u" ".join(tokens)
-
-
-def computeCompleteParameterPosition(text, line, begidx, endidx):
-    before = simplifySpaces(line[:begidx].strip())
-    return before.count(" ") + 1
 # vi: ts=4 sw=4 et

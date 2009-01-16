@@ -28,4 +28,13 @@ class CompletersTestCase(unittest.TestCase):
         result = completer("f", "t_add f", 6, 8)
         self.assertEqual(result, expected)
 
+
+    def testCompleteParameterPosition(self):
+        data = [
+                 (("bla", "t_add bla", 6, 10), 1),
+                 (("bli", "t_add bla bli", 10, 14), 2),
+               ]
+        for params, expectedResult in data:
+            result = completers.computeCompleteParameterPosition(*params)
+            self.assertEqual(result, expectedResult)
 # vi: ts=4 sw=4 et

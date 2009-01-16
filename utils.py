@@ -112,12 +112,4 @@ def createMissingKeywords(lst):
             return False
     return True
 
-def getItemPropertiesStartingWith(item, field, text):
-    """Return a list of item.field starting with text
-    @param item: the object item, example : Task, Project, Keyword...
-    @param field: the item's field lookup : Project.q.name, Task.q.title, Keyword.q.name. Don't forget the magic q
-    @param text: The begining of the text as a str
-    @return: list of matching strings"""
-    return [x.name for x in item.select(LIKE(field, text + "%"))]
-
 # vi: ts=4 sw=4 et

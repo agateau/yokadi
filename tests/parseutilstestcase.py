@@ -29,13 +29,3 @@ class ParseUtilsTestCase(unittest.TestCase):
             taskLine = parseutils.createTaskLine(*parsedStruct)
             result = parseutils.parseTaskLine(taskLine)
             self.assertEqual(result, parsedStruct)
-
-
-    def testCompleteParameterPosition(self):
-        data = [
-                 (("bla", "t_add bla", 6, 10), 1),
-                 (("bli", "t_add bla bli", 10, 14), 2),
-               ]
-        for params, expectedResult in data:
-            result = parseutils.computeCompleteParameterPosition(*params)
-            self.assertEqual(result, expectedResult)
