@@ -6,12 +6,17 @@ HTML rendering of t_list output
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
+import xml.sax.saxutils as saxutils
+
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "keywords"]
+
+def escape(text):
+    return saxutils.escape(unicode(text))
 
 def printRow(out, tag, lst):
     print >>out, "<tr>"
     for value in lst:
-        text = unicode(value).encode("utf-8") or "&nbsp;"
+        text = escape(value).encode("utf-8") or "&nbsp;"
         print >>out, "<%s>%s</%s>" % (tag, text, tag)
     print >>out, "</tr>"
 
@@ -35,7 +40,7 @@ class HtmlListRenderer(object):
                 """
 
     def addTaskList(self, project, taskList):
-        print >>self.out, (u"<h1>%s</h1>" % project.name).encode("utf-8")
+        print >>self.out, (u"<h1>%s</h1>" % escape(project.name)).encode("utf-8")
         print >>self.out, "<table width='100%'>"
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:
