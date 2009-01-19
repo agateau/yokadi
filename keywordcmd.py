@@ -6,7 +6,7 @@ Keyword related commands.
 @license: GPLv3
 """
 from db import Keyword
-from utils import YokadiException
+from yokadiexception import YokadiException
 from completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import LIKE
