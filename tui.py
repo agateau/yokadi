@@ -57,18 +57,21 @@ def editLine(line, prompt="edit> "):
         # Unset the hook again
         readline.set_pre_input_hook(None)
 
-    readline.set_pre_input_hook(pre_input_hook)
+    if sys.platform != 'win32':
+        readline.set_pre_input_hook(pre_input_hook)
 
     if len(_answers) > 0:
         line = _answers.pop(0)
     else:
         line = raw_input(prompt)
+
     # Remove edited line from history:
     #   oddly, get_history_item is 1-based,
     #   but remove_history_item is 0-based
-    length = readline.get_current_history_length()
-    if length > 0:
-        readline.remove_history_item(length - 1)
+    if sys.platform != 'win32':
+        length = readline.get_current_history_length()
+        if length > 0:
+            readline.remove_history_item(length - 1)
 
     return line.decode(ENCODING)
 
