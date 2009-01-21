@@ -10,6 +10,8 @@ Command line oriented, sqlite powered, todo list
 import os
 import sys
 import readline
+reload(sys)  ## So as to enable setdefaultencoding
+
 import traceback
 import locale
 from cmd import Cmd
@@ -27,7 +29,6 @@ from yokadioptionparser import YokadiOptionParserNormalExitException
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command
-reload(sys)
 sys.setdefaultencoding(tui.ENCODING)
 
 
