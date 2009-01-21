@@ -133,7 +133,7 @@ def main():
     (options, args) = parser.parse_args()
 
     if not options.filename:
-        options.filename=os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
+        options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
         print "Using default database (%s)" % options.filename
 
     db.connectDatabase(options.filename)
