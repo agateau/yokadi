@@ -135,7 +135,11 @@ def connectDatabase(dbFileName, createIfNeeded=True):
 
     dbFileName=os.path.abspath(dbFileName)
 
-    connectionString = 'sqlite:' + dbFileName
+    if sys.platform == 'win32':
+        connectionString = 'sqlite:/'+ dbFileName[0] +'|' + dbFileName[2:]
+    else:
+        connectionString = 'sqlite:' + dbFileName
+        
     connection = connectionForURI(connectionString)
     sqlhub.processConnection = connection
 
