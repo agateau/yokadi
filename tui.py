@@ -22,6 +22,26 @@ from yokadiexception import YokadiException
 ENCODING=locale.getpreferredencoding()
 
 _answers = []
+class IOStream:
+    def __init__(self, original_flow):
+        self.__original_flow = original_flow
+        if sys.platform == 'win32':
+            import pyreadline
+            self.__console = pyreadline.GetOutputFile()
+        
+    def write(self, text):
+        if sys.platform == 'win32':
+            self.__console.write_color(text)
+        else:
+            self.__original_flow.write(text) 
+
+class IOHandler:
+    def __init__(self):
+        self.stdout = IOStream(sys.stdout)
+        self.stderr = IOStream(sys.stderr)
+        self.stdin  = IOStream(sys.stdin)
+
+yio = IOHandler()           # The one and only Yokaidi IO Handler
 
 
 def editText(text):
@@ -128,19 +148,21 @@ def renderFields(fields):
     maxWidth = max([len(x) for x,y in fields])
     format=C.BOLD+"%" + str(maxWidth) + "s"+C.RESET+": %s"
     for caption, value in fields:
-        print format % (caption, value)
+        print >>yio.stdout, format % (caption, value)
+
+
 
 
 def error(message):
-    print >>sys.stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
+    print >>yio.stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
 
 
 def warning(message):
-    print >>sys.stderr, C.RED + "Warning: " + C.RESET + message
+    print >>yio.stderr, C.RED + "Warning: " + C.RESET + message
 
 
 def info(message):
-    print >>sys.stderr, C.CYAN + "Info: " + C.RESET + message
+    print >>yio.stderr, C.CYAN + "Info: " + C.RESET + message
 
 
 def addInputAnswers(*answers):
@@ -149,3 +171,4 @@ def addInputAnswers(*answers):
     This is useful for unit-testing."""
     _answers.extend(answers)
 # vi: ts=4 sw=4 et
+

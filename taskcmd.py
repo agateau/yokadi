@@ -289,7 +289,7 @@ class TaskCmd(object):
         if options.output:
             out = open(options.output, "w")
         else:
-            out = sys.stdout
+            out = tui.yio.stdout
 
         # Instantiate renderer
         rendererClass = selectRendererClass()
