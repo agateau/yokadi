@@ -8,8 +8,14 @@ Database access layer using sqlobject
 
 import os
 import sys
-from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
-     RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol
+try:
+    from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
+         RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol
+except ImportError:
+    print "You must install SQLObject to use Yokadi"
+    print "Get it on http://www.sqlobject.org/"
+    print "Or use 'easy_install sqlobject'"
+    sys.exit(1)
 
 from yokadiexception import YokadiException
 import tui
