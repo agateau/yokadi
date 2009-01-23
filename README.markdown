@@ -157,7 +157,7 @@ The project is hosted on http://yokadi.github.com.
 
 All discussion happens on Yokadi mailing-list, hosted by our friends from the
 Sequanux LUG. To join, visit
-http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi
+<http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi>.
 
 
 # Authors
