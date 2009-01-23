@@ -64,7 +64,8 @@ Here is an example of a short Yokadi session:
     1  |Buy food and drinks                                         |0  |N|2009-01-09 08:57|
     3  |Invite Wendy                                                |0  |N|2009-01-09 08:58|
 
-- Task 2 has not disappeared, but `t_list` skips done tasks by default. To list all tasks use:
+- Task 2 has not disappeared, but `t_list` skips done tasks by default. To list
+  all tasks use:
 
     yokadi> t_list birthday --all
                                              birthday
@@ -82,11 +83,13 @@ Here is an example of a short Yokadi session:
     --------------------------------------------------------------------------------------------------
     2  |Invite Bob                                                  |0  |D|2009-01-09 08:58|
 
-- You may want to attach your grocery list to task 1. This can be done with `t_describe`.
+- You may want to attach your grocery list to task 1. This can be done with
+  `t_describe`.
 
     yokadi> t_describe 1
 
-  This will start the editor specified in $EDITOR (or `vi` if not set) to enter a longer text, attached to the task.
+  This will start the editor specified in $EDITOR (or `vi` if not set) to enter
+  a longer text, attached to the task.
 
 - You can now display details of task 1:
 
@@ -105,9 +108,10 @@ Here is an example of a short Yokadi session:
     - Cookies
     - Pizzas
 
-  Note: `t_show` is not mandatory, just entering the task number will display its details.
+  Note: `t_show` is not mandatory, just entering the task number will display
+  its details.
 
-- `t_list` indicates marks tasks which have a longer description with a '*' character:
+- `t_list` indicates tasks which have a longer description with a '*' character:
 
     yokadi> t_list birthday
                                              birthday
@@ -116,9 +120,9 @@ Here is an example of a short Yokadi session:
     1  |Buy food and drinks                                        *|0  |N|2009-01-09 08:57|
     3  |Invite Wendy                                                |0  |N|2009-01-09 08:58|
 
-There is much more, but this should get you started. You can get a list of all
-commands by typing `help` and get the detailed documentation of a command with
-`help <command>`.
+There is much more, we only scratched the surface, but this should get you
+started. You can get a list of all commands by typing `help` and get the
+detailed documentation of a command with `help <command>`.
 
 
 # Integration
@@ -128,11 +132,13 @@ commands by typing `help` and get the detailed documentation of a command with
 By default, Yokadi creates a database in `$HOME/.yokadi.db`, but you can
 specify an alternative location with the `--db` option.
 
-A convenient way to start yokadi is by creating an alias in your `.bashrc` file like this:
+A convenient way to start yokadi is by creating an alias in your `.bashrc` file
+like this:
 
-    alias y='/home/me/yokadi/yokadi.py --db /home/me/travail/yokadi.db'
+    alias y='/home/me/yokadi/yokadi.py --db /home/me/work/yokadi.db'
 
-The single letter `y` will start Yokadi with your favorite database from wherever you are.
+The single letter `y` will start Yokadi with your favorite database from
+wherever you are.
 
 ## Yokadid, the Yokadid daemon
 
