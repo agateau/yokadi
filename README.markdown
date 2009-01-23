@@ -150,4 +150,21 @@ must create a shell script in `$HOME/.kde/Autostart/`. Sample script:
 
     /home/me/yokadi/yokadid.py --db /home/me/work/yokadi.db
 
+
+# Contact
+
+The project is hosted on http://yokadi.github.com.
+
+All discussion happens on Yokadi mailing-list, hosted by our friends from the
+Sequanux LUG. To join, visit
+http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi
+
+
+# Authors
+
+Yokadi has been brought to you by:
+
+- Aurélien Gâteau <aurelien.gateau@free.fr>: Developer, funder
+- Sébastien Renard <sebastien.renard@digitalfox.org>: Developer
+
 <!-- vim: set ts=4 sw=4 et: -->
