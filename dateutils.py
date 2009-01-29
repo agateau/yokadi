@@ -99,7 +99,7 @@ def parseHumaneDateTime(line):
             # Set year and/or month to current date if not given
             if not "%Y" in fDate:
                 date=date.replace(year=today.year)
-            if not "%M" in fDate:
+            if not "%m" in fDate:
                 date=date.replace(month=today.month)
 
     return date
