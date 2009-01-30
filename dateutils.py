@@ -38,6 +38,20 @@ def guessTimeFormat(tTime):
     return fTime
 
 
+def parseDateTimeDelta(line):
+    line = line.upper()
+    if   line.endswith("W"):
+        return timedelta(days=float(line[0:-1])*7)
+    elif line.endswith("D"):
+        return timedelta(days=float(line[0:-1]))
+    elif line.endswith("H"):
+        return timedelta(hours=float(line[0:-1]))
+    elif line.endswith("M"):
+        return timedelta(minutes=float(line[0:-1]))
+    else:
+        raise YokadiException("Unable to understand time shift. See help t_set_due")
+
+
 def parseHumaneDateTime(line):
     """Parse human date and time and return structured datetime object
     Datetime  can be absolute (23/10/2008 10:38) or relative (+5M, +3H, +1D, +6W)
@@ -55,19 +69,8 @@ def parseHumaneDateTime(line):
     date=today # Safe because datetime objects are immutables
 
     if line.startswith("+"):
-        #Delta/relative date and/or time
-        line=line.upper().strip("+")
         try:
-            if   line.endswith("W"):
-                date=today+timedelta(days=float(line[0:-1])*7)
-            elif line.endswith("D"):
-                date=today+timedelta(days=float(line[0:-1]))
-            elif line.endswith("H"):
-                date=today+timedelta(hours=float(line[0:-1]))
-            elif line.endswith("M"):
-                date=today+timedelta(minutes=float(line[0:-1]))
-            else:
-                raise YokadiException("Unable to understand time shift. See help t_set_due")
+            date = today + parseDateTimeDelta(line[1:])
         except ValueError:
             raise YokadiException("Timeshift must be a float or an integer")
     else:
