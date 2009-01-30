@@ -441,7 +441,22 @@ class TaskCmd(object):
 
     def do_t_set_due(self, line):
         """Set task's due date
-        t_set_due_date <id> <date>"""
+        t_set_due_date <id> <date>
+
+        Date can be specified as a relative offset:
+        - +5M: in 5 minutes
+        - +3H: in 3 hours
+        - +1D: in 1 day
+        - +6W: in 6 weeks
+
+        Or as an absolute date or time:
+        - 10:38:            at 10:38 today
+        - 25/09/2010 12:10: on the 25th of September, 2010, at 12:10
+        - 23/02/2010:       on the 23th of February, 2010
+        - 01/04:            on the 1st of April
+        - 12:               on the 12th of current month
+
+        To reset a due date, use "none"."""
         if len(line.split())<2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
