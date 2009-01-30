@@ -449,8 +449,10 @@ class TaskCmd(object):
 
         if line.lower()=="none":
             task.dueDate=None
+            print "Due date for task '%s' reset" % task.title
         else:
             task.dueDate = dateutils.parseHumaneDateTime(line)
+            print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
 
     complete_t_set_due = taskIdCompleter
 
