@@ -6,7 +6,7 @@ Date utilities test cases
 """
 
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
  
 import dateutils
 from yokadiexception import YokadiException 
@@ -20,6 +20,20 @@ class DateUtilsTestCase(unittest.TestCase):
 
         for text, expected in testData:
             output = dateutils.guessDateFormat(text)
+            self.assertEquals(expected, output)
+
+
+    def testParseDateTimeDelta(self):
+        testData = [
+            ("1m", timedelta(minutes=1)),
+            ("3M", timedelta(minutes=3)),
+            ("5H", timedelta(hours=5)),
+            ("6.5D", timedelta(days=6, hours=12)),
+            ("12W", timedelta(days=12*7)),
+            ]
+
+        for text, expected in testData:
+            output = dateutils.parseDateTimeDelta(text)
             self.assertEquals(expected, output)
 
 
