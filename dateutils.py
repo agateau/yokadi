@@ -71,12 +71,10 @@ def parseHumaneDateTime(line):
 
     today=datetime.today().replace(microsecond=0)
 
-    # Initialise date to now (may be now + fixe delta ?)
-    date=today # Safe because datetime objects are immutables
-
     if line.startswith("+"):
         date = today + parseDateTimeDelta(line[1:])
     else:
+        date = today
         #Absolute date and/or time
         if " " in line:
             # We assume user give date & time
