@@ -39,15 +39,21 @@ def guessTimeFormat(tTime):
 
 
 def parseDateTimeDelta(line):
-    line = line.upper()
-    if   line.endswith("W"):
-        return timedelta(days=float(line[0:-1])*7)
-    elif line.endswith("D"):
-        return timedelta(days=float(line[0:-1]))
-    elif line.endswith("H"):
-        return timedelta(hours=float(line[0:-1]))
-    elif line.endswith("M"):
-        return timedelta(minutes=float(line[0:-1]))
+    # FIXME: Do we really want to support float deltas?
+    try:
+        delta = float(line[:-1])
+    except ValueError:
+        raise YokadiException("Timeshift must be a float or an integer")
+
+    suffix = line[-1].upper()
+    if   suffix == "W":
+        return timedelta(days=delta * 7)
+    elif suffix == "D":
+        return timedelta(days=delta)
+    elif suffix == "H":
+        return timedelta(hours=delta)
+    elif suffix == "M":
+        return timedelta(minutes=delta)
     else:
         raise YokadiException("Unable to understand time shift. See help t_set_due")
 
@@ -69,10 +75,7 @@ def parseHumaneDateTime(line):
     date=today # Safe because datetime objects are immutables
 
     if line.startswith("+"):
-        try:
-            date = today + parseDateTimeDelta(line[1:])
-        except ValueError:
-            raise YokadiException("Timeshift must be a float or an integer")
+        date = today + parseDateTimeDelta(line[1:])
     else:
         #Absolute date and/or time
         if " " in line:
