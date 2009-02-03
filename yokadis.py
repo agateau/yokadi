@@ -23,6 +23,7 @@ from sqlobject import AND
 
 # PyWin32 imports
 from win32ts import WTSSendMessage, WTSEnumerateSessions, WTS_CURRENT_SERVER_HANDLE
+from win32con import MB_ICONEXCLAMATION, MB_OK
 
 
 ###############################################################################
@@ -86,12 +87,10 @@ class YokadiService(BaseService):
                 # This task with the same dueDate has already been triggered, skipping
                 continue
    
-            cmd=cmdTemplate.replace("{ID}", str(task.id))
-            cmd=cmd.replace("{TITLE}", task.title.replace('"', '\"'))
-            cmd=cmd.replace("{DATE}", str(task.dueDate))
+            cmd = "Task %s (%s) should be done now : it is due for the %s" %(task.title, task.id, task.dueDate)
             
             # Display a warning
-            WTSSendMessage(WTS_CURRENT_SERVER_HANDLE, sessionID, 'Yokadi alert', cmd, 1, 999, False)
+            WTSSendMessage(WTS_CURRENT_SERVER_HANDLE, sessionID, 'Yokadi alert', cmd, MB_ICONEXCLAMATION + MB_OK, 999, False)
             
             # Remember that we have displayed this 
             triggeredTasks[task.id]=task.dueDate
