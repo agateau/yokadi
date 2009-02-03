@@ -21,6 +21,10 @@ from yokadiexception import YokadiException
 # Beware of circular import definition when add dependencies to this module
 ENCODING=locale.getpreferredencoding()
 
+# All input is read from inputImpl. You can replace this function in unit-tests
+# to simulate user input
+inputImpl = raw_input
+
 def editText(text):
     """Edit text with external editor
     @raise YokadiException: if editor cannot be started
@@ -56,7 +60,7 @@ def editLine(line, prompt="edit> "):
 
     readline.set_pre_input_hook(pre_input_hook)
 
-    line = raw_input(prompt)
+    line = inputImpl(prompt)
     # Remove edited line from history:
     #   oddly, get_history_item is 1-based,
     #   but remove_history_item is 0-based
