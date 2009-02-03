@@ -36,4 +36,17 @@ class TaskTestCase(unittest.TestCase):
 
         kwDict = Task.get(2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
+
+    def testMark(self):
+        inputImpl = MockInputImpl(
+            "y", # Create project
+            )
+        tui.inputImpl = inputImpl
+        self.cmd.do_t_add("x t1")
+        task = Task.get(1)
+        self.assertEqual(task.status, "new")
+        self.cmd.do_t_mark_started("1")
+        self.assertEqual(task.status, "started")
+        self.cmd.do_t_mark_done("1")
+        self.assertEqual(task.status, "done")
 # vi: ts=4 sw=4 et
