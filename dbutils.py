@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import LIKE, SQLObjectNotFound
 
+import tui
 from db import Keyword, Project, Task
 from yokadiexception import YokadiException
 
@@ -70,12 +71,8 @@ def getOrCreateKeyword(keywordName, interactive=True):
     if len(result):
         return result[0]
 
-    while interactive:
-        answer = raw_input("Keyword '%s' does not exist, create it (y/n)? " % keywordName)
-        if answer == "n":
-            return None
-        if answer == "y":
-            break
+    if not tui.confirm("Keyword '%s' does not exist, create it" % keywordName):
+        return None
     keyword = Keyword(name=keywordName)
     print "Added keyword '%s'" % keywordName
     return keyword
@@ -92,12 +89,8 @@ def getOrCreateProject(projectName, interactive=True):
     if len(result):
         return result[0]
 
-    while interactive:
-        answer = raw_input("Project '%s' does not exist, create it (y/n)? " % projectName)
-        if answer == "n":
-            return None
-        if answer == "y":
-            break
+    if not tui.confirm("Project '%s' does not exist, create it" % projectName):
+        return None
     project = Project(name=projectName)
     print "Added project '%s'" % projectName
     return project
