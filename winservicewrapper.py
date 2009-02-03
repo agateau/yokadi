@@ -123,6 +123,14 @@ class ServiceHandler():
             print str(x)
             raise
     
+    def uninstall(self):
+        try:
+            if self.isServiceRunning():
+                self.stopService()
+            win32serviceutil.RemoveService(self.serviceName)
+            print 'Service deletion OK (it won\'t disappear till next logon)'
+        except:
+            raise
 
 
 class BaseService(win32serviceutil.ServiceFramework):    
