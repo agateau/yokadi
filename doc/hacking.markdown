@@ -33,7 +33,7 @@ since the name of the method is used to create the name of the command:
 Filenames are lowercase. If they contain a class they should match the name of
 the class they contain.
 
-Internal functions and methods should be prefixed with '_'.
+Internal functions and methods should be prefixed with `_`.
 
 ## Spacing
 

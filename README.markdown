@@ -111,7 +111,7 @@ You can now display details of task 1:
 Note: `t_show` is not mandatory, just entering the task number will display its
 details.
 
-`t_list` indicates tasks which have a longer description with a '*' character:
+`t_list` indicates tasks which have a longer description with a `*` character:
 
     yokadi> t_list birthday
                                              birthday
