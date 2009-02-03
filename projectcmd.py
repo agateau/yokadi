@@ -7,9 +7,11 @@ Project related commands.
 """
 from sqlobject import SQLObjectNotFound
 
+import tui
+from completers import ProjectCompleter
 from db import Project, Task
 from yokadiexception import YokadiException
-from completers import ProjectCompleter
+from yokadioptionparser import YokadiOptionParser
 
 
 def getProjectFromName(name, parameterName="project_name"):
@@ -61,10 +63,21 @@ class ProjectCmd(object):
         getProjectFromName(line).active=False
     complete_p_set_inactive = ProjectCompleter(1)
 
+    def parser_p_remove(self):
+        parser = YokadiOptionParser()
+        parser.set_usage("p_remove [options] <project_name>")
+        parser.set_description("Remove a project and all its associated tasks.")
+        parser.add_option("-f", dest="force", default=False, action="store_true",
+                          help="Skip confirmation prompt")
+        return parser
+
     def do_p_remove(self, line):
-        """Remove a project and all its associated tasks
-        p_remove <project_name>"""
-        project = getProjectFromName(line)
+        parser = self.parser_p_remove()
+        options, args = parser.parse_args(line)
+        project = getProjectFromName(' '.join(args))
+        if not options.force:
+            if not tui.confirm("Remove project '%s' and all its tasks" % project.name):
+                return
         taskList = Task.select(Task.q.projectID == project.id)
         taskList = list(taskList)
         print "Removing project tasks:"
