@@ -1,12 +1,8 @@
 ---
-layout: default
 title: Documentation
+layout: default
 ---
-Yokadi Documentation is bundled in the release archives, but you can also browse
-it on GitHub:
-
-- The [README][]
-- The [docs folder][docs]
-
-[README]: http://github.com/agateau/yokadi/master/README.markdown
-[docs]: http://github.com/agateau/yokadi/master/docs/
+- [README](README.html)
+- [bugtracking](bugtracking.html)
+- [hacking](hacking.html)
+- [tips](tips.html)
