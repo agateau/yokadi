@@ -105,17 +105,16 @@ def parseOptions():
     parser = OptionParser()
     
     parser.add_option("-d", "--db", dest="filename",
-                      help="database file to use", metavar="FILE")
+                      help="database file to use. This parameter is only useful for the Service first start", metavar="FILE")
 
     parser.add_option("-s", "--stop",
                       dest="stop", default=False, action="store_true", 
-                      help="Stops the Yokadi Service (you can specify database with -db if you run multiple YokadiS")
+                      help="Stops the Yokadi Service")
 
     parser.add_option("-u", "--unistall",
                       dest="uninstall", default=False, action="store_true", 
-                      help="Removes the Yokadi Service (you can specify database with -db if you run multiple YokadiS")
+                      help="Removes the Yokadi Service")
     
-
     return parser.parse_args()
 
 
@@ -123,16 +122,25 @@ def main(start = True):
     # Parse command line
     (options, args) = parseOptions()
     
-    # Open database
+    # Get database
     if not options.filename:
         options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
-        print "Using default database (%s)" % options.filename
-    
-    print YokadiService
     YokadiService.filename = options.filename
     
+    # Get the service handler
+    sh = ServiceHandler(YokadiService, "Yokadi", "Yokadi task manager Service", binArgs="-d %s" %options.filename)
+    
+    # Service stop
+    if options.stop:
+        sh.stopService()
+        return 0
+    
+    # Service removal
+    if options.uninstall:
+        sh.uninstall()
+        return 0
+    
     # Start service    
-    sh = ServiceHandler(YokadiService, "Yokadi3", "Yokadi3 task manager Service", binArgs="-d %s" %options.filename)
     if start:
         sh.startAndOrInstallServiceNoError()
 
