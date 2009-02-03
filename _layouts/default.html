@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
- 
+
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
@@ -8,12 +8,18 @@
 </head>
 <body>
 <div id="nav">
-    <a href="page1.html">Page 1</a> | <a href="page2.html">Page 2</a>
+    <a href="index.html">Home</a>
+    | <a href="doc.html">Documentation</a>
+    | <a href="download.html">Download</a>
+    | <a href="contact.html">Contact</a>
 </div>
+<h1 id="pagetitle">{{ page.title }}</h1>
 <div id="content">
-{{ content }}
+    {{ content }}
 </div>
-<hr />
-The footer
+<div id="footer">
+    &copy; 2008-2009 Yokadi developers
+</div>
 </body>
 </html>
+<!-- vim:set ts=4 sw=4 et: -->

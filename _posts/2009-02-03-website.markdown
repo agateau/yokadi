@@ -1,0 +1,5 @@
+---
+title: Website is up
+---
+Here we are, Yokadi website is taking shape. Right now we are busy getting ready
+for the 0.9 release.

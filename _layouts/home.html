@@ -1,0 +1,11 @@
+---
+layout: default
+---
+{{ content }}
+
+<h1>News</h1>
+
+{% for post in site.posts %}
+    <h3><span>{{ post.date | date_to_string }}</span> - {{ post.title }}</h3>
+    {{ post.content }}
+{% endfor %}
