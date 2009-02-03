@@ -17,13 +17,18 @@ from db import Config, Project, Task, connectDatabase
 from optparse import OptionParser
 from datetime import datetime, timedelta
 import os
+import sys
 
 # SQLO imports
 from sqlobject import AND
 
 # PyWin32 imports
-from win32ts import WTSSendMessage, WTSEnumerateSessions, WTS_CURRENT_SERVER_HANDLE
-from win32con import MB_ICONEXCLAMATION, MB_OK
+try:
+    from win32ts import WTSSendMessage, WTSEnumerateSessions, WTS_CURRENT_SERVER_HANDLE
+    from win32con import MB_ICONEXCLAMATION, MB_OK
+except:
+    print "PyWin32 must be installed in order to run the Yokadi Service. See https://sourceforge.net/projects/pywin32/"
+    sys.exit(1)
 
 
 ###############################################################################
