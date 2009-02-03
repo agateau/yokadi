@@ -23,7 +23,7 @@ import win32event
 import win32api
 import servicemanager
 
-# Pythn imports
+# Python imports
 import sys
 from os.path import splitext, abspath
 
@@ -54,23 +54,15 @@ class ServiceHandler():
         self.serviceClass   = serviceClass
         self.serviceClassString   = splitext(abspath(sys.modules[serviceClass.__module__].__file__))[0] + "." + serviceClass.__name__
     
-    
         self.serviceClass._svc_name_ = self.serviceName
         self.serviceClass._svc_display_name_ = self.longName
-        BaseService._svc_name_ = self.serviceName
-        BaseService._svc_display_name_ = self.longName
             
             
     def startService(self):
         """ Starts the service. Raises exceptions if isn't installed, or already running """
         try:
-            print self.serviceClass
-            #print self.serviceClassString
             self.serviceClass._svc_name_ = self.serviceName
             self.serviceClass._svc_display_name_ = self.longName
-            BaseService._svc_name_ = self.serviceName
-            BaseService._svc_display_name_ = self.longName
-            #print self.serviceClass._svc_name_
             win32serviceutil.StartService(self.serviceName)
             print u'Service started OK'
         except Exception, x:
@@ -133,22 +125,15 @@ class ServiceHandler():
     
 
 
-class BaseService(win32serviceutil.ServiceFramework):
-    
-    _svc_name_ = "meuh"
-    _svc_display_name_ = "pouet"
-    
+class BaseService(win32serviceutil.ServiceFramework):    
     def __init__(self, *args):
         if self.__class__.__name__ == 'BaseService':
             raise NotImplementedError('BaseService is an abstract class and should not be instanciated as such')
-        
-        #raise Exception(self.__class__._svc_name_)
-        
+         
         win32serviceutil.ServiceFramework.__init__(self, *args)
         self.logInfo('init')
         self.stop_event = win32event.CreateEvent(None, 0, 0, None)
-        self.isRunning = False        
-    
+        self.isRunning = False         
     
     def logInfo(self, msg):
         servicemanager.LogInfoMsg(str(msg))
@@ -167,19 +152,19 @@ class BaseService(win32serviceutil.ServiceFramework):
         self.ReportServiceStatus(win32service.SERVICE_START_PENDING)
         try:
             self.ReportServiceStatus(win32service.SERVICE_RUNNING)
-            self.logInfo('starting service %s' %BaseService._svc_name_)
+            self.logInfo('starting service %s' %self._svc_name_)
             
             # Call main loop (provided by the end user)
             self.mainLoop()
             
             # Once loop is finished, the service should not end (would be an error) but wait for an end signal
-            self.logInfo('service %s is waiting for a stop event' %BaseService._svc_name_)
+            self.logInfo('service %s is waiting for a stop event' %self._svc_name_)
             win32event.WaitForSingleObject(self.stop_event, win32event.INFINITE)
-            self.logInfo('service %s has finished' %BaseService._svc_name_)
+            self.logInfo('service %s has finished' %self._svc_name_)
         except Exception, x:
-            raise
-            self.logError('Service %s : [exception] %s' %(BaseService._svc_name_, x))
+            self.logError('Service %s : [exception] %s' %(self._svc_name_, x))
             self.SvcStop()
+            raise
             
             
     def SvcStop(self):
