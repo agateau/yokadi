@@ -26,11 +26,12 @@ class YokadiOptionParser(OptionParser):
         # Splitting an empty line gives us [""], not an empty array
         if argv == [u""]:
             argv = []
+
         # Escape things that looks like arg but are indeed value (a user text with a dash for example)
         nargv = [] # New argv with escaped arg if needed
         earg = []  # Escaped argument
         for arg in argv:
-            if self.get_option(arg):
+            if self.get_option(arg) or "--" in arg:
                 nargv.append(arg)
             else:
                 arg=arg.replace("-", "\-")
@@ -46,6 +47,7 @@ class YokadiOptionParser(OptionParser):
                 nargs.append(arg.replace("\-", "-"))
             else:
                 nargs.append(arg)
+
         return options, nargs
 
 
