@@ -21,9 +21,8 @@ from yokadiexception import YokadiException
 # Beware of circular import definition when add dependencies to this module
 ENCODING=locale.getpreferredencoding()
 
-# All input is read from inputImpl. You can replace this function in unit-tests
-# to simulate user input
-inputImpl = raw_input
+_answers = []
+
 
 def editText(text):
     """Edit text with external editor
@@ -60,7 +59,10 @@ def editLine(line, prompt="edit> "):
 
     readline.set_pre_input_hook(pre_input_hook)
 
-    line = inputImpl(prompt)
+    if len(_answers) > 0:
+        line = _answers.pop(0)
+    else:
+        line = raw_input(prompt)
     # Remove edited line from history:
     #   oddly, get_history_item is 1-based,
     #   but remove_history_item is 0-based
@@ -136,4 +138,11 @@ def warning(message):
 
 def info(message):
     print >>sys.stderr, C.CYAN + "Info: " + C.RESET + message
+
+
+def addInputAnswers(*answers):
+    """Add answers to tui internal answer buffer. Next call to editLine() will
+    pop the first answer from the buffer instead of prompting the user.
+    This is useful for unit-testing."""
+    _answers.extend(answers)
 # vi: ts=4 sw=4 et

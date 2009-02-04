@@ -8,7 +8,6 @@ Task test cases
 import unittest
 
 import testutils
-from mockinputimpl import MockInputImpl
 
 import tui
 from db import Project, Task
@@ -20,13 +19,10 @@ class TaskTestCase(unittest.TestCase):
         self.cmd = TaskCmd()
 
     def testAdd(self):
-        inputImpl = MockInputImpl(
-            "y", # Create project
-            "y", # Create kw1
-            "y", # Create kw2
-            )
-        tui.inputImpl = inputImpl
+        tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
+
+        tui.addInputAnswers("y", "y")
         self.cmd.do_t_add("x -k kw1 -k kw2=12 t2")
 
         tasks = list(Task.select())
@@ -38,10 +34,7 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
     def testMark(self):
-        inputImpl = MockInputImpl(
-            "y", # Create project
-            )
-        tui.inputImpl = inputImpl
+        tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
         task = Task.get(1)
         self.assertEqual(task.status, "new")
