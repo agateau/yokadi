@@ -31,7 +31,7 @@ class YokadiOptionParser(OptionParser):
         nargv = [] # New argv with escaped arg if needed
         earg = []  # Escaped argument
         for arg in argv:
-            if self.get_option(arg) or "--" in arg:
+            if self.get_option(arg.split("=")[0]):
                 nargv.append(arg)
             else:
                 arg=arg.replace("-", "\-")

@@ -25,7 +25,7 @@ class YokadiOptionParserTestCase(unittest.TestCase):
 
     def testDash(self):
         parser = YokadiOptionParser()
-        srcs = ["foo-bar", "foo - bar", "foo -bar"]
+        srcs = ["foo-bar", "foo - bar", "foo -bar", "--bar -f"]
         for src in srcs:
             options, args = parser.parse_args(src)
             # Recreate the line
