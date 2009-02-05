@@ -10,10 +10,11 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
 
 # Dependencies
 
-- Unix or Linux system. MacOSX and Windows should work but have not been tested.
-- Python 2.4 or higher
-- Sqlite module (included in Python since 2.5 release)
-- SQLObject 0.9 or 0.10
+- Unix or Linux system. Mac OS X and Windows should work but have not been
+  tested yet.
+- Python 2.4 or higher.
+- Sqlite module (included in Python since 2.5 release).
+- SQLObject 0.9 or higher.
 
 # Quickstart
 
