@@ -113,5 +113,10 @@ fields). You should:
   the last commit *before* your changes as "db-vx".
   This way one can checkout the latest version of Yokadi before your changes,
   create a database version x and test your update script.
+  The correct way to create the tag is:
+
+        # Note the -a!
+        git tag -a db-vx
+        git push --tags
 
 <!-- vim: set ts=4 sw=4 et: -->
