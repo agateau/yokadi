@@ -71,7 +71,7 @@ def getOrCreateKeyword(keywordName, interactive=True):
     if len(result):
         return result[0]
 
-    if not tui.confirm("Keyword '%s' does not exist, create it" % keywordName):
+    if interactive and not tui.confirm("Keyword '%s' does not exist, create it" % keywordName):
         return None
     keyword = Keyword(name=keywordName)
     print "Added keyword '%s'" % keywordName
@@ -89,7 +89,7 @@ def getOrCreateProject(projectName, interactive=True):
     if len(result):
         return result[0]
 
-    if not tui.confirm("Project '%s' does not exist, create it" % projectName):
+    if interactive and not tui.confirm("Project '%s' does not exist, create it" % projectName):
         return None
     project = Project(name=projectName)
     print "Added project '%s'" % projectName

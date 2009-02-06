@@ -18,6 +18,7 @@ import db
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
 from dateutilstestcase import DateUtilsTestCase
+from dbutilstestcase import DbUtilsTestCase
 from projecttestcase import ProjectTestCase
 from completerstestcase import CompletersTestCase
 from tasktestcase import TaskTestCase
