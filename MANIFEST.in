@@ -1,0 +1,3 @@
+include MANIFEST.in
+global-include *.py *.markdown *.sh
+include update/update*to*
