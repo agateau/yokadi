@@ -109,6 +109,7 @@ def sigHupHandler(signal, stack):
 
 def eventLoop():
     """Main event loop"""
+    delta=timedelta(hours=float(Config.byName("ALARM_DELAY").value))
     delta=timedelta(hours=int(Config.byName("ALARM_DELAY").value))
     cmdDelayTemplate=Config.byName("ALARM_DELAY_CMD").value
     cmdDueTemplate=Config.byName("ALARM_DUE_CMD").value
