@@ -41,7 +41,9 @@ class IOHandler:
         self.stderr = IOStream(sys.stderr)
         self.stdin  = IOStream(sys.stdin)
 
-yio = IOHandler()           # The one and only Yokaidi IO Handler
+io = IOHandler()           # The one and only tui IO Handler
+stdout=io.stdout
+stderr=io.stderr
 
 
 def editText(text):
@@ -148,21 +150,21 @@ def renderFields(fields):
     maxWidth = max([len(x) for x,y in fields])
     format=C.BOLD+"%" + str(maxWidth) + "s"+C.RESET+": %s"
     for caption, value in fields:
-        print >>yio.stdout, format % (caption, value)
+        print >>stdout, format % (caption, value)
 
 
 
 
 def error(message):
-    print >>yio.stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
+    print >>stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
 
 
 def warning(message):
-    print >>yio.stderr, C.RED + "Warning: " + C.RESET + message
+    print >>stderr, C.RED + "Warning: " + C.RESET + message
 
 
 def info(message):
-    print >>yio.stderr, C.CYAN + "Info: " + C.RESET + message
+    print >>stderr, C.CYAN + "Info: " + C.RESET + message
 
 
 def addInputAnswers(*answers):
