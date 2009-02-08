@@ -170,7 +170,8 @@ def setDefaultConfig():
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
         "ALARM_DUE_CMD"   : ('''kdialog --error "task {TITLE} ({ID}) should be done now" --title "Yokadi Daemon"''',False,
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)")}
+        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
+        "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again")}
 
     for name, value in defaultConfig.items():
         if Config.select(Config.q.name==name).count()==0:

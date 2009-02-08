@@ -110,9 +110,10 @@ def sigHupHandler(signal, stack):
 def eventLoop():
     """Main event loop"""
     delta=timedelta(hours=float(Config.byName("ALARM_DELAY").value))
-    delta=timedelta(hours=int(Config.byName("ALARM_DELAY").value))
+    suspend=timedelta(hours=float(Config.byName("ALARM_SUSPEND").value))
     cmdDelayTemplate=Config.byName("ALARM_DELAY_CMD").value
     cmdDueTemplate=Config.byName("ALARM_DUE_CMD").value
+    # For the two following dict, task id is key, and value is (duedate, triggerdate)
     triggeredDelayTasks={}
     triggeredDueTasks={}
     activeTaskFilter=[Task.q.status!="done",
@@ -126,21 +127,29 @@ def eventLoop():
                                    *activeTaskFilter))
         dueTasks=Task.select(AND(Task.q.dueDate < now,
                                  *activeTaskFilter))
-        processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate)
-        processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate)
+        processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate, suspend)
+        processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
 
-def processTasks(tasks, triggeredTasks, cmdTemplate):
+def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
+    """Process a list of tasks and trigger action if needed
+    @param tasks: list of tasks
+    @param triggeredTasks: dict of tasks that has been triggered. Dict can be updated
+    @param cmdTemplate: command line template to execute if task trigger
+    @param suspend: timedelta beetween to task trigger"""
+    now=datetime.now()
     for task in tasks:
-        if triggeredTasks.has_key(task.id) and triggeredTasks[task.id]==task.dueDate:
-            # This task with the same dueDate has already been triggered, skipping
-            continue
+        if triggeredTasks.has_key(task.id) and triggeredTasks[task.id][0]==task.dueDate:
+            # This task with the same dueDate has already been triggered
+            if now-triggeredTasks[task.id][1]<suspend:
+                # Task has been trigger recently, skip to next
+                continue
         print "Task %s is due soon" % task.title
         cmd=cmdTemplate.replace("{ID}", str(task.id))
         cmd=cmd.replace("{TITLE}", task.title.replace('"', '\"'))
         cmd=cmd.replace("{DATE}", str(task.dueDate))
         process=Popen(cmd, shell=True)
         #TODO: redirect stdout/stderr properly to Log (not so easy...)
-        triggeredTasks[task.id]=task.dueDate
+        triggeredTasks[task.id]=(task.dueDate, datetime.now())
 
 def killYokadid(dbName):
     """Kill Yokadi daemon
