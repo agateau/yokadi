@@ -30,10 +30,13 @@ class IOStream:
             self.__console = pyreadline.GetOutputFile()
         
     def write(self, text):
-        if sys.platform == 'win32':
-            self.__console.write_color(text)
-        else:
-            self.__original_flow.write(text) 
+        try:
+            if sys.platform == 'win32':
+                self.__console.write_color(text)
+            else:
+                self.__original_flow.write(text)
+        except IOError, e:
+            raise YokadiException(e)
 
 class IOHandler:
     def __init__(self):
