@@ -22,14 +22,26 @@ class YokadiOptionParser(OptionParser):
         OptionParser.__init__(self)
 
     def parse_args(self, line):
+        nargv = [] # New argv with escaped arg if needed or keyword switch change
+        earg = []  # Escaped argument
+
         argv = line.split(u" ")
         # Splitting an empty line gives us [""], not an empty array
         if argv == [u""]:
             argv = []
 
+        # Change @keyword notation by -k switch
+        for arg in argv:
+            if arg.startswith("@"):
+                arg=arg.replace("@", "")
+                nargv.append("-k")
+            nargv.append(arg)
+
+        argv=list(nargv)
+        nargv=[] # Clear it for next filter
+
         # Escape things that looks like arg but are indeed value (a user text with a dash for example)
-        nargv = [] # New argv with escaped arg if needed
-        earg = []  # Escaped argument
+        # For long option with value (--foo=bar) truncate value part to recognize option name
         for arg in argv:
             if self.get_option(arg.split("=")[0]):
                 nargv.append(arg)
