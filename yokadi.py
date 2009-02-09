@@ -74,7 +74,9 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
         except YokadiException, e:
             tui.error("*** Yokadi error ***\n\t%s" % e)
         except IOError, e:
-            tui.error("*** I/O error ***\n\t%s" % e)
+            # We can get I/O errors when yokadi is piped onto another shell commands
+            # that breaks.
+            print >>sys.stderr, "*** I/O error ***\n\t%s" % e
         except KeyboardInterrupt:
             print "*** Break ***"
         except Exception, e:
