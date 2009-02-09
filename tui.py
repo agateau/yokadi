@@ -14,7 +14,6 @@ import tempfile
 import locale
 
 import colors as C
-from yokadiexception import YokadiException
 
 # Default user encoding. Used to decode all input strings
 # This is the central yokadi definition of encoding - this constant is imported from all other modules
@@ -22,6 +21,7 @@ from yokadiexception import YokadiException
 ENCODING=locale.getpreferredencoding()
 
 _answers = []
+
 class IOStream:
     def __init__(self, original_flow):
         self.__original_flow = original_flow
@@ -30,42 +30,28 @@ class IOStream:
             self.__console = pyreadline.GetOutputFile()
         
     def write(self, text):
-        try:
-            if sys.platform == 'win32':
-                self.__console.write_color(text)
-            else:
-                self.__original_flow.write(text)
-        except IOError, e:
-            raise YokadiException(e)
+        if sys.platform == 'win32':
+            self.__console.write_color(text)
+        else:
+            self.__original_flow.write(text)
 
-class IOHandler:
-    def __init__(self):
-        self.stdout = IOStream(sys.stdout)
-        self.stderr = IOStream(sys.stderr)
-        self.stdin  = IOStream(sys.stdin)
-
-io = IOHandler()           # The one and only tui IO Handler
-stdout=io.stdout
-stderr=io.stderr
+stdout = IOStream(sys.stdout)
+stderr = IOStream(sys.stderr)
 
 
 def editText(text):
     """Edit text with external editor
-    @raise YokadiException: if editor cannot be started
     @return: newText"""
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
     try:
-        try:
-            fl = file(name, "w")
-            fl.write(text.encode(ENCODING))
-            fl.close()
-            editor = os.environ.get("EDITOR", "vi")
-            retcode = subprocess.call([editor, name])
-            if retcode != 0:
-                raise Exception()
-            return unicode(file(name).read(), ENCODING)
-        except:
-            raise YokadiException("Starting editor failed")
+        fl = file(name, "w")
+        fl.write(text.encode(ENCODING))
+        fl.close()
+        editor = os.environ.get("EDITOR", "vi")
+        retcode = subprocess.call([editor, name])
+        if retcode != 0:
+            raise Exception()
+        return unicode(file(name).read(), ENCODING)
     finally:
         os.close(fd)
         os.unlink(name)

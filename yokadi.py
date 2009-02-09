@@ -73,6 +73,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
             pass
         except YokadiException, e:
             tui.error("*** Yokadi error ***\n\t%s" % e)
+        except IOError, e:
+            tui.error("*** I/O error ***\n\t%s" % e)
         except KeyboardInterrupt:
             print "*** Break ***"
         except Exception, e:

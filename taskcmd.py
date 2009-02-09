@@ -55,7 +55,10 @@ class TaskCmd(object):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
         task=dbutils.getTaskFromId(line)
-        description = tui.editText(task.description)
+        try:
+            description = tui.editText(task.description)
+        except Exception, e:
+            raise YokadiException(e)
         task.description = description
 
     complete_t_describe = taskIdCompleter
