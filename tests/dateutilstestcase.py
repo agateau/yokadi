@@ -42,7 +42,7 @@ class DateUtilsTestCase(unittest.TestCase):
                      "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
             dateutils.parseHumaneDateTime(date)
             
-        for invalidDate in ("2008", "01/2009", "01//02/01", "02/20/2009", "", "-23d", "+3e", "lkjljlkjlkj"):
+        for invalidDate in ("2008", "01/2009", "01//02/01", "02/20/2009", "", "-23d", "+3e", "lkjljlkjlkj", "200/200/2009"):
             self.assertRaises(YokadiException, dateutils.parseHumaneDateTime, invalidDate)
 
         testData = [
