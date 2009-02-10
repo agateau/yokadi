@@ -90,22 +90,24 @@ def parseHumaneDateTime(line):
                 fTime=guessTimeFormat(line)
                 try:
                     tTime=datetime(*time.strptime(line, fTime)[0:5]).time()
-                except ValueError:
-                    raise YokadiException("Invalid time format")
+                except ValueError, e:
+                    raise YokadiException("Invalid date format: %s" % e)
                 date=datetime.combine(today, tTime)
             else:
                 fDate=guessDateFormat(line)
                 try:
                     date=datetime(*time.strptime(line, fDate)[0:5])
-                except ValueError:
-                    raise YokadiException("Invalid date format")
+                except ValueError, e:
+                    raise YokadiException("Invalid date format: %s" % e)
         if fDate:
             # Set year and/or month to current date if not given
-            if not "%Y" in fDate:
-                date=date.replace(year=today.year)
-            if not "%m" in fDate:
-                date=date.replace(month=today.month)
-
+            try:
+                if not "%Y" in fDate:
+                    date=date.replace(year=today.year)
+                if not "%m" in fDate:
+                    date=date.replace(month=today.month)
+            except ValueError, e:
+                    raise YokadiException("Invalid date format: %s" % e)
     return date
 
 
