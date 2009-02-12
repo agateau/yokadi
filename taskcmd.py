@@ -7,7 +7,6 @@ Task related commands.
 @license: GPLv3
 """
 import os
-import sys
 from datetime import datetime, date, timedelta
 
 from sqlobject import SQLObjectNotFound, LIKE, AND
@@ -64,6 +63,11 @@ class TaskCmd(object):
     complete_t_describe = taskIdCompleter
 
     def do_t_set_urgency(self, line):
+        """@deprecated: should be removed"""
+        tui.warnDeprecated("t_set_urgency", "t_urgency")
+        self.do_t_urgency(line)
+
+    def do_t_urgency(self, line):
         """Defines urgency of a task.
         t_set_urgency <id> <value>"""
         tokens = line.split(" ")
@@ -79,6 +83,7 @@ class TaskCmd(object):
         task.urgency = urgency
 
     complete_t_set_urgency = taskIdCompleter
+    complete_t_urgency = taskIdCompleter
 
     def do_t_mark_started(self, line):
         """Mark task as started.
@@ -429,6 +434,12 @@ class TaskCmd(object):
     complete_t_edit = taskIdCompleter
 
     def do_t_set_project(self, line):
+        """@deprecated: should be removed"""
+        tui.warnDeprecated("t_set_project", "t_project")
+        self.do_t_project(line)
+
+
+    def do_t_project(self, line):
         """Set task's project.
         t_set_project <id> <project>"""
         tokens = line.split(" ")
@@ -440,9 +451,16 @@ class TaskCmd(object):
         task.project = dbutils.getOrCreateProject(projectName)
         if task.project:
             print "Moved task '%s' to project '%s'" % (task.title, projectName)
+
     complete_t_set_project = ProjectCompleter(2)
+    complete_t_project = ProjectCompleter(2)
 
     def do_t_set_due(self, line):
+        """@deprecated: should be removed"""
+        tui.warnDeprecated("t_set_due", "t_due")
+        self.do_t_due(line)
+
+    def do_t_due(self, line):
         """Set task's due date
         t_set_due_date <id> <date>
 
@@ -473,5 +491,6 @@ class TaskCmd(object):
             print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
 
     complete_t_set_due = taskIdCompleter
+    complete_t_due = taskIdCompleter
 
 # vi: ts=4 sw=4 et

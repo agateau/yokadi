@@ -141,7 +141,13 @@ def renderFields(fields):
     for caption, value in fields:
         print >>stdout, format % (caption, value)
 
-
+def warnDeprecated(old, new):
+    """Warn user that a command is now deprecated
+    and incitate him to use the new one
+    @param old: the old one (str)
+    @param new: the new one (str)"""
+    warning("Command '%s' is deprecated, use '%s' instead" % (old, new))
+    info("Command %s has been executed" % new)
 
 
 def error(message):
