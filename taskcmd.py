@@ -9,7 +9,7 @@ Task related commands.
 import os
 from datetime import datetime, date, timedelta
 
-from sqlobject import SQLObjectNotFound, LIKE, AND
+from sqlobject import SQLObjectNotFound, LIKE, AND, OR
 
 from db import Config, Keyword, Project, Task
 import dbutils
@@ -190,6 +190,11 @@ class TaskCmd(object):
                           help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
                           metavar="<keyword>[=<value>]")
 
+        parser.add_option("-s", "--search", dest="search",
+                          action="append",
+                          help="only list tasks which title or description match <value>",
+                          metavar="<search>[=<value>]")
+
         formatList = ["auto"] + gRendererClassDict.keys()
         parser.add_option("-f", "--format", dest="format",
                           type="choice", default="auto", choices=formatList,
@@ -292,6 +297,10 @@ class TaskCmd(object):
             filters.append(Task.q.dueDate!=None)
             order=Task.q.dueDate
             limit=5
+        if options.search:
+            for word in options.search:
+                filters.append(OR(LIKE(Task.q.title, "%"+word+"%"),
+                                  LIKE(Task.q.description, "%"+word+"%")))
 
         # Define output
         if options.output:
