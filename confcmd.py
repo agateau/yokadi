@@ -49,7 +49,27 @@ class ConfCmd(object):
         if p.count()==0:
             tui.error("Sorry, no parameter match")
         else:
-            p[0].value=value
-            print "Parameter updated"
+            if self.checkParameterValue(name, value):
+                p[0].value=value
+                tui.info("Parameter updated")
+            else:
+                tui.error("Parameter value is incorrect")
 
     complete_c_set=confCompleter
+
+    def checkParameterValue(self, name, value):
+        """Control that the value if ok for a parameter
+        @param key: parameter name
+        @param value: parameter value
+        @return: True if parameter is ok, else False"""
+        # Positive int parameters
+        if name in ("TEXT_WIDTH", "ALARM_DELAY", "ALARM_SUSPEND", "PURGE_DELAY"):
+            try:
+                value=int(value)
+                assert(value>=0)
+                return True
+            except (ValueError, AssertionError):
+                return False
+        else:
+            # No check for this parameter, so tell everything is fine
+            return True
