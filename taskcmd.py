@@ -161,12 +161,13 @@ class TaskCmd(object):
 
     def parser_t_purge(self):
         parser = YokadiOptionParser()
-        parser.set_usage("t_purge [options] <id>")
-        parser.set_description("Purge old done tasks")
+        parser.set_usage("t_purge [options]")
+        parser.set_description("Remove old done tasks from all projects.")
         parser.add_option("-f", "--force", dest="force", default=False, action="store_true",
                           help="Skip confirmation prompt")
-        parser.add_option("-d", "--delay", dest="delay", default=Config.byName("PURGE_DELAY").value,
-                          type="int", help="Delay (in days) after which done tasks are destroyed")
+        delay = int(Config.byName("PURGE_DELAY").value)
+        parser.add_option("-d", "--delay", dest="delay", default=delay,
+                          type="int", help="Delay (in days) after which done tasks are destroyed. Default is %d." % delay)
         return parser
 
     def do_t_purge(self, line):
@@ -181,7 +182,7 @@ class TaskCmd(object):
             return
         print "The following tasks will be removed:"
         print "\n".join(["%s: %s" % (task.id, task.title) for task in tasks])
-        if options.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone) ?"):
+        if options.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
             Task.deleteMany(AND(*filters))
             print "Tasks deleted"
         else:
