@@ -310,7 +310,7 @@ class TaskCmd(object):
 
         # Filtering and sorting according to parameters
         filters=[]
-        order=-Task.q.urgency
+        order=-Task.q.urgency, Task.q.creationDate
         limit=None
         if options.done:
             filters.append(Task.q.status=='done')
