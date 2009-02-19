@@ -15,6 +15,7 @@ from db import Config
 class TextListRenderer(object):
     def __init__(self, out):
         self.out = out
+        self.today=datetime.today().replace(microsecond=0)
 
 
     def addTaskList(self, project, taskList):
@@ -30,13 +31,13 @@ class TextListRenderer(object):
     def _getTaskFormat(self):
         """@return: task format as a string with placeholder"""
         width=Config.byName("TEXT_WIDTH").value
-        return "%(id)-3s|%(title)-"+width+"s|%(urgency)-3s|%(status)-1s|%(creationDate)-16s|%(timeLeft)-10s"
+        return "%(id)-3s|%(title)-"+width+"s|%(urgency)-3s|%(status)-1s|%(age)-18s|%(timeLeft)-10s"
 
 
     def _renderTaskListHeader(self, projectName):
         width=int(Config.byName("TEXT_WIDTH").value)
         line = self._getTaskFormat() % dict(id="ID", title="Title", urgency="U",
-                                       status="S", creationDate="Creation date", timeLeft="Time left")
+                                       status="S", age="Age", timeLeft="Time left")
         print >>self.out
         print >>self.out, C.CYAN+projectName.center(30+width)+C.RESET
         print >>self.out, C.BOLD+line+C.RESET
@@ -57,9 +58,9 @@ class TextListRenderer(object):
         status = task.status[0].upper()
         if status=="S":
             status=C.BOLD+status+C.RESET
-        creationDate = str(task.creationDate)[:-3]
+        age = str(self.today - task.creationDate)
         if task.dueDate:
-            timeLeft=dateutils.formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
+            timeLeft=dateutils.formatTimeDelta(task.dueDate - self.today)
         else:
             timeLeft=""
         if int(task.urgency)>75:
@@ -70,5 +71,5 @@ class TextListRenderer(object):
             urgency=task.urgency
 
         print >>self.out, self._getTaskFormat() % dict(id=str(task.id), title=title, urgency=urgency, status=status,
-                                       creationDate=creationDate, timeLeft=timeLeft)
+                                       age=age, timeLeft=timeLeft)
 # vi: ts=4 sw=4 et
