@@ -69,7 +69,7 @@ class TaskCmd(object):
 
     def do_t_urgency(self, line):
         """Defines urgency of a task.
-        t_set_urgency <id> <value>"""
+        t_urgency <id> <value>"""
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You must provide a taskId and an urgency value") 
@@ -478,7 +478,7 @@ class TaskCmd(object):
 
     def do_t_project(self, line):
         """Set task's project.
-        t_set_project <id> <project>"""
+        t_project <id> <project>"""
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You should give two arguments: <task id> <project>")
@@ -499,7 +499,7 @@ class TaskCmd(object):
 
     def do_t_due(self, line):
         """Set task's due date
-        t_set_due_date <id> <date>
+        t_due_date <id> <date>
 
         Date can be specified as a relative offset:
         - +5M: in 5 minutes
