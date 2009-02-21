@@ -127,14 +127,13 @@ class TextListRenderer(object):
 
 
     def _renderTaskListHeader(self, projectName):
-        width=int(Config.byName("TEXT_WIDTH").value)
-
         cells = [x.createHeader() for x in self.columns]
         line = "|".join(cells)
+        width = len(line)
         print >>self.out
-        print >>self.out, C.CYAN+projectName.center(30+width)+C.RESET
-        print >>self.out, C.BOLD+line+C.RESET
-        print >>self.out, "-" * len(line)
+        print >>self.out, C.CYAN + projectName.center(width) + C.RESET
+        print >>self.out, C.BOLD + line + C.RESET
+        print >>self.out, "-" * width
 
 
     def _renderTaskListRow(self, task):
