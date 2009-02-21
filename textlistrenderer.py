@@ -69,19 +69,19 @@ class TitleFormater(object):
         return title
 
 
-class AgeFormater(object):
-    def __init__(self):
-        self.today = datetime.today().replace(microsecond=0)
+def timeLeftFormater(task):
+    if task.dueDate:
+        return dateutils.formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
+    else:
+        return ""
 
-    def __call__(self, task):
-        return str(self.today - task.creationDate)
-
-
-def urgencyColorizer(task):
-    if task.urgency > 75:
-        return C.RED
-    elif task.urgency > 50:
-        return C.PURPLE
+def timeLeftColorizer(task):
+    if task.dueDate:
+        timeLeft=(task.dueDate - datetime.today().replace(microsecond=0)).days
+        if timeLeft<0:
+            return colorizer(100)
+        else:
+            return colorizer(timeLeft*33, reverse=True)
     else:
         return None
 
@@ -93,26 +93,35 @@ def statusColorizer(task):
         return None
 
 
-def timeLeftFormater(task):
-    dueDate = task.dueDate
-    if dueDate:
-        return dateutils.formatTimeDelta(dueDate - datetime.today().replace(microsecond=0))
+def colorizer(value, reverse=False):
+    """Return a color according to value.
+    @param value: value used to determine color. Low (0) value means not urgent/visible, high (100) value means important
+    @param reverse: If false low value means important and vice versa
+    @return: a color code or None for no color"""
+    if reverse:
+        value=100-value
+    if value>75:
+        return C.RED
+    elif value>50:
+        return C.PURPLE
+    elif value >25:
+        return C.ORANGE
     else:
-        return ""
-
+        return None
 
 class TextListRenderer(object):
     def __init__(self, out):
         self.out = out
-
+        today=datetime.today().replace(microsecond=0)
         titleWidth = int(Config.byName("TEXT_WIDTH").value)
         self.columns = [
             Column("ID"       , 3         , lambda x: str(x.id)),
             Column("Title"    , titleWidth, TitleFormater(titleWidth)),
-            Column("U"        , 3         , lambda x: str(x.urgency)     , colorizer=urgencyColorizer),
+            Column("U"        , 3         , lambda x: str(x.urgency)     , colorizer=lambda x:colorizer(x.urgency)),
             Column("S"        , 1         , lambda x: x.status[0].upper(), colorizer=statusColorizer),
-            Column("Age"      , 18        , AgeFormater()),
-            Column("Time left", 10        , timeLeftFormater),
+            Column("Age"      , 14        , lambda x: dateutils.formatTimeDelta(today-x.creationDate),
+                                            colorizer=lambda x:colorizer((today-x.creationDate).days)),
+            Column("Time left", 10        , timeLeftFormater, colorizer=timeLeftColorizer),
             ]
 
 

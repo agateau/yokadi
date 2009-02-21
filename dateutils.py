@@ -116,10 +116,9 @@ def formatTimeDelta(timeLeft):
         - Use fake negative timedelta if needed not to confuse user.
         - Hide seconds when delta > 1 day
         - Hide hours and minutes when delta > 3 days
-        - Color time according to time remaining
     @param timeLeft: Remaining time
     @type timeLeft: timedelta (from datetime)
-    @return: formated and colored str"""
+    @return: formated  str"""
     if timeLeft < timedelta(0):
         # Negative timedelta are very confusing, so we manually put a "-" and show a positive timedelta
         timeLeft=-timeLeft
@@ -128,11 +127,11 @@ def formatTimeDelta(timeLeft):
             formatedTimeLeft=shortenTimeDelta(timeLeft, "datetime")
         else:
             formatedTimeLeft=shortenTimeDelta(timeLeft, "date")
-        formatedTimeLeft=C.RED+"-"+formatedTimeLeft+C.RESET
+        formatedTimeLeft="-"+formatedTimeLeft
     elif timeLeft < timedelta(1):
-        formatedTimeLeft=C.PURPLE+str(timeLeft)+C.RESET
+        formatedTimeLeft=str(timeLeft)
     elif timeLeft < timedelta(3):
-        formatedTimeLeft=C.ORANGE+shortenTimeDelta(timeLeft, "datetime")+C.RESET
+        formatedTimeLeft=shortenTimeDelta(timeLeft, "datetime")
     else:
         formatedTimeLeft=shortenTimeDelta(timeLeft, "date")
     return formatedTimeLeft
