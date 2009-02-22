@@ -6,11 +6,10 @@ Database utilities.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-import locale
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from sqlobject.dberrors import DuplicateEntryError
-from sqlobject import LIKE, SQLObjectNotFound
+from sqlobject import SQLObjectNotFound
 
 import tui
 from db import Keyword, Project, Task

@@ -13,7 +13,6 @@ import readline
 reload(sys)  ## So as to enable setdefaultencoding
 
 import traceback
-import locale
 from cmd import Cmd
 from optparse import OptionParser
 

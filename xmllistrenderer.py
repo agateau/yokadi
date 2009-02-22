@@ -6,7 +6,6 @@ Xml rendering of t_list output
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPLv3
 """
-import sys
 from xml.dom import minidom as dom
 
 import tui

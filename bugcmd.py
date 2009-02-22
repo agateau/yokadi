@@ -8,7 +8,6 @@ Bug related commands.
 import parseutils
 import dbutils
 import tui
-from db import Task
 from completers import ProjectCompleter
 
 SEVERITY_PROPERTY_NAME = "severity"

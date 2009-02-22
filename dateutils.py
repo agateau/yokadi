@@ -8,7 +8,6 @@ Date utilities.
 import time
 from datetime import datetime, timedelta
 
-import colors as C
 from yokadiexception import YokadiException
 
 
