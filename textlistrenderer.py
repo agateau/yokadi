@@ -119,9 +119,9 @@ class TextListRenderer(object):
             Column("Title"    , titleWidth, TitleFormater(titleWidth)),
             Column("U"        , 3         , lambda x: str(x.urgency)     , colorizer=lambda x:colorizer(x.urgency)),
             Column("S"        , 1         , lambda x: x.status[0].upper(), colorizer=statusColorizer),
-            Column("Age"      , 14        , lambda x: dateutils.formatTimeDelta(today-x.creationDate),
+            Column("Age"      , 13        , lambda x: dateutils.formatTimeDelta(today-x.creationDate),
                                             colorizer=lambda x:colorizer((today-x.creationDate).days)),
-            Column("Time left", 10        , timeLeftFormater, colorizer=timeLeftColorizer),
+            Column("Time left", 13        , timeLeftFormater, colorizer=timeLeftColorizer),
             ]
 
 
