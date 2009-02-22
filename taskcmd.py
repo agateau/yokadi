@@ -80,6 +80,14 @@ class TaskCmd(object):
             urgency = int(tokens[1])
         except ValueError:
             raise YokadiException("Task urgency must be a digit")
+
+        if urgency>100:
+            tui.warning("Max urgency is 100")
+            urgency=100
+        elif urgency<-99:
+            tui.warning("Min urgency is -99")
+            urgency=-99
+
         task.urgency = urgency
 
     complete_t_set_urgency = taskIdCompleter
