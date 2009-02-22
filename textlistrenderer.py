@@ -9,8 +9,7 @@ from datetime import datetime
 
 import colors as C
 import dateutils
-from db import Config
-
+from db import Config, Task
 
 class Column(object):
     __slots__ = ["title", "width", "formater", "colorizer"]
@@ -114,8 +113,9 @@ class TextListRenderer(object):
         self.out = out
         today=datetime.today().replace(microsecond=0)
         titleWidth = int(Config.byName("TEXT_WIDTH").value)
+        idWidth=max(2, len(str(Task.select().max(Task.q.id))))
         self.columns = [
-            Column("ID"       , 3         , lambda x: str(x.id)),
+            Column("ID"       , idWidth   , lambda x: str(x.id)),
             Column("Title"    , titleWidth, TitleFormater(titleWidth)),
             Column("U"        , 3         , lambda x: str(x.urgency)     , colorizer=lambda x:colorizer(x.urgency)),
             Column("S"        , 1         , lambda x: x.status[0].upper(), colorizer=statusColorizer),
