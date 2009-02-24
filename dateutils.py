@@ -110,41 +110,30 @@ def parseHumaneDateTime(line):
     return date
 
 
-def formatTimeDelta(timeLeft):
-    """Friendly format a time delta :
-        - Use fake negative timedelta if needed not to confuse user.
-        - Hide seconds when delta > 1 day
-        - Hide hours and minutes when delta > 3 days
+def formatTimeDelta(delta):
+    """Friendly format a time delta:
+        - Show only days if delta > 1 day
+        - Show only hours and minutes othewise
     @param timeLeft: Remaining time
     @type timeLeft: timedelta (from datetime)
     @return: formated  str"""
-    if timeLeft < timedelta(0):
-        # Negative timedelta are very confusing, so we manually put a "-" and show a positive timedelta
-        timeLeft=-timeLeft
-        # Shorten timedelta:
-        if timeLeft < timedelta(3):
-            formatedTimeLeft=shortenTimeDelta(timeLeft, "datetime")
-        else:
-            formatedTimeLeft=shortenTimeDelta(timeLeft, "date")
-        formatedTimeLeft="-"+formatedTimeLeft
-    elif timeLeft < timedelta(1):
-        formatedTimeLeft=str(timeLeft)
-    elif timeLeft < timedelta(3):
-        formatedTimeLeft=shortenTimeDelta(timeLeft, "datetime")
+    if delta.days > 7:
+        value = "%dw" % (delta.days / 7)
+        days = delta.days % 7
+        if days > 0:
+            value = value + ", %dd" % days
+    elif delta.days > 0:
+        value = "%dd" % delta.days
     else:
-        formatedTimeLeft=shortenTimeDelta(timeLeft, "date")
-    return formatedTimeLeft
-
-
-def shortenTimeDelta(timeLeft, format):
-    """Shorten timeDelta according the format parameter
-    @param timeLeft: timedelta to be shorten
-    @type timeLeft: timedelta (from datetime)
-    @param format: can be "date" (hours, minute and seconds removed) or "datetime" (seconds removed)
-    @return: shorten timedelta"""
-    if   format=="date":
-        return str(timeLeft).split(",")[0]
-    elif format=="datetime":
-        # Hide seconds (remove the 3 last characters)
-        return str(timeLeft)[:-3]
+        minutes = delta.seconds / 60
+        hours = minutes / 60
+        minutes = minutes % 60
+        if hours > 0:
+            value = "%dh " % hours
+        else:
+            value = ""
+        value = value + "%dm" % minutes
+    if delta < timedelta(0):
+        value = "-" + value
+    return value
 # vi: ts=4 sw=4 et

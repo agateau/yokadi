@@ -98,20 +98,9 @@ class AgeFormater(object):
 
     def __call__(self, task):
         delta = self.today - task.creationDate
-        if delta.days > 7:
-            value = "%dw" % (delta.days / 7)
-            days = delta.days % 7
-            if days > 0:
-                value = value + ", %dd" % days
-        elif delta.days > 0:
-            value = "%dd" % delta.days
-        elif delta.seconds > 3600:
-            value = "%dh" % (delta.seconds / 3600)
-        else:
-            value = "%dm" % (delta.seconds / 60)
-        return value, colorizer(delta.days)
+        return dateutils.formatTimeDelta(delta), colorizer(delta.days)
 
-class TimeLeftFormater(object):
+class DueDateFormater(object):
     def __init__(self, today):
         self.today = today
 
@@ -119,8 +108,15 @@ class TimeLeftFormater(object):
         if not task.dueDate:
             return "", None
         delta = task.dueDate - self.today
+        if delta.days != 0:
+            value = task.dueDate.strftime("%x %H:%M")
+        else:
+            value = task.dueDate.strftime("%H:%M")
+
+        value = value + " (%s)" % dateutils.formatTimeDelta(delta)
+
         color = colorizer(delta.days * 33, reverse=True)
-        return dateutils.formatTimeDelta(delta), color
+        return value, color
 
 
 class TextListRenderer(object):
@@ -135,7 +131,7 @@ class TextListRenderer(object):
             Column("U"        , 3         , urgencyFormater),
             Column("S"        , 1         , statusFormater),
             Column("Age"      , 8         , AgeFormater(today)),
-            Column("Time left", 13        , TimeLeftFormater(today))
+            Column("Due date" , 23        , DueDateFormater(today))
             ]
 
 
