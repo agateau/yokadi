@@ -11,19 +11,36 @@ import colors as C
 import dateutils
 from db import Config, Task
 
-class Column(object):
-    __slots__ = ["title", "width", "formater", "colorizer"]
 
-    def __init__(self, title, width, formater, colorizer = None):
+def colorizer(value, reverse=False):
+    """Return a color according to value.
+    @param value: value used to determine color. Low (0) value means not urgent/visible, high (100) value means important
+    @param reverse: If false low value means important and vice versa
+    @return: a color code or None for no color"""
+    if reverse:
+        value = 100 - value
+    if value > 75:
+        return C.RED
+    elif value > 50:
+        return C.PURPLE
+    elif value > 25:
+        return C.ORANGE
+    else:
+        return None
+
+
+class Column(object):
+    __slots__ = ["title", "width", "formater"]
+
+    def __init__(self, title, width, formater):
         """
-        formater is a callable which accepts a task and returns a string
-        colorizer is another callable which takes accepts a task and returns a
-        color or None
+        formater is a callable which accepts a task and returns a tuple
+        of the form (string, color)
+        color may be None if no color should be applied
         """
         self.title = title
         self.width = width
         self.formater = formater
-        self.colorizer = colorizer
 
 
     def createHeader(self):
@@ -31,12 +48,7 @@ class Column(object):
 
 
     def createCell(self, task):
-        value = self.formater(task)
-
-        if self.colorizer:
-            color = self.colorizer(task)
-        else:
-            color = None
+        value, color = self.formater(task)
 
         if color:
             cell = color
@@ -47,6 +59,9 @@ class Column(object):
             cell = cell + C.RESET
         return cell
 
+
+def idFormater(task):
+    return str(task.id), None
 
 class TitleFormater(object):
     def __init__(self, width):
@@ -65,48 +80,37 @@ class TitleFormater(object):
         if hasDescription:
             title = title + "*"
 
-        return title
+        return title, None
 
+def urgencyFormater(task):
+    return str(task.urgency), colorizer(task.urgency)
 
-def timeLeftFormater(task):
-    if task.dueDate:
-        return dateutils.formatTimeDelta(task.dueDate - datetime.today().replace(microsecond=0))
-    else:
-        return ""
-
-def timeLeftColorizer(task):
-    if task.dueDate:
-        timeLeft = (task.dueDate - datetime.today().replace(microsecond=0)).days
-        if timeLeft < 0:
-            return colorizer(100)
-        else:
-            return colorizer(timeLeft*33, reverse=True)
-    else:
-        return None
-
-
-def statusColorizer(task):
+def statusFormater(task):
     if task.status == "started":
-        return C.BOLD
+        color = C.BOLD
     else:
-        return None
+        color = None
+    return task.status[0].upper(), color
 
+class AgeFormater(object):
+    def __init__(self, today):
+        self.today = today
 
-def colorizer(value, reverse=False):
-    """Return a color according to value.
-    @param value: value used to determine color. Low (0) value means not urgent/visible, high (100) value means important
-    @param reverse: If false low value means important and vice versa
-    @return: a color code or None for no color"""
-    if reverse:
-        value = 100-value
-    if value > 75:
-        return C.RED
-    elif value > 50:
-        return C.PURPLE
-    elif value > 25:
-        return C.ORANGE
-    else:
-        return None
+    def __call__(self, task):
+        delta = self.today - task.creationDate
+        return dateutils.formatTimeDelta(delta), colorizer(delta.days)
+
+class TimeLeftFormater(object):
+    def __init__(self, today):
+        self.today = today
+
+    def __call__(self, task):
+        if not task.dueDate:
+            return "", None
+        delta = task.dueDate - self.today
+        color = colorizer(delta.days * 33, reverse=True)
+        return dateutils.formatTimeDelta(delta), color
+
 
 class TextListRenderer(object):
     def __init__(self, out):
@@ -115,13 +119,12 @@ class TextListRenderer(object):
         titleWidth = int(Config.byName("TEXT_WIDTH").value)
         idWidth = max(2, len(str(Task.select().max(Task.q.id))))
         self.columns = [
-            Column("ID"       , idWidth   , lambda x: str(x.id)),
+            Column("ID"       , idWidth   , idFormater),
             Column("Title"    , titleWidth, TitleFormater(titleWidth)),
-            Column("U"        , 3         , lambda x: str(x.urgency)     , colorizer=lambda x:colorizer(x.urgency)),
-            Column("S"        , 1         , lambda x: x.status[0].upper(), colorizer=statusColorizer),
-            Column("Age"      , 13        , lambda x: dateutils.formatTimeDelta(today - x.creationDate),
-                                            colorizer=lambda x:colorizer((today - x.creationDate).days)),
-            Column("Time left", 13        , timeLeftFormater, colorizer=timeLeftColorizer),
+            Column("U"        , 3         , urgencyFormater),
+            Column("S"        , 1         , statusFormater),
+            Column("Age"      , 13        , AgeFormater(today)),
+            Column("Time left", 13        , TimeLeftFormater(today))
             ]
 
 
