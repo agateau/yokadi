@@ -7,6 +7,7 @@ Command line oriented, sqlite powered, todo list
 @license: GPLv3
 """
 
+import locale
 import os
 import sys
 import readline
@@ -124,6 +125,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
 
 
 def main():
+    locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
     parser = OptionParser()
 
     parser.add_option("-d", "--db", dest="filename",
