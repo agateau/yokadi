@@ -76,8 +76,8 @@ def timeLeftFormater(task):
 
 def timeLeftColorizer(task):
     if task.dueDate:
-        timeLeft=(task.dueDate - datetime.today().replace(microsecond=0)).days
-        if timeLeft<0:
+        timeLeft = (task.dueDate - datetime.today().replace(microsecond=0)).days
+        if timeLeft < 0:
             return colorizer(100)
         else:
             return colorizer(timeLeft*33, reverse=True)
@@ -98,12 +98,12 @@ def colorizer(value, reverse=False):
     @param reverse: If false low value means important and vice versa
     @return: a color code or None for no color"""
     if reverse:
-        value=100-value
-    if value>75:
+        value = 100-value
+    if value > 75:
         return C.RED
-    elif value>50:
+    elif value > 50:
         return C.PURPLE
-    elif value >25:
+    elif value > 25:
         return C.ORANGE
     else:
         return None
@@ -111,16 +111,16 @@ def colorizer(value, reverse=False):
 class TextListRenderer(object):
     def __init__(self, out):
         self.out = out
-        today=datetime.today().replace(microsecond=0)
+        today = datetime.today().replace(microsecond=0)
         titleWidth = int(Config.byName("TEXT_WIDTH").value)
-        idWidth=max(2, len(str(Task.select().max(Task.q.id))))
+        idWidth = max(2, len(str(Task.select().max(Task.q.id))))
         self.columns = [
             Column("ID"       , idWidth   , lambda x: str(x.id)),
             Column("Title"    , titleWidth, TitleFormater(titleWidth)),
             Column("U"        , 3         , lambda x: str(x.urgency)     , colorizer=lambda x:colorizer(x.urgency)),
             Column("S"        , 1         , lambda x: x.status[0].upper(), colorizer=statusColorizer),
-            Column("Age"      , 13        , lambda x: dateutils.formatTimeDelta(today-x.creationDate),
-                                            colorizer=lambda x:colorizer((today-x.creationDate).days)),
+            Column("Age"      , 13        , lambda x: dateutils.formatTimeDelta(today - x.creationDate),
+                                            colorizer=lambda x:colorizer((today - x.creationDate).days)),
             Column("Time left", 13        , timeLeftFormater, colorizer=timeLeftColorizer),
             ]
 
