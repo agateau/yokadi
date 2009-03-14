@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""This is just a wrapper to yokadi package that rely in standard python site-package
+ This wrapper is intended to be placed in user PATH and to be executable
+
+@author: Sébastien Renard (sebastien.renard@digitalfox.org)
+@license:GNU GPL V3
+ """
+
+from yokadi import yokadid
+yokadid.main()

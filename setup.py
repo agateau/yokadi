@@ -17,7 +17,7 @@ data_files.append(["share/yokadi",
                    ["version", "README.markdown", "ChangeLog", "ChangeLog-Synthesis", "LICENSE"]])
 
 # Scripts
-scripts=["src/bin/yokadi"]
+scripts=["src/bin/yokadi", "src/bin/yokadid"]
 
 # Version
 try:
