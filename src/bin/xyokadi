@@ -1,0 +1,15 @@
+#!/bin/sh
+# Simple wrapper to start yokadi in a shell Terminal
+# This wrapper is intended for people that would like
+# to start yokadi from a menu or icon click
+# That's not a very powerfull way to use yokadi
+# but it could help to gather newbies that still believe
+# to point and click myth
+
+for term in konsole rxvt xterm
+do
+    which $term #> /dev/null 2>&1
+    if [ $? == 0 ]; then
+        exec $term -e yokadi $*
+    fi
+done
