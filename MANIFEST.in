@@ -1,3 +1,9 @@
-include MANIFEST.in
-global-include *.py *.markdown *.sh
 include update/update*to*
+include *py
+include ChangeLog
+include README.markdown
+include LICENSE
+include MANIFEST.in
+include version
+include ChangeLog-Synthesis
+include yokadi

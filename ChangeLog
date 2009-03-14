@@ -1,0 +1,2237 @@
+commit cb381a0f2ccf1658493a61723271d0beb4cb9fa3
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Tue Feb 24 09:40:28 2009 +0100
+
+    Moved code from AgeFormater to dateutils.formatTimeDelta. Show due date in addition to time left.
+
+commit 3ef3070527660acfa351772a6e84bd17f43dfa8b
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Tue Feb 24 09:39:22 2009 +0100
+
+    Init locale
+
+commit 73a3e73191de75f297afce3ea2c207ccf25d8731
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Tue Feb 24 09:03:14 2009 +0100
+
+    Show age in a more compact way.
+
+commit 6dc96069b58a44c560b315175dd5f5ac9e0c6ff1
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Tue Feb 24 08:27:15 2009 +0100
+
+    Reworked column code to avoid multiple callables. More readable IMHO.
+
+commit 0562e889abfa47f968640a950c8eed70b37a608d
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Tue Feb 24 08:06:00 2009 +0100
+
+    Spaces
+
+commit fc8354e5419b6b19a38cf6e28953a254ba8dedb4
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 22 20:48:13 2009 +0100
+
+    Adjust age and time left columns width
+
+commit f2f07cf5198c53fcf02c16cbcdc0cdc9db7df7ec
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 22 20:44:04 2009 +0100
+
+    Check that urgency is between -99 and 100.
+
+commit 29e2bb124b61f51e171135b30b3b0d9389017c3c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 22 20:38:08 2009 +0100
+
+    Compute id field width instead of hardcoding "3".
+
+commit 530a246f04549550b9ec06595a01e8ab4da4457b
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 22 17:31:18 2009 +0100
+
+    Unused import cleanup
+
+commit 6b99ba6e439a48ec866cfeb0c027eba9e067c5f7
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Feb 21 15:45:22 2009 +0100
+
+    Remove coloring from dateutils.formatTimedelta
+    Add colors to age and dueDate according to new style
+
+commit 4c32a05628513072c0158c3aed74c7c4652eaf4b
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Sat Feb 21 14:32:24 2009 +0100
+
+    Cleanup
+
+commit 2940589b88c97479f8c0aefe9e510a474dbc2fa3
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Sat Feb 21 14:17:17 2009 +0100
+
+    New way to create table cells, without getting troubled by color chars.
+
+commit 7dcb279cd83f831f2c40c06fc798408c01368cfd
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Feb 20 17:54:48 2009 +0100
+
+    Fix help messages
+
+commit 0ad5586f69d54c652ff88218a7204f28fc69e6f9
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Feb 19 07:40:22 2009 +0100
+
+    Default sort in now urgency, age (instead of just urgency)
+
+commit d1e6d509222bf2ede3667d76198e0053f123b437
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Feb 19 07:37:50 2009 +0100
+
+    Display task age instead of creation date in text list format
+
+commit 1e41f1c1186063f67cd4ad403edae31a4a9a686f
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Sun Feb 15 23:53:02 2009 +0100
+
+    Fixed t_purge doc.
+
+commit bed7dad727853c5e42c5ef83acc11ece0f32e1f4
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Feb 14 19:05:03 2009 +0100
+
+    Check config parameter type (positive int for instance)
+
+commit fbb0b7942b580462975a21e5b1f9ab87c5adc8dd
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Feb 14 19:04:35 2009 +0100
+
+    Add a purge (t_purge) command to remove old done tasks
+
+commit b6826bbe73d608882f88430360203d1612f7f63f
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Feb 12 23:43:19 2009 +0100
+
+    Add basic tasks title/description search switch to t_list
+
+commit bb6b2bfe6565be656fbcfca0269f2964b89853d5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Feb 12 22:54:49 2009 +0100
+
+    Get rid of "set" in taskcmd. Make alias for old ones with deprecation
+    warning to make a smooth transition.
+
+commit e4a081837be094f8ecc55de87d2710effa7e4604
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Feb 10 19:36:31 2009 +0100
+
+    Add unit test for batch month/day number in parseHumanDAte
+
+commit da46b074f275efd08b76f869e9231ebcba6d36ed
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Feb 10 13:04:56 2009 +0100
+
+    Fix crash in parseHumanDateTime when absolute month was out of range
+    Display better error message when a date cannot be parsed
+
+commit 780ba41b04de6d0710b9caeb146415a10df3aa17
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Feb 9 23:31:53 2009 +0100
+
+    Explain why we need to catch IOError and do not use tui.error
+    to report IOError.
+
+commit c210f12df7176119c21387c942743c28fc4d90f6
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Feb 9 23:10:01 2009 +0100
+
+    Cleanup tui from YokadiException references and simplify IO handling
+    by removing the IOHandler class
+
+commit af8347939047aaf7420658192440b754f50ea65e
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Feb 9 21:27:04 2009 +0100
+
+    Don't use colors when stdout is not a tty
+
+commit 791920d17c1a75b0448701c9c377eeffba160558
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Feb 9 21:22:37 2009 +0100
+
+    Handle IOError to avoid explosion when broken pipe occurs
+    (ex. piping yokadi in an unknown command)
+
+commit b73047f7872e7b2a933b548da759ef2e6fba6f32
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Feb 9 08:57:53 2009 +0100
+
+    Allow @keyword notation (equivalent to -k keyword)
+
+commit 4c78f2a6acca4594e7422f9bc420fc1136c1ea76
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 8 18:35:34 2009 +0100
+
+    Allow alarm to trigger again after a defined time (ALARM_SUSPEND parameter)
+
+commit 1643e7c0f13605603e974183c42e702f552fc7f6
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 8 18:31:17 2009 +0100
+
+    Allow float value for ALARM_DELAY
+
+commit 7bec53bc4d9fd7562736faec732e8fbb9255f24c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Feb 8 12:51:56 2009 +0100
+
+    Fix io handler naming to be yokadi neutral. Make direct access to
+    stdout and stderr on tui.
+
+commit 99c13a91e23d2f2f8e607decdfb243d99c7785c7
+Author: marcanpilami <marsu_pilami@msn.com>
+Date:   Wed Jan 21 23:03:03 2009 +0100
+
+    Added colours support in Windows command prompt
+    
+    This is made possible by a small scale IO centralisation. This centralisation is only done for the outputs using colours for now. Perhaps a good idea would be to finish it, but the code is functionnal and clean for the moment.
+
+commit c021fdbcffea93fcaa643c7b1e4d364e8f23c04d
+Author: marcanpilami <marsu_pilami@msn.com>
+Date:   Wed Jan 21 22:59:39 2009 +0100
+
+    Added tests to avoid calling unsupported Readline functions in Windows
+
+commit 84f4d68b605d3d59c9b41db626705f71e83dc6f1
+Author: marcanpilami <marsu_pilami@msn.com>
+Date:   Wed Jan 21 22:55:11 2009 +0100
+
+    Added support for Windows SQLObjects URI
+
+commit 393742159e46eb73ec840109720027d06c42e02f
+Author: marcanpilami <marsu_pilami@msn.com>
+Date:   Wed Jan 21 22:54:20 2009 +0100
+
+    The HOME dir is now found via an internal Python function (Windows compatible)
+
+commit 5a2b9cf8f3402168bb8d5b2c705b401925b8d8ef
+Author: marcanpilami <marsu_pilami@msn.com>
+Date:   Wed Jan 21 22:53:20 2009 +0100
+
+    Placed 'reload(sys)' just after its import, to avoide confusing anyone using sys during initialisation
+
+commit faaecc8456f149b37fa87e30cf63b4b2d9622954
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Sat Feb 7 00:18:47 2009 +0100
+
+    Ignore MANIFEST
+
+commit 9b707cac06086d93c00b4708f61d48b9cfebd754
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Fri Feb 6 21:40:52 2009 +0100
+
+    Fix regression in dbutils.getOrCreate* (interactive was ignored)
+
+commit 52322d13a739c8738988fbbfb0b66035bf4ca905
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Fri Feb 6 21:30:02 2009 +0100
+
+    Added crude setup.py script.
+
+commit aa571e1460331e9cc2ec99389fbc70580f8cb747
+Author: Aurélien Gâteau <aurelien.gateau@free.fr>
+Date:   Fri Feb 6 17:00:17 2009 +0100
+
+    Added tag command to db version paragraph.
+
+commit d926145d64526a39e82608b88b9b50b163cbe336
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Feb 5 19:08:03 2009 +0100
+
+    More consistent headline levels;
+
+commit e60c0f1ba7e9387a82ba9dc7169a01a0b2322925
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Feb 5 19:07:35 2009 +0100
+
+    Typos.
+
+commit d503204ada312b6ad7d5b957c406174326b59ad9
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Feb 5 07:40:55 2009 +0100
+
+    Allow again double dashed words in task's title if it is not a
+    recognized option
+
+commit 5ce80a8d1e0f309947b2b4c95f76c019334e115c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Feb 4 23:04:06 2009 +0100
+
+    Don't escape double dash escaping that breaks --foo=bar option parsing
+
+commit f0fbc7f8e44acfa812fc47331d3123dee97e814f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Feb 4 08:42:36 2009 +0100
+
+    Simpler way to provide predefined answers to tui.
+
+commit c63cb48f9c3b32c35b8700cd44bf581062b672bd
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 19:34:08 2009 +0100
+
+    Test t_mark*
+
+commit 6c7923a7a157368eec3083e40f0b1ef8b3b19347
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 19:30:33 2009 +0100
+
+    Simulate user answers.
+    Test adding valued and value-less keywords.
+
+commit c4ce8b7012f9d26619444bae4fac033a19003c2a
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 19:28:30 2009 +0100
+
+    A mock implementation of raw_input for tui.
+
+commit ecad8ea08243214055e670c5e1fa52b64b46dfd5
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 19:27:56 2009 +0100
+
+    Added inputImpl
+
+commit 7776498d6fe7cda3a7172e67254adb39e5ffdef5
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 19:24:54 2009 +0100
+
+    Use tui.confirm()
+
+commit 97e3f0226549256cbb0232318c8057218679aead
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 19:13:28 2009 +0100
+
+    Added confirmation prompt to p_remove.
+
+commit f65186aedd45208bbf6267714e06afd1d856b034
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Feb 3 10:26:35 2009 +0100
+
+    Escape chars which cause Maruku to complain.
+
+commit 40ce73ba3a90e07808ca9390dd43e210ff4f56af
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 23:25:58 2009 +0100
+
+    Too many caps hurt the eyes.
+
+commit 48fcebd91ed341ffcbf05b889ded41e02c7b7214
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 23:25:27 2009 +0100
+
+    Add some tips.
+
+commit 71bf84645aab7565e4fd47d126c3a25c0e545ba9
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 23:02:39 2009 +0100
+
+    Added doc about how to use Yokadi to track bugs.
+
+commit 4c608b3d7a85a4c185d85e542dcf6fd2dfe651d1
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 09:17:01 2009 +0100
+
+    Simplify
+
+commit 49d785c4afa8573514ad2e6874cc5044c932286c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 09:16:06 2009 +0100
+
+    Reworked parseDateTimeDelta(), easier to read now
+
+commit 2b6d2cf7987a9357acf4225e2702dbb18323b76b
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 09:14:38 2009 +0100
+
+    Test parseDateTimeDelta
+
+commit 7a3d4bfd9c4811f3a8971fe648aae88b0adbb811
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 09:07:10 2009 +0100
+
+    Moved delta parsing to parseDateTimeDelta (easier to unit-test)
+
+commit a1f0bb95dcc5ceffc6d00f5e522f39f036cee9fc
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 08:51:59 2009 +0100
+
+    Documented t_set_due date format.
+
+commit 91bcd059ffcd5b2f883c09feb8385600ede8748e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 30 08:41:49 2009 +0100
+
+    Show result of t_set_due
+
+commit ca87725df6ccee4a33874ac45fa1b987c297f4ff
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jan 29 16:00:34 2009 +0100
+
+    Fix broken parse.
+
+commit 1e2180ee4ecfc9c7b54693f2ea6af561eba075d9
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jan 29 16:00:16 2009 +0100
+
+    Added more tests.
+
+commit c75d601fcc5eab141b1d53b6f81a3ee9d089169e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 23 20:44:20 2009 +0100
+
+    Make ml url a link.
+
+commit 2694fd259a80d4984f35d94269eb6bb049ecda53
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 23 20:43:18 2009 +0100
+
+    Fix indentation.
+
+commit 4353840a8f3cb649a7fdfd4df4c1eb43125418c7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 23 20:39:01 2009 +0100
+
+    Added Contact and Authors sections.
+
+commit aff3c846a444315070ef3208a5b8e1d664c4203f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 23 20:31:55 2009 +0100
+
+    Small cleanups.
+
+commit 66b9cdc4b0a1008a8d7fedd7a35999745b8aaf4f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 23 20:26:59 2009 +0100
+
+    Indent
+
+commit 4fb336964c83ffe5ad0ebd53e734dd2206813bbb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 23 20:26:48 2009 +0100
+
+    HACKING documentation
+
+commit 5c4ce9e1f909aad8c7f28ff97035a13ebc3ff80b
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Jan 22 22:08:03 2009 +0100
+
+    Print a pretty message if sqlobject is not available
+
+commit 7fb12891576bb401ac864f71e066a61da54be3b7
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Jan 19 11:09:57 2009 +0100
+
+    Fix import (utils.py is gone)
+
+commit 059aa83384bd847338abf8922bb2f10f88ae1b42
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 22:25:32 2009 +0100
+
+    Escape text in html output.
+
+commit 0b6ce6d36d81c9fd5aab156df3b3ceb8f790759a
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 22:12:53 2009 +0100
+
+    Get rid of TextRenderer class.
+
+commit 75b9ac923426ae58df35a1e323eb67c26532d269
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 22:07:33 2009 +0100
+
+    Added the beginning of Task test cases.
+
+commit 37440968c480821231843f4c078ce5d7d222c3c9
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 21:58:29 2009 +0100
+
+    utils.py => dbutils.py
+
+commit 62121000f5033fc5fce0b62462e33b8eafc29d1c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 21:54:12 2009 +0100
+
+    Moved completion code from parseutils.py and utils.py to completers.py.
+
+commit a9b8ab54c4ddbd112089cca133b0aad9c5a2fd20
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 21:48:45 2009 +0100
+
+    Added CompletersTestCase
+
+commit 9bd9195f4dd52f5db2ec9db4572e07b4ac0e7986
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 21:48:29 2009 +0100
+
+    Do not recreate database at every tests.
+    
+    SQLObject does not allow creating a table several times.
+
+commit 9fb875dbbc308f7a4ad01bce0b9dab9e1dedf077
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 21:46:22 2009 +0100
+
+    Keep a list of all tables in TABLE_LIST
+
+commit e4049b2ed56b54dd289f1eaa570d4099f3abc85c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 19:08:32 2009 +0100
+
+    Continue utils.py cleanup: moved getProjectFromName to projectcmd.py
+
+commit 50ae4699bfc4110eb21d72227072dfe03eb47022
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 16 19:06:36 2009 +0100
+
+    Added unittest for Project class
+
+commit 50788c26450945ac9837eb4d760cbd514e6eeedb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 19:23:31 2009 +0100
+
+    Clean up
+
+commit 74d20954e416b83f2e166652498dad2dd1bb4911
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 19:17:05 2009 +0100
+
+    Do not allow unknown keywords, it's too easy to miss the warning.
+
+commit 10e250c67e1a51620198c26dc62cb9f31e0ad7b7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 19:14:49 2009 +0100
+
+    Output messages to stderr
+
+commit 44ce3868f3b294654d90fe576d6587e1a9eab96f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 19:13:13 2009 +0100
+
+    Introduced new methods in tui: info,warning,error. This helps standardizing
+    the way messages are output.
+
+commit b0ce28468d5aa3a07436f2798015412b878ceef6
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 19:06:18 2009 +0100
+
+    Moved ENCODING from utils.py to tui.py
+
+commit d0460be16cdeaea964567b5f35255039429ef2b7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 10:36:01 2009 +0100
+
+    Started to write README
+
+commit bba87fef6e9492633ceec37ca79f8dcb49543ca7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 08:43:24 2009 +0100
+
+    Doc update system in a separate file.
+
+commit bc342c3118b6011420c8b4c183b751663a1f1438
+Merge: 8b3cb55... 67ac056...
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jan 9 10:40:06 2009 +0100
+
+    Merge branch 'master' of git://github.com/digitalfox/yokadi into digitalfox
+    
+    Conflicts:
+    
+    	taskcmd.py
+
+commit 67ac056306f98b7569613dec33a8c792f8ab298c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Jan 4 14:55:15 2009 +0100
+
+    Fix taskIdCompleter that was relying on old TextRenderer implementation.
+    Now it works again but use its own very simple renderer.
+
+commit 6e5b81abd37ec6d7b83cfb4dc357e94a9c8efcc6
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Jan 1 23:43:28 2009 +0100
+
+    Factorise unittest init code
+    Add basic unit test for humanParseDate function
+
+commit d8be0e7b2ef3d4e6f9883c52befbb72c0c9042b3
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jan 4 15:09:50 2009 +0100
+
+    Simplified test runner. Thanks Sébastien!
+
+commit f75336eb4ad42b8e463b8d0b7daf13e1ee2f207e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Dec 21 23:50:30 2008 +0100
+
+    Added short option for t_list format.
+
+commit 2f21df5d7d123931dbb7bd4a058ff8d4e3cb077d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 23:10:15 2008 +0100
+
+    Added PlainListRenderer
+
+commit b9abeb33aaa526cf165623f5b3828490c5b8bcec
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:50:58 2008 +0100
+
+    Export "description" as an element.
+
+commit 6d6caac115f70623a6f86ad9f84fa7412531da30
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:40:21 2008 +0100
+
+    - Added id attribute
+    - Removed <tasks> element
+    - Changed the way keywords are exported
+
+commit bfaa40d277396a07de8b4efa990adcdf8f40750a
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:39:22 2008 +0100
+
+    Don't include "project" field, it's in <project> element.
+
+commit 47c4ef393e9e58a12f2fb2c29a6f911c27b6d1cb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:29:25 2008 +0100
+
+    Make sure all rows and all cells are correctly encoded.
+
+commit 7b94ecff5fc0128ac9d2f3d2929b7be0c8ff70e0
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:23:41 2008 +0100
+
+    Added Sébastien as author
+
+commit 94c682d7454a0b9b0d5458c03b1f913f6a8fcd9d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:21:09 2008 +0100
+
+    Prettify html output a bit.
+
+commit 05a2a45875e13fe52604af2d1f9cbe061cc7d456
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 22:02:55 2008 +0100
+
+    We do not have care about user encoding when exporting to html
+
+commit 30ca649d6539e3d6edb05a19c6fb4dc01de63255
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 21:57:13 2008 +0100
+
+    Removed t_export
+
+commit 0e2f6f4effce3dea87078ca9baf8b8e7b25a42a1
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 21:57:01 2008 +0100
+
+    Cleanup
+
+commit 6585b051e65164bf80e70799ff0a0ad76420f822
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 19:49:44 2008 +0100
+
+    HTML list renderer
+
+commit 51daa8e1d4ecf2add8b3187fa8c817c7457ba052
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 19:40:40 2008 +0100
+
+    Csv list renderer.
+
+commit 55a5aa7e20babe22ca3160729bf1afc1b1241de9
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 19:28:04 2008 +0100
+
+    Make renderClassDict global
+
+commit c351413d8f47c82e465a5f373ea861b0ef34ccbe
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 19:21:12 2008 +0100
+
+    Deduce format from output file extension
+
+commit bbdecb26727eac9473d0728c3b67f88524e592df
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 19:02:55 2008 +0100
+
+    Make it possible to specify output
+
+commit ebb8c917576e671014e89eb0e55cb74bc595643d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 18:55:57 2008 +0100
+
+    t_list can now print as xml
+
+commit 07ea345ac6b9803896c01158154b1432cf570951
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 18:23:19 2008 +0100
+
+    Moved text rendering of t_list to a new class: TextListRenderer
+
+commit f9ead23028eac67b1f4c440f33ce59367dbcb816
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 18:05:48 2008 +0100
+
+    Fix rendering of Done field.
+
+commit e9b435c7ea8d3d3259260779483df5e80747f184
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 20 17:51:16 2008 +0100
+
+    Use only one line for hidden projects, and show it at the end
+
+commit 9dfe7025c9673a23c1bd15fb645c7ce2a26c57f5
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Dec 8 19:29:36 2008 +0100
+
+    Added testDash
+
+commit 9c7b7e00970c62892f74eb3c2f73894a02f16ad6
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Dec 7 12:29:19 2008 +0100
+
+    Allow to use dash if it does not conflict with options
+
+commit af1a5d3e4309a059a042f222f67f91d961fab4ae
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Dec 8 18:58:58 2008 +0100
+
+    Added testQuote
+
+commit 8b3cb55425f7b25ece978b74ebead8408d0471dd
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Dec 7 12:29:19 2008 +0100
+
+    Allow to use dash if it does not conflict with options
+
+commit 12d1d20a4b2342603f191e1098f0fc3e521b20e1
+Merge: 1aed5ce... 8c3f605...
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Dec 7 11:36:09 2008 +0100
+
+    Merge branch 'master' of git://github.com/agateau/yokadi
+    
+    Conflicts:
+    	taskcmd.py
+
+commit 8c3f60589e4331e0ad3dd84cba1b87ad86a4a175
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Dec 7 00:42:08 2008 +0100
+
+    No more need for help parameter
+
+commit fd6e65f260303cda0094c79d8a2d34ed90539b39
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Dec 7 00:41:57 2008 +0100
+
+    Interface Cmd help system with YokadiParser when it is used.
+
+commit fef7f29b61da1a9dffffbaf59d71b6a5e237f9c8
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Dec 7 00:27:38 2008 +0100
+
+    Use "choice" type for output option.
+
+commit 1aed5ce8dac624a20133cd9830a24551f2d3fe84
+Merge: d1fd698... 5be1a75...
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Dec 7 00:26:13 2008 +0100
+
+    Merge branch 'master' of git://github.com/agateau/yokadi
+    
+    Conflicts:
+    	taskcmd.py
+
+commit d1fd698f71a7e8615548fc54b588dc5607bbe54a
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Dec 7 00:24:32 2008 +0100
+
+    Add a raw mode to t_list in order to easy copy paste tasks to mail
+
+commit eb3bbe5228cd116d4a1be8f0dbf8db2ef7619da6
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 22:53:13 2008 +0100
+
+    Changed behavior when no projects match: print an error message.
+
+commit 5be1a7558569450d68e3a47b4140969bffc119ec
+Merge: 7b2a111... 40996d0...
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 22:38:52 2008 +0100
+
+    Merge branch 'digitalfox'
+    
+    Conflicts:
+    
+    	taskcmd.py
+    	textrenderer.py
+
+commit 7b2a11114085894bc033cbef9169b9ef3c86f7b2
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 13:05:30 2008 +0100
+
+    Prompt before removing
+
+commit 91c1bd20be91e8711058d2da41f64e3d2e0fdc83
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 12:57:41 2008 +0100
+
+    Print task title when changing status
+
+commit 89e6ff252c8ebe2185dda22efbe39946f3b21e81
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 12:47:33 2008 +0100
+
+    Cleanup
+
+commit 705b5df7984cc47e7eb52056e537bb28ac4bf72a
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 12:45:17 2008 +0100
+
+    Moved formatTimeDelta and shortenTimeDelta to dateutils
+
+commit 2b7bf35fc6b21745eafa343181b6720b5b330c79
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 12:42:17 2008 +0100
+
+    Moved guess{Date,Time}Format to dateutils
+
+commit 30e410fb9fb0384248f965d014fcc220e04984ce
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 12:40:00 2008 +0100
+
+    Moved date parsing code from t_set_due to a new utils file: dateutils
+
+commit 52e20172ba9dd671d9c3fc33b00dd44cfe1ce81c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 12:31:34 2008 +0100
+
+    It seems difficult to have options with optional argument.
+    Unbreak t_list by making the --done argument mandatory for now.
+
+commit 40996d05c95799b29f3acf9d1e4d1901c4f4e7db
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Dec 6 11:21:33 2008 +0100
+
+    Some import cleaning and reorg
+
+commit 89bf31fdb3844b774e3bfc61621059e016b018a9
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 11:07:46 2008 +0100
+
+    Safer implementation for "thisweek"
+
+commit 16b6ee8ce608c701220a5dd41da0c3e1e8eadb94
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Dec 6 10:42:55 2008 +0100
+
+    Note to self: test your code after renaming functions
+
+commit 0c22657d63f1d38cbcb60c46b90fc816fd1fd128
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Dec 5 19:33:55 2008 +0100
+
+    Added support to limit done tasks with a range.
+    Not sure about the syntax for now.
+
+commit 69b1ee7bbf23b607c640dbb8c05db810de2dd0eb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Dec 5 19:08:10 2008 +0100
+
+    Allow negative urgency.
+
+commit f395831a9784e67e4238f03276f05401e767e4f8
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Dec 5 09:15:04 2008 +0100
+
+    Moved YokadiException to its own file.
+
+commit 7548360463b184f123075498f8cc9c45e8d6bdbd
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Dec 5 09:09:28 2008 +0100
+
+    Specifying keywords in t_list is now done using '-k', like t_add.
+
+commit 6fa1497269762b70c68e8d396ab5ec7baf5ea29c
+Merge: e3ecde5... fef54a1...
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Dec 4 22:27:30 2008 +0100
+
+    Merge branch 'master' of git://github.com/agateau/yokadi
+
+commit e3ecde527b807e042898cc4915a5521c1e866990
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Dec 4 19:25:01 2008 +0100
+
+    Try to find child project in t_list when giving only the begining of project name
+    Usefull for people that don't know the % tips
+
+commit f492c69eacf730c215d9a37a6026561f6497ef98
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Dec 4 08:37:30 2008 +0100
+
+    Add symlink to ease yokadi starting ('cause bash completion hesitate between yokadi.py and yokadid.py and stop to yokadi :D)
+
+commit b61acabf88c6b0806ba506b5f1a224fcd021be62
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Dec 3 23:03:34 2008 +0100
+
+    AddColumn is now in sqlmeta subclass (warning in sqlobject 0.9, error in sqlobjet 0.10)
+
+commit 852b000def17bc782451a04ffc677a216b25a048
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Dec 3 23:02:16 2008 +0100
+
+    Update default Yokadid Alarm command value
+
+commit fef54a193cc32542cedb15e593279de2cfe0cbbe
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Dec 3 19:29:43 2008 +0100
+
+    Do not use deprecated methods. Should fix broken update with sqlobject 0.10.2.
+
+commit 81b5cd75ab43e92be2c7a577b0e47fe0739ce5bf
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Dec 3 19:29:13 2008 +0100
+
+    Doc
+
+commit e5a833933a9c79c4477edbeb772e5cb380d1a591
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Dec 2 18:59:03 2008 +0100
+
+    Make it possible to run update.py from outside its dir
+
+commit d1bcbd915f3e12d8cc75e61a53f482a8abde9cf1
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Dec 2 18:42:15 2008 +0100
+
+    Fix headers (encoding, author, licence...)
+
+commit 4cd3b6956c660766c9b9e7909b1bfc5365dcfc1c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Dec 1 23:34:33 2008 +0100
+
+    Don't consider tasks of inactive project when trigering alarms
+
+commit ab455c0093d29b1e67b4c0edc8b6c425970b6e52
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Nov 30 12:12:39 2008 +0100
+
+    Don't consider done task
+    Use double quote to launch external command and escape it in task titles
+
+commit 9a1944c0f1fb2d3b1c250b7c05e9829b8b7a5f90
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Nov 27 19:31:30 2008 +0100
+
+    Only complete  taskId for active tasks (not in state done)
+
+commit 7899cfa6e36b558ed98f5977399ae4944d7abf80
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Nov 27 19:24:35 2008 +0100
+
+    Add verbose completion on taskId for all commands that take it on argument
+
+commit 2c1a1c2ee418e07b8c0ed65ba688ac8cf3bfe86d
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Nov 26 22:39:37 2008 +0100
+
+    Also use default database ($HOME/.yokadi.db) for Yokadi Daemon when no
+    database provided on command line
+
+commit cdc1325c1c1b9029e88d19b0e6a0901a1a8e3e02
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Nov 26 22:34:23 2008 +0100
+
+    Force default encoding to user encoding (needed for syslog message)
+
+commit 78b2fe59eb4cbeebe502970b271ee4404a9dfe29
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Nov 25 13:47:46 2008 +0100
+
+    Centralize encoding definition
+
+commit 2ca8b3ab2142ae3b7a9c8cd4e03afbc490d11eb2
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Nov 25 13:40:19 2008 +0100
+
+    Use a default database ($HOME/.yokadi.db) when no database is provided
+
+commit e852b3370e1a131d548ff89d5e25df16a8d6ae1c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Nov 20 09:54:07 2008 +0100
+
+    Fix case where line is empty.
+
+commit 2c831c273ef10f5f8eb750978c2e96d9d0eb9131
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Nov 20 09:52:29 2008 +0100
+
+    Added test for YokadiOptionParser.
+
+commit a6a8b15b301abdabb8e54b4b69129999a1b9c9d8
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Nov 20 09:50:04 2008 +0100
+
+    Move ParseUtilsTestCase to its own file
+
+commit 669a1a05c0cd0e8650f896fb0747536cafa72844
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Nov 20 09:47:37 2008 +0100
+
+    Prepare test reorganization to be able to run tests from multiple modules.
+
+commit 911f2abe4ee7e069451e6570a769d325f922061e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Nov 20 09:03:00 2008 +0100
+
+    Do not use shlex.split(), we do not want to have to escape quotes.
+
+commit f79cb3465b3bb38abd142ecdef4fb615e9d3b61c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 19 19:38:10 2008 +0100
+
+    Added --output option to t_show to make it possible to choose what get output.
+
+commit 98121942ac6dd8e2759ee1001b116cf6b3963bfb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 09:19:33 2008 +0100
+
+    moved projectByName to utils.getProjectFromName.
+    Make utils.getTaskFromId work like utils.getProjectFromName.
+
+commit f07d3e25de00aea48fcfe734892b65bb02e88a57
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 09:09:30 2008 +0100
+
+    Applied Simon Guinot patch to garbage-collect task-less projects.
+
+commit 40bcf7493a2e8c613c5df7802284686a625a559b
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 09:00:40 2008 +0100
+
+    delete -> remove
+
+commit ec8e4ab44ed76f8ee588f1d46d461f8b313a5b08
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 08:54:06 2008 +0100
+
+    Completer for p_remove
+
+commit e9edffc25be00dc32d5cf9583255c162675c8c60
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 08:53:18 2008 +0100
+
+    Factorize line parsing and error handling.
+
+commit 83b028f065cdc3096c006231030d4c930571ece6
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 08:46:29 2008 +0100
+
+    Applied patch from Simon Guinot to remove project.
+
+commit e9a03852d1ebccef9da04588704dbafacc82d95d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 00:38:30 2008 +0100
+
+    Oups, I broke t_add. Bad boy.
+
+commit 0754b61e398a4275bba5c20a3e1add4973a9a7e1
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 00:30:58 2008 +0100
+
+    Consistent naming: YokadiOptionParser.py -> yokadioptionparser.py.
+
+commit 9fcb8c5b5c15b929b90daf34c961e915421b4be9
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 00:16:24 2008 +0100
+
+    Use YokadiOptionParser in t_list. Removed CommonCmd.
+
+commit f9d95f33b7d94daec687b49d7b689e9e7f86443d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Nov 18 00:14:33 2008 +0100
+
+    Add missing include
+
+commit a43293f58e062a7bc18eb6d63e0fe194cbe1c659
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 17 23:42:25 2008 +0100
+
+    Use YokadiOptionParser.
+
+commit 08286b478ddfaaa342400dc44114cf6f5ebbcb9b
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 17 23:42:16 2008 +0100
+
+    Better handling of exit codepaths. Ability to pass doc as a parameter.
+
+commit 87ec5f93ad901096a6dba12a58c00b803eb5ff3f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 17 23:00:09 2008 +0100
+
+    Fix exception name.
+
+commit fa5180c77a8e13dcbd5cc4eff7a8b715c8075b26
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 17 22:59:57 2008 +0100
+
+    Unicode fixes.
+
+commit 4e28d8582197768383fb2f9a6f656bf87ed90d8e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 17 21:03:13 2008 +0100
+
+    Introduced YokadiOptionParser. Use it to parse t_add and t_edit for now.
+
+commit 10b66f49755fea8d0c099470097ff75a79512ffd
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 09:01:19 2008 +0100
+
+    Removed old script.
+
+commit 8e9b7157fabc037e20350d837d9459e6caaba964
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 09:00:09 2008 +0100
+
+    Documentation.
+
+commit 69833a7a728e5a59c4fe6bd3078eb40d22c24aa4
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 08:51:38 2008 +0100
+
+    use db.DB_VERSION
+
+commit a6d6d601d38279784a290a5d15f3f1ff4c26ade6
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 08:50:46 2008 +0100
+
+    Keep version as an int. Use a const to store version key.
+
+commit 4bf70ab72b17927df1d585fdcf6750c494e2cc59
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 08:44:08 2008 +0100
+
+    restore.py no longer needs to be a separate script
+
+commit 8230f8e1fcc8f0f59fc5ed36af5091db3c30a335
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 08:37:39 2008 +0100
+
+    Make udpate1to2 a separate script: it will avoid SQLObject troubles
+    when different update scripts defines different versions of the tables.
+
+commit db9c3d4fb92fbeae0f4b4e96f3a78a2cadddf265
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Nov 12 08:28:00 2008 +0100
+
+    Doc
+
+commit e8d82cf467f8d81e17bdca57bdc385d327f0546e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 10 09:03:01 2008 +0100
+
+    Changed option parser
+
+commit 8ed775e931ed7bfcc0cdffa2f6b5563d38636a35
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 10 08:50:41 2008 +0100
+
+    dump.py does not have to be a separate script.
+
+commit 3c754923c5582f318cc1021eb0250608670c5972
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 10 08:41:39 2008 +0100
+
+    Mark project active by default
+
+commit 46b1857c9eabb5c55606491369ea51122dc13aeb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 10 08:38:15 2008 +0100
+
+    Do not attempt to update the db in connectDatabase, this is update.py job.
+
+commit 282c7b5df5935b521247d7e05a90ce236dac768c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Nov 10 08:31:41 2008 +0100
+
+    Created update system
+
+commit caaf9e841d3d2eb5cf6c1e62e5227e9bf6747fc0
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Nov 7 08:51:13 2008 +0100
+
+    Do not allow null in Config table fields.
+
+commit b75517e1dad3e66e709302a678dfd1e97edf8442
+Merge: dd78b78... 27755d6...
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Nov 7 08:49:54 2008 +0100
+
+    Merge branch 'digitalfox'
+
+commit dd78b78678eb66d4c9fd330d69258a067a367302
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Nov 2 15:21:19 2008 +0100
+
+    Applied typo patch from Simon Guinot.
+
+commit 27755d6ff1505c2df8bafd4c1e59e374a8178b8d
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Oct 23 07:59:33 2008 +0200
+
+    Set default output encoding to allow proper encoding when yokadi output
+    is piped in another command
+
+commit a2b271554a156fc928c25afdf304be8b74007031
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Sep 30 18:49:55 2008 +0200
+
+    Also decode rawline with user encoding (fix regression bug with tasks accentuated title crashing t_add since it use rawline)
+
+commit 05de18e1c87fbcf08f27446447fefd1915991e74
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Sep 28 15:32:48 2008 +0200
+
+    Complete correctly t_list with projects and keywords even when parameters are given
+
+commit 76352339968b339c62f706b622b95df7f0752287
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Sep 28 11:51:10 2008 +0200
+
+    Manage two alarm : one before delay to warn and one when task should be done
+
+commit 812df394dd93cf299e4173abc1662f9cf9032686
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 23:17:24 2008 +0200
+
+    Implement the kill option to force Yokadi Daemon to exit
+
+commit 786dbae4eda91cadffdcc86eb1c0205ebe639a0b
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 20:59:14 2008 +0200
+
+    Honor SIGHUP and reload configuration
+
+commit c6d4e11e1873bab7e4b888cc03e154b9181021ce
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 20:37:35 2008 +0200
+
+    Handle properly bad time or date format
+
+commit 42e647d88b6b7b0b003eb2e979b99870204b7347
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 17:02:28 2008 +0200
+
+    Ensure a database file has been given to warn and exit properly
+
+commit 117c0e8f850307081212b2ecef0691e678e5a323
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 16:59:43 2008 +0200
+
+    Use textrenderer for config output.
+
+commit fefa4fb43f18563f5a03baf6547c8acd0705508e
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 11:29:24 2008 +0200
+
+    Allow paramters to be composed of more than one word.
+    Little cleanup
+
+commit c2f85692f8e83a4b4df28d37d94d824d04679202
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 10:56:06 2008 +0200
+
+    Factorise db connexion code and move it db.py module.
+    Also move default paramter stuff and DB_VERSION control
+
+commit 3fd751310c93f0137be0f5dc7553f59853c1fc24
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 10:19:41 2008 +0200
+
+    Ensure database file exist and is readable. Also check that is it a true Yokadi database
+
+commit bc6ef506a3e3dbc33a5dcf2dfbea0dd27b6c4ede
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 10:18:36 2008 +0200
+
+    Fix DB_VERSION initialisation bug (missing desc field)
+
+commit 381ada9fb87f50133c8bca4d29706ce189354de3
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 10:08:02 2008 +0200
+
+    Add options to Yokadi Daemon for database file and foreground/background
+
+commit 2c53dc4714f4f36f14f86dc89ae22b9b910d972f
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Sep 27 09:56:53 2008 +0200
+
+    Add short options -d and -c for respectively --db and --create-only
+
+commit fd4cbb8e52fdf81f7a02d13f5602cb7a829c8512
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Sep 26 22:31:07 2008 +0200
+
+    Make delay and command parameters
+
+commit 5e5118732fe51c2e8596ed764ad249dba14c95e8
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Sep 26 22:29:13 2008 +0200
+
+    Add a description field to parameters
+    Two new parameters for yokadi daemon : ALARM_CMD and ALARM_DELAY
+
+commit 30b8730800c1061db58c966ff74736e29d569d62
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Sep 26 11:53:08 2008 +0200
+
+    First release of Yokadi Daemon. Working but not customisable at all
+
+commit 459210132d4728855c4e4e9e4b2d415db8f88674
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 18 18:44:13 2008 +0200
+
+    The default project is now customizable with DEFAULT_PROJECT user config parameter
+
+commit 0745e3668da1e94329c3c50fb5b6d7cb63bbd72d
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 18 18:33:04 2008 +0200
+
+    Add completion on c_set too. Fix regression bug for -s parameter of c_get
+
+commit 3249090cb09d28dbbc53784dfbd4b71d3c33f6e0
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 18 14:09:40 2008 +0200
+
+    Add completion on parameter name
+
+commit 53f41f04673695cf9a8b04f812a46c8ef1c42769
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 18 09:03:01 2008 +0200
+
+    Generic parameter parsing for all commands
+
+commit 053a0a80472b3007d51c62e8f13c52ae1cff6ab5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Sep 17 08:37:50 2008 +0200
+
+    Set default config parameter in database if they (still) do not exist
+
+commit 77401f16ddb9e3b0b0b6fb82e223eea10fd50ca7
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Sep 16 19:25:00 2008 +0200
+
+    Task desc field width is now a parameter (instead of fixed 60 caracters)
+
+commit c92ee12937461570c2cfd914e67df1a9d6db9c32
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Sep 16 12:27:25 2008 +0200
+
+    Don't use Cmd.default method to display the "unknown command" error
+    because it is not unicode aware.
+    YokadiException is now used for that
+
+commit f37ffd1434fdd09136a7d840eae50afdd005fd8b
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 15 08:54:22 2008 +0200
+
+    Add some basic filtering option to t_list
+
+commit 58214d3ebee3edd7ba41d3775a3d4018b19f1202
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 11 14:46:00 2008 +0200
+
+    Add XML export
+
+commit bb4591842edbab3bcfd52a147d5dbdaf56341536
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Sep 10 22:57:50 2008 +0200
+
+    Move keyword list formating to the model layer in order to factorize code
+    Add simple HTML export
+
+commit 8fcc46b4a75baebf20a50a66a9d2b55e336cef3e
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Sep 10 22:26:16 2008 +0200
+
+    Add new function t_export to export tasks in various format.
+    For now, only classic CSV format is implemented
+
+commit 578501d1d90fc69e19c886514da63d2b33165443
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 8 22:51:28 2008 +0200
+
+    Hide seconds of creation date (useless)
+
+commit 160b8fcd718b36819e153ced06ebebe7b434c675
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 8 22:49:32 2008 +0200
+
+    Extract timedelta formating from textrenderer to utils and split it
+
+commit 39c58cff5a30a40a6a6499735deb037a722792e0
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Sep 5 18:46:12 2008 +0200
+
+    Allow project to be active or not. Inactive project are not shown when filtering with t_list
+
+commit e68d0e0237125c23b47ad64dbcc1e6e47d98e1fa
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 4 18:42:51 2008 +0200
+
+    Simple shell script to generate API doc with Epydoc
+
+commit 4ba538288f21718ba83c8fd30809e4b0ef8d8228
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 4 18:38:19 2008 +0200
+
+    Add proper documentation to all functions
+
+commit 6922274128a1e5f45eaead06a578ffd3afae32fa
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 4 18:23:22 2008 +0200
+
+    Factorize GetProjectNameStartingWith and GetKeywordNameStarting into
+    a generic function
+
+commit a1ffaf4e4fcfbbebc5f7bdea3f0b770db28097b7
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Sep 4 09:22:19 2008 +0200
+
+    Add keyword completion on t_list (for filtering) and k_remove
+
+commit eeddbc415006b9afb615f8ede484ac960374e81b
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Sep 3 18:41:44 2008 +0200
+
+    Simplify tui.editText interface (exception raising instead of return code)
+
+commit b4053bbfe58a3f973dea3ea3b5d9cdedb7440375
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Sep 3 11:52:15 2008 +0200
+
+    Move unique task title per project contraint to database layer
+
+commit 995005509fc45b3815ee2970bb37ab666d330034
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Sep 3 09:01:37 2008 +0200
+
+    Remove uniq constraint on task name on the database layer
+    Ensure we never create two task whith the same title in the same project on the
+    addTask function
+
+commit f720904fc20ea8e95137461d1410cb57d6a37d7f
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 1 22:32:30 2008 +0200
+
+    Add basic c_set function
+    Extend config table with a "system" flag to filter user settings from Yokadi system settings
+    Bump schema release to 2 (should write the update script one day !)
+
+commit 4b77449434e8ee8a78e5557cdf8599f264f9f9f5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 1 19:09:40 2008 +0200
+
+    Add some basic configuration management (get only for now)
+
+commit 2460c7e2f7741dc65a9f3a97c9708dacbc2c9211
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 1 18:48:38 2008 +0200
+
+    Use user encoding for edit (line and page) function as well
+
+commit 2e84769a80a5aac0bebb12026b28fcb72a575b87
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 1 13:29:10 2008 +0200
+
+    Don't assume everyone use UTF-8 and decode user
+    input according to its own encoding
+
+commit ac2c41c40c76be69959c2c76e8ca17ee9481bcd8
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Sep 1 13:17:05 2008 +0200
+
+    Some color
+
+commit 8fbfef21ad465fabe3471901c260f977eb6966bc
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 31 21:55:54 2008 +0200
+
+    getTaskFromId returns None if task existance is not asked
+
+commit c8ea891b6b6652e89182925f7cfca887b178c241
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 31 21:55:34 2008 +0200
+
+    Use getTaskFromId for bug_edit
+
+commit 497982146bc8cdffec4df6838a03589d45c6a23f
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 31 21:26:40 2008 +0200
+
+    Move providesTaskId to utils.
+    Change its name to "getTaskFromId"
+    and now return Task instance instead of taskId
+    This simplify a lot taskcmd.py and make it also available for
+    other commands
+    Add some more test when parsing arguments in taskcmd.py
+
+commit 4d30dbfd66aad09e454497dd378a4d6bf2875cf0
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Aug 30 13:00:59 2008 +0200
+
+    Explicit is better than implicit (tm). So, get rid of all
+    import * !
+    Hope that I don't break too many things...
+
+commit ef2929834370d6e7fc66f8222902b770647ec913
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Aug 30 12:30:27 2008 +0200
+
+    Ensure task have a title and that cehck task does not exist when adding one
+
+commit 00d44251d84d6cd2d4feadb65f8b77ccef4442a0
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Aug 30 11:21:13 2008 +0200
+
+    Add colors also to forgotten "Done" field
+
+commit 9460fad2bdb38e603a95bf777815017956fc17e9
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Aug 30 11:13:24 2008 +0200
+
+    Don't crash when a user want to add an already existing keyword
+
+commit 69472a18e09a1eeaddba0ef56489b52c5d3bc9f0
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Aug 30 10:54:20 2008 +0200
+
+    Remove one more useless return
+
+commit 04418d631a890375a681105628a7c633f8f83f52
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sat Aug 30 10:45:58 2008 +0200
+
+    Allow to use break (control-C) to exit from interactive dialog (edit task for example)
+    wihtout exiting Yokadi
+    A break at the prompt will still exit from Yokadi but explain user how to that nicely
+    Add some alias to help people exit from yokadi if they don't understand what is EOF ;-)
+
+commit d1e68b55fc953abf7b3b3d66f3f09af038796378
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 29 23:03:48 2008 +0200
+
+    Keyword management : new functions to add and remove keywords
+
+commit 8ae103d3a05b8ec5420facdcde71b7e8f23f3e82
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 29 19:03:41 2008 +0200
+
+    When listing keywords alos show tasks that have those keywords
+
+commit 7b75800c8fd1dbe8ea1c09cbeaf045011c67e51d
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 29 18:51:12 2008 +0200
+
+    Ignore unknown keyword when filtering and warn user instead of kicking him
+
+commit ca8d42009afe6bea48a471bf21679e7d7ffe30e5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Aug 28 22:07:42 2008 +0200
+
+    Show tasks timeleft before due date in t_list view
+
+commit 9dbab05e828bc543f422f001d965c1aa5d2798c5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Aug 28 21:55:59 2008 +0200
+
+    Don't hide stacktrace to ease debug
+    Incitate users to blame developpers by sending them the stacktrace
+
+commit 1b313956be857f18e8f914275fdaf89a373d3d94
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Wed Aug 27 14:12:59 2008 +0200
+
+    Add a Config table
+    Handle database schema version and version control
+
+commit b6d62631fd7bd46709bea1c41358ded7acf4f48a
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Aug 26 14:11:15 2008 +0200
+
+    dueDate can be removed with t_set_due x none (case unsensitive)
+
+commit 52ebe770c3d7d285c25feb9a149d01d6dd89d6d2
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Aug 26 09:42:15 2008 +0200
+
+    Add due date in task details
+
+commit f96a42956d032e529a8d12384e3c5df71e42b386
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Aug 26 09:36:40 2008 +0200
+
+    Squash microsecond in due Date. Seconds are enough ;-)
+
+commit 7fafbde91817e59824f1dbbb01b695e95f1d51e6
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Tue Aug 26 08:55:56 2008 +0200
+
+    Now partial absolute dueDate works !
+    set_due 47 29 set the due date to the 29th of the current month of the current year
+    Factorise today computation and little code cleaning
+    Some more doc for provideTaskId method
+
+commit 2d13e9d6a1a72169c54de57b27cbfbda20741e91
+Merge: db1d3d6... d9f3fc1...
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Aug 25 21:40:50 2008 +0200
+
+    Merge branch 'master' of git://github.com/agateau/yokadi
+
+commit db1d3d67df548f840933b4a7d82f3efc07d75eff
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Mon Aug 25 21:32:40 2008 +0200
+
+    Add a due date to tasks and a convenient way to set it
+    Still buggy for absolut date with default month or year
+    There's no way for now to show the due date ;-)
+
+commit d9f3fc12729bd8ebe39d5dce97e7804b973fd525
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Aug 25 00:12:53 2008 +0200
+
+    No need to check taskId now that providesTaskId raise an exception on error.
+
+commit 7f0e9af10f1b4e207cac4f59f1353fd9dc96bb88
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Aug 25 00:12:16 2008 +0200
+
+    No need to return since we now raise.
+
+commit c0f793047e4d3e736221f87b2451386bc9327b65
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Aug 25 00:07:39 2008 +0200
+
+    Set license on files which missed it.
+
+commit b66e27bba5cdb7f084edd5562baaca8f9393755e
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 22:24:56 2008 +0200
+
+    Check that taskid is a digit
+
+commit 8110eafe288ac37d8f1fdbe8c182dd7c0498a1f8
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 22:23:58 2008 +0200
+
+    Show errors in red
+
+commit fd65ce96604054010e26838e7d5a9787e94809f6
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 22:17:21 2008 +0200
+
+    Handle errors for project renaming
+
+commit 2b2a9955c72761819b6152a5b0568d22e77fc128
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 14:58:34 2008 +0200
+
+    Colorise task list (urgency and status for now)
+
+commit 21a451b92743c75ba61ed12d1b39e72b1d481f55
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 14:57:07 2008 +0200
+
+    List all project's tasks if none is given with t_list
+
+commit cbc1a545ca0287b15c718ba762f10910adc04e33
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 14:55:50 2008 +0200
+
+    Make test works whatever your current dir is
+
+commit 6485cbec230b74b1bc2cd868117c7aaef8ef40a5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 14:24:21 2008 +0200
+
+    Don't show a task when just trying to check if it exists (bugfix)
+
+commit 4dbbc7ccbb0a0f737390c43cb826833454246883
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 13:08:30 2008 +0200
+
+    Add persistant history on disk
+
+commit 38508acb84c6ab58e35cdfb47103d102ae60a4bc
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Sun Aug 24 11:16:29 2008 +0200
+
+    Add color to Yokadi !
+    Normalize some header file to specify encoding, author and licence
+
+commit 723d19d86e61bbe080dc27cc1be394c972415348
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 18:16:30 2008 +0200
+
+    More test
+    Do not say a task if move if user cancel project creation
+
+commit 2e9316d0d45e49431a3e1413c0aab75b8b01daca
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 18:10:21 2008 +0200
+
+    Create YokadiException to handle all Yokadi errors in a standard way
+    Add a catch for all unhandled errors to avoid nasty stacktrace in user face
+    Maybe a flag should be add to allow full stacktrace for developper
+
+commit 1e200befb16b567a9af13930eddf2ab451f769c0
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 17:31:59 2008 +0200
+
+    More tests and error handling
+
+commit 661785f63e98b4d987c3b90c0a8c129870846b8c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 17:26:17 2008 +0200
+
+    Exit nicely if a break (control-C) is received
+
+commit 9498b571efb95e71a375513c691d166bccc4fed5
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 17:19:57 2008 +0200
+
+    Don't track eclipse files
+
+commit 3f6a8caf7df746caa339348bf228450625c44a7d
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 14:26:11 2008 +0200
+
+    Harden t_mark* commands
+
+commit 51d9ccf5bf35428822be21424553a06c9a0cb603
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Fri Aug 22 09:13:58 2008 +0200
+
+    Use generic mechanism to check if task id is provided and if task exists
+
+commit e5ef9ef86b07046f6460271c328812acc2b7203c
+Author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+Date:   Thu Aug 21 23:43:34 2008 +0200
+
+    Harden t_show and t_add commands
+    Use a default project when not specified in t_add
+
+commit a03fdbb17bff8ef700c72a8ca8d7407fe83a2715
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Aug 10 11:49:48 2008 +0200
+
+    Fix unicode handling in editText()
+
+commit ab30ea15325e3fae1ee2bc51d84cdbe878401fdd
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 11:44:54 2008 +0200
+
+    Show task when its number is entered.
+
+commit aad2e97a762ff460562308647dcc5f6e53286aca
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 11:42:35 2008 +0200
+
+    Do not repeat commands when input is empty.
+
+commit 988179fb60ce7cef3cbbfedcd9c94e0db988da1d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 11:39:09 2008 +0200
+
+    Removed t_prop_set: it's not that useful.
+
+commit 9bf6b4c47cc72fdc656cf04834faf5de32d50d99
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:54:09 2008 +0200
+
+    Added missing KeywordCmd class.
+
+commit a39f36ee48336729c7cb7490970d8a22470a67de
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:52:40 2008 +0200
+
+    Complete on t_reorder.
+
+commit 7c219c015fea6ccac576d153b71db4b68bbc8cb7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:31:49 2008 +0200
+
+    Renamed ycmd.py to taskcmd.py.
+
+commit 06ab19088b05ea3ef4812242fcbebbbb1bcc62aa
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:30:57 2008 +0200
+
+    Refactored: moved project and keyword commands to their own file.
+
+commit f7ef857563da8fea871ec3790820a7fee6150913
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:18:56 2008 +0200
+
+    Use ProjectCompleter for bug_add.
+
+commit 8ff2488c5f06a1b2440c9a6ee5afa9f6a7e7f056
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:18:37 2008 +0200
+
+    ProjectCompleter on t_edit is useless.
+
+commit 42cd3846a6f26c286ef3911823898ff98737b5cb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jul 30 10:16:46 2008 +0200
+
+    Moved ProjectCompleter to a completers.py file.
+
+commit f0d5eae54a97b8ced54e5c1958233755c37767e2
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 28 17:45:08 2008 +0200
+
+    Fix project renaming
+
+commit 29fec4c1e2c9f8613fdc941a2fd70788d98a770f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 28 17:41:12 2008 +0200
+
+    New command: p_rename.
+
+commit 65af974eb774bd51b62c256bdd67e52d8905887b
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jul 27 22:57:56 2008 +0200
+
+    Add completion on project names.
+
+commit ef1e20a0ee1f445a540ba6872fe626dd6526b766
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 24 09:51:12 2008 +0200
+
+    Do not append '%' to project name in t_list.
+    More consistent with other commands.
+
+commit 69692a68ff1189d22c3e94b0115f7389bc757a0f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jul 22 23:31:00 2008 +0200
+
+    Renamed temp files.
+    Added SQL and Shell upgrading.
+
+commit 985682a560b1c8c616cea68ce09540e8a0b7d51c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jul 22 23:30:22 2008 +0200
+
+    Fix encoding issue.
+
+commit d40be6a24be3f6036ad0e56f3800d5376c84a113
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jul 22 23:30:11 2008 +0200
+
+    Removed dead code.
+
+commit 25d3431fb06d71be2536a93ec434e17167fd02c5
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jul 22 21:20:19 2008 +0200
+
+    Test for stressed letters.
+
+commit 5470b920306312c39c6f8d234a48a75b8083d90e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jul 22 21:12:40 2008 +0200
+
+    -p => -k
+
+commit f5440d282b0765cc4533fd286c40bb201a274c01
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 21 23:59:13 2008 +0200
+
+    New t_list syntax.
+
+commit 39013233765624f3ba8615a27170d7c155998cb4
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 21 23:55:15 2008 +0200
+
+    Show done date.
+
+commit 0c4cae54b29add6d8d9be332c4cef6edc6da67ff
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 21 23:51:35 2008 +0200
+
+    Added doneDate column.
+
+commit 99100e4662d9bd302e1362259404826c341740d2
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 21 23:10:07 2008 +0200
+
+    t_list => k_list
+
+commit fda6ff7b9e1b56f78304820bcfce064c43dcf96f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 21 22:59:34 2008 +0200
+
+    Support for shell upgrading.
+
+commit e2bb276003735b6b290030671bebcfe14604f013
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Mon Jul 21 22:59:20 2008 +0200
+
+    property => keyword
+
+commit a7076d466e98405e2607fcc2db4ca44f66270051
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Fri Jul 18 12:23:39 2008 +0200
+
+    New command: t_set_project.
+
+commit 73dfea4ffe6c27428bb4cd3465ba66432a95a555
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 23:51:47 2008 +0200
+
+    Removed not-working anymore yagtd import code.
+
+commit b3f691eb6a7210e593755db07ac3fdacba925340
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 20:43:23 2008 +0200
+
+    Updated documentation.
+
+commit 4d5e2273158b0e0a3ce990fd88f1ecb29474705c
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 20:35:02 2008 +0200
+
+    New command: t_reorder
+
+commit bf47e83494cdfe109f497a77314c5e9a8ca54ba5
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 20:34:49 2008 +0200
+
+    Mark Project.name column as alternateID
+
+commit 5db39680b1bbc1ebc2a9b7da3ef791155667da12
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 20:20:45 2008 +0200
+
+    Support EDITOR env var in editText.
+
+commit 19ba8ac8508741e9b29f9294bffa0368262e017f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 20:18:11 2008 +0200
+
+    Moved selectFromList and enterInt to tui.
+
+commit 925cb8f445e8e5ab5e3454cdbeb296aab0cc9b89
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Thu Jul 10 20:15:37 2008 +0200
+
+    Moved edit* methods to a new module: tui
+
+commit 4c91d25f7940964be6e09f210fa5ea926f0d1406
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jul 6 23:11:12 2008 +0200
+
+    Updated BugCmd to handle Project table.
+
+commit a0349bcfbe764e9f6959482ae000820c3c7015ea
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jul 5 01:06:58 2008 +0200
+
+    Use textrenderer to print project name.
+
+commit 051592cf92ac86c05cdbfd1ea25c56a0019bd1da
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jul 5 01:06:31 2008 +0200
+
+    Moved FIXME :)
+
+commit c17f8b00681b595ac5ced078467e840a82395603
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jul 5 01:06:10 2008 +0200
+
+    Modeline
+
+commit bce47023b7a2e4709c67bd96f8e43351e3910b37
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jul 5 00:59:45 2008 +0200
+
+    Useful scripts to import db.
+
+commit 8efc1da28524eeea5cf842fa50bb3657e39cc55e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jul 5 00:59:33 2008 +0200
+
+    Added back Project table.
+
+commit 18c8018d927e03be037233b65f4b01550365cc35
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jul 5 00:09:37 2008 +0200
+
+    Added a --create-only option.
+
+commit c8141747766458f126dc0eb4f280d74a98019ce8
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jun 17 19:03:01 2008 +0200
+
+    Added bug_edit command.
+
+commit fc968445766049159736f775a7d0ec24f97448f0
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jun 17 19:02:40 2008 +0200
+
+    Make it possible to customize the prompt.
+    Do not fail if result is empty.
+
+commit 5edc6a6224523a630f42d8bd308aeb6938bb8bda
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jun 17 19:02:17 2008 +0200
+
+    Show urgency.
+
+commit 46e90a545b980b37d2bc14ed362bc61c22ba048f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jun 17 18:40:38 2008 +0200
+
+    Moved editing with readline to utils.
+
+commit 1b89a09cebb857e2255b97f3e000ba8fbfe74558
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 15 01:31:41 2008 +0200
+
+    Make it possible to edit task descriptions.
+
+commit 2542ba90621064b47a70454d1a271fc4e4e1032d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 15 01:16:23 2008 +0200
+
+    Handle task.description.
+
+commit 6472f6f8cc1067e103a009ebc5372f507515db0b
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 15 01:16:07 2008 +0200
+
+    Moved urgency computation to a separate function.
+
+commit cd035211bafe63aa425370a55615f04b52056f68
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 15 01:06:31 2008 +0200
+
+    Sort properties
+
+commit 184181d0eb0599196f78e7e47a763a8f65875df1
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 14 15:59:06 2008 +0200
+
+    Unbreak t_apply
+
+commit 99b6dfe5578b2be84978ed48178154b6c7c39063
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 14 15:45:45 2008 +0200
+
+    Do not crash if task/bug is not created.
+
+commit 126f3cd1104d4b05bca9a76cd56897ef1c315cad
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jun 11 00:26:20 2008 +0200
+
+    Changed "t_add" message to be similar to "bug_add" message.
+
+commit c84041fce285b3502899d080068f015ba357b3d6
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jun 11 00:11:06 2008 +0200
+
+    Started to add bug support.
+
+commit ea7680402855a6a01dc0a8a36116ea80d8df28f5
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Wed Jun 11 00:10:54 2008 +0200
+
+    Moved task creation to utils.py
+
+commit a90c243553d0822f245b2d0cdf4f7ad7fe1e5da3
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Tue Jun 10 23:39:20 2008 +0200
+
+    Changed t_add syntax: takes project name (without p/) as first parameter now.
+
+commit 558432b30060169b0dc209d8c5a615e283c48140
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:55:48 2008 +0200
+
+    extractProperties -> parseTaskLine
+
+commit bf9f9b21459bb6e0071e344d5b6d8fc03c5e9f55
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:52:28 2008 +0200
+
+    Moved some code from t_edit to parseutils, unit test it.
+
+commit fd886dbc65f1fdf3d4f0145b48d463b067aab0d1
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:42:48 2008 +0200
+
+    Moved all parsing code to parseutils.py.
+
+commit cb158503982fe71f4d0aafb4b8929fe473d972b1
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:37:40 2008 +0200
+
+    Doc
+
+commit 38c410defca55505cf296b4c90541c04efa7e8e2
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:36:34 2008 +0200
+
+    Sort by urgency, desc.
+
+commit 9b1e034d87a3b223cff3e7b40f1c95ddddde0e10
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:34:28 2008 +0200
+
+    Factorized code between t_edit and t_add.
+
+commit 6ce5e27fffd93b90891ca15247e7b3d07da0bbb7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:27:37 2008 +0200
+
+    Make it possible to edit properties with t_edit
+
+commit 03a3326a4f967015a2fd95bac89e80ffe6a3a702
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sun Jun 8 00:27:23 2008 +0200
+
+    Added setPropertyDict.
+
+commit d246714cc379e94d8b4219803ad6e749615f727e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 23:49:41 2008 +0200
+
+    Spaces.
+
+commit 3d4e2dc3013c3d80bce745d2a489be80c6179270
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 23:49:36 2008 +0200
+
+    Unit tests.
+    Support setting valued properties in t_add.
+    Added a t_set_urgency command.
+
+commit b28194038287ec2cd1e7725df0751d93d07f374e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 23:13:53 2008 +0200
+
+    Added t_edit command.
+
+commit c064aa986d2c91e61f63db227b42d0b6be866907
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 23:13:38 2008 +0200
+
+    Use readline
+
+commit 6c12f23368b3541074afa82ee89e940c589ca8b4
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 18:40:42 2008 +0200
+
+    Import bug:
+
+commit e0a7d907f2d053258e04ddb0f9df9f3c27e358cb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 18:34:21 2008 +0200
+
+    Keyword -> Property
+
+commit 9e5d4839cb759d00192f6b6a0ce924287a595fbb
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 18:25:51 2008 +0200
+
+    Show valued properties.
+
+commit a1bb75e6acaa58d669f67f6cfc84405c5dfef173
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 18:25:40 2008 +0200
+
+    New function: t_prop_set
+
+commit 38baf1c02860dd86b52510d1e448579c8b0d6123
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 18:25:30 2008 +0200
+
+    Explicitly create the MTM table, to be able to assign an optional integer value.
+
+commit 33466ce323c920d5f693b6fed3f941c69be0bcb7
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 17:50:43 2008 +0200
+
+    Added urgency field.
+
+commit 8583b86e38ea366d0dcd6c5d0b1fa0e6ff63016d
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 17:45:00 2008 +0200
+
+    Ignore T: and I: fields in yagtd import.
+
+commit 26247e94a2f70a38f91a14e1d755ac182853881f
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:35:57 2008 +0200
+
+    Moved task list rendering to TextRenderer.
+
+commit b955009f6a3b0c88d8d462dc82afea27d53915ab
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:25:47 2008 +0200
+
+    Ignore files.
+
+commit 029c6c7dbe3f37f00d1339c13d0609c82933137e
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:25:24 2008 +0200
+
+    Added a renderer.
+    Added a t_show command.
+
+commit a8c4486a79608cb7ca27db20c8100e5b1dab8c08
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:05:17 2008 +0200
+
+    no need for this to handle stdin.
+
+commit 60d4863cdf8e559265e56fb916c759c9f7ed2b8b
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:04:44 2008 +0200
+
+    Clean
+
+commit 5695e0a7f7ac6d16a0f5c5a67727c43e00ef4e25
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:04:35 2008 +0200
+
+    Fix prompt setting.
+
+commit bb20b967e773319f7d7e707c7dde16400ca5f39a
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 16:04:21 2008 +0200
+
+    Improved formating
+
+commit 315dbf8f84f3b12d70dde559de2dd19fe22a6656
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 15:55:14 2008 +0200
+
+    Switch to tags.
+    Added a import_yagtd command.
+
+commit 2120ff478de9830cf92a6f256126e0be451175a2
+Author: Aurélien Gâteau <aurelien@trinity.(none)>
+Date:   Sat Jun 7 13:59:00 2008 +0200
+
+    Initial import
