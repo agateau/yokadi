@@ -1,4 +1,7 @@
 include update/update*to*
+include update/*py
+include update/README.markdown
+include doc/*markdown
 include *py
 include ChangeLog
 include README.markdown

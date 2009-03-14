@@ -9,19 +9,27 @@
 
 from distutils.core import setup
 import sys
-from os.path import dirname, join
+import os
+from os.path import abspath, dirname, join
+
+# yokadi root path
+root=abspath(dirname(__file__))
 
 # Additional files
 data_files=[]
 data_files.append(["share/yokadi",
                    ["version", "README.markdown", "ChangeLog", "ChangeLog-Synthesis", "LICENSE"]])
 
+# Doc
+data_files.append(["share/yokadi/doc",
+                   ["doc/%s" % f for f in os.listdir(join(root, "doc"))]])
+
 # Scripts
 scripts=["src/bin/yokadi", "src/bin/yokadid", "src/bin/xyokadi"]
 
 # Version
 try:
-    version=file(join(dirname(__file__), "version")).readline().rstrip().rstrip("\n")
+    version=file(join(root, "version")).readline().rstrip().rstrip("\n")
 except Exception, e:
     print "Warning, cannot read version file (%s)" % e
     print "Defaulting to 'snapshot'"
@@ -39,6 +47,7 @@ setup(name="yokadi",
       author_email="ml-yokadi@sequanux.org",
       url="http://yokadi.github.com/",
       package_dir={"yokadi" : "src/yokadi"},
+      package_data={"yokadi": ["tests/*.py"]},
       packages=["yokadi"],
       scripts=scripts,
       data_files=data_files
