@@ -75,11 +75,12 @@ class ProjectCmd(object):
     def do_p_list(self, line):
         """List all projects."""
         for project in Project.select():
-            #TODO: add keywords
             if project.active:
-                print project.name
+                active = ""
             else:
-                print "%s (inactive)" % project.name
+                active = "(inactive)"
+            print "%s %s %s" % (project.name, project.getKeywordsAsString(), active)
+
 
     def do_p_set_active(self, line):
         """Activate the given project"""
