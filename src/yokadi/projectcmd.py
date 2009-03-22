@@ -38,7 +38,7 @@ class ProjectCmd(object):
         if not line:
             print "Give at least a project name !"
             return
-        projectName, garbage, keywordDict = parseutils.parseTaskLine(line, useDefaultProject=False)
+        projectName, garbage, keywordDict = parseutils.parseLine(line, useDefaultProject=False)
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
         project = Project(name=projectName)
@@ -47,24 +47,35 @@ class ProjectCmd(object):
             return None
         project.setKeywordDict(keywordDict)
 
-    def do_p_rename(self, line):
-        """Rename project.
-        p_rename <old_name> <new_name>"""
-        tokens = line.split(" ")
-        if len(tokens)!=2:
-            raise YokadiException("You must provide two arguments: old_name and new_name")
-        oldName = tokens[0]
-        newName = tokens[1]
+    def do_p_edit(self, line):
+        """Edit a project.
+        p_edit <project name>"""
+        project=dbutils.getOrCreateProject(line, createIfNeeded=False)
 
-        project = getProjectFromName(oldName, "old_name")
-        project.name = newName
-        print "Renamed project '%s' to '%s'" % (oldName, newName)
-    complete_p_rename = ProjectCompleter(1)
+        if not project:
+            raise YokadiException("Project does not exist.")
 
+        # Create project line
+        projectLine = parseutils.createLine(project.name, "", project.getKeywordDict())
+
+        # Edit
+        line = tui.editLine(projectLine)
+
+        # Update project
+        projectName, garbage, keywordDict = parseutils.parseLine(line, useDefaultProject=False)
+        if garbage:
+            raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
+        if not dbutils.createMissingKeywords(keywordDict.keys()):
+            return
+        project.name = projectName
+        project.setKeywordDict(keywordDict)
+
+    complete_p_edit = ProjectCompleter(1)
 
     def do_p_list(self, line):
         """List all projects."""
         for project in Project.select():
+            #TODO: add keywords
             if project.active:
                 print project.name
             else:

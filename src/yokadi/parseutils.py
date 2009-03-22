@@ -31,7 +31,7 @@ def parseParameters(line):
     return (parameters, " ".join(text))
 
 
-def parseTaskLine(line, useDefaultProject=True):
+def parseLine(line, useDefaultProject=True):
     """Parse line of form:
     project some text -k keyword1 -k keyword2=12 some other text
     @param useDefaultProject: if true, a single word will be interpreted as task description
@@ -69,7 +69,7 @@ def parseTaskLine(line, useDefaultProject=True):
     return project, line, keywordDict
 
 
-def createTaskLine(projectName, title, keywordDict):
+def createLine(projectName, title, keywordDict):
     tokens = []
     for keywordName, value in keywordDict.items():
         tokens.append(u"-k")

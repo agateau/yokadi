@@ -43,7 +43,7 @@ class Project(SQLObject):
 
     def setKeywordDict(self, dct):
         """
-        Defines keywords of a task.
+        Defines keywords of a project.
         Dict is of the form: keywordName => value
         """
         for projectKeyword in ProjectKeyword.selectBy(project=self):
@@ -52,6 +52,23 @@ class Project(SQLObject):
         for name, value in dct.items():
             keyword = Keyword.selectBy(name=name)[0]
             ProjectKeyword(project=self, keyword=keyword, value=value)
+
+    def getKeywordDict(self):
+        """
+        Returns all keywords of a project as a dict of the form:
+        keywordName => value
+        """
+        dct = {}
+        for keyword in ProjectKeyword.selectBy(project=self):
+            dct[keyword.keyword.name] = keyword.value
+        return dct
+
+    def getKeywordsAsString(self):
+        """
+        Returns all keywords as a string like "key1=value1, key2=value2..."
+        """
+        return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
+
 
 class Keyword(SQLObject):
     class sqlmeta:

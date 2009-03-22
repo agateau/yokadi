@@ -68,7 +68,7 @@ class BugCmd(object):
         """Add a bug-type task. Will create a task and ask additional info.
         bug_add <project_name> [-k <keyword1>] [-k <keyword2>] <Bug description>
         """
-        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        projectName, title, keywordDict = parseutils.parseLine(line)
         editBugKeywords(keywordDict)
 
         task = dbutils.addTask(projectName, title, keywordDict)
@@ -88,11 +88,11 @@ class BugCmd(object):
         task = dbutils.getTaskFromId(line)
 
         # Create task line
-        taskLine = parseutils.createTaskLine(task.project.name, task.title, task.getKeywordDict())
+        taskLine = parseutils.createLine(task.project.name, task.title, task.getKeywordDict())
 
         # Edit
         line = tui.editLine(taskLine)
-        projectName, title, keywordDict = parseutils.parseTaskLine(line)
+        projectName, title, keywordDict = parseutils.parseLine(line)
         editBugKeywords(keywordDict)
 
         # Update bug

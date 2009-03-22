@@ -77,19 +77,25 @@ def getOrCreateKeyword(keywordName, interactive=True):
     return keyword
 
 
-def getOrCreateProject(projectName, interactive=True):
+def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
     """Get a project by its name. Create it if needed
     @param projectName: project name as a string
     @param interactive: Ask user before creating project (this is the default)
     @type interactive: Bool
-    @return: Project instance or None if user cancel creation"""
+    @param createIfNeeded: create project if it does not exist (this is the default)
+    @type createIfNeeded: Bool
+    @return: Project instance or None if user cancel creation or createIfNeeded is False"""
     result = Project.selectBy(name=projectName)
     result = list(result)
     if len(result):
         return result[0]
 
+    if not createIfNeeded:
+        return None
+
     if interactive and not tui.confirm("Project '%s' does not exist, create it" % projectName):
         return None
+
     project = Project(name=projectName)
     print "Added project '%s'" % projectName
     return project

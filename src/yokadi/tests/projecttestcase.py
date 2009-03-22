@@ -11,16 +11,27 @@ import testutils
 
 from db import Project
 from projectcmd import ProjectCmd
+import tui
 
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
+        self.cmd = ProjectCmd()
 
-    def testRename(self):
-        project = Project(name="src")
-        id = project.id
-        cmd = ProjectCmd()
-        cmd.do_p_rename("src dst")
-        project = Project.selectBy(id=id)[0]
-        self.assertEqual(project.name, "dst")
+
+    def testAdd(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_p_add("p1")
+
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_p_add("p2 -k kw1 -k kw2=12")
+
+        projects = list(Project.select())
+        result = [x.name for x in projects]
+        expected = [u"p1", u"p2"]
+        self.assertEqual(result, expected)
+
+        kwDict = Project.get(2).getKeywordDict()
+        self.assertEqual(kwDict, dict(kw1=None, kw2=12))
+
 # vi: ts=4 sw=4 et

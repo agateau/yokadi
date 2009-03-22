@@ -18,14 +18,14 @@ gTaskLineToParsedStructList = [
 class ParseUtilsTestCase(unittest.TestCase):
     def testExtractKeywords(self):
         for src, dst in gTaskLineToParsedStructList:
-            result = parseutils.parseTaskLine(src)
+            result = parseutils.parseLine(src)
             self.assertEqual(result, dst)
 
-    def testCreateTaskLine(self):
+    def testCreateLine(self):
         for dummy, parsedStruct in gTaskLineToParsedStructList:
-            # We do not check the result of createTaskLine() against the
+            # We do not check the result of createLine() against the
             # original task line because there are many ways to write the same
             # taskLine.
-            taskLine = parseutils.createTaskLine(*parsedStruct)
-            result = parseutils.parseTaskLine(taskLine)
+            taskLine = parseutils.createLine(*parsedStruct)
+            result = parseutils.parseLine(taskLine)
             self.assertEqual(result, parsedStruct)
