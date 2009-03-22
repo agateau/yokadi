@@ -359,7 +359,8 @@ class TaskCmd(object):
 
             if keywordDict:
                 # FIXME: Optimize
-                taskList = [x for x in taskList if keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict)]
+                taskList = [x for x in taskList if (keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict) or
+                                                    keywordDictIsSubsetOf(x.project.getKeywordDict(), keywordDict))]
             else:
                 taskList = list(taskList)
 
