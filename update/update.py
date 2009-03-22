@@ -18,7 +18,7 @@ from sqlobject import *
 
 import dump
 
-sys.path.append(join(dirname(__file__),".."))
+sys.path.append(join(dirname(__file__),"..", "src", "yokadi"))
 import db
 
 def getVersion(fileName):
