@@ -23,7 +23,7 @@ import tui
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 2
+DB_VERSION = 3
 DB_VERSION_KEY = "DB_VERSION"
 
 
@@ -32,10 +32,26 @@ class Project(SQLObject):
         defaultOrder = "name"
     name = UnicodeCol(alternateID=True, notNone=True)
     active = BoolCol(default=True)
+    keywords = RelatedJoin("Keyword",
+        createRelatedTable=False,
+        intermediateTable="project_keyword",
+        joinColumn="project_id",
+        otherColumn="keyword_id")
 
     def __unicode__(self):
         return self.name
 
+    def setKeywordDict(self, dct):
+        """
+        Defines keywords of a task.
+        Dict is of the form: keywordName => value
+        """
+        for projectKeyword in ProjectKeyword.selectBy(project=self):
+            projectKeyword.destroySelf()
+
+        for name, value in dct.items():
+            keyword = Keyword.selectBy(name=name)[0]
+            ProjectKeyword(project=self, keyword=keyword, value=value)
 
 class Keyword(SQLObject):
     class sqlmeta:
@@ -50,6 +66,12 @@ class Keyword(SQLObject):
 
 class TaskKeyword(SQLObject):
     task = ForeignKey("Task")
+    keyword = ForeignKey("Keyword")
+    value = IntCol(default=None)
+
+
+class ProjectKeyword(SQLObject):
+    project = ForeignKey("Project")
     keyword = ForeignKey("Keyword")
     value = IntCol(default=None)
 
@@ -108,7 +130,7 @@ class Config(SQLObject):
     desc = UnicodeCol(default="", notNone=True)
 
 
-TABLE_LIST = [Project, Keyword, Task, TaskKeyword, Config]
+TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config]
 
 def createTables():
     for table in TABLE_LIST:

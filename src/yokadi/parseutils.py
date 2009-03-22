@@ -31,10 +31,12 @@ def parseParameters(line):
     return (parameters, " ".join(text))
 
 
-def parseTaskLine(line):
+def parseTaskLine(line, useDefaultProject=True):
     """Parse line of form:
     project some text -k keyword1 -k keyword2=12 some other text
-    returns a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
+    @param useDefaultProject: if true, a single word will be interpreted as task description
+    and the default project will be used.
+    @return: a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
 
     # First extract project name
     line = simplifySpaces(line)
@@ -42,8 +44,13 @@ def parseTaskLine(line):
         project, line = line.split(" ", 1)
         
     else:
-        project=Config.byName("DEFAULT_PROJECT").value
-        print "Project name not given, using default project (%s)" % project
+        # Line is single word.
+        if useDefaultProject:
+            project=Config.byName("DEFAULT_PROJECT").value
+            print "Project name not given, using default project (%s)" % project
+        else:
+            project=line
+            line=""
 
     parser = YokadiOptionParser()
     parser.add_option("-k", dest="keyword", action="append")

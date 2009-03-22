@@ -12,6 +12,8 @@ from completers import ProjectCompleter
 from db import Project, Task
 from yokadiexception import YokadiException
 from yokadioptionparser import YokadiOptionParser
+import parseutils
+import dbutils
 
 
 def getProjectFromName(name, parameterName="project_name"):
@@ -30,6 +32,21 @@ def getProjectFromName(name, parameterName="project_name"):
 
 
 class ProjectCmd(object):
+    def do_p_add(self, line):
+        """Add new project. Will prompt to create keywords if they do not exist.
+        p_add <projectName> [-k <keyword1>] [-k <keyword2>]"""
+        if not line:
+            print "Give at least a project name !"
+            return
+        projectName, garbage, keywordDict = parseutils.parseTaskLine(line, useDefaultProject=False)
+        if garbage:
+            raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
+        project = Project(name=projectName)
+        print "Added project '%s'" % projectName
+        if not dbutils.createMissingKeywords(keywordDict.keys()):
+            return None
+        project.setKeywordDict(keywordDict)
+
     def do_p_rename(self, line):
         """Rename project.
         p_rename <old_name> <new_name>"""
@@ -87,4 +104,5 @@ class ProjectCmd(object):
         project.delete(project.id)
         print "Project removed"
     complete_p_remove = ProjectCompleter(1)
+
 # vi: ts=4 sw=4 et
