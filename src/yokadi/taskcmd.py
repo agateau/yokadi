@@ -221,11 +221,6 @@ class TaskCmd(object):
                           default=False, action="store_true",
                           help="top 5 urgent tasks of each project based on due date")
 
-        parser.add_option("-k", "--keyword", dest="keyword",
-                          action="append",
-                          help="only list tasks matching <keyword>. If <value> is specified, <keyword> must have the same value",
-                          metavar="<keyword>[=<value>]")
-
         parser.add_option("-s", "--search", dest="search",
                           action="append",
                           help="only list tasks which title or description match <value>",
@@ -289,32 +284,29 @@ class TaskCmd(object):
         parser = self.parser_t_list()
         options, args = parser.parse_args(line)
         if len(args) > 0:
-            projectName = args[0]
+            projectName, keywordDict = parseutils.extractKeywords(u" ".join(args))
+            projectName = projectName.rstrip(":")
         else:
+            projectName = ""
+            keywordDict = {}
+
+        if not projectName:
             # Take all project if none provided
             projectName="%"
+
         projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count()==0:
             tui.error("Found no project matching '%s'" % projectName)
             return
 
-        # Init keywordDict
-        # Keyword object => None or value
-        keywordDict = {}
-        if options.keyword:
-            for text in options.keyword:
-                if "=" in text:
-                    keyword, value = text.split("=", 1)
-                    value = int(value)
-                else:
-                    keyword, value = text, None
-                try:
-                    Keyword.byName(keyword)
-                    keywordDict[keyword] = value
-                except SQLObjectNotFound:
-                    tui.error("Keyword %s is unknown." % keyword)
-                    return
+        # Check keywords exist
+        for keyword in keywordDict.keys():
+            try:
+                Keyword.byName(keyword)
+            except SQLObjectNotFound:
+                tui.error("Keyword %s is unknown." % keyword)
+                return
 
         # Filtering and sorting according to parameters
         filters=[]
