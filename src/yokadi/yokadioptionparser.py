@@ -30,16 +30,6 @@ class YokadiOptionParser(OptionParser):
         if argv == [u""]:
             argv = []
 
-        # Change @keyword notation by -k switch
-        for arg in argv:
-            if arg.startswith("@"):
-                arg=arg.replace("@", "")
-                nargv.append("-k")
-            nargv.append(arg)
-
-        argv=list(nargv)
-        nargv=[] # Clear it for next filter
-
         # Escape things that looks like arg but are indeed value (a user text with a dash for example)
         # For long option with value (--foo=bar) truncate value part to recognize option name
         for arg in argv:

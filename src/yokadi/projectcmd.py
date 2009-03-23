@@ -34,7 +34,7 @@ def getProjectFromName(name, parameterName="project_name"):
 class ProjectCmd(object):
     def do_p_add(self, line):
         """Add new project. Will prompt to create keywords if they do not exist.
-        p_add <projectName> [-k <keyword1>] [-k <keyword2>]"""
+        p_add <projectName> [@<keyword1>] [@<keyword2>]"""
         if not line:
             print "Give at least a project name !"
             return

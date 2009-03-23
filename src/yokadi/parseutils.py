@@ -8,7 +8,7 @@ Parse utilities. Used to manipulate command line text.
 import re
 
 from db import Config
-from yokadioptionparser import YokadiOptionParser
+import tui
 
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):
@@ -33,7 +33,7 @@ def parseParameters(line):
 
 def parseLine(line, useDefaultProject=True):
     """Parse line of form:
-    project some text -k keyword1 -k keyword2=12 some other text
+    project: some text @keyword1 @keyword2=12 some other text
     @param useDefaultProject: if true, a single word will be interpreted as task description
     and the default project will be used.
     @return: a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
@@ -58,33 +58,37 @@ def parseLine(line, useDefaultProject=True):
     return project, line, keywordDict
 
 def extractKeywords(line):
-    """Extract keywords (-k k1 -k k2=n..) from line
+    """Extract keywords (@k1 @k2=n..) from line
     @param line: line from which keywords are extracted
     @returns: (remaining_text, {keywordDict})"""
-    parser = YokadiOptionParser()
-    parser.add_option("-k", dest="keyword", action="append")
-    options, args = parser.parse_args(line)
-
     keywordDict = {}
-    if options.keyword:
-        for text in options.keyword:
-            if "=" in text:
-                keyword, value = text.split("=", 1)
-                value = int(value)
+    remainingText=[]
+    for token in line.split():
+        if token.startswith("@"):
+            token=token[1:]
+            if "=" in token:
+                keyword, value = token.split("=", 1)
+                try:
+                    value = int(value)
+                except ValueError:
+                    tui.error("Keyword value must be an integer (got %s). Removing value for %s keyword" %
+                              (value, keyword))
+                    value = None
             else:
-                keyword, value = text, None
+                keyword, value = token, None
             keywordDict[keyword] = value
+        else:
+            remainingText.append(token)
 
-    return (u" ".join(args), keywordDict)
+    return (u" ".join(remainingText), keywordDict)
 
 def createLine(projectName, title, keywordDict):
     tokens = []
     for keywordName, value in keywordDict.items():
-        tokens.append(u"-k")
         if value:
-            tokens.append(keywordName + "=" + str(value))
+            tokens.append("@" + keywordName + "=" + str(value))
         else:
-            tokens.append(keywordName)
+            tokens.append("@" + keywordName)
 
     tokens.insert(0, projectName+":")
 

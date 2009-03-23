@@ -37,7 +37,7 @@ gRendererClassDict = dict(
 class TaskCmd(object):
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
-        t_add <projectName> [-k <keyword1>] [-k <keyword2>] <Task description>"""
+        t_add <projectName> [@<keyword1>] [@<keyword2>] <Task description>"""
         if not line:
             print "Give at least a task name !"
             return

@@ -23,7 +23,7 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_add("x: t1")
 
         tui.addInputAnswers("y", "y")
-        self.cmd.do_t_add("x: -k kw1 -k kw2=12 t2")
+        self.cmd.do_t_add("x: @kw1 @kw2=12 t2")
 
         tasks = list(Task.select())
         result = [x.title for x in tasks]
