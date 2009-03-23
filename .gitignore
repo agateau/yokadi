@@ -5,4 +5,5 @@
 .pydevproject
 .project
 .settings
+dist
 MANIFEST
