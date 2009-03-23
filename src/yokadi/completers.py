@@ -32,7 +32,7 @@ class ProjectCompleter(object):
 
     def __call__(self, text, line, begidx, endidx):
         if computeCompleteParameterPosition(text, line, begidx, endidx) == self.position:
-            return ["%s:" % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
+            return ["%s: " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
         else:
             return []
 
@@ -52,7 +52,7 @@ def t_listCompleter(cmd, text, line, begidx, endidx):
     position=computeCompleteParameterPosition(text, line, begidx, endidx)
     position-=len(parseutils.parseParameters(line)[0]) # remove arguments from position count
     if   position == 1 :
-        return ["%s:" % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
+        return ["%s: " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
     elif position >= 2 :
         return getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)
 

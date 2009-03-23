@@ -23,7 +23,7 @@ class CompletersTestCase(unittest.TestCase):
         Project(name=u"foo2")
         Project(name=u"bar")
 
-        expected = [u"foo:", u"foo2:"]
+        expected = [u"foo: ", u"foo2: "]
         completer = completers.ProjectCompleter(1)
         result = completer("f", "t_add f", 6, 8)
         self.assertEqual(result, expected)
