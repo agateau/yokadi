@@ -20,10 +20,10 @@ class TaskTestCase(unittest.TestCase):
 
     def testAdd(self):
         tui.addInputAnswers("y")
-        self.cmd.do_t_add("x t1")
+        self.cmd.do_t_add("x: t1")
 
         tui.addInputAnswers("y", "y")
-        self.cmd.do_t_add("x -k kw1 -k kw2=12 t2")
+        self.cmd.do_t_add("x: -k kw1 -k kw2=12 t2")
 
         tasks = list(Task.select())
         result = [x.title for x in tasks]
@@ -35,7 +35,7 @@ class TaskTestCase(unittest.TestCase):
 
     def testMark(self):
         tui.addInputAnswers("y")
-        self.cmd.do_t_add("x t1")
+        self.cmd.do_t_add("x: t1")
         task = Task.get(1)
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_started("1")

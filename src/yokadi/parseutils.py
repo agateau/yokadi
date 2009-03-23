@@ -40,18 +40,27 @@ def parseLine(line, useDefaultProject=True):
 
     # First extract project name
     line = simplifySpaces(line)
-    if line.count(" "):
+    if line.split()[0][-1] == ":": # Last character of first word
         project, line = line.split(" ", 1)
-        
-    else:
-        # Line is single word.
-        if useDefaultProject:
-            project=Config.byName("DEFAULT_PROJECT").value
-            print "Project name not given, using default project (%s)" % project
+        project = project[0:-1]
+    elif useDefaultProject:
+        project = Config.byName("DEFAULT_PROJECT").value
+        print "Project name not given, using default project (%s)" % project
+    else: # First word is project
+        if line.count(" "):
+            project, line = line.split(" ", 1)
         else:
-            project=line
-            line=""
+            project = line
+            line = ""
 
+    line, keywordDict = extractKeywords(line)
+
+    return project, line, keywordDict
+
+def extractKeywords(line):
+    """Extract keywords (-k k1 -k k2=n..) from line
+    @param line: line from which keywords are extracted
+    @returns: (remaining_text, {keywordDict})"""
     parser = YokadiOptionParser()
     parser.add_option("-k", dest="keyword", action="append")
     options, args = parser.parse_args(line)
@@ -65,9 +74,8 @@ def parseLine(line, useDefaultProject=True):
             else:
                 keyword, value = text, None
             keywordDict[keyword] = value
-    line = u" ".join(args)
-    return project, line, keywordDict
 
+    return (u" ".join(args), keywordDict)
 
 def createLine(projectName, title, keywordDict):
     tokens = []
@@ -78,7 +86,7 @@ def createLine(projectName, title, keywordDict):
         else:
             tokens.append(keywordName)
 
-    tokens.insert(0, projectName)
+    tokens.insert(0, projectName+":")
 
     tokens.append(title)
     return u" ".join(tokens)
