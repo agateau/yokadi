@@ -18,7 +18,7 @@ root=abspath(dirname(__file__))
 # Additional files
 data_files=[]
 data_files.append(["share/yokadi",
-                   ["version", "README.markdown", "ChangeLog", "ChangeLog-Synthesis", "LICENSE"]])
+                   ["version", "README.markdown", "NEWS", "LICENSE"]])
 
 # Doc
 data_files.append(["share/yokadi/doc",

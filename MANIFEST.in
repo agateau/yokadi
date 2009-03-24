@@ -3,10 +3,9 @@ include update/*py
 include update/README.markdown
 include doc/*markdown
 include *py
-include ChangeLog
 include README.markdown
 include LICENSE
 include MANIFEST.in
 include version
-include ChangeLog-Synthesis
+include NEWS
 include yokadi
