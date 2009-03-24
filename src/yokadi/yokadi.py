@@ -123,6 +123,32 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
             print "Usage: ",
             Cmd.do_help(self, arg)
 
+def currentVersion():
+    """@return: current yokadi version according to 'version' file"""
+    try:
+        version = ""
+        #TODO: handle windows case
+        if os.path.join("src", "yokadi") in __file__:
+            # We are in a source tree, look at source root
+            version = os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, "version")
+        else:
+            # We are in a standard Yokadi installation or called by a symlink
+            paths=[os.path.dirname(__file__), # Current dir
+                   "/usr/share/yokadi",
+                   "/usr/local/share/yokadi",
+                   "/usr/local/yokadi/share/yokadi",
+                   "/opt/yokadi/share/yokadi"]
+            for path in paths:
+                if os.path.exists(os.path.join(path, "version")):
+                    version = os.path.join(path, "version")
+                    break
+        # Return file content
+        return file(version).readline().strip("\n")
+    except Exception, e:
+        print "Unable to read 'version' file. Do you remove or change it ?"
+        print e
+        return ""
+
 
 def main():
     locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
@@ -135,7 +161,15 @@ def main():
                       dest="createOnly", default=False, action="store_true",
                       help="Just create an empty database")
 
+    parser.add_option("-v", "--version",
+                      dest="version", action="store_true",
+                      help="Display Yokadi current version")
+
     (options, args) = parser.parse_args()
+
+    if options.version:
+        print "Yokadi - %s" % currentVersion()
+        return
 
     if not options.filename:
         options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
