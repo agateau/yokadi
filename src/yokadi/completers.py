@@ -48,13 +48,13 @@ class KeywordCompleter(object):
         else:
             return []
 
-def t_listCompleter(cmd, text, line, begidx, endidx):
+def projectAndKeywordCompleter(cmd, text, line, begidx, endidx):
     position=computeCompleteParameterPosition(text, line, begidx, endidx)
     position-=len(parseutils.parseParameters(line)[0]) # remove arguments from position count
-    if   position == 1 :
+    if   position == 1: # Projects
         return ["%s: " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
-    elif position >= 2 :
-        return getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)
+    elif position >= 2 and line[-1] != " " and line.split()[-1][0] == "@": # Keywords (we ensure that it starts with @
+        return ["%s" % x for x in getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)]
 
 def confCompleter(cmd, text, line, begidx, endidx):
     return getItemPropertiesStartingWith(Config, Config.q.name, text)

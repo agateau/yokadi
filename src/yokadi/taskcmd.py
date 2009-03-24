@@ -16,7 +16,7 @@ import dbutils
 import dateutils
 import parseutils
 import tui
-from completers import ProjectCompleter, t_listCompleter, taskIdCompleter
+from completers import ProjectCompleter, projectAndKeywordCompleter, taskIdCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
@@ -48,7 +48,7 @@ class TaskCmd(object):
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
 
-    complete_t_add = ProjectCompleter(1)
+    complete_t_add = projectAndKeywordCompleter
 
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
@@ -365,7 +365,7 @@ class TaskCmd(object):
         if len(hiddenProjectNames) > 0:
             tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
-    complete_t_list = t_listCompleter
+    complete_t_list = projectAndKeywordCompleter
 
     def do_t_reorder(self, line):
         """Reorder tasks of a project.
