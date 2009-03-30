@@ -77,11 +77,12 @@ def main():
     # Start import
     workDbFileName = createWorkDb(dbFileName)
 
+    scriptDir = os.path.dirname(__file__) or "."
     while True:
         version = getVersion(workDbFileName)
         if version == db.DB_VERSION:
             break
-        scriptFileName = join(dirname(__file__), "update%dto%d" % (version, version + 1))
+        scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
         print "Running %s" % scriptFileName
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
