@@ -60,11 +60,17 @@ except:
 
 class YokadiApplication(object):
     def __init__(self, tip = None, icon = None, db_file = None):
+        self.logInfo('A WinYokadi instance is starting')
         
         ## Connect to the yokadi db
-        self.db_file = db_file or os.path.normcase(os.path.expanduser("~/.yokadi.db"))
-        connectDatabase(self.db_file, createIfNeeded=False)
-        
+        try:
+            self.db_file = db_file or os.path.normcase(os.path.expanduser("~/.yokadi.db"))
+            connectDatabase(self.db_file, createIfNeeded=False)
+            self.logInfo('WinYokadi is connected to the database %s' %self.db_file)
+        except:
+            self.logError("Yokadi couldn't connect to the following db : %s. Exiting." %self.db_file)
+            sys.exit(1)
+            
         ## Window data init
         self.hwnd               = None
         self.hinst              = None
@@ -105,13 +111,20 @@ class YokadiApplication(object):
                              ('Open Yokadi', None, self.startYokadiShell))
         
         ## Create window
-        self.createWindow()
-        
+        try:
+            self.createWindow()
+        except:
+            self.logError("WinYokadi couldn't create its window. Exiting")
+            sys.exit(1)
+            
         ## Timer
         self.timer = timer.set_timer(self.polling_delta * 1000, self.OnTimer)
                 
         ## Add the notification icon
-        self.drawTrayIcon()
+        try:
+            self.drawTrayIcon()
+        except:
+            self.logError("WinYokadi couldn't add a tray Icon")
         
         ## Start main Win Message Loop
         win32gui.PumpMessages()
@@ -200,6 +213,7 @@ class YokadiApplication(object):
         """
         print "Fin WinYokadi"
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, self.getNID())
+        self.logInfo('WinYokadi is about to stop (%s)' %self.db_file)
         win32gui.PostQuitMessage(0)
    
     def redraw(self):
