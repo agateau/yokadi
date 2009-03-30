@@ -107,8 +107,8 @@ class YokadiApplication(object):
                             }
         
         ## Menu data init
-        self.menu_options = (('Quit', None, self.destroy),
-                             ('Open Yokadi', None, self.startYokadiShell))
+        self.menu_options = (('Quit', self.destroy),
+                             ('Open Yokadi', self.startYokadiShell))
         
         ## Create window
         try:
@@ -201,7 +201,7 @@ class YokadiApplication(object):
     
     def OnCommand(self, hwnd, msg, wparam, lparam):
         id = win32gui.LOWORD(wparam)
-        action = self.menu_options[id][2]
+        action = self.menu_options[id][1]
         action()
     
     def OnDestroy(self, hwnd, msg, wparam, lparam):
