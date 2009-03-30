@@ -59,7 +59,11 @@ except:
 #####################################################################
 
 class YokadiApplication(object):
-    def __init__(self, tip = None, icon = None):
+    def __init__(self, tip = None, icon = None, db_file = None):
+        
+        ## Connect to the yokadi db
+        self.db_file = db_file or os.path.normcase(os.path.expanduser("~/.yokadi.db"))
+        connectDatabase(self.db_file, createIfNeeded=False)
         
         ## Window data init
         self.hwnd               = None
@@ -132,6 +136,9 @@ class YokadiApplication(object):
         
         ## Add the notification icon
         self.drawTrayIcon()
+        
+        ## Start main Win Message Loop
+        win32gui.PumpMessages()
 
     def getNID(self):
         """
@@ -298,17 +305,10 @@ def main():
     ## Parse command line
     (options, args) = parseOptions()
     
-    ## Get database
-    if not options.filename:
-        options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
+    ## Create the Windows MFC application
+    appli = YokadiApplication(db_file = options.filename)
     
-    connectDatabase(options.filename, createIfNeeded=False)
-    
-    ## Build & draw notification icon
-    htray = YokadiApplication(tip = 'yokadi')
-    
-    ## Start main Win Message Loop
-    win32gui.PumpMessages()
+    ## The appli will return when it is closed
 
 
 if __name__ == "__main__":
