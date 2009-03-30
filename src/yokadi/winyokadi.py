@@ -100,14 +100,28 @@ class YokadiApplication(object):
                                 win32con.WM_COMMAND: self.OnCommand     # Menu & icons events
                             }
         
-        ## Menu init
+        ## Menu data init
         self.menu_options = (('Quit', None, self.destroy),
                              ('Open Yokadi', None, self.startYokadiShell))
         
+        ## Create window
+        self.createWindow()
+        
+        ## Timer
+        self.timer = timer.set_timer(self.polling_delta * 1000, self.OnTimer)
+                
+        ## Add the notification icon
+        self.drawTrayIcon()
+        
+        ## Start main Win Message Loop
+        win32gui.PumpMessages()
+
+
+    def createWindow(self):
         ## Create & register window class
         wnd_class = win32gui.WNDCLASS()
         self.hinst = wnd_class.hInstance = win32gui.GetModuleHandle(None)        ## Current main window handle
-        wnd_class.lpszClassName = "Yokadi_Windows"
+        wnd_class.lpszClassName = "WinYokadi"
         wnd_class.style = win32con.CS_VREDRAW | win32con.CS_HREDRAW
         wnd_class.lpfnWndProc = self.message_map
         
@@ -127,19 +141,10 @@ class YokadiApplication(object):
                                               0,                                # menu
                                               0,                                # hinstance
                                               None)                             # Must be None (context)
-
-        ## Timer
-        self.timer = timer.set_timer(self.polling_delta * 1000, self.OnTimer)
-                
         ## Open the window if debug mode
         #win32gui.ShowWindow(self.hwnd, win32con.SW_SHOW)        
         
-        ## Add the notification icon
-        self.drawTrayIcon()
         
-        ## Start main Win Message Loop
-        win32gui.PumpMessages()
-
     def getNID(self):
         """
             Builds a NOTIFYICONDATA structure containg instance data. (This C structure is not
