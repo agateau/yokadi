@@ -59,7 +59,12 @@ except:
 #####################################################################
 
 class YokadiApplication(object):
-    def __init__(self, tip = None, icon = None, db_file = None):
+    def __init__(self, db_file = None):
+        """
+            WinYokadi application constructor
+            @param db_file: the path to the sqlite database file to use. If not given, %USERPROFILE%/.yokadi.db will be used.
+        """
+        
         self.logInfo('A WinYokadi instance is starting')
         
         ## Connect to the yokadi db
@@ -75,11 +80,11 @@ class YokadiApplication(object):
         self.hwnd               = None
         self.hinst              = None
         self.id                 = 0
-        self.flags              = win32gui.NIF_MESSAGE | win32gui.NIF_ICON
+        self.flags              = win32gui.NIF_MESSAGE | win32gui.NIF_ICON | win32gui.NIF_TIP
         self.callbackmessage    = 1044 # = WM_TRAYMESSAGE, i.e. WM_USER + 20
-        self.icon               = icon or win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
-        self.tip                = tip or ""
-        self.info               = ""
+        self.icon               = win32gui.LoadIcon(0, win32con.IDI_APPLICATION)
+        self.tip                = u"WinYokadi is running"
+        self.info               = u"WinYokadi info text"        ## Only used in bubbles
         self.timeout            = 0
         self.infotitle          = ""
         self.infoflags          = win32gui.NIIF_NONE
@@ -131,6 +136,10 @@ class YokadiApplication(object):
 
 
     def createWindow(self):
+        """ 
+            Builds - but does not display - the main window of our application.
+            Indeed, a tray icon is always relative to a window, so we have to build one.
+        """
         ## Create & register window class
         wnd_class = win32gui.WNDCLASS()
         self.hinst = wnd_class.hInstance = win32gui.GetModuleHandle(None)        ## Current main window handle
@@ -181,6 +190,10 @@ class YokadiApplication(object):
         win32gui.Shell_NotifyIcon(win32gui.NIM_ADD, self.getNID())
     
     def displayMenu(self):
+        """ 
+            This function displays a contextual menu at the mouse location.
+            The menu content is taken from self.menu_options
+        """
         self.menu = win32gui.CreatePopupMenu()
         for item in self.menu_options:
             item, extra = win32gui_struct.PackMENUITEMINFO(text = item[0],
@@ -200,6 +213,7 @@ class YokadiApplication(object):
         win32gui.PostMessage(self.hwnd, win32con.WM_NULL, 0, 0)
     
     def OnCommand(self, hwnd, msg, wparam, lparam):
+        """ Called whenever an action is performed on a menu item """
         id = win32gui.LOWORD(wparam)
         action = self.menu_options[id][1]
         action()
@@ -209,7 +223,7 @@ class YokadiApplication(object):
     
     def destroy(self):
         """
-            Removes the icon from the notification area
+            Properly closes the MFC application
         """
         print "Fin WinYokadi"
         win32gui.Shell_NotifyIcon(win32gui.NIM_DELETE, self.getNID())
@@ -242,26 +256,26 @@ class YokadiApplication(object):
             self.displayMenu()
     
     def OnTimer(self, timer_id, time):
+        """ This function is called every self.polling_delta seconds """
         #print "timer event"
         self.payload()
         
     def logInfo(self, msg):
+        """ Logs an entry in the syslog with the INFO level"""
         servicemanager.LogInfoMsg(str(msg))
     
     def logError(self, msg):
+        """ Logs an entry in the syslog with the ERROR level"""
         servicemanager.LogErrorMsg(str(msg))
     
     def logWarning(self, msg):
+        """ Logs an entry in the syslog with the WARNING level"""
         servicemanager.LogWarningMsg(str(msg))
-        
-    def sleep(self, sec):
-            win32api.Sleep(sec*1000, True)    
-
 
     def payload(self):
         """
             The function that actually does something useful...
-            Taken from yokadid.py by Sebastien Renard
+            Shamelessly taken from yokadid.py by Sébastien Renard
         """
         now = datetime.today().replace(microsecond=0)
         delayTasks = Task.select(AND(Task.q.dueDate < now + self.delta,
