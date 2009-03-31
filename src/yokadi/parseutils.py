@@ -41,7 +41,11 @@ def parseLine(line, useDefaultProject=True):
     # First extract project name
     line = simplifySpaces(line)
     if line.split()[0][-1] == ":": # Last character of first word
-        project, line = line.split(" ", 1)
+        if line.count(" "):
+            project, line = line.split(" ", 1)
+        else:
+            project = line
+            line = ""
         project = project[0:-1]
     elif useDefaultProject:
         project = Config.byName("DEFAULT_PROJECT").value
