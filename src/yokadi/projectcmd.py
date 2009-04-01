@@ -22,6 +22,7 @@ def getProjectFromName(name, parameterName="project_name"):
     YokadiException if it does not exist.
     """
     name = name.strip()
+    name = name.rstrip(":")
     if len(name) == 0:
         raise YokadiException("Missing <%s> parameter" % parameterName)
 
@@ -50,6 +51,7 @@ class ProjectCmd(object):
     def do_p_edit(self, line):
         """Edit a project.
         p_edit <project name>"""
+        line = line.rstrip(":")
         project=dbutils.getOrCreateProject(line, createIfNeeded=False)
 
         if not project:
