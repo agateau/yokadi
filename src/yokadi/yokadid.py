@@ -148,6 +148,7 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
         cmd=cmd.replace("{TITLE}", task.title.replace('"', '\"'))
         cmd=cmd.replace("{DATE}", str(task.dueDate))
         process=Popen(cmd, shell=True)
+        process.wait()
         #TODO: redirect stdout/stderr properly to Log (not so easy...)
         triggeredTasks[task.id]=(task.dueDate, datetime.now())
 
