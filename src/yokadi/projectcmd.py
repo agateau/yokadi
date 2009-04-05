@@ -6,6 +6,7 @@ Project related commands.
 @license: GPLv3
 """
 from sqlobject import SQLObjectNotFound
+from sqlobject.dberrors import DuplicateEntryError
 
 import tui
 from completers import ProjectCompleter
@@ -42,7 +43,10 @@ class ProjectCmd(object):
         projectName, garbage, keywordDict = parseutils.parseLine(line, useDefaultProject=False)
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
-        project = Project(name=projectName)
+        try:
+            project = Project(name=projectName)
+        except DuplicateEntryError:
+            raise YokadiException("A project named %s already exists. Please find another name" % projectName)
         print "Added project '%s'" % projectName
         if not dbutils.createMissingKeywords(keywordDict.keys()):
             return None
