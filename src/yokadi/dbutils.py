@@ -49,9 +49,10 @@ def getTaskFromId(line, parameterName="id"):
     if len(line) == 0:
         raise YokadiException("Missing <%s> parameter" % parameterName)
 
-    if not line.isdigit():
+    try:
+        taskId = int(line)
+    except ValueError:
         raise YokadiException("<%s> should be a number" % parameterName)
-    taskId = int(line)
 
     try:
         return Task.get(taskId)
