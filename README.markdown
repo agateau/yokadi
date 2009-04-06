@@ -168,4 +168,9 @@ Yokadi has been brought to you by:
 - Aurélien Gâteau <aurelien.gateau@free.fr>: Developer, funder
 - Sébastien Renard <sebastien.renard@digitalfox.org>: Developer
 
+Other people contributed to Yokadi:
+
+- Olivier Hervieu <olivier.hervieu@wallix.com>:
+  Contributed a working setup.py
+
 <!-- vim: set ts=4 sw=4 et: -->
