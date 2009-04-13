@@ -117,6 +117,11 @@ def formatTimeDelta(delta):
     @param timeLeft: Remaining time
     @type timeLeft: timedelta (from datetime)
     @return: formated  str"""
+    prefix = ""
+    if delta < timedelta(0):
+        delta = -delta
+        prefix = "-"
+
     if delta.days > 7:
         value = "%dw" % (delta.days / 7)
         days = delta.days % 7
@@ -133,7 +138,6 @@ def formatTimeDelta(delta):
         else:
             value = ""
         value = value + "%dm" % minutes
-    if delta < timedelta(0):
-        value = "-" + value
-    return value
+
+    return prefix + value
 # vi: ts=4 sw=4 et

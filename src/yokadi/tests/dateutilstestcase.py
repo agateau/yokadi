@@ -53,4 +53,18 @@ class DateUtilsTestCase(unittest.TestCase):
         for text, expected in testData:
             output = dateutils.parseHumaneDateTime(text)
             self.assertEquals(expected, output)
+
+
+    def testFormatTimeDelta(self):
+        testData = [
+            (timedelta(minutes=1), "1m"),
+            (timedelta(days=2, hours=5), "2d"),
+            (timedelta(days=12*7), "12w"),
+            ]
+
+        for input, expected in testData:
+            output = dateutils.formatTimeDelta(input)
+            self.assertEquals(expected, output)
+            output = dateutils.formatTimeDelta(-input)
+            self.assertEquals("-" + expected, output)
 # vi: ts=4 sw=4 et
