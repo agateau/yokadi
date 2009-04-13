@@ -376,7 +376,9 @@ class TaskCmd(object):
         if not line:
             line=Config.byName("DEFAULT_PROJECT").value
             tui.info("using default project (%s)" % line)
-        project = Project.byName(line)
+
+        projectName = line.rstrip(":")
+        project = Project.byName(projectName)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),
                                orderBy=-Task.q.urgency)
