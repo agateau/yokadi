@@ -151,7 +151,7 @@ def currentVersion():
 
 
 def main():
-    locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
+    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
     parser = OptionParser()
 
     parser.add_option("-d", "--db", dest="filename",
