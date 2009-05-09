@@ -42,4 +42,15 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(task.status, "started")
         self.cmd.do_t_mark_done("1")
         self.assertEqual(task.status, "done")
+
+    def testAddKeywords(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x: t1")
+        task = Task.get(1)
+
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_t_add_keywords("1 @kw1 @kw2=12")
+
+        kwDict = task.getKeywordDict()
+        self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 # vi: ts=4 sw=4 et

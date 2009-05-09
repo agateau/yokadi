@@ -533,4 +533,20 @@ class TaskCmd(object):
     complete_t_set_due = taskIdCompleter
     complete_t_due = taskIdCompleter
 
+    def do_t_add_keywords(self, line):
+        """Add keywords to an existing task
+        t_add_keyword <id> <keyword1> <keyword2>[=<value>]...
+        """
+        tokens = line.split(" ", 1)
+        if len(tokens) < 2:
+            raise YokadiException("You should give at least two arguments: <task id> <keyword>")
+        task = dbutils.getTaskFromId(tokens[0])
+        remainingText, newKwDict = parseutils.extractKeywords(tokens[1])
+
+        dbutils.createMissingKeywords(newKwDict.keys())
+
+        kwDict = task.getKeywordDict()
+        kwDict.update(newKwDict)
+        task.setKeywordDict(kwDict)
+
 # vi: ts=4 sw=4 et
