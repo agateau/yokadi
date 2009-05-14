@@ -116,12 +116,16 @@ class TaskCmd(object):
 
     def _t_set_status(self, line, status):
         task=dbutils.getTaskFromId(line)
-        task.status = status
-        if status == 'done':
-            task.doneDate = datetime.now()
+        if task.recurrence and status == "done":
+            task.dueDate = task.recurrence.get_next()
+            print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
         else:
-            task.doneDate = None
-        print "Task '%s' marked as %s" % (task.title, status)
+            task.status = status
+            if status == "done":
+                task.doneDate = datetime.now()
+            else:
+                task.doneDate = None
+            print "Task '%s' marked as %s" % (task.title, status)
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
@@ -592,7 +596,7 @@ class TaskCmd(object):
         elif tokens[1] == "monthly":
             raise YokadiException("Not yet implemented")
         else:
-            raise YokadiException("Unknown frequency. Available: daily, weekly, monthy")
+            raise YokadiException("Unknown frequency. Available: daily, weekly, monthly")
 
         recurrence = Recurrence()
         recurrence.set_rrule(rr)
