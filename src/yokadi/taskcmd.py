@@ -553,6 +553,7 @@ class TaskCmd(object):
         """Make a task recurs
         t_recurs <id> weekly <MO, TU, WE, TH, FR, SA, SU> <HH:MM>
         t_recurs <id> daily <HH:MM>"""
+        WEEKDAYS = { "MO" : 0, "TU" : 1, "WE" : 2, "TH" : 3, "FR" : 4, "SA" : 5, "SU" : 6 }
         def getHourAndMinute(token):
             """Extract hour and minute from HH:MM token
             #TODO: move this in date utils
@@ -577,13 +578,13 @@ class TaskCmd(object):
             rr = rrule.rrule(rrule.WEEKLY)
             if len(tokens) != 4:
                 raise YokadiException("You should give day and time for weekly task")
-            if not tokens[2] in rrule.weekdays:
-                raise YokadiException("Day must be one of the following: %s" % ", ".join(rrule.weekdays))
-            rr._byweekday = tokens[2]
+            if not WEEKDAYS.has_key(tokens[2]):
+                raise YokadiException("Day must be one of the following: MO, TU, WE, TH, FR, SA, SU")
+            rr._byweekday = WEEKDAYS[tokens[2]]
             rr._byhour, rr._byminute = getHourAndMinute(tokens[3])
         else:
             raise YokadiException("Unknown frequency. Available: daily, weekly")
-        
+
         recurrence = Recurrence()
         recurrence.set_rrule(rr)
         task.recurrence = recurrence
