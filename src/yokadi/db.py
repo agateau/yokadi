@@ -8,6 +8,16 @@ Database access layer using sqlobject
 
 import os
 import sys
+from datetime import datetime
+try:
+    from dateutil import rrule
+except ImportError:
+    print "You must install dateutils to use Yokadi"
+    print "This library is used for task recurrence"
+    print "Get it on Gustavo Niemeyer website"
+    print "Or use 'easy_install dateutils'"
+    sys.exit(1)
+
 try:
     from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
          RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol
@@ -107,6 +117,7 @@ class Task(SQLObject):
         intermediateTable="task_keyword",
         joinColumn="task_id",
         otherColumn="keyword_id")
+    recurrence = ForeignKey("Recurrence", default=None)
     uniqTaskTitlePerProject=DatabaseIndex(title, project, unique=True)
 
     def setKeywordDict(self, dct):
@@ -137,6 +148,56 @@ class Task(SQLObject):
         """
         return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
 
+class Recurrence(SQLObject):
+    """Task reccurrence definition"""
+
+    # Keywords used to define rrule object
+    RRULES_KEYWORDS=("wkst", "count", "until", "bysetpos", "bymonth", "bymonthday",
+                 "byyearday", "byweekno", "byweekday", "byhour", "byminute", "bysecond",
+                 "byeaster")
+
+    frequency = IntCol(default=rrule.DAILY, notNone=True)
+    start_date = DateTimeCol(default=None)
+    params = UnicodeCol(default="", notNone=True)
+
+    def get_rrule(self):
+        """Create rrule object from its Recurrence representation
+        @return: dateutil.rrule.rrule instance"""
+        parDict = {}
+        try:
+            if self.params:
+                parDict = eval(self.params)
+        except Exception, e:
+            print "Bad recurrence parameter: %s" % e
+            #TODO: should we log an exception or break upstream ?
+            # Bad data here means set_params is buggy or was not used to insert data
+        parDict["cache"] = True # Allow rrule cache to optimise multiple access to same rrule
+        parDict["dtstart"] = self.start_date
+        return rrule.rrule(self.frequency, **parDict)
+
+    def set_rrule(self, rule):
+        """Set Recurrence according to rule
+        @type rule: dateutil.rrule.rrule instance"""
+        if not isinstance(rule, rrule.rrule):
+            raise Exception("A dateutil.rrule.rrule object if requiered")
+        self.frequency = rule._freq
+        self.start_date = rule._dtstart
+        parDict = {}
+        for key in self.RRULES_KEYWORDS:
+            parDict[key] = getattr(rule, "_"+key)
+        self.params = repr(parDict) # Use str representation of the dict
+
+
+    def get_next(self, refDate=None):
+        """Return next date of recurrence after given date
+        @param refDate: reference date used to compute the next occurence of recurrence
+        @type refDate: datetime
+        @return: next occurence (datetime)"""
+        rr = self.get_rrule()
+        if refDate is None:
+            refDate = datetime.now()
+        return rr.after(refDate)
+
 class Config(SQLObject):
     """yokadi config"""
     class sqlmeta:
@@ -147,7 +208,7 @@ class Config(SQLObject):
     desc = UnicodeCol(default="", notNone=True)
 
 
-TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config]
+TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence]
 
 def createTables():
     for table in TABLE_LIST:

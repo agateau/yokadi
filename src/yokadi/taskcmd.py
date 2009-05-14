@@ -8,10 +8,10 @@ Task related commands.
 """
 import os
 from datetime import datetime, date, timedelta
-
+from dateutil import rrule
 from sqlobject import SQLObjectNotFound, LIKE, AND, OR
 
-from db import Config, Keyword, Project, Task
+from db import Config, Keyword, Project, Task, Recurrence
 import dbutils
 import dateutils
 import parseutils
@@ -549,4 +549,43 @@ class TaskCmd(object):
         kwDict.update(newKwDict)
         task.setKeywordDict(kwDict)
 
+    def do_t_recurs(self, line):
+        """Make a task recurs
+        t_recurs <id> weekly <MO, TU, WE, TH, FR, SA, SU> <HH:MM>
+        t_recurs <id> daily <HH:MM>"""
+        def getHourAndMinute(token):
+            """Extract hour and minute from HH:MM token
+            #TODO: move this in date utils
+            @param token: HH:MM string
+            @return: (int, int)"""
+            hour, minute = token.split(":")
+            try:
+                hour = int(hour)
+                minute = int(minute)
+            except ValueError:
+                raise YokadiException("You must provide integer for hour/minute")
+            return hour, minute
+
+        tokens = line.split()
+        if len(tokens) < 2:
+            raise YokadiException("You should give at least three arguments: <task id> <frequency> <time or day>")
+        task = dbutils.getTaskFromId(tokens[0])
+        if tokens[1] == "daily":
+            rr = rrule.rrule(rrule.DAILY)
+            rr._byhour, rr._byminute = getHourAndMinute(tokens[2])
+        elif tokens[1] == "weekly":
+            rr = rrule.rrule(rrule.WEEKLY)
+            if len(tokens) != 4:
+                raise YokadiException("You should give day and time for weekly task")
+            if not tokens[2] in rrule.weekdays:
+                raise YokadiException("Day must be one of the following: %s" % ", ".join(rrule.weekdays))
+            rr._byweekday = tokens[2]
+            rr._byhour, rr._byminute = getHourAndMinute(tokens[3])
+        else:
+            raise YokadiException("Unknown frequency. Available: daily, weekly")
+        
+        recurrence = Recurrence()
+        recurrence.set_rrule(rr)
+        task.recurrence = recurrence
+        task.dueDate = recurrence.get_next()
 # vi: ts=4 sw=4 et
