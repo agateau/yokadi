@@ -551,8 +551,10 @@ class TaskCmd(object):
 
     def do_t_recurs(self, line):
         """Make a task recurs
+        t_recurs <id> monthy <dd> <HH:MM>
         t_recurs <id> weekly <MO, TU, WE, TH, FR, SA, SU> <HH:MM>
-        t_recurs <id> daily <HH:MM>"""
+        t_recurs <id> daily <HH:MM>
+        t_recurs <id> none (remove recurrence)"""
         WEEKDAYS = { "MO" : 0, "TU" : 1, "WE" : 2, "TH" : 3, "FR" : 4, "SA" : 5, "SU" : 6 }
         def getHourAndMinute(token):
             """Extract hour and minute from HH:MM token
@@ -569,9 +571,14 @@ class TaskCmd(object):
 
         tokens = line.split()
         if len(tokens) < 2:
-            raise YokadiException("You should give at least three arguments: <task id> <frequency> <time or day>")
+            raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = dbutils.getTaskFromId(tokens[0])
-        if tokens[1] == "daily":
+        if tokens[1].lower() == "none":
+            task.recurrence = None
+            return
+        elif tokens[1] == "daily":
+            if len(tokens) != 3:
+                raise YokadiException("You should give time for daily task")
             rr = rrule.rrule(rrule.DAILY)
             rr._byhour, rr._byminute = getHourAndMinute(tokens[2])
         elif tokens[1] == "weekly":
@@ -582,8 +589,10 @@ class TaskCmd(object):
                 raise YokadiException("Day must be one of the following: MO, TU, WE, TH, FR, SA, SU")
             rr._byweekday = WEEKDAYS[tokens[2]]
             rr._byhour, rr._byminute = getHourAndMinute(tokens[3])
+        elif tokens[1] == "monthly":
+            raise YokadiException("Not yet implemented")
         else:
-            raise YokadiException("Unknown frequency. Available: daily, weekly")
+            raise YokadiException("Unknown frequency. Available: daily, weekly, monthy")
 
         recurrence = Recurrence()
         recurrence.set_rrule(rr)
