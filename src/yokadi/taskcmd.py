@@ -440,6 +440,7 @@ class TaskCmd(object):
                 ("Due", task.dueDate),
                 ("Status", task.status),
                 ("Urgency", task.urgency),
+                ("Recurrence", task.recurrence),
                 ("Keywords", keywords),
                 ]
 

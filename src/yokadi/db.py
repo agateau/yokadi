@@ -198,6 +198,10 @@ class Recurrence(SQLObject):
             refDate = datetime.now()
         return rr.after(refDate)
 
+    def __str__(self):
+        FREQUENCY = { 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
+        return "%s (next: %s)" % (FREQUENCY[self.frequency], self.get_next())
+
 class Config(SQLObject):
     """yokadi config"""
     class sqlmeta:
