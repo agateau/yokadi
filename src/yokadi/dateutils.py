@@ -10,6 +10,9 @@ from datetime import datetime, timedelta
 
 from yokadiexception import YokadiException
 
+WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wenesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
+SHORT_WEEKDAYS = { "mo" : 0, "tu" : 1, "we" : 2, "th" : 3, "fr" : 4, "sa" : 5, "su" : 6 }
+
 
 def guessDateFormat(tDate):
     """Guess a date format.
@@ -140,4 +143,21 @@ def formatTimeDelta(delta):
         value = value + "%dm" % minutes
 
     return prefix + value
+
+def getHourAndMinute(token):
+    """Extract hour and minute from HH:MM token
+    #TODO: move this in date utils
+    @param token: HH:MM string
+    @return: (int, int)"""
+    try:
+        hour, minute = token.split(":")
+    except ValueError:
+        hour = token
+        minute = 0
+    try:
+        hour = int(hour)
+        minute = int(minute)
+    except ValueError:
+        raise YokadiException("You must provide integer for hour/minute")
+    return hour, minute
 # vi: ts=4 sw=4 et

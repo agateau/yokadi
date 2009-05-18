@@ -560,25 +560,6 @@ class TaskCmd(object):
         t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
-        WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wenesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
-        SHORT_WEEKDAYS = { "mo" : 0, "tu" : 1, "we" : 2, "th" : 3, "fr" : 4, "sa" : 5, "su" : 6 }
-        def getHourAndMinute(token):
-            """Extract hour and minute from HH:MM token
-            #TODO: move this in date utils
-            @param token: HH:MM string
-            @return: (int, int)"""
-            try:
-                hour, minute = token.split(":")
-            except ValueError:
-                hour = token
-                minute = 0
-            try:
-                hour = int(hour)
-                minute = int(minute)
-            except ValueError:
-                raise YokadiException("You must provide integer for hour/minute")
-            return hour, minute
-
         tokens = line.split()
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
@@ -590,20 +571,20 @@ class TaskCmd(object):
             if len(tokens) != 3:
                 raise YokadiException("You should give time for daily task")
             rr = rrule.rrule(rrule.DAILY)
-            rr._byhour, rr._byminute = getHourAndMinute(tokens[2])
+            rr._byhour, rr._byminute = dateutils.getHourAndMinute(tokens[2])
         elif tokens[1] == "weekly":
             rr = rrule.rrule(rrule.WEEKLY)
             if len(tokens) != 4:
                 raise YokadiException("You should give day and time for weekly task")
             day = tokens[2].lower()
-            if len(day) == 2 and SHORT_WEEKDAYS.has_key(day):
-                dayNumber = SHORT_WEEKDAYS[day]
-            elif WEEKDAYS.has_key(day):
-                dayNumber = WEEKDAYS[day]
+            if len(day) == 2 and dateutils.SHORT_WEEKDAYS.has_key(day):
+                dayNumber = dateutils.SHORT_WEEKDAYS[day]
+            elif dateutils.WEEKDAYS.has_key(day):
+                dayNumber = dateutils.WEEKDAYS[day]
             else:
                 raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
             rr._byweekday = dayNumber
-            rr._byhour, rr._byminute = getHourAndMinute(tokens[3])
+            rr._byhour, rr._byminute = dateutils.getHourAndMinute(tokens[3])
         elif tokens[1] == "monthly":
             raise YokadiException("Not yet implemented")
         else:
