@@ -53,4 +53,16 @@ class TaskTestCase(unittest.TestCase):
 
         kwDict = task.getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
+
+    def testRecurs(self):
+        self.cmd.do_t_add("x: t1")
+        task = Task.get(1)
+        self.cmd.do_t_recurs("1 daily 10:00")
+        desc = str(task.recurrence)
+        self.cmd.do_t_recurs("1 weekly FR 23:00")
+        self.assertNotEqual(desc, str(task.recurrence))
+        self.assertEqual(task.status, "new")
+        self.cmd.do_t_mark_done("1")
+        self.assertEqual(task.status, "new")
+
 # vi: ts=4 sw=4 et
