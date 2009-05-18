@@ -567,7 +567,11 @@ class TaskCmd(object):
             #TODO: move this in date utils
             @param token: HH:MM string
             @return: (int, int)"""
-            hour, minute = token.split(":")
+            try:
+                hour, minute = token.split(":")
+            except ValueError:
+                hour = token
+                minute = 0
             try:
                 hour = int(hour)
                 minute = int(minute)
