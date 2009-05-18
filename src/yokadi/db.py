@@ -160,7 +160,7 @@ class Recurrence(SQLObject):
     start_date = DateTimeCol(default=None)
     params = UnicodeCol(default="", notNone=True)
 
-    def get_rrule(self):
+    def getRrule(self):
         """Create rrule object from its Recurrence representation
         @return: dateutil.rrule.rrule instance"""
         parDict = {}
@@ -175,7 +175,7 @@ class Recurrence(SQLObject):
         parDict["dtstart"] = self.start_date
         return rrule.rrule(self.frequency, **parDict)
 
-    def set_rrule(self, rule):
+    def setRrule(self, rule):
         """Set Recurrence according to rule
         @type rule: dateutil.rrule.rrule instance"""
         if not isinstance(rule, rrule.rrule):
@@ -188,19 +188,19 @@ class Recurrence(SQLObject):
         self.params = repr(parDict) # Use str representation of the dict
 
 
-    def get_next(self, refDate=None):
+    def getNext(self, refDate=None):
         """Return next date of recurrence after given date
         @param refDate: reference date used to compute the next occurence of recurrence
         @type refDate: datetime
         @return: next occurence (datetime)"""
-        rr = self.get_rrule()
+        rr = self.getRrule()
         if refDate is None:
             refDate = datetime.now()
         return rr.after(refDate)
 
     def __str__(self):
         FREQUENCY = { 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
-        return "%s (next: %s)" % (FREQUENCY[self.frequency], self.get_next())
+        return "%s (next: %s)" % (FREQUENCY[self.frequency], self.getNext())
 
 class Config(SQLObject):
     """yokadi config"""

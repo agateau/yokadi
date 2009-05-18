@@ -117,7 +117,7 @@ class TaskCmd(object):
     def _t_set_status(self, line, status):
         task=dbutils.getTaskFromId(line)
         if task.recurrence and status == "done":
-            task.dueDate = task.recurrence.get_next()
+            task.dueDate = task.recurrence.getNext()
             print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
         else:
             task.status = status
@@ -600,7 +600,7 @@ class TaskCmd(object):
             raise YokadiException("Unknown frequency. Available: daily, weekly, monthly")
 
         recurrence = Recurrence()
-        recurrence.set_rrule(rr)
+        recurrence.setRrule(rr)
         task.recurrence = recurrence
-        task.dueDate = recurrence.get_next()
+        task.dueDate = recurrence.getNext()
 # vi: ts=4 sw=4 et
