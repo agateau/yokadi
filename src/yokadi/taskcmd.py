@@ -557,10 +557,11 @@ class TaskCmd(object):
     def do_t_recurs(self, line):
         """Make a task recurs
         t_recurs <id> monthy <dd> <HH:MM>
-        t_recurs <id> weekly <MO, TU, WE, TH, FR, SA, SU> <HH:MM>
+        t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
-        WEEKDAYS = { "MO" : 0, "TU" : 1, "WE" : 2, "TH" : 3, "FR" : 4, "SA" : 5, "SU" : 6 }
+        WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wenesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
+        SHORT_WEEKDAYS = { "mo" : 0, "tu" : 1, "we" : 2, "th" : 3, "fr" : 4, "sa" : 5, "su" : 6 }
         def getHourAndMinute(token):
             """Extract hour and minute from HH:MM token
             #TODO: move this in date utils
@@ -590,9 +591,14 @@ class TaskCmd(object):
             rr = rrule.rrule(rrule.WEEKLY)
             if len(tokens) != 4:
                 raise YokadiException("You should give day and time for weekly task")
-            if not WEEKDAYS.has_key(tokens[2]):
-                raise YokadiException("Day must be one of the following: MO, TU, WE, TH, FR, SA, SU")
-            rr._byweekday = WEEKDAYS[tokens[2]]
+            day = tokens[2].lower()
+            if len(day) == 2 and SHORT_WEEKDAYS.has_key(day):
+                dayNumber = SHORT_WEEKDAYS[day]
+            elif WEEKDAYS.has_key(day):
+                dayNumber = WEEKDAYS[day]
+            else:
+                raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
+            rr._byweekday = dayNumber
             rr._byhour, rr._byminute = getHourAndMinute(tokens[3])
         elif tokens[1] == "monthly":
             raise YokadiException("Not yet implemented")
