@@ -160,4 +160,17 @@ def getHourAndMinute(token):
     except ValueError:
         raise YokadiException("You must provide integer for hour/minute")
     return hour, minute
+
+def getWeekDayNumberFromDay(day):
+    """Return week day number (0-6) from week day name (short or long)
+    @param day: week day as a string in short or long format (in english)
+    @type day: str
+    @return: week day number (int)"""
+    if len(day) == 2 and SHORT_WEEKDAYS.has_key(day):
+        dayNumber = SHORT_WEEKDAYS[day]
+    elif WEEKDAYS.has_key(day):
+        dayNumber = WEEKDAYS[day]
+    else:
+        raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
+    return dayNumber
 # vi: ts=4 sw=4 et

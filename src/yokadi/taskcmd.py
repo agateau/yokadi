@@ -578,14 +578,7 @@ class TaskCmd(object):
             rr = rrule.rrule(rrule.WEEKLY)
             if len(tokens) != 4:
                 raise YokadiException("You should give day and time for weekly task")
-            day = tokens[2].lower()
-            if len(day) == 2 and dateutils.SHORT_WEEKDAYS.has_key(day):
-                dayNumber = dateutils.SHORT_WEEKDAYS[day]
-            elif dateutils.WEEKDAYS.has_key(day):
-                dayNumber = dateutils.WEEKDAYS[day]
-            else:
-                raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
-            rr._byweekday = dayNumber
+            rr._byweekday = dateutils.getWeekDayNumberFromDay(tokens[2].lower())
             rr._byhour, rr._byminute = dateutils.getHourAndMinute(tokens[3])
         elif tokens[1] == "monthly":
             raise YokadiException("Not yet implemented")
