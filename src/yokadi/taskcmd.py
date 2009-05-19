@@ -565,7 +565,9 @@ class TaskCmd(object):
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = dbutils.getTaskFromId(tokens[0])
         if tokens[1].lower() == "none":
-            task.recurrence = None
+            if task.recurrence:
+                task.recurrence.destroySelf()
+                task.recurrence = None
             return
         elif tokens[1] == "daily":
             if len(tokens) != 3:
@@ -590,8 +592,8 @@ class TaskCmd(object):
         else:
             raise YokadiException("Unknown frequency. Available: daily, weekly, monthly")
 
-        recurrence = Recurrence()
-        recurrence.setRrule(rr)
-        task.recurrence = recurrence
-        task.dueDate = recurrence.getNext()
+        if task.recurrence is None:
+            task.recurrence = Recurrence()
+        task.recurrence.setRrule(rr)
+        task.dueDate = task.recurrence.getNext()
 # vi: ts=4 sw=4 et
