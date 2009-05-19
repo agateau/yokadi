@@ -7,6 +7,7 @@ Date utilities.
 """
 import time
 from datetime import datetime, timedelta
+import parseutils
 
 from yokadiexception import YokadiException
 
@@ -66,6 +67,8 @@ def parseHumaneDateTime(line):
     @param line: human date / time
     @type line: str
     @return: datetime object"""
+
+    line = parseutils.simplifySpaces(line)
 
     # Date & Time format
     fDate=None
