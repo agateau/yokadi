@@ -581,7 +581,14 @@ class TaskCmd(object):
             rr._byweekday = dateutils.getWeekDayNumberFromDay(tokens[2].lower())
             rr._byhour, rr._byminute = dateutils.getHourAndMinute(tokens[3])
         elif tokens[1] == "monthly":
-            raise YokadiException("Not yet implemented")
+            rr = rrule.rrule(rrule.MONTHLY)
+            if len(tokens) != 4:
+                raise YokadiException("You should give day number and time for monthy task")
+            try:
+                rr._bymonthday = int(tokens[2])
+            except ValueError:
+                raise YokadiException("Day must be a number")
+            rr._byhour, rr._byminute = dateutils.getHourAndMinute(tokens[3])
         else:
             raise YokadiException("Unknown frequency. Available: daily, weekly, monthly")
 

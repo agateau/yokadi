@@ -63,6 +63,7 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_recurs("1 weekly fr 23:00")
         self.cmd.do_t_recurs("1 weekly Fr 23:00")
         self.cmd.do_t_recurs("1 weekly Friday 23:00")
+        self.cmd.do_t_recurs("1 monthly 3 13:00")
         self.assertNotEqual(desc, str(task.recurrence))
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_done("1")
