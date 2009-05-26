@@ -18,8 +18,8 @@ from sqlobject import *
 
 import dump
 
-sys.path.append(join(dirname(__file__),"..", "src", "yokadi"))
-import db
+sys.path.append(join(dirname(__file__),"..", "src"))
+import yokadi.db
 
 def getVersion(fileName):
     cx = connectionForURI('sqlite:' + fileName)
@@ -44,7 +44,7 @@ def createFinalDb(workFileName, finalFileName):
 
     print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
     sqlhub.processConnection = connectionForURI("sqlite:" + finalFileName)
-    db.createTables()
+    yokadi.db.createTables()
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
         raise Exception("Dump restoration failed")
@@ -70,7 +70,7 @@ def main():
     # Check version
     version = getVersion(dbFileName)
     print "Found version %d" % version
-    if version == db.DB_VERSION:
+    if version == yokadi.db.DB_VERSION:
         print "Nothing to do"
         return 0
 
@@ -80,7 +80,7 @@ def main():
     scriptDir = os.path.dirname(__file__) or "."
     while True:
         version = getVersion(workDbFileName)
-        if version == db.DB_VERSION:
+        if version == yokadi.db.DB_VERSION:
             break
         scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
         print "Running %s" % scriptFileName

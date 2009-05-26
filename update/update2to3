@@ -11,11 +11,11 @@ from os.path import dirname, join
 
 from sqlobject import connectionForURI, RelatedJoin, sqlhub, SQLObject
 
-sys.path.append(join(dirname(__file__),"..", "src", "yokadi"))
-import db
+sys.path.append(join(dirname(__file__),"..", "src"))
+import yokadi.db
 
 def alterProjectTable():
-    db.Project.sqlmeta.addJoin(RelatedJoin("Keyword",
+    yokadi.db.Project.sqlmeta.addJoin(RelatedJoin("Keyword",
                                           createRelatedTable=False,
                                           intermediateTable="project_keyword",
                                           joinColumn="project_id",
@@ -24,7 +24,7 @@ def alterProjectTable():
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
     alterProjectTable()
-    v=db.Config.selectBy(name="DB_VERSION")[0]
+    v=yokadi.db.Config.selectBy(name="DB_VERSION")[0]
     v.value="3"
 
 

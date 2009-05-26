@@ -11,21 +11,21 @@ from os.path import dirname, join
 
 from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey
 
-sys.path.append(join(dirname(__file__),"..", "src", "yokadi"))
-import db
+sys.path.append(join(dirname(__file__),"..", "src"))
+import yokadi.db
 
 
 def createRecurrenceTable():
-    db.Recurrence.createTable()
+    yokadi.db.Recurrence.createTable()
 
 def alterTaskTable():
-    db.Task.sqlmeta.addColumn(ForeignKey("Recurrence", default=None))
+    yokadi.db.Task.sqlmeta.addColumn(ForeignKey("Recurrence", default=None))
 
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
     createRecurrenceTable
     alterTaskTable()
-    v=db.Config.selectBy(name="DB_VERSION")[0]
+    v=yokadi.db.Config.selectBy(name="DB_VERSION")[0]
     v.value="4"
 
 
