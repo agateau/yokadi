@@ -29,6 +29,7 @@ except ImportError:
 
 from yokadiexception import YokadiException
 import tui
+import utils
 
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
@@ -262,7 +263,8 @@ def connectDatabase(dbFileName, createIfNeeded=True):
     if version != DB_VERSION:
         tui.error("Your database version is %d but Yokadi wants version %d." \
             % (version, DB_VERSION))
-        print "Please, run the update.py script to migrate your database prior to running Yokadi"
+        print "Please, run the %s/update.py script to migrate your database prior to running Yokadi" % \
+                os.path.abspath(utils.shareDirPath())
         sys.exit(1)
 
 def setDefaultConfig():
