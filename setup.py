@@ -24,6 +24,10 @@ data_files.append(["share/yokadi",
 data_files.append(["share/yokadi/doc",
                    ["doc/%s" % f for f in os.listdir(join(root, "doc"))]])
 
+# Update scripts
+data_files.append(["share/yokadi/update",
+                   ["update/%s" % f for f in os.listdir(join(root, "update"))]])
+
 # Scripts
 scripts=["src/bin/yokadi", "src/bin/yokadid", "src/bin/xyokadi"]
 
