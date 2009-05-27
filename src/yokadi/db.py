@@ -200,7 +200,7 @@ class Recurrence(SQLObject):
         return rr.after(refDate)
 
     def __str__(self):
-        FREQUENCY = { 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
+        FREQUENCY = { 0 : "Yearly", 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
         return "%s (next: %s)" % (FREQUENCY[self.frequency], self.getNext())
 
 class Config(SQLObject):
