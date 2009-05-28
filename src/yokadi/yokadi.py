@@ -11,6 +11,7 @@ import locale
 import os
 import sys
 import readline
+readline.parse_and_bind("set show-all-if-ambiguous on")
 reload(sys)  ## So as to enable setdefaultencoding
 
 import traceback
