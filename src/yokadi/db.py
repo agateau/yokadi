@@ -174,6 +174,9 @@ class Recurrence(SQLObject):
             # Bad data here means set_params is buggy or was not used to insert data
         parDict["cache"] = True # Allow rrule cache to optimise multiple access to same rrule
         parDict["dtstart"] = self.start_date
+        if parDict["byweekday"] and type(parDict["byweekday"]) is not int:
+            print rrule.weekday(parDict["byweekday"])
+            parDict["byweekday"] = rrule.weekday(parDict["byweekday"])
         return rrule.rrule(self.frequency, **parDict)
 
     def setRrule(self, rule):
@@ -187,6 +190,7 @@ class Recurrence(SQLObject):
         for key in self.RRULES_KEYWORDS:
             parDict[key] = getattr(rule, "_"+key)
         self.params = repr(parDict) # Use str representation of the dict
+        print self.params
 
 
     def getNext(self, refDate=None):
