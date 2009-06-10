@@ -119,7 +119,7 @@ class TaskCmd(object):
         if task.recurrence and status == "done":
             task.dueDate = task.recurrence.getNext(task.dueDate)
             print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
-            print "To *really* mark done this task and forgive it, remove its recurrence first with t_recurs %s none" % task.id
+            print "To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id
         else:
             task.status = status
             if status == "done":
