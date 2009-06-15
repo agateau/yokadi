@@ -69,11 +69,12 @@ class BugCmd(object):
         bug_add <project_name> [@<keyword1>] [@<keyword2>] <Bug description>
         """
         projectName, title, keywordDict = parseutils.parseLine(line)
-        editBugKeywords(keywordDict)
 
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             return
+
+        editBugKeywords(keywordDict)
 
         task.urgency = computeUrgency(keywordDict)
 
