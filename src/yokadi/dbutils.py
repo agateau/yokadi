@@ -39,6 +39,24 @@ def addTask(projectName, title, keywordDict):
 
     return task
 
+def updateTask(task, projectName, title, keywordDict):
+    """
+    Update an existing task, returns True if it went well, False if user
+    canceled the update
+    """
+    if not createMissingKeywords(keywordDict.keys()):
+        return False
+
+    project = getOrCreateProject(projectName)
+    if not project:
+        return False
+
+    task.project = project
+    task.title = title
+    task.setKeywordDict(keywordDict)
+    return True
+
+
 def getTaskFromId(line, parameterName="id"):
     """Returns a task given its id, or raise a YokadiException if it does not
     exist.

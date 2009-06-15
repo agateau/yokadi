@@ -470,12 +470,7 @@ class TaskCmd(object):
 
         # Update task
         projectName, title, keywordDict = parseutils.parseLine(line)
-        if not dbutils.createMissingKeywords(keywordDict.keys()):
-            return
-        task.project = dbutils.getOrCreateProject(projectName)
-        task.title = title
-        task.setKeywordDict(keywordDict)
-
+        dbutils.updateTask(task, projectName, title, keywordDict)
 
     complete_t_edit = taskIdCompleter
 

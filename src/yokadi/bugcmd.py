@@ -94,14 +94,10 @@ class BugCmd(object):
         # Edit
         line = tui.editLine(taskLine)
         projectName, title, keywordDict = parseutils.parseLine(line)
+        dbutils.updateTask(task, projectName, title, keywordDict)
         editBugKeywords(keywordDict)
 
         # Update bug
-        if not dbutils.createMissingKeywords(keywordDict.keys()):
-            return
-        task.project = dbutils.getOrCreateProject(projectName)
-        task.title = title
-        task.setKeywordDict(keywordDict)
         task.urgency = computeUrgency(keywordDict)
 
 # vi: ts=4 sw=4 et
