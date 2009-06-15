@@ -72,6 +72,7 @@ class BugCmd(object):
 
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
+            tui.reinjectInRawInput(u"bug_add " + line)
             return
 
         editBugKeywords(keywordDict)
@@ -94,7 +95,9 @@ class BugCmd(object):
         # Edit
         line = tui.editLine(taskLine)
         projectName, title, keywordDict = parseutils.parseLine(line)
-        dbutils.updateTask(task, projectName, title, keywordDict)
+        if not dbutils.updateTask(task, projectName, title, keywordDict):
+            tui.reinjectInRawInput(u"bug_edit " + line)
+            return
         editBugKeywords(keywordDict)
 
         # Update bug

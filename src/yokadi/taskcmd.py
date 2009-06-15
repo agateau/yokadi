@@ -47,6 +47,8 @@ class TaskCmd(object):
         task = dbutils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
+        else:
+            tui.reinjectInRawInput(u"t_add " + line)
 
     complete_t_add = projectAndKeywordCompleter
 
@@ -470,7 +472,8 @@ class TaskCmd(object):
 
         # Update task
         projectName, title, keywordDict = parseutils.parseLine(line)
-        dbutils.updateTask(task, projectName, title, keywordDict)
+        if not dbutils.updateTask(task, projectName, title, keywordDict):
+            tui.reinjectInRawInput(u"t_edit " + line)
 
     complete_t_edit = taskIdCompleter
 
