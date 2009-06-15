@@ -467,13 +467,19 @@ class TaskCmd(object):
         # Create task line
         taskLine = parseutils.createLine(task.project.name, task.title, task.getKeywordDict())
 
-        # Edit
-        line = tui.editLine(taskLine)
-
-        # Update task
-        projectName, title, keywordDict = parseutils.parseLine(line)
-        if not dbutils.updateTask(task, projectName, title, keywordDict):
-            tui.reinjectInRawInput(u"t_edit " + line)
+        while True:
+            # Edit
+            print "(Press Ctrl+C to cancel)"
+            try:
+                line = tui.editLine(taskLine)
+            except KeyboardInterrupt:
+                print
+                print "Cancelled"
+                return
+            projectName, title, keywordDict = parseutils.parseLine(line)
+            # Update
+            if dbutils.updateTask(task, projectName, title, keywordDict):
+                break
 
     complete_t_edit = taskIdCompleter
 

@@ -93,11 +93,17 @@ class BugCmd(object):
         taskLine = parseutils.createLine(task.project.name, task.title, task.getKeywordDict())
 
         # Edit
-        line = tui.editLine(taskLine)
-        projectName, title, keywordDict = parseutils.parseLine(line)
-        if not dbutils.updateTask(task, projectName, title, keywordDict):
-            tui.reinjectInRawInput(u"bug_edit " + line)
-            return
+        while True:
+            print "(Press Ctrl+C to cancel)"
+            try:
+                line = tui.editLine(taskLine)
+            except KeyboardInterrupt:
+                print
+                print "Cancelled"
+                return
+            projectName, title, keywordDict = parseutils.parseLine(line)
+            if dbutils.updateTask(task, projectName, title, keywordDict):
+                break
         editBugKeywords(keywordDict)
 
         # Update bug
