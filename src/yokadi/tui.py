@@ -57,9 +57,12 @@ def editText(text):
         os.unlink(name)
 
 
-def editLine(line, prompt="edit> "):
-    """Edit a line using readline"""
-    # Init readline
+def reinjectInRawInput(line):
+    """Next call to raw_input() will have line set as default text
+    @param line: The default text
+    """
+
+    # Set readline.pre_input_hook to feed it with our line
     # (Code copied from yagtd)
     def pre_input_hook():
         readline.insert_text(line.encode(ENCODING))
@@ -70,6 +73,12 @@ def editLine(line, prompt="edit> "):
 
     if sys.platform != 'win32':
         readline.set_pre_input_hook(pre_input_hook)
+
+
+def editLine(line, prompt="edit> "):
+    """Edit a line using readline"""
+    if line:
+       reinjectInRawInput(line)
 
     if len(_answers) > 0:
         line = _answers.pop(0)
