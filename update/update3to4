@@ -23,7 +23,7 @@ def alterTaskTable():
 
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
-    createRecurrenceTable
+    createRecurrenceTable()
     alterTaskTable()
     v=yokadi.db.Config.selectBy(name="DB_VERSION")[0]
     v.value="4"
