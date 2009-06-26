@@ -31,11 +31,9 @@ def parseParameters(line):
     return (parameters, " ".join(text))
 
 
-def parseLine(line, useDefaultProject=True):
+def parseLine(line):
     """Parse line of form:
     project: some text @keyword1 @keyword2=12 some other text
-    @param useDefaultProject: if true, a single word will be interpreted as task description
-    and the default project will be used.
     @return: a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
 
     # First extract project name
@@ -47,9 +45,6 @@ def parseLine(line, useDefaultProject=True):
             project = line
             line = ""
         project = project[0:-1]
-    elif useDefaultProject:
-        project = Config.byName("DEFAULT_PROJECT").value
-        print "Project name not given, using default project (%s)" % project
     else: # First word is project
         if line.count(" "):
             project, line = line.split(" ", 1)

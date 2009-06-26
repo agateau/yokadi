@@ -381,10 +381,6 @@ class TaskCmd(object):
         the order of the lines and save the list. The urgency field will be
         updated to match the order.
         t_reorder <project_name>"""
-        if not line:
-            line=Config.byName("DEFAULT_PROJECT").value
-            tui.info("using default project (%s)" % line)
-
         projectName = line.rstrip(":")
         project = Project.byName(projectName)
         taskList = Task.select(AND(Task.q.projectID == project.id,

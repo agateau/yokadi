@@ -40,7 +40,7 @@ class ProjectCmd(object):
         if not line:
             print "Give at least a project name !"
             return
-        projectName, garbage, keywordDict = parseutils.parseLine(line, useDefaultProject=False)
+        projectName, garbage, keywordDict = parseutils.parseLine(line)
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
         try:
@@ -68,7 +68,7 @@ class ProjectCmd(object):
         line = tui.editLine(projectLine)
 
         # Update project
-        projectName, garbage, keywordDict = parseutils.parseLine(line, useDefaultProject=False)
+        projectName, garbage, keywordDict = parseutils.parseLine(line)
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
         if not dbutils.createMissingKeywords(keywordDict.keys()):
