@@ -165,7 +165,7 @@ Sequanux LUG. To join, visit
 
 Yokadi has been brought to you by:
 
-- Aurélien Gâteau <aurelien.gateau@free.fr>: Developer, funder
+- Aurélien Gâteau <aurelien.gateau@free.fr>: Developer, founder
 - Sébastien Renard <sebastien.renard@digitalfox.org>: Developer
 
 Other people contributed to Yokadi:
