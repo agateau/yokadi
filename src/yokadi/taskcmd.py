@@ -598,8 +598,7 @@ class TaskCmd(object):
                 bymonthday = int(tokens[2])
                 byhour, byminute = dateutils.getHourAndMinute(tokens[3])
             except ValueError:
-                print tokens
-                POSITION = { "first" : 0, "second" : 1, "third" : 2, "fourth" : 3, "last" : -1 }
+                POSITION = { "first" : 1, "second" : 2, "third" : 3, "fourth" : 4, "last" : -1 }
                 if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
                     byweekday = rrule.weekday(dateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])

@@ -8,6 +8,7 @@ Database access layer using sqlobject
 
 import os
 import sys
+from pickle import loads, dumps
 from datetime import datetime
 try:
     from dateutil import rrule
@@ -20,7 +21,7 @@ except ImportError:
 
 try:
     from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
-         RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol
+         RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol, StringCol
 except ImportError:
     print "You must install SQLObject to use Yokadi"
     print "Get it on http://www.sqlobject.org/"
@@ -152,46 +153,17 @@ class Task(SQLObject):
 class Recurrence(SQLObject):
     """Task reccurrence definition"""
 
-    # Keywords used to define rrule object
-    RRULES_KEYWORDS=("wkst", "count", "until", "bysetpos", "bymonth", "bymonthday",
-                 "byyearday", "byweekno", "byweekday", "byhour", "byminute", "bysecond",
-                 "byeaster")
-
-    frequency = IntCol(default=rrule.DAILY, notNone=True)
-    start_date = DateTimeCol(default=None)
-    params = UnicodeCol(default="", notNone=True)
+    rule = StringCol(default="", notNone=True)
 
     def getRrule(self):
         """Create rrule object from its Recurrence representation
         @return: dateutil.rrule.rrule instance"""
-        parDict = {}
-        try:
-            if self.params:
-                parDict = eval(self.params)
-        except Exception, e:
-            print "Bad recurrence parameter: %s" % e
-            #TODO: should we log an exception or break upstream ?
-            # Bad data here means set_params is buggy or was not used to insert data
-        parDict["cache"] = True # Allow rrule cache to optimise multiple access to same rrule
-        parDict["dtstart"] = self.start_date
-        if parDict["byweekday"] and type(parDict["byweekday"]) is not int:
-            print rrule.weekday(parDict["byweekday"])
-            parDict["byweekday"] = rrule.weekday(parDict["byweekday"])
-        return rrule.rrule(self.frequency, **parDict)
+        return loads(self.rule)
 
     def setRrule(self, rule):
         """Set Recurrence according to rule
         @type rule: dateutil.rrule.rrule instance"""
-        if not isinstance(rule, rrule.rrule):
-            raise Exception("A dateutil.rrule.rrule object if requiered")
-        self.frequency = rule._freq
-        self.start_date = rule._dtstart
-        parDict = {}
-        for key in self.RRULES_KEYWORDS:
-            parDict[key] = getattr(rule, "_"+key)
-        self.params = repr(parDict) # Use str representation of the dict
-        print self.params
-
+        self.rule = dumps(rule)
 
     def getNext(self, refDate=None):
         """Return next date of recurrence after given date
@@ -205,7 +177,7 @@ class Recurrence(SQLObject):
 
     def __str__(self):
         FREQUENCY = { 0 : "Yearly", 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
-        return "%s (next: %s)" % (FREQUENCY[self.frequency], self.getNext())
+        return "%s (next: %s)" % (FREQUENCY[self.getRrule()._freq], self.getNext())
 
 class Config(SQLObject):
     """yokadi config"""
