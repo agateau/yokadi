@@ -76,6 +76,7 @@ class BugCmd(object):
             return
 
         editBugKeywords(keywordDict)
+        task.setKeywordDict(keywordDict)
 
         task.urgency = computeUrgency(keywordDict)
 

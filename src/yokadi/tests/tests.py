@@ -22,6 +22,7 @@ from dbutilstestcase import DbUtilsTestCase
 from projecttestcase import ProjectTestCase
 from completerstestcase import CompletersTestCase
 from tasktestcase import TaskTestCase
+from bugtestcase import BugTestCase
 
 DB_FILENAME = "unittest.db"
 
