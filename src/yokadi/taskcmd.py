@@ -516,7 +516,7 @@ class TaskCmd(object):
 
     def do_t_due(self, line):
         """Set task's due date
-        t_due_date <id> <date>
+        t_due <id> <date>
 
         Date can be specified as a relative offset:
         - +5M: in 5 minutes
