@@ -106,6 +106,7 @@ class BugCmd(object):
             if dbutils.updateTask(task, projectName, title, keywordDict):
                 break
         editBugKeywords(keywordDict)
+        task.setKeywordDict(keywordDict)
 
         # Update bug
         task.urgency = computeUrgency(keywordDict)
