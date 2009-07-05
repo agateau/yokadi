@@ -472,6 +472,9 @@ class TaskCmd(object):
             print "(Press Ctrl+C to cancel)"
             try:
                 line = tui.editLine(taskLine)
+                if not line.strip():
+                    tui.warning("Indicate project name and task title !")
+                    continue
             except KeyboardInterrupt:
                 print
                 print "Cancelled"
