@@ -619,7 +619,8 @@ class TaskCmd(object):
 
         if task.recurrence is None:
             task.recurrence = Recurrence()
-        rr = rrule.rrule(freq, byhour=byhour, byminute=byminute, byweekday=byweekday)
+        rr = rrule.rrule(freq, byhour=byhour, byminute=byminute, byweekday=byweekday,
+                         bymonthday=bymonthday, bymonth=bymonth)
         task.recurrence.setRrule(rr)
         task.dueDate = task.recurrence.getNext()
 # vi: ts=4 sw=4 et
