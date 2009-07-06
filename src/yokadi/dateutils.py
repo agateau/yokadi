@@ -11,7 +11,7 @@ import parseutils
 
 from yokadiexception import YokadiException
 
-WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wenesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
+WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
 SHORT_WEEKDAYS = { "mo" : 0, "tu" : 1, "we" : 2, "th" : 3, "fr" : 4, "sa" : 5, "su" : 6 }
 
 
