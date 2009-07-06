@@ -29,6 +29,12 @@ def getVersion(fileName):
     return int(row[0])
 
 
+def setVersion(fileName, version):
+    cx = connectionForURI('sqlite:' + fileName)
+    assert cx.tableExists("config")
+    cx.query("update config set value=%d where name='DB_VERSION'" % version)
+
+
 def createWorkDb(fileName):
     name = os.path.join(os.path.dirname(fileName), "work.db")
     shutil.copy(fileName, name)
@@ -78,16 +84,15 @@ def main():
     workDbFileName = createWorkDb(dbFileName)
 
     scriptDir = os.path.dirname(__file__) or "."
-    while True:
-        version = getVersion(workDbFileName)
-        if version == yokadi.db.DB_VERSION:
-            break
+    oldVersion = getVersion(workDbFileName)
+    for version in range(oldVersion, yokadi.db.DB_VERSION):
         scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
         print "Running %s" % scriptFileName
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
             print "Update failed."
             return 2
+    setVersion(workDbFileName, yokadi.db.DB_VERSION)
 
     createFinalDb(workDbFileName, newDbFileName)
 

@@ -24,8 +24,6 @@ def alterProjectTable():
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
     alterProjectTable()
-    v=yokadi.db.Config.selectBy(name="DB_VERSION")[0]
-    v.value="3"
 
 
 if __name__ == "__main__":
