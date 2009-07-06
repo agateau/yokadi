@@ -16,7 +16,8 @@ import dbutils
 import dateutils
 import parseutils
 import tui
-from completers import ProjectCompleter, projectAndKeywordCompleter, taskIdCompleter
+from completers import ProjectCompleter, projectAndKeywordCompleter,\
+                       taskIdCompleter, recurrenceCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
@@ -577,7 +578,9 @@ class TaskCmd(object):
         # Define recurrence:
         freq = byminute = byhour = byweekday = bymonthday = bymonth = None
 
-        if tokens[1].lower() == "none":
+        tokens[1] = tokens[1].lower()
+
+        if tokens[1] == "none":
             if task.recurrence:
                 task.recurrence.destroySelf()
                 task.recurrence = None
@@ -623,4 +626,5 @@ class TaskCmd(object):
                          bymonthday=bymonthday, bymonth=bymonth)
         task.recurrence.setRrule(rr)
         task.dueDate = task.recurrence.getNext()
+    complete_t_recurs = recurrenceCompleter
 # vi: ts=4 sw=4 et

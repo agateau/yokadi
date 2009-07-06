@@ -38,6 +38,8 @@ import utils
 DB_VERSION = 4
 DB_VERSION_KEY = "DB_VERSION"
 
+# Task frequency
+FREQUENCY = { 0 : "Yearly", 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
 
 class Project(SQLObject):
     class sqlmeta:
@@ -176,7 +178,6 @@ class Recurrence(SQLObject):
         return rr.after(refDate)
 
     def __str__(self):
-        FREQUENCY = { 0 : "Yearly", 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
         return "%s (next: %s)" % (FREQUENCY[self.getRrule()._freq], self.getNext())
 
 class Config(SQLObject):

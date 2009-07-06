@@ -8,7 +8,8 @@ Implementation of completers for various Yokadi objects.
 from sqlobject import LIKE
 
 import parseutils
-from db import Config, Keyword, Project, Task
+from dateutil import rrule
+from db import Config, Keyword, Project, Task, FREQUENCY
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
@@ -69,4 +70,12 @@ def taskIdCompleter(cmd, text, line, begidx, endidx):
         print "%s: %s / %s" % (task.id, task.project.name, task.title)
     return [str(x.id) for x in tasks]
 
+def recurrenceCompleter(cmd, text, line, begidx, endidx):
+    position=computeCompleteParameterPosition(text, line, begidx, endidx)
+    if position == 1: # Task id
+        return taskIdCompleter(cmd, text, line, begidx, endidx)
+    elif position == 2: # frequency
+        return [x for x in FREQUENCY.values()+["None"] if x.lower().startswith(text.lower())]
+    elif position == 3 and "weekly" in line.lower():
+        return [str(x) for x in rrule.weekdays if str(x).lower().startswith(text.lower())]
 # vi: ts=4 sw=4 et
