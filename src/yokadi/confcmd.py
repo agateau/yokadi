@@ -29,11 +29,11 @@ class ConfCmd(object):
         line = u" ".join(args)
         if not line:
             line="%"
-        try:
-            k=Config.select(AND(LIKE(Config.q.name, line), Config.q.system==options.system))
-            fields=[(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
+        k=Config.select(AND(LIKE(Config.q.name, line), Config.q.system==options.system))
+        fields=[(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
+        if fields:
             tui.renderFields(fields)
-        except SQLObjectNotFound:
+        else:
             raise YokadiException("Configuration key %s does not exist" % line)
 
     complete_c_get=confCompleter
