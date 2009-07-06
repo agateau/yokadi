@@ -21,11 +21,14 @@ def createRecurrenceTable():
 def alterTaskTable():
     yokadi.db.Task.sqlmeta.addColumn(ForeignKey("Recurrence", default=None))
 
+def removeDefaultProject():
+    sqlhub.processConnection.query("delete from config where name='DEFAULT_PROJECT'")
+
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
     createRecurrenceTable()
     alterTaskTable()
-
+    removeDefaultProject()
 
 if __name__ == "__main__":
     main()
