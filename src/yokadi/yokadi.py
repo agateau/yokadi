@@ -112,6 +112,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
                         % (self.historyPath, e))
 
     def do_help(self, arg):
+        """Type help <topic> to see the help for a given topic"""
+
         """
         Overload do_help to show help from the command parser if it exists:
         if there is a parser_foo() method, assume this method returns a
