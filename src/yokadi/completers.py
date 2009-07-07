@@ -53,7 +53,7 @@ def projectAndKeywordCompleter(cmd, text, line, begidx, endidx):
     position=computeCompleteParameterPosition(text, line, begidx, endidx)
     position-=len(parseutils.parseParameters(line)[0]) # remove arguments from position count
     if   position == 1: # Projects
-        return ["%s: " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
+        return ["%s" % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
     elif position >= 2 and line[-1] != " " and line.split()[-1][0] == "@": # Keywords (we ensure that it starts with @
         return ["%s" % x for x in getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)]
 

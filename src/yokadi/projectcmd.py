@@ -23,7 +23,6 @@ def getProjectFromName(name, parameterName="project_name"):
     YokadiException if it does not exist.
     """
     name = name.strip()
-    name = name.rstrip(":")
     if len(name) == 0:
         raise YokadiException("Missing <%s> parameter" % parameterName)
 

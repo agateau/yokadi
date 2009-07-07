@@ -24,7 +24,7 @@ class ProjectTestCase(unittest.TestCase):
         self.cmd.do_p_add("p1")
 
         tui.addInputAnswers("y", "y")
-        self.cmd.do_p_add("p2: @kw1 @kw2=12")
+        self.cmd.do_p_add("p2 @kw1 @kw2=12")
 
         projects = list(Project.select())
         result = [x.name for x in projects]

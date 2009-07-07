@@ -20,7 +20,7 @@ class BugTestCase(unittest.TestCase):
 
     def testAdd(self):
         tui.addInputAnswers("y", "2", "4", "123")
-        self.cmd.do_bug_add("x: t1")
+        self.cmd.do_bug_add("x t1")
 
         tasks = list(Task.select())
         result = [x.title for x in tasks]

@@ -33,24 +33,16 @@ def parseParameters(line):
 
 def parseLine(line):
     """Parse line of form:
-    project: some text @keyword1 @keyword2=12 some other text
+    project some text @keyword1 @keyword2=12 some other text
     @return: a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
 
     # First extract project name
     line = simplifySpaces(line)
-    if line.split()[0][-1] == ":": # Last character of first word
-        if line.count(" "):
-            project, line = line.split(" ", 1)
-        else:
-            project = line
-            line = ""
-        project = project[0:-1]
-    else: # First word is project
-        if line.count(" "):
-            project, line = line.split(" ", 1)
-        else:
-            project = line
-            line = ""
+    if line.count(" "):
+        project, line = line.split(" ", 1)
+    else:
+        project = line
+        line = ""
 
     line, keywordDict = extractKeywords(line)
 
@@ -89,7 +81,7 @@ def createLine(projectName, title, keywordDict):
         else:
             tokens.append("@" + keywordName)
 
-    tokens.insert(0, projectName+":")
+    tokens.insert(0, projectName)
 
     tokens.append(title)
     return u" ".join(tokens)

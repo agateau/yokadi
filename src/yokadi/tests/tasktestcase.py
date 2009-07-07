@@ -20,10 +20,10 @@ class TaskTestCase(unittest.TestCase):
 
     def testAdd(self):
         tui.addInputAnswers("y")
-        self.cmd.do_t_add("x: t1")
+        self.cmd.do_t_add("x t1")
 
         tui.addInputAnswers("y", "y")
-        self.cmd.do_t_add("x: @kw1 @kw2=12 t2")
+        self.cmd.do_t_add("x @kw1 @kw2=12 t2")
 
         tasks = list(Task.select())
         result = [x.title for x in tasks]
@@ -35,7 +35,7 @@ class TaskTestCase(unittest.TestCase):
 
     def testMark(self):
         tui.addInputAnswers("y")
-        self.cmd.do_t_add("x: t1")
+        self.cmd.do_t_add("x t1")
         task = Task.get(1)
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_started("1")
@@ -45,7 +45,7 @@ class TaskTestCase(unittest.TestCase):
 
     def testAddKeywords(self):
         tui.addInputAnswers("y")
-        self.cmd.do_t_add("x: t1")
+        self.cmd.do_t_add("x t1")
         task = Task.get(1)
 
         tui.addInputAnswers("y", "y")
@@ -55,7 +55,7 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
     def testRecurs(self):
-        self.cmd.do_t_add("x: t1")
+        self.cmd.do_t_add("x t1")
         task = Task.get(1)
         self.cmd.do_t_recurs("1 daily 10:00")
         desc = str(task.recurrence)
