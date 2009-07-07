@@ -33,7 +33,7 @@ class ProjectCompleter(object):
 
     def __call__(self, text, line, begidx, endidx):
         if computeCompleteParameterPosition(text, line, begidx, endidx) == self.position:
-            return ["%s: " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
+            return ["%s " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
         else:
             return []
 
