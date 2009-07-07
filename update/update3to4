@@ -9,17 +9,22 @@ Update from version 3 to version 4 of Yokadi DB
 import sys
 from os.path import dirname, join
 
-from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey
+from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, StringCol
 
-sys.path.append(join(dirname(__file__),"..", "src"))
-import yokadi.db
 
+""" This is the v4 table """
+class Recurrence(SQLObject):
+    rule = StringCol(default="", notNone=True)
+
+""" This is a fake table (we only need table name) """
+class Task(SQLObject):
+    pass
 
 def createRecurrenceTable():
-    yokadi.db.Recurrence.createTable()
+    Recurrence.createTable()
 
 def alterTaskTable():
-    yokadi.db.Task.sqlmeta.addColumn(ForeignKey("Recurrence", default=None))
+    Task.sqlmeta.addColumn(ForeignKey("Recurrence", default=None))
 
 def removeDefaultProject():
     sqlhub.processConnection.query("delete from config where name='DEFAULT_PROJECT'")

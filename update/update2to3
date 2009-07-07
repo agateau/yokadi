@@ -11,11 +11,12 @@ from os.path import dirname, join
 
 from sqlobject import connectionForURI, RelatedJoin, sqlhub, SQLObject
 
-sys.path.append(join(dirname(__file__),"..", "src"))
-import yokadi.db
+""" This is a fake table (we only need table name) """
+class Project(SQLObject):
+    pass
 
 def alterProjectTable():
-    yokadi.db.Project.sqlmeta.addJoin(RelatedJoin("Keyword",
+    Project.sqlmeta.addJoin(RelatedJoin("Keyword",
                                           createRelatedTable=False,
                                           intermediateTable="project_keyword",
                                           joinColumn="project_id",
