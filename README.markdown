@@ -136,7 +136,7 @@ specify an alternative location with the `--db` option.
 A convenient way to start yokadi is by creating an alias in your `.bashrc` file
 like this:
 
-    alias y='/home/me/yokadi/yokadi.py --db /home/me/work/yokadi.db'
+    alias y=yokadi
 
 The single letter `y` will start Yokadi with your favorite database from
 wherever you are.
@@ -147,10 +147,9 @@ If you want to be automatically reminded of due tasks, you can use the Yokadi
 daemon.
 
 The Yokadi daemon can be launched via desktop autostart services. In KDE, you
-must create a shell script in `$HOME/.kde/Autostart/`. Sample script:
+must create a symlink to yokadid (or a shell script that calls it) in `$HOME/.kde/Autostart/`.
 
-    /home/me/yokadi/yokadid.py --db /home/me/work/yokadi.db
-
+    ln -s `which yokadid` $HOME/.kde/Autostart/
 
 # Contact
 
