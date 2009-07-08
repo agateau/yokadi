@@ -459,10 +459,10 @@ class TaskCmd(object):
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
-        task=dbutils.getTaskFromId(line)
+        task = dbutils.getTaskFromId(line)
 
         # Create task line
-        taskLine = parseutils.createLine(task.project.name, task.title, task.getKeywordDict())
+        taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
 
         while True:
             # Edit
@@ -470,15 +470,14 @@ class TaskCmd(object):
             try:
                 line = tui.editLine(taskLine)
                 if not line.strip():
-                    tui.warning("Indicate project name and task title !")
+                    tui.warning("Indicate a task title !")
                     continue
             except KeyboardInterrupt:
                 print
                 print "Cancelled"
                 return
-            projectName, title, keywordDict = parseutils.parseLine(line)
-            # Update
-            if dbutils.updateTask(task, projectName, title, keywordDict):
+            foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
+            if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 
     complete_t_edit = taskIdCompleter

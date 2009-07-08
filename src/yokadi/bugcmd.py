@@ -91,19 +91,22 @@ class BugCmd(object):
         task = dbutils.getTaskFromId(line)
 
         # Create task line
-        taskLine = parseutils.createLine(task.project.name, task.title, task.getKeywordDict())
+        taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
 
         # Edit
         while True:
             print "(Press Ctrl+C to cancel)"
             try:
                 line = tui.editLine(taskLine)
+                if not line.strip():
+                    tui.warning("Indicate a bug title !")
+                    continue
             except KeyboardInterrupt:
                 print
                 print "Cancelled"
                 return
-            projectName, title, keywordDict = parseutils.parseLine(line)
-            if dbutils.updateTask(task, projectName, title, keywordDict):
+            foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
+            if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
         editBugKeywords(keywordDict)
         task.setKeywordDict(keywordDict)
