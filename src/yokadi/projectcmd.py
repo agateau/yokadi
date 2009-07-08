@@ -54,7 +54,6 @@ class ProjectCmd(object):
     def do_p_edit(self, line):
         """Edit a project.
         p_edit <project name>"""
-        line = line.rstrip(":")
         project=dbutils.getOrCreateProject(line, createIfNeeded=False)
 
         if not project:

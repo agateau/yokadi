@@ -293,7 +293,6 @@ class TaskCmd(object):
         options, args = parser.parse_args(line)
         if len(args) > 0:
             projectName, keywordDict = parseutils.extractKeywords(u" ".join(args))
-            projectName = projectName.rstrip(":")
         else:
             projectName = ""
             keywordDict = {}
@@ -381,7 +380,6 @@ class TaskCmd(object):
         the order of the lines and save the list. The urgency field will be
         updated to match the order.
         t_reorder <project_name>"""
-        projectName = line.rstrip(":")
         project = Project.byName(projectName)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),
