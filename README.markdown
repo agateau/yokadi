@@ -125,6 +125,27 @@ There is much more, we only scratched the surface, but this should get you
 started. You can get a list of all commands by typing `help` and get the
 detailed documentation of a command with `help <command>`.
 
+# Advanced stuff
+
+You can define due date for your tasks with t_due. This can be done with a relative or absolute date:
+
+    yokadi> t_due 21 +3d
+    Due date for task 'Buy chocolate' set to Sat Jul 11 17:16:20 2009
+
+    yokadi> t_due 21 23/07 10:30
+    Due date for task 'Buy chocolate' set to Thu Jul 23 10:30:00 2009
+
+Due dates are show by t_list. Due date is colored according to time left. If you want to be reminded when a task
+is due, you can use the Yokadi Daemon for that. See below for details.
+
+If you have periodic tasks, you can tell it to yokadi with t_recurs:
+    yokadi>t_recurs 1 weekly monday 21:30
+    yokadi>t_recurs 1 monthly 3 11:00
+    yokadi>t_recurs 1 monthly last saturday 11:00
+    yokadi>t_recurs 1 yearly 23/2 14:00
+
+Type 'help t_recurs' to see all possible syntax
+
 
 # Integration
 
@@ -169,7 +190,7 @@ Yokadi has been brought to you by:
 
 Other people contributed to Yokadi:
 
-- Olivier Hervieu <olivier.hervieu@wallix.com>:
-  Contributed a working setup.py
+- Olivier Hervieu <olivier.hervieu@wallix.com>: first working setup.py release
+- Marc-Antoine Gouillart <marsu_pilami@msn.com>: Windows port
 
 <!-- vim: set ts=4 sw=4 et: -->

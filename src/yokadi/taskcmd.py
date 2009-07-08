@@ -562,6 +562,7 @@ class TaskCmd(object):
         """Make a task recurs
         t_recurs <id> yearly <dd/mm> <HH:MM>
         t_recurs <id> monthly <dd> <HH:MM>
+        t_recurs <id> monthly <first/second/third/last> <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
