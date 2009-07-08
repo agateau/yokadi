@@ -83,7 +83,10 @@ def editLine(line, prompt="edit> "):
     if len(_answers) > 0:
         line = _answers.pop(0)
     else:
-        line = raw_input(prompt)
+        try:
+            line = raw_input(prompt)
+        except EOFError:
+            line=""
 
     # Remove edited line from history:
     #   oddly, get_history_item is 1-based,
