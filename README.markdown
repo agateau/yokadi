@@ -127,7 +127,7 @@ detailed documentation of a command with `help <command>`.
 
 # Advanced stuff
 
-You can define due date for your tasks with t_due. This can be done with a relative or absolute date:
+You can define due date for your tasks with `t_due`. This can be done with a relative or absolute date:
 
     yokadi> t_due 21 +3d
     Due date for task 'Buy chocolate' set to Sat Jul 11 17:16:20 2009
@@ -135,16 +135,17 @@ You can define due date for your tasks with t_due. This can be done with a relat
     yokadi> t_due 21 23/07 10:30
     Due date for task 'Buy chocolate' set to Thu Jul 23 10:30:00 2009
 
-Due dates are show by t_list. Due date is colored according to time left. If you want to be reminded when a task
+Due dates are show by `t_list`. Due date is colored according to time left. If you want to be reminded when a task
 is due, you can use the Yokadi Daemon for that. See below for details.
 
-If you have periodic tasks, you can tell it to yokadi with t_recurs:
+If you have periodic tasks, you can tell it to yokadi with `t_recurs`:
+
     yokadi>t_recurs 1 weekly monday 21:30
     yokadi>t_recurs 1 monthly 3 11:00
     yokadi>t_recurs 1 monthly last saturday 11:00
     yokadi>t_recurs 1 yearly 23/2 14:00
 
-Type 'help t_recurs' to see all possible syntax
+Type `help t_recurs` to see all possible syntax
 
 
 # Integration
