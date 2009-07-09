@@ -179,5 +179,18 @@ def addInputAnswers(*answers):
     pop the first answer from the buffer instead of prompting the user.
     This is useful for unit-testing."""
     _answers.extend(answers)
-# vi: ts=4 sw=4 et
 
+
+def getTermWidth():
+    """Gets the terminal width. Works only on Unix system.
+    @return: terminal width or "120" is system not supported
+    Kindly borrowed from pysql code"""
+    if os.name=="posix":
+        result=os.popen("tput cols").readline().strip()
+        if result:
+            return int(result)
+    else:
+        # Unsupported system, use default 120
+        return 120
+
+# vi: ts=4 sw=4 et

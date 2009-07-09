@@ -10,6 +10,7 @@ from datetime import datetime
 import colors as C
 import dateutils
 from db import Config, Task
+import tui
 
 
 def colorizer(value, reverse=False):
@@ -122,27 +123,44 @@ class DueDateFormater(object):
 class TextListRenderer(object):
     def __init__(self, out):
         self.out = out
-        today = datetime.today().replace(microsecond=0)
-        titleWidth = int(Config.byName("TEXT_WIDTH").value)
+        self._taskList = []
+        self._maxTitleLen = 0
+        self.today = datetime.today().replace(microsecond=0)
+
+
+    def addTaskList(self, project, taskList):
+        # Store tasks
+        self._taskList.append((project, taskList))
+        # Find max title width
+        for task in taskList:
+            if len(task.title)>self._maxTitleLen:
+                self._maxTitleLen = len(task.title)
+
+    def end(self):
         idWidth = max(2, len(str(Task.select().max(Task.q.id))))
+        titleWidth = self._maxTitleLen
         self.columns = [
             Column("ID"       , idWidth   , idFormater),
             Column("Title"    , titleWidth, TitleFormater(titleWidth)),
             Column("U"        , 3         , urgencyFormater),
             Column("S"        , 1         , statusFormater),
-            Column("Age"      , 8         , AgeFormater(today)),
-            Column("Due date" , 23        , DueDateFormater(today))
+            Column("Age"      , 8         , AgeFormater(self.today)),
+            Column("Due date" , 26        , DueDateFormater(self.today))
             ]
+        # Check if column's witdh sum is not too large
+        termWidth = tui.getTermWidth()
+        totalWidth = sum([x.width for x in self.columns])
+        if totalWidth > termWidth:
+            titleWidth -= (totalWidth - termWidth) + len(self.columns)
+            for column in self.columns:
+                if column.title == "Title":
+                    column.width = titleWidth
+                    column.formater = TitleFormater(titleWidth)
 
-
-    def addTaskList(self, project, taskList):
-        self._renderTaskListHeader(project.name)
-        for task in taskList:
-            self._renderTaskListRow(task)
-
-
-    def end(self):
-        pass
+        for project, taskList in self._taskList:
+            self._renderTaskListHeader(project.name)
+            for task in taskList:
+                self._renderTaskListRow(task)
 
 
     def _renderTaskListHeader(self, projectName):
