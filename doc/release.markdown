@@ -18,6 +18,10 @@ Bump version on master
 	git checkout master
 	vi version
 
+Go back to branch in order to prepare tarballs
+
+	git co <serie>
+
 ## In yokadi.github.com checkout
 
 Ensure checkout is up to date
