@@ -51,8 +51,7 @@ setup(name="yokadi",
       author_email="ml-yokadi@sequanux.org",
       url="http://yokadi.github.com/",
       package_dir={"yokadi" : "src/yokadi"},
-      package_data={"yokadi": ["tests/*.py"]},
-      packages=["yokadi"],
+      packages=["yokadi", "yokadi.tests"],
       scripts=scripts,
       data_files=data_files
       )
