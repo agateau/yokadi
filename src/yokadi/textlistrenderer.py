@@ -102,8 +102,9 @@ class AgeFormater(object):
         return dateutils.formatTimeDelta(delta), colorizer(delta.days)
 
 class DueDateFormater(object):
-    def __init__(self, today):
+    def __init__(self, today, shortFormat):
         self.today = today
+        self.shortFormat = shortFormat
 
     def __call__(self, task):
         if not task.dueDate:
@@ -114,7 +115,10 @@ class DueDateFormater(object):
         else:
             value = task.dueDate.strftime("%H:%M")
 
-        value = value + " (%s)" % dateutils.formatTimeDelta(delta)
+        if self.shortFormat:
+            value = dateutils.formatTimeDelta(delta)
+        else:
+            value = value + " (%s)" % dateutils.formatTimeDelta(delta)
 
         color = colorizer(delta.days * 33, reverse=True)
         return value, color
@@ -137,18 +141,24 @@ class TextListRenderer(object):
                 self._maxTitleLen = len(task.title)
 
     def end(self):
+        termWidth = tui.getTermWidth()
         idWidth = max(2, len(str(Task.select().max(Task.q.id))))
         titleWidth = self._maxTitleLen
+        if termWidth < 100:
+            dueDateWidth = 8
+            shortDateFormat = True
+        else:
+            dueDateWidth = 26
+            shortDateFormat = False
         self.columns = [
-            Column("ID"       , idWidth   , idFormater),
-            Column("Title"    , titleWidth, TitleFormater(titleWidth)),
-            Column("U"        , 3         , urgencyFormater),
-            Column("S"        , 1         , statusFormater),
-            Column("Age"      , 8         , AgeFormater(self.today)),
-            Column("Due date" , 26        , DueDateFormater(self.today))
+            Column("ID"       , idWidth     , idFormater),
+            Column("Title"    , titleWidth  , TitleFormater(titleWidth)),
+            Column("U"        , 3           , urgencyFormater),
+            Column("S"        , 1           , statusFormater),
+            Column("Age"      , 8           , AgeFormater(self.today)),
+            Column("Due date" , dueDateWidth, DueDateFormater(self.today, shortDateFormat))
             ]
         # Check if column's witdh sum is not too large
-        termWidth = tui.getTermWidth()
         totalWidth = sum([x.width for x in self.columns])
         if totalWidth > termWidth:
             titleWidth -= (totalWidth - termWidth) + len(self.columns)
