@@ -163,6 +163,11 @@ like this:
 The single letter `y` will start Yokadi with your favorite database from
 wherever you are.
 
+If you do not want to use default database location, you can define
+the `YOKADI_DB` env variable to point to your database:
+
+    export YOKADI_DB=$HOME/work/yokadi.db
+
 ## Yokadid, the Yokadid daemon
 
 If you want to be automatically reminded of due tasks, you can use the Yokadi

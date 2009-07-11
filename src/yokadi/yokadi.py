@@ -150,8 +150,13 @@ def main():
         return
 
     if not options.filename:
-        options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
-        print "Using default database (%s)" % options.filename
+        # Look if user define an env VAR for yokadi db
+        options.filename=os.getenv("YOKADI_DB")
+        if options.filename:
+            print "Using env defined database (%s)" % options.filename
+        else:
+            options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
+            print "Using default database (%s)" % options.filename
 
     db.connectDatabase(options.filename)
 
