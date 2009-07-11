@@ -247,7 +247,6 @@ def connectDatabase(dbFileName, createIfNeeded=True):
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig={
-        "TEXT_WIDTH"      : ("60", False, "Width of task display output with t_list command"),
         "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi Daemon"''',False,
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
         "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi Daemon"''',False,

@@ -14,9 +14,13 @@ def updateBugsKeywordsNames():
     for keyword in ("bug", "severity", "likelihood"):
         sqlhub.processConnection.query("update keyword set name='_%s' where name='%s'" % (keyword, keyword))
 
+def removeTextWidthParam():
+    sqlhub.processConnection.query("delete from config where name='TEXT_WIDTH'")
+
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
     updateBugsKeywordsNames()
+    removeTextWidthParam()
 
 if __name__ == "__main__":
     main()

@@ -63,7 +63,7 @@ class ConfCmd(object):
         @param value: parameter value
         @return: True if parameter is ok, else False"""
         # Positive int parameters
-        if name in ("TEXT_WIDTH", "ALARM_DELAY", "ALARM_SUSPEND", "PURGE_DELAY"):
+        if name in ("ALARM_DELAY", "ALARM_SUSPEND", "PURGE_DELAY"):
             try:
                 value=int(value)
                 assert(value>=0)
