@@ -69,22 +69,26 @@ class TitleFormater(object):
         self.width = width
 
     def __call__(self, task):
-        #TODO: ignore internal keywords
         keywords = [k for k in task.getKeywordDict().keys() if not k.startswith("_")]
         if keywords:
             keywords = C.BOLD+", ".join(keywords)+C.RESET
             title = "%s (%s)" % (task.title, keywords)
+            titleWidth = len(title) - len(C.BOLD) - len(C.RESET)
         else:
             title = task.title
+            titleWidth = len(title)
 
         hasDescription = task.description != ""
         maxLength = self.width
         if hasDescription:
             maxLength -= 1
-        if len(title) > maxLength:
+        if titleWidth > maxLength:
             title = title[:maxLength - 1] + ">"
         else:
-            title = title.ljust(maxLength)
+            if keywords:
+                title = title.ljust(maxLength + len(C.BOLD) + len(C.RESET))
+            else:
+                title = title.ljust(maxLength)
         if hasDescription:
             title = title + "*"
 
