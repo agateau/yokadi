@@ -35,7 +35,7 @@ import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 4
+DB_VERSION = 5
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency

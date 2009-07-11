@@ -10,9 +10,9 @@ import dbutils
 import tui
 from completers import ProjectCompleter
 
-SEVERITY_PROPERTY_NAME = "severity"
-LIKELIHOOD_PROPERTY_NAME = "likelihood"
-BUG_PROPERTY_NAME = "bug"
+SEVERITY_PROPERTY_NAME = "_severity"
+LIKELIHOOD_PROPERTY_NAME = "_likelihood"
+BUG_PROPERTY_NAME = "_bug"
 PROPERTY_NAMES = SEVERITY_PROPERTY_NAME, LIKELIHOOD_PROPERTY_NAME, BUG_PROPERTY_NAME
 
 SEVERITY_LIST = [

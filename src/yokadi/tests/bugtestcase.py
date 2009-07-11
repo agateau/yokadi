@@ -28,6 +28,6 @@ class BugTestCase(unittest.TestCase):
         self.assertEqual(result, expected)
 
         kwDict = Task.get(1).getKeywordDict()
-        self.assertEqual(kwDict, dict(severity=2, likelihood=4, bug=123))
+        self.assertEqual(kwDict, dict(_severity=2, _likelihood=4, _bug=123))
 
 # vi: ts=4 sw=4 et

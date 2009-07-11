@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+"""
+Update from version 4 to version 5 of Yokadi DB
+
+@author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
+@license: GPLv3
+"""
+import sys
+from sqlobject import connectionForURI, sqlhub
+
+
+def updateBugsKeywordsNames():
+    for keyword in ("bug", "severity", "likelihood"):
+        sqlhub.processConnection.query("update keyword set name='_%s' where name='%s'" % (keyword, keyword))
+
+def main():
+    sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
+    updateBugsKeywordsNames()
+
+if __name__ == "__main__":
+    main()
+# vi: ts=4 sw=4 et
