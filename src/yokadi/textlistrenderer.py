@@ -70,7 +70,7 @@ class TitleFormater(object):
 
     def __call__(self, task):
         #TODO: ignore internal keywords
-        keywords = task.getKeywordDict().keys()
+        keywords = [k for k in task.getKeywordDict().keys() if not k.startswith("_")]
         if keywords:
             keywords = ", ".join(keywords)
             title = "%s (%s)" % (task.title, keywords)
