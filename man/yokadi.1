@@ -1,0 +1,46 @@
+.TH YOKADI 1 "July 10, 2009"
+.SH NAME
+yokadi \- commandline todo system
+.SH SYNOPSIS
+.B yokadi
+.RI [ options ]...
+.br
+.SH DESCRIPTION
+.B yokadi
+is a command-line oriented, SQLite powered, TODO list tool.  It helps
+you organize all the things you have to do and you must not forget. It aims to
+be simple, intuitive and very efficient. In Yokadi you manage projects, which
+contains tasks. At the minimum, a task has a title, but it can also have a
+description, a due date, an urgency or keywords. Keywords can be any word that
+help you to find and sort your tasks.
+.PP
+.SH OPTIONS
+These programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+A summary of options is included below.
+.TP
+.B \-d, FILE \-\-db=FILE
+TODO database.
+.TP
+.B \-c, \-\-create-only
+Just create an empty database.
+.TP
+.TP
+.B \-h, \-\-help
+Show summary of options and exit.
+.TP
+.B \-v, \-\-version
+Show version of program and exit.
+.SH SEE ALSO
+.BR xyokadi (1),
+.BR yokadid (1).
+.br
+.SH SEE ALSO
+Website: http://yokadi.github.com
+
+Mailing List: http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi
+.SH AUTHOR
+yokadi was written by Aurélien Gâteau <aurelien.gateau@free.fr> and Sébastien Renard <sebastien.renard@digitalfox.org>.
+.PP
+This manual page was written by Kartik Mistry <kartik@debian.org>,
+for the Debian project (and may be used by others).

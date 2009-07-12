@@ -1,0 +1,49 @@
+.TH YOKADID 1 "July 10, 2009"
+.SH NAME
+yokadid \- commandline todo system
+.SH SYNOPSIS
+.B yokadid
+.RI [ options ]...
+.br
+.SH DESCRIPTION
+.B yokadid
+is a Yokadi daemon that remind you due tasks. If you want to be automatically
+reminded of due tasks, you can use the Yokadi daemon. The Yokadi daemon can be
+launched via desktop autostart services.
+
+In KDE, you must create a symlink to yokadid (or a shell script that calls it)
+in $HOME/.kde/Autostart/.
+
+ln \-s `which yokadid` $HOME/.kde/Autostart/
+
+.PP
+.SH OPTIONS
+These programs follow the usual GNU command line syntax, with long
+options starting with two dashes (`-').
+A summary of options is included below.
+.TP
+.B \-d, FILE \-\-db=FILE
+TODO database.
+.TP
+.B \-k, \-\-kill
+Kill Yokadi Daemon (you can specify database with \-db if you run multiple
+Yokadid).
+.TP
+.B \-f, \-\-foreground
+Don't fork background. Usefull for debug.
+.TP
+.B \-h, \-\-help
+Show summary of options and exit.
+.SH SEE ALSO
+.BR yokadi (1),
+.BR xyokadi (1).
+.br
+.SH SEE ALSO
+Website: http://yokadi.github.com
+
+Mailing List: http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi
+.SH AUTHOR
+yokadi was written by Aurélien Gâteau <aurelien.gateau@free.fr> and Sébastien Renard <sebastien.renard@digitalfox.org>.
+.PP
+This manual page was written by Kartik Mistry <kartik@debian.org>,
+for the Debian project (and may be used by others).
