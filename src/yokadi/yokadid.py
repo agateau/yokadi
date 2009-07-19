@@ -183,7 +183,7 @@ def parseOptions():
 
     parser.add_option("-f", "--foreground",
                       dest="foreground", default=False, action="store_true", 
-                      help="Don't fork background. Usefull for debug")
+                      help="Don't fork background. Useful for debug")
 
     return parser.parse_args()
 
