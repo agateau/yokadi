@@ -12,7 +12,7 @@
 for term in konsole rxvt xterm
 do
     which $term #> /dev/null 2>&1
-    if [ $? == 0 ]; then
+    if [ $? = 0 ]; then
         exec $term -e yokadi $*
     fi
 done
