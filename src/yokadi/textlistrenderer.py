@@ -139,7 +139,7 @@ class TextListRenderer(object):
     def __init__(self, out):
         self.out = out
         self._taskList = []
-        self._maxTitleLen = 0
+        self._maxTitleWidth = 0
         self.today = datetime.today().replace(microsecond=0)
 
 
@@ -148,13 +148,12 @@ class TextListRenderer(object):
         self._taskList.append((project, taskList))
         # Find max title width
         for task in taskList:
-            if len(task.title)>self._maxTitleLen:
-                self._maxTitleLen = len(task.title)
+            self._maxTitleWidth = max(self._maxTitleWidth, len(task.title))
 
     def end(self):
         termWidth = tui.getTermWidth()
         idWidth = max(2, len(str(Task.select().max(Task.q.id))))
-        titleWidth = self._maxTitleLen
+        titleWidth = self._maxTitleWidth
         if termWidth < 100:
             dueDateWidth = 8
             shortDateFormat = True
