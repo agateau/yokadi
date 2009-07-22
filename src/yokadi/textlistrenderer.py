@@ -149,6 +149,8 @@ class TextListRenderer(object):
         # Find max title width
         for task in taskList:
             self._maxTitleWidth = max(self._maxTitleWidth, len(task.title))
+        # Keep some space for potential '*' suffix
+        self._maxTitleWidth += 1
 
     def end(self):
         termWidth = tui.getTermWidth()
