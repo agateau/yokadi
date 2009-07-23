@@ -11,7 +11,8 @@ from datetime import datetime, date, timedelta
 from dateutil import rrule
 from sqlobject import SQLObjectNotFound, LIKE, AND, OR
 
-from db import Config, Keyword, Project, Task, TaskKeyword, Recurrence
+from db import Config, Keyword, Project, Task, \
+               TaskKeyword, ProjectKeyword, Recurrence
 import dbutils
 import dateutils
 import parseutils
@@ -264,6 +265,34 @@ class TaskCmd(object):
                     return False
             return True
 
+        def taskHasWantedKeywordDict(task, wantedKeywordDict):
+            """
+            @param task: task object
+            @param wantedKeywordDict: dict of name/value of wanted keyword
+            # a task is considered a subset of wantedKeywordDict if:
+            # 1. All wantedKeywordDict keys are in task or project keywords
+            # 2. All wantedKeywordDict valued keywords have the same value
+            #    in task or project keyword"""
+            for wantedKeyword, wantedValue in wantedKeywordDict.items():
+                taskFilters=[Task.q.id==task.id,
+                         TaskKeyword.q.taskID==task.id,
+                         TaskKeyword.q.keywordID==Keyword.q.id,
+                         LIKE(Keyword.q.name, wantedKeyword)]
+
+                projectFilters=[Project.q.id==task.projectID,
+                                ProjectKeyword.q.projectID==Project.q.id,
+                                ProjectKeyword.q.keyword==Keyword.q.id,
+                                LIKE(Keyword.q.name, wantedKeyword)]
+
+                if wantedValue:
+                    taskFilters.append(TaskKeyword.q.value==wantedValue)
+                    projectFilters.append(ProjectKeyword.q.value==wantedValue)
+
+                if Task.select(AND(*taskFilters)).count()==0 and Task.select(AND(*projectFilters)).count()==0:
+                    return False
+            # All critera were met, return ok
+            return True
+
         def createFilterFromRange(_range):
             # Parse the _range string and return an SQLObject filter
             minDate = date.today()
@@ -313,11 +342,8 @@ class TaskCmd(object):
 
         # Check keywords exist
         for keyword in keywordDict.keys():
-            try:
-                Keyword.byName(keyword)
-            except SQLObjectNotFound:
+            if Keyword.select(LIKE(Keyword.q.name, keyword)).count()==0:
                 tui.error("Keyword %s is unknown." % keyword)
-                return
 
         # Filtering and sorting according to parameters
         filters=[]
@@ -359,9 +385,8 @@ class TaskCmd(object):
                                            *filters),
                                         orderBy=order, limit=limit)
                 if keywordDict:
-                    # FIXME: Optimize & factorise (see project oriented rendering below)
-                    taskList = [x for x in taskList if (keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict) or
-                                                    keywordDictIsSubsetOf(x.project.getKeywordDict(), keywordDict))]
+                    # FIXME: factorize (see project oriented rendering below)
+                    taskList = [x for x in taskList if taskHasWantedKeywordDict(x, keywordDict)]
                 else:
                     taskList = list(taskList)
 
@@ -381,9 +406,7 @@ class TaskCmd(object):
                                        orderBy=order, limit=limit)
     
                 if keywordDict:
-                    # FIXME: Optimize
-                    taskList = [x for x in taskList if (keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict) or
-                                                        keywordDictIsSubsetOf(x.project.getKeywordDict(), keywordDict))]
+                    taskList = [x for x in taskList if taskHasWantedKeywordDict(x, keywordDict)]
                 else:
                     taskList = list(taskList)
     
