@@ -11,7 +11,7 @@ from datetime import datetime, date, timedelta
 from dateutil import rrule
 from sqlobject import SQLObjectNotFound, LIKE, AND, OR
 
-from db import Config, Keyword, Project, Task, Recurrence
+from db import Config, Keyword, Project, Task, TaskKeyword, Recurrence
 import dbutils
 import dateutils
 import parseutils
@@ -229,6 +229,10 @@ class TaskCmd(object):
                           default=False, action="store_true",
                           help="top 5 urgent tasks of each project based on due date")
 
+        parser.add_option("-k", "--keyword", dest="keyword",
+                          default=False, action="store_true",
+                          help="Group tasks by keyword instead of project")
+
         parser.add_option("-s", "--search", dest="search",
                           action="append",
                           help="only list tasks which title or description match <value>",
@@ -348,29 +352,49 @@ class TaskCmd(object):
         renderer = rendererClass(out)
 
         # Fill the renderer
-        hiddenProjectNames = []
-        for project in projectList:
-            if not project.active:
-                hiddenProjectNames.append(project.name)
-                continue
-            taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
-                                   orderBy=order, limit=limit)
-
-            if keywordDict:
-                # FIXME: Optimize
-                taskList = [x for x in taskList if (keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict) or
+        if options.keyword:
+            for keyword in Keyword.select():
+                taskList = Task.select(AND(TaskKeyword.q.taskID == Task.q.id,
+                                           TaskKeyword.q.keywordID == keyword.id,
+                                           *filters),
+                                        orderBy=order, limit=limit)
+                if keywordDict:
+                    # FIXME: Optimize & factorise (see project oriented rendering below)
+                    taskList = [x for x in taskList if (keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict) or
                                                     keywordDictIsSubsetOf(x.project.getKeywordDict(), keywordDict))]
-            else:
-                taskList = list(taskList)
+                else:
+                    taskList = list(taskList)
 
-            if len(taskList) == 0:
-                continue
+                if len(taskList) == 0:
+                    continue
 
-            renderer.addTaskList(project, taskList)
-        renderer.end()
-
-        if len(hiddenProjectNames) > 0:
-            tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
+                renderer.addTaskList(keyword, taskList)
+            # Call renderer
+            renderer.end()
+        else:
+            hiddenProjectNames = []
+            for project in projectList:
+                if not project.active:
+                    hiddenProjectNames.append(project.name)
+                    continue
+                taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
+                                       orderBy=order, limit=limit)
+    
+                if keywordDict:
+                    # FIXME: Optimize
+                    taskList = [x for x in taskList if (keywordDictIsSubsetOf(x.getKeywordDict(), keywordDict) or
+                                                        keywordDictIsSubsetOf(x.project.getKeywordDict(), keywordDict))]
+                else:
+                    taskList = list(taskList)
+    
+                if len(taskList) == 0:
+                    continue
+    
+                renderer.addTaskList(project, taskList)
+            renderer.end()
+    
+            if len(hiddenProjectNames) > 0:
+                tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
     complete_t_list = projectAndKeywordCompleter
 
