@@ -199,5 +199,6 @@ Other people contributed to Yokadi:
 - Olivier Hervieu <olivier.hervieu@wallix.com>: first working setup.py release
 - Marc-Antoine Gouillart <marsu_pilami@msn.com>: Windows port
 - Kartik Mistry <kartik@debian.org>: man pages
+- Jonas Christian Drewsen <jdrewsen@gmail.com>: quarterly recurrence feature
 
 <!-- vim: set ts=4 sw=4 et: -->

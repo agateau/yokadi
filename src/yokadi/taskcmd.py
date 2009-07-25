@@ -608,6 +608,8 @@ class TaskCmd(object):
         t_recurs <id> yearly <dd/mm> <HH:MM>
         t_recurs <id> monthly <dd> <HH:MM>
         t_recurs <id> monthly <first/second/third/last> <mo, tu, we, th, fr, sa, su> <hh:mm>
+        t_recurs <id> quarterly <dd> <HH:MM>
+        t_recurs <id> quarterly <first/second/third/last> <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
@@ -637,10 +639,15 @@ class TaskCmd(object):
                 raise YokadiException("You should give day and time for weekly task")
             byweekday = dateutils.getWeekDayNumberFromDay(tokens[2].lower())
             byhour, byminute = dateutils.getHourAndMinute(tokens[3])
-        elif tokens[1] == "monthly":
-            freq = rrule.MONTHLY
+        elif tokens[1] in ("monthly","quarterly"):
+            if tokens[1] == "monthly":
+                freq = rrule.MONTHLY
+            else:
+                # quarterly
+                freq = rrule.YEARLY
+                bymonth = [1,4,7,10]
             if len(tokens) < 4:
-                raise YokadiException("You should give day and time for monthly task")
+                raise YokadiException("You should give day and time for %s task" % (tokens[1],))
             try:
                 bymonthday = int(tokens[2])
                 byhour, byminute = dateutils.getHourAndMinute(tokens[3])
