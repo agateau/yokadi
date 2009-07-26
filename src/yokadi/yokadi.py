@@ -17,6 +17,7 @@ reload(sys)  ## So as to enable setdefaultencoding
 import traceback
 from cmd import Cmd
 from optparse import OptionParser
+from sqlobject import __doc__ as sqlobjectVersion
 
 import db
 from taskcmd import TaskCmd
@@ -84,10 +85,15 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
         except Exception, e:
             tui.error("Unhandled exception (oups)\n\t%s" % e)
             print "This is a bug of Yokadi, sorry."
-            print "Send the above message by email to Yokadi developers to help them make Yokadi better."
+            print "Send the above message by email to Yokadi developers (ml-yokadi@sequanux.org) to help them make Yokadi better."
             cut="---------------------8<----------------------------------------------"
             print cut
             traceback.print_exc()
+            print "--"
+            print "Python: %s" % sys.version.replace("\n", " ")
+            print "SQLObject: %s" % sqlobjectVersion.replace("\n", " ")
+            print "OS: %s (%s)" % os.uname()[0:3:2]
+            print "Yokadi: %s" % utils.currentVersion()
             print cut
             print
 
