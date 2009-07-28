@@ -61,58 +61,85 @@ def parseDateTimeDelta(line):
         raise YokadiException("Unable to understand time shift. See help t_set_due")
 
 
-def parseHumaneDateTime(line):
+def parseHumaneDateTime(line, today=None):
     """Parse human date and time and return structured datetime object
     Datetime  can be absolute (23/10/2008 10:38) or relative (+5M, +3H, +1D, +6W)
     @param line: human date / time
+    @param today: optional parameter to define a fake today date. Useful for
+    unit testing.
     @type line: str
     @return: datetime object"""
 
     line = parseutils.simplifySpaces(line)
+    if not line:
+        raise YokadiException("Date is empty")
 
     # Date & Time format
     fDate=None
     fTime=None
 
-    today=datetime.today().replace(microsecond=0)
+    if today is None:
+        today = datetime.today().replace(microsecond=0)
 
+    # Check for "+<delta>" format
     if line.startswith("+"):
-        date = today + parseDateTimeDelta(line[1:])
-    else:
-        date = today
-        #Absolute date and/or time
+        return today + parseDateTimeDelta(line[1:])
+
+    # Check for "<weekday> [<time>]" format
+    firstWord = line.split()[0].lower()
+
+    weekdayDict = {"tomorrow": (today.weekday() + 1) % 7}
+    weekdayDict.update(WEEKDAYS)
+    weekdayDict.update(SHORT_WEEKDAYS)
+    weekday = weekdayDict.get(firstWord)
+    if weekday is not None:
+        date = today + timedelta(days=(weekday - today.weekday()) % 7)
         if " " in line:
-            # We assume user give date & time
-            tDate, tTime=line.split()
-            fDate=guessDateFormat(tDate)
-            fTime=guessTimeFormat(tTime)
+            timeText = line.split()[1]
+            fTime = guessTimeFormat(timeText)
             try:
-                date=datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
-            except Exception, e:
-                raise YokadiException("Unable to understand date & time format:\t%s" % e)
-        else:
-            if ":" in line:
-                fTime=guessTimeFormat(line)
-                try:
-                    tTime=datetime(*time.strptime(line, fTime)[0:5]).time()
-                except ValueError, e:
-                    raise YokadiException("Invalid date format: %s" % e)
-                date=datetime.combine(today, tTime)
-            else:
-                fDate=guessDateFormat(line)
-                try:
-                    date=datetime(*time.strptime(line, fDate)[0:5])
-                except ValueError, e:
-                    raise YokadiException("Invalid date format: %s" % e)
-        if fDate:
-            # Set year and/or month to current date if not given
-            try:
-                if not "%Y" in fDate:
-                    date=date.replace(year=today.year)
-                if not "%m" in fDate:
-                    date=date.replace(month=today.month)
+                tTime = datetime(*time.strptime(timeText, fTime)[0:5]).time()
             except ValueError, e:
-                    raise YokadiException("Invalid date format: %s" % e)
+                raise YokadiException("Invalid date format: %s" % e)
+            date = datetime.combine(date, tTime)
+        return date
+
+    # Absolute date and/or time
+    date = None
+    if " " in line:
+        # We assume user give date & time
+        tDate, tTime=line.split()
+        fDate=guessDateFormat(tDate)
+        fTime=guessTimeFormat(tTime)
+        try:
+            date=datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
+        except Exception, e:
+            raise YokadiException("Unable to understand date & time format:\t%s" % e)
+    else:
+        if ":" in line:
+            fTime=guessTimeFormat(line)
+            try:
+                tTime=datetime(*time.strptime(line, fTime)[0:5]).time()
+            except ValueError, e:
+                raise YokadiException("Invalid date format: %s" % e)
+            date=datetime.combine(today, tTime)
+        else:
+            fDate=guessDateFormat(line)
+            try:
+                date=datetime(*time.strptime(line, fDate)[0:5])
+            except ValueError, e:
+                raise YokadiException("Invalid date format: %s" % e)
+    assert date
+
+    if fDate:
+        # Set year and/or month to current date if not given
+        try:
+            if not "%Y" in fDate:
+                date=date.replace(year=today.year)
+            if not "%m" in fDate:
+                date=date.replace(month=today.month)
+        except ValueError, e:
+                raise YokadiException("Invalid date format: %s" % e)
     return date
 
 

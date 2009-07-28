@@ -564,6 +564,11 @@ class TaskCmd(object):
         - +1D: in 1 day
         - +6W: in 6 weeks
 
+        As a day in the week:
+        - tomorrow:      tomorrow, same hour
+        - tuesday 12:10: next tuesday, at 12:10
+        - fr 15:30:      next friday, at 15:30
+
         Or as an absolute date or time:
         - 10:38:            at 10:38 today
         - 25/09/2010 12:10: on the 25th of September, 2010, at 12:10

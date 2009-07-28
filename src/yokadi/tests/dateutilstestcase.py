@@ -45,13 +45,18 @@ class DateUtilsTestCase(unittest.TestCase):
         for invalidDate in ("2008", "01/2009", "01//02/01", "02/20/2009", "", "-23d", "+3e", "lkjljlkjlkj", "200/200/2009"):
             self.assertRaises(YokadiException, dateutils.parseHumaneDateTime, invalidDate)
 
+        # Fake today to a fixed date. This is a saturday (weekday=5).
+        today = datetime(2009, 1, 3)
         testData = [
             ("06/02/2009", datetime(2009, 2, 6)),
             ("06/02/2009 12:30", datetime(2009, 2, 6, 12, 30)),
+            ("tomorrow 18:00", today + timedelta(days=1, hours=18)),
+            ("sunday", datetime(2009, 1, 4)),
+            ("tu 11:45", datetime(2009, 1, 6, 11, 45)),
             ]
 
         for text, expected in testData:
-            output = dateutils.parseHumaneDateTime(text)
+            output = dateutils.parseHumaneDateTime(text, today=today)
             self.assertEquals(expected, output)
 
 
