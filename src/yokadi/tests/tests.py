@@ -23,6 +23,7 @@ from projecttestcase import ProjectTestCase
 from completerstestcase import CompletersTestCase
 from tasktestcase import TaskTestCase
 from bugtestcase import BugTestCase
+from aliastestcase import AliasTestCase
 
 DB_FILENAME = "unittest.db"
 
