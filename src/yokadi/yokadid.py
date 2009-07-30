@@ -34,7 +34,7 @@ except ImportError:
     SYSLOG=False
 
 # Daemon polling delay (in seconds)
-DELAY=5
+DELAY=30
 
 # Event sender to main loop
 event=[True, ""]
