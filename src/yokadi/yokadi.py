@@ -18,6 +18,7 @@ import traceback
 from cmd import Cmd
 from optparse import OptionParser
 from sqlobject import __doc__ as sqlobjectVersion
+from sqlobject import SQLObjectNotFound
 
 import db
 from taskcmd import TaskCmd
@@ -45,12 +46,23 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
         self.prompt = "yokadi> "
         self.historyPath=os.path.expandvars("$HOME/.yokadi_history")
         self.loadHistory()
+        try:
+            self.aliases = eval(db.Config.byName("ALIASES").value)
+        except SQLObjectNotFound:
+            self.aliases = {}
+        except Exception, e:
+            tui.error("Aliases syntax error. Ignored")
+            self.aliases = {}
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""
         return
 
     def default(self, line):
+        tokens = line.split()
+        if len(tokens)>0 and tokens[0] in self.aliases:
+            line = "%s %s" % (self.aliases[tokens[0]], " ".join(tokens[1:]))
+            return self.onecmd(line)
         if line.isdigit():
             self.do_t_show(line)
         else:
@@ -60,7 +72,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
         """Quit."""
         print
         return True
-    #Some alias
+
+    #Some standard alias
     do_quit=do_EOF
     do_q=do_EOF
     do_exit=do_EOF
