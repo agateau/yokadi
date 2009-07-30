@@ -24,6 +24,7 @@ import db
 from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
+from aliascmd import AliasCmd
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from yokadiexception import YokadiException
@@ -36,23 +37,17 @@ import utils
 sys.setdefaultencoding(tui.ENCODING)
 
 
-class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, Cmd):
+class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)
         ProjectCmd.__init__(self)
         KeywordCmd.__init__(self)
         BugCmd.__init__(self)
+        AliasCmd.__init__(self)
         self.prompt = "yokadi> "
         self.historyPath=os.path.expandvars("$HOME/.yokadi_history")
         self.loadHistory()
-        try:
-            self.aliases = eval(db.Config.byName("ALIASES").value)
-        except SQLObjectNotFound:
-            self.aliases = {}
-        except Exception, e:
-            tui.error("Aliases syntax error. Ignored")
-            self.aliases = {}
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""
