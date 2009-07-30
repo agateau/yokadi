@@ -8,6 +8,7 @@ Alias related commands.
 from db import Config
 from yokadiexception import YokadiException
 import tui
+import colors as C
 
 from sqlobject import SQLObjectNotFound
 
@@ -25,8 +26,7 @@ class AliasCmd(object):
         """List all aliases."""
         if self.aliases:
             for name, command in self.aliases.items():
-                #TODO: make this pretty
-                print "%s => %s" % (name, command)
+                print C.BOLD+name.ljust(10) + C.RESET + "=> " + command
         else:
             print "No alias defined. Use a_add to create one"
 
