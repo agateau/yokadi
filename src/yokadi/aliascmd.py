@@ -56,3 +56,13 @@ class AliasCmd(object):
             aliases.value = repr(self.aliases)
         else:
             tui.error("No alias with that name. Use a_list to display all aliases")
+
+def resolveAlias(line, aliasDict):
+    """Look for alias in alias and replace it with rela command
+    @param line : string to analyse
+    @param aliasDict: aliases dictionnary
+    @return: modified line"""
+    tokens = line.split()
+    if len(tokens)>0 and tokens[0] in aliasDict:
+        line = "%s %s" % (aliasDict[tokens[0]], " ".join(tokens[1:]))
+    return line

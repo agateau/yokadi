@@ -24,7 +24,7 @@ import db
 from taskcmd import TaskCmd
 from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
-from aliascmd import AliasCmd
+from aliascmd import AliasCmd, resolveAlias
 from confcmd import ConfCmd
 from bugcmd import BugCmd
 from yokadiexception import YokadiException
@@ -54,14 +54,22 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd)
         return
 
     def default(self, line):
-        tokens = line.split()
-        if len(tokens)>0 and tokens[0] in self.aliases:
-            line = "%s %s" % (self.aliases[tokens[0]], " ".join(tokens[1:]))
-            return self.onecmd(line)
-        if line.isdigit():
-            self.do_t_show(line)
+        nline = resolveAlias(line, self.aliases)
+        if nline != line:
+            return self.onecmd(nline)
+        elif nline.isdigit():
+            self.do_t_show(nline)
         else:
             raise YokadiException("Unknown command. Use 'help' to see all available commands")
+
+    def completedefault(self, text, line, begidx, endidx):
+        """Default completion command.
+        Try to see if command is an alias and find the
+        appropriate complete function if it exists"""
+        nline = resolveAlias(line, self.aliases)
+        compfunc = getattr(self, 'complete_' + nline.split()[0])
+        matches = compfunc(text, line, begidx, endidx)
+        return matches
 
     def do_EOF(self, line):
         """Quit."""
