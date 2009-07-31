@@ -42,7 +42,6 @@ class YokadiOptionParser(OptionParser):
                 # We have to check if all option are real ones
                 realOption = True
                 for subArgs in arg[1:]:
-                    print subArgs
                     if not self.get_option("-" + subArgs):
                         realOption = False
                         break
