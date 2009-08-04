@@ -180,7 +180,7 @@ class TextListRenderer(object):
                     column.formater = TitleFormater(titleWidth)
 
         for project, taskList in self._taskList:
-            self._renderTaskListHeader(project.name)
+            self._renderTaskListHeader(unicode(project))
             for task in taskList:
                 self._renderTaskListRow(task)
 

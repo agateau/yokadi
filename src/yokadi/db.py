@@ -53,7 +53,11 @@ class Project(SQLObject):
         otherColumn="keyword_id")
 
     def __unicode__(self):
-        return self.name
+        keywords = self.getKeywordsAsString()
+        if keywords:
+            return "%s (%s)" % (self.name, keywords)
+        else:
+            return self.name
 
     def setKeywordDict(self, dct):
         """
@@ -80,8 +84,15 @@ class Project(SQLObject):
     def getKeywordsAsString(self):
         """
         Returns all keywords as a string like "key1=value1, key2=value2..."
+        Value is not displayed if none
         """
-        return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
+        result = []
+        for key, value in self.getKeywordDict().items():
+            if value:
+                result.append("%s=%s" % (key, value))
+            else:
+                result.append(key)
+        return ", ".join(result)
 
 
 class Keyword(SQLObject):
@@ -93,6 +104,9 @@ class Keyword(SQLObject):
         intermediateTable="task_keyword",
         joinColumn="keyword_id",
         otherColumn="task_id")
+
+    def __unicode__(self):
+        return self.name
 
 
 class TaskKeyword(SQLObject):
