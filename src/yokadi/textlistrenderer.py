@@ -3,6 +3,7 @@
 Text rendering of t_list output
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPLv3
 """
 from datetime import datetime
@@ -143,9 +144,14 @@ class TextListRenderer(object):
         self.today = datetime.today().replace(microsecond=0)
 
 
-    def addTaskList(self, project, taskList):
-        # Store tasks
-        self._taskList.append((project, taskList))
+    def addTaskList(self, sectionName, taskList):
+        """Store tasks for this section
+        @param sectionName: name of the task groupement section
+        @type sectionName: unicode
+        @param taskList: list of tasks to display
+        @type taskList: list of db.Task instances
+        """
+        self._taskList.append((sectionName, taskList))
         # Find max title width
         for task in taskList:
             self._maxTitleWidth = max(self._maxTitleWidth, len(task.title))
@@ -179,18 +185,22 @@ class TextListRenderer(object):
                     column.width = titleWidth
                     column.formater = TitleFormater(titleWidth)
 
-        for project, taskList in self._taskList:
-            self._renderTaskListHeader(unicode(project))
+        for sectionName, taskList in self._taskList:
+            self._renderTaskListHeader(sectionName)
             for task in taskList:
                 self._renderTaskListRow(task)
 
 
-    def _renderTaskListHeader(self, projectName):
+    def _renderTaskListHeader(self, sectionName):
+        """
+        @param sectionName: name used for list header
+        @type sectionName: unicode"""
+
         cells = [x.createHeader() for x in self.columns]
         line = "|".join(cells)
         width = len(line)
         print >>self.out
-        print >>self.out, C.CYAN + projectName.center(width) + C.RESET
+        print >>self.out, C.CYAN + sectionName.center(width) + C.RESET
         print >>self.out, C.BOLD + line + C.RESET
         print >>self.out, "-" * width
 

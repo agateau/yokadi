@@ -393,7 +393,7 @@ class TaskCmd(object):
                 if len(taskList) == 0:
                     continue
 
-                renderer.addTaskList(keyword, taskList)
+                renderer.addTaskList(unicode(keyword), taskList)
             # Call renderer
             renderer.end()
         else:
@@ -404,7 +404,7 @@ class TaskCmd(object):
                     continue
                 taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
                                        orderBy=order, limit=limit)
-    
+
                 if keywordDict:
                     taskList = [x for x in taskList if taskHasWantedKeywordDict(x, keywordDict)]
                 else:
@@ -412,8 +412,8 @@ class TaskCmd(object):
     
                 if len(taskList) == 0:
                     continue
-    
-                renderer.addTaskList(project, taskList)
+
+                renderer.addTaskList(unicode(project), taskList)
             renderer.end()
     
             if len(hiddenProjectNames) > 0:
