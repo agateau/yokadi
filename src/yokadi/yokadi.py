@@ -4,6 +4,7 @@
 Command line oriented, sqlite powered, todo list
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPLv3
 """
 
@@ -148,6 +149,14 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd)
         else:
             print "Usage: ",
             Cmd.do_help(self, arg)
+
+    def completenames(self, text, *ignored):
+        """Complete commands names. Same as Cmd.cmd one but with support
+        for command aliases. Code kindly borrowed to Pysql"""
+        dotext = 'do_'+text
+        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        names.extend([a for a in self.aliases.keys() if a.startswith(text)])
+        return names
 
 
 def main():
