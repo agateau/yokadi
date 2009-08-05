@@ -143,6 +143,9 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd)
         YokadiOptionParser for the do_foo() method and show the help of the
         parser, instead of do_foo() docstring.
         """
+        if arg in self.aliases:
+            # If arg is an alias, get help on the underlying command
+            arg = self.aliases[arg].split()[0]
         if hasattr(self, "parser_" + arg):
             parserMethod = getattr(self, "parser_" + arg)
             parserMethod().print_help(sys.stderr)
