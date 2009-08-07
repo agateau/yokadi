@@ -39,8 +39,15 @@ class HtmlListRenderer(object):
                 <body>
                 """
 
-    def addTaskList(self, project, taskList):
-        print >>self.out, (u"<h1>%s</h1>" % escape(project.name)).encode("utf-8")
+    def addTaskList(self, sectionName, taskList):
+        """Store tasks for this section
+        @param sectionName: name of the task groupement section
+        @type sectionName: unicode
+        @param taskList: list of tasks to display
+        @type taskList: list of db.Task instances
+        """
+
+        print >>self.out, (u"<h1>%s</h1>" % escape(sectionName)).encode("utf-8")
         print >>self.out, "<table width='100%'>"
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:

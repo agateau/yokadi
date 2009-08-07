@@ -20,15 +20,22 @@ class XmlListRenderer(object):
         self.doc.appendChild(self.rootElement)
 
 
-    def addTaskList(self, project, taskList):
-        projectElement = self.doc.createElement("project")
-        self.rootElement.appendChild(projectElement)
-        projectElement.setAttribute("name", project.name)
-        projectElement.setAttribute("id", unicode(project.id))
+    def addTaskList(self, sectionName, taskList):
+        """Store tasks for this section
+        @param sectionName: name of the task groupement section
+        @type sectionName: unicode
+        @param taskList: list of tasks to display
+        @type taskList: list of db.Task instances
+        """
+
+        sectionElement = self.doc.createElement("section")
+        self.rootElement.appendChild(sectionElement)
+        sectionElement.setAttribute("name", sectionName)
+
 
         for task in taskList:
             taskElement = self.doc.createElement("task")
-            projectElement.appendChild(taskElement)
+            sectionElement.appendChild(taskElement)
 
             taskElement.setAttribute("id", unicode(task.id))
 
