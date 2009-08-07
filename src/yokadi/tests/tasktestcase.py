@@ -73,4 +73,13 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_mark_done("1")
         self.assertEqual(task.status, "new")
 
+    def testTlist(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_t_add("x @kw1 @kw2=12 t2")
+
+        for line in ("", "-a", "-t",
+                     "-f plain", "-f xml", "-f html"):
+            self.cmd.do_t_list(line)
 # vi: ts=4 sw=4 et
