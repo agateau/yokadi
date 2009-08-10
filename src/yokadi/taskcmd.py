@@ -670,6 +670,8 @@ class TaskCmd(object):
             rDate = dateutils.parseHumaneDateTime(" ".join(tokens[2:]))
             bymonth = rDate.month
             bymonthday = rDate.day
+            byhour = rDate.hour
+            byminute = rDate.minute
         else:
             raise YokadiException("Unknown frequency. Available: daily, weekly, monthly and yearly")
 
