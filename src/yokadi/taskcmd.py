@@ -7,6 +7,7 @@ Task related commands.
 @license: GPLv3
 """
 import os
+import readline
 from datetime import datetime, date, timedelta
 from dateutil import rrule
 from sqlobject import SQLObjectNotFound, LIKE, AND, OR
@@ -504,6 +505,28 @@ class TaskCmd(object):
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
+
+        def editComplete(text, state):
+            """ Specific completer for the edit prompt.
+            This subfunction should stay here because it needs to access to cmd members"""
+            if state == 0:
+                origline = readline.get_line_buffer()
+                line = origline.lstrip()
+                stripped = len(origline) - len(line)
+                begidx = readline.get_begidx() - stripped
+                endidx = readline.get_endidx() - stripped
+                if begidx>0:
+                    self.completion_matches = projectAndKeywordCompleter("", text, line, begidx, endidx, shift=1)
+                else:
+                    self.completion_matches = []
+            try:
+                return self.completion_matches[state]
+            except IndexError:
+                return None
+
+        old_completer = readline.get_completer() # Backup previous completer to restore it in the end
+        readline.set_completer(editComplete)     # Switch to specific completer
+
         task = dbutils.getTaskFromId(line)
 
         # Create task line
@@ -524,6 +547,8 @@ class TaskCmd(object):
             foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
+
+        readline.set_completer(old_completer)   # Restore standard completer
 
     complete_t_edit = taskIdCompleter
 

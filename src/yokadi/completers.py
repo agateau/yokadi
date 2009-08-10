@@ -49,9 +49,11 @@ class KeywordCompleter(object):
         else:
             return []
 
-def projectAndKeywordCompleter(cmd, text, line, begidx, endidx):
+def projectAndKeywordCompleter(cmd, text, line, begidx, endidx, shift=0):
+    """@param shift: argument position shift. Used when command is omitted (t_edit usecase)"""
     position=computeCompleteParameterPosition(text, line, begidx, endidx)
     position-=len(parseutils.parseParameters(line)[0]) # remove arguments from position count
+    position+=shift # Apply argument shift
     if   position == 1: # Projects
         return ["%s" % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
     elif position >= 2 and line[-1] != " " and line.split()[-1][0] == "@": # Keywords (we ensure that it starts with @
