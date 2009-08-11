@@ -18,8 +18,16 @@ reload(sys)  ## So as to enable setdefaultencoding
 import traceback
 from cmd import Cmd
 from optparse import OptionParser
-from sqlobject import __doc__ as sqlobjectVersion
-from sqlobject import SQLObjectNotFound
+
+try:
+    from sqlobject import __doc__ as sqlobjectVersion
+    from sqlobject import SQLObjectNotFound
+
+except ImportError:
+    print "You must install SQLObject to use Yokadi"
+    print "Get it on http://www.sqlobject.org/"
+    print "Or use 'easy_install sqlobject'"
+    sys.exit(1)
 
 import db
 from taskcmd import TaskCmd

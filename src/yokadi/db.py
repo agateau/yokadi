@@ -10,6 +10,9 @@ import os
 import sys
 from pickle import loads, dumps
 from datetime import datetime
+from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
+     RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol, StringCol
+
 try:
     from dateutil import rrule
 except ImportError:
@@ -17,15 +20,6 @@ except ImportError:
     print "This library is used for task recurrence"
     print "Get it on Gustavo Niemeyer website"
     print "Or use 'easy_install dateutils'"
-    sys.exit(1)
-
-try:
-    from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
-         RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol, StringCol
-except ImportError:
-    print "You must install SQLObject to use Yokadi"
-    print "Get it on http://www.sqlobject.org/"
-    print "Or use 'easy_install sqlobject'"
     sys.exit(1)
 
 from yokadiexception import YokadiException
