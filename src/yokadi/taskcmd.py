@@ -543,6 +543,7 @@ class TaskCmd(object):
             except KeyboardInterrupt:
                 print
                 print "Cancelled"
+                readline.set_completer(old_completer)   # Restore standard completer
                 return
             foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
