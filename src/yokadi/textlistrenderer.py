@@ -145,6 +145,20 @@ class TextListRenderer(object):
         self._maxTitleWidth = len("Title") - 1
         self.today = datetime.today().replace(microsecond=0)
 
+        # All fields set to None must be defined in end()
+        self.columns = [
+            Column("ID"       , None        , idFormater),
+            Column("Title"    , None        , None),
+            Column("U"        , 3           , urgencyFormater),
+            Column("S"        , 1           , statusFormater),
+            Column("Age"      , 8           , AgeFormater(self.today)),
+            Column("Due date" , None        , None),
+            ]
+
+        self.idColumn = self.columns[0]
+        self.titleColumn = self.columns[1]
+        self.dueColumn = self.columns[-1]
+
 
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
@@ -161,31 +175,24 @@ class TextListRenderer(object):
         self._maxTitleWidth += 1
 
     def end(self):
-        idWidth = max(2, len(str(Task.select().max(Task.q.id))))
-        titleWidth = self._maxTitleWidth
-        if self.termWidth < 100:
-            dueDateWidth = 8
-            shortDateFormat = True
-        else:
-            dueDateWidth = 26
-            shortDateFormat = False
-        self.columns = [
-            Column("ID"       , idWidth     , idFormater),
-            Column("Title"    , titleWidth  , TitleFormater(titleWidth)),
-            Column("U"        , 3           , urgencyFormater),
-            Column("S"        , 1           , statusFormater),
-            Column("Age"      , 8           , AgeFormater(self.today)),
-            Column("Due date" , dueDateWidth, DueDateFormater(self.today, shortDateFormat))
-            ]
+        # Adjust idColumn
+        maxId = Task.select().max(Task.q.id)
+        self.idColumn.width = max(2, len(str(maxId)))
 
-        # If table is larger than terminal, reduce width of title column
+        # Adjust dueColumn
+        shortDateFormat = self.termWidth < 100
+        if shortDateFormat:
+            self.dueColumn.width = 8
+        else:
+            self.dueColumn.width = 26
+        self.dueColumn.formater = DueDateFormater(self.today, shortDateFormat)
+
+        # Adjust titleColumn
+        self.titleColumn.width = self._maxTitleWidth
         totalWidth = sum([x.width for x in self.columns])
-            for column in self.columns:
-                if column.title == "Title":
-                    column.width = titleWidth
-                    column.formater = TitleFormater(titleWidth)
         if totalWidth > self.termWidth:
-            titleWidth -= (totalWidth - self.termWidth) + len(self.columns)
+            self.titleColumn.width -= (totalWidth - self.termWidth) + len(self.columns)
+        self.titleColumn.formater = TitleFormater(self.titleColumn.width)
 
         # Print table
         for sectionName, taskList in self._taskList:
