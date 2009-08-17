@@ -35,7 +35,7 @@ class TextListRendererTestCase(unittest.TestCase):
 %(CYAN)s              Foo               %(RESET)s
 %(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s
 --------------------------------
-1 |t1 |0  |N|0m      |        
+1 |t1   |0  |N|0m      |        
 """ % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
 
         testutils.multiLinesAssertEqual(self, out.getvalue(), expected)

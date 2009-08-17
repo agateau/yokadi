@@ -141,7 +141,8 @@ class TextListRenderer(object):
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self._taskList = []
-        self._maxTitleWidth = 0
+        # - 1 to compensate for potential '*' suffix
+        self._maxTitleWidth = len("Title") - 1
         self.today = datetime.today().replace(microsecond=0)
 
 
