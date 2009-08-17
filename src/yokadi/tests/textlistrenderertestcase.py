@@ -26,10 +26,12 @@ class TextListRendererTestCase(unittest.TestCase):
         dbutils.getOrCreateKeyword("k2", interactive=False)
         t1 = dbutils.addTask("x", "t1", {})
         t2 = dbutils.addTask("x", "t2", {"k1":None, "k2":12})
+        longerTask = dbutils.addTask("x", "A longer task name", {})
 
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80)
         renderer.addTaskList("Foo", [t1])
+        self.assertEquals(renderer.maxTitleWidth, 5)
         renderer.end()
         expected=(u"\n" \
             + "%(CYAN)s              Foo               %(RESET)s\n" \
@@ -39,11 +41,10 @@ class TextListRendererTestCase(unittest.TestCase):
             )% dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
         testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
 
-        longerTask = dbutils.addTask("x", "A longer task name", {})
-
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80)
         renderer.addTaskList("Foo", [longerTask])
+        self.assertEquals(renderer.maxTitleWidth, len(longerTask.title) + 1)
         renderer.end()
         expected=(u"\n" \
             + "%(CYAN)s                     Foo                      %(RESET)s\n" \
