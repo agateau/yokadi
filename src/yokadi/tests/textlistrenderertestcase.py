@@ -31,13 +31,26 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer = TextListRenderer(out, termWidth=80)
         renderer.addTaskList("Foo", [t1])
         renderer.end()
-        expected=u"""
-%(CYAN)s              Foo               %(RESET)s
-%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s
---------------------------------
-1 |t1   |0  |N|0m      |        
-""" % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
+        expected=(u"\n" \
+            + "%(CYAN)s              Foo               %(RESET)s\n" \
+            + "%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s\n" \
+            +         "--------------------------------\n" \
+            +         "1 |t1   |0  |N|0m      |        \n" \
+            )% dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
+        testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
 
+        longerTask = dbutils.addTask("x", "A longer task name", {})
+
+        out = StringIO()
+        renderer = TextListRenderer(out, termWidth=80)
+        renderer.addTaskList("Foo", [longerTask])
+        renderer.end()
+        expected=(u"\n" \
+            + "%(CYAN)s                     Foo                      %(RESET)s\n" \
+            + "%(BOLD)sID|Title              |U  |S|Age     |Due date%(RESET)s\n" \
+            +         "----------------------------------------------\n" \
+            +         "3 |A longer task name |0  |N|0m      |        \n" \
+            )% dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
         testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
 
 
