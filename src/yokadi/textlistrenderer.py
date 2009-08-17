@@ -140,9 +140,9 @@ class TextListRenderer(object):
     def __init__(self, out, termWidth = None):
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
-        self._taskList = []
+        self.taskLists = []
         # - 1 to compensate for potential '*' suffix
-        self._maxTitleWidth = len("Title") - 1
+        self.maxTitleWidth = len("Title") - 1
         self.today = datetime.today().replace(microsecond=0)
 
         # All fields set to None must be defined in end()
@@ -167,12 +167,12 @@ class TextListRenderer(object):
         @param taskList: list of tasks to display
         @type taskList: list of db.Task instances
         """
-        self._taskList.append((sectionName, taskList))
+        self.taskLists.append((sectionName, taskList))
         # Find max title width
         for task in taskList:
-            self._maxTitleWidth = max(self._maxTitleWidth, len(task.title))
+            self.maxTitleWidth = max(self.maxTitleWidth, len(task.title))
         # Keep some space for potential '*' suffix
-        self._maxTitleWidth += 1
+        self.maxTitleWidth += 1
 
     def end(self):
         # Adjust idColumn
@@ -188,14 +188,14 @@ class TextListRenderer(object):
         self.dueColumn.formater = DueDateFormater(self.today, shortDateFormat)
 
         # Adjust titleColumn
-        self.titleColumn.width = self._maxTitleWidth
+        self.titleColumn.width = self.maxTitleWidth
         totalWidth = sum([x.width for x in self.columns])
         if totalWidth > self.termWidth:
             self.titleColumn.width -= (totalWidth - self.termWidth) + len(self.columns)
         self.titleColumn.formater = TitleFormater(self.titleColumn.width)
 
         # Print table
-        for sectionName, taskList in self._taskList:
+        for sectionName, taskList in self.taskLists:
             self._renderTaskListHeader(sectionName)
             for task in taskList:
                 self._renderTaskListRow(task)
