@@ -55,6 +55,7 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
     def testRecurs(self):
+        tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
         task = Task.get(1)
         self.cmd.do_t_recurs("1 daily 10:00")
