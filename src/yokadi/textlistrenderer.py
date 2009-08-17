@@ -137,8 +137,9 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out):
+    def __init__(self, out, termWidth = None):
         self.out = out
+        self.termWidth = termWidth or tui.getTermWidth()
         self._taskList = []
         self._maxTitleWidth = 0
         self.today = datetime.today().replace(microsecond=0)
@@ -159,10 +160,9 @@ class TextListRenderer(object):
         self._maxTitleWidth += 1
 
     def end(self):
-        termWidth = tui.getTermWidth()
         idWidth = max(2, len(str(Task.select().max(Task.q.id))))
         titleWidth = self._maxTitleWidth
-        if termWidth < 100:
+        if self.termWidth < 100:
             dueDateWidth = 8
             shortDateFormat = True
         else:
@@ -179,12 +179,12 @@ class TextListRenderer(object):
 
         # If table is larger than terminal, reduce width of title column
         totalWidth = sum([x.width for x in self.columns])
-        if totalWidth > termWidth:
-            titleWidth -= (totalWidth - termWidth) + len(self.columns)
             for column in self.columns:
                 if column.title == "Title":
                     column.width = titleWidth
                     column.formater = TitleFormater(titleWidth)
+        if totalWidth > self.termWidth:
+            titleWidth -= (totalWidth - self.termWidth) + len(self.columns)
 
         # Print table
         for sectionName, taskList in self._taskList:

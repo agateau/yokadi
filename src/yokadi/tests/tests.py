@@ -24,6 +24,7 @@ from completerstestcase import CompletersTestCase
 from tasktestcase import TaskTestCase
 from bugtestcase import BugTestCase
 from aliastestcase import AliasTestCase
+from textlistrenderertestcase import TextListRendererTestCase
 
 DB_FILENAME = "unittest.db"
 
