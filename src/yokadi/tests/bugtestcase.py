@@ -16,6 +16,7 @@ from bugcmd import BugCmd
 class BugTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
+        tui.clearInputAnswers()
         self.cmd = BugCmd()
 
     def testAdd(self):

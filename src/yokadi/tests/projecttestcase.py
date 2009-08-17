@@ -16,6 +16,7 @@ import tui
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
+        tui.clearInputAnswers()
         self.cmd = ProjectCmd()
 
 

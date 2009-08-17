@@ -17,6 +17,7 @@ from db import Keyword, Project
 class DbUtilsTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
+        tui.clearInputAnswers()
 
 
     def testGetOrCreateKeyword(self):

@@ -16,6 +16,7 @@ from taskcmd import TaskCmd
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
+        tui.clearInputAnswers()
         self.cmd = TaskCmd()
 
     def testAdd(self):

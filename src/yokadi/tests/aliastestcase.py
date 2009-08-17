@@ -11,7 +11,6 @@ import testutils
 
 from db import Config
 from aliascmd import AliasCmd
-import tui
 
 class AliasTestCase(unittest.TestCase):
     def setUp(self):

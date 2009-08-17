@@ -181,6 +181,14 @@ def addInputAnswers(*answers):
     _answers.extend(answers)
 
 
+def clearInputAnswers():
+    """Remove all added answers. Useful to avoid making a test depend on a "y"
+    added by another test.
+    """
+    global _answers
+    _answers = []
+
+
 def getTermWidth():
     """Gets the terminal width. Works only on Unix system.
     @return: terminal width or "120" is system not supported
