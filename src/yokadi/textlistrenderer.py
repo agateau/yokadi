@@ -176,7 +176,8 @@ class TextListRenderer(object):
             Column("Age"      , 8           , AgeFormater(self.today)),
             Column("Due date" , dueDateWidth, DueDateFormater(self.today, shortDateFormat))
             ]
-        # Check if column's witdh sum is not too large
+
+        # If table is larger than terminal, reduce width of title column
         totalWidth = sum([x.width for x in self.columns])
         if totalWidth > termWidth:
             titleWidth -= (totalWidth - termWidth) + len(self.columns)
@@ -185,6 +186,7 @@ class TextListRenderer(object):
                     column.width = titleWidth
                     column.formater = TitleFormater(titleWidth)
 
+        # Print table
         for sectionName, taskList in self._taskList:
             self._renderTaskListHeader(sectionName)
             for task in taskList:
