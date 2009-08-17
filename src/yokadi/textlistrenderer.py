@@ -66,34 +66,43 @@ def idFormater(task):
     return str(task.id), None
 
 class TitleFormater(object):
+    TITLE_WITH_KEYWORDS_TEMPLATE = "%s (%s)"
     def __init__(self, width):
         self.width = width
 
     def __call__(self, task):
-        keywords = [k for k in task.getKeywordDict().keys() if not k.startswith("_")]
+        # Compute title, titleWidth and colorWidth
+        keywords = self.keywordStringsForTask(task)
         if keywords:
-            keywords = C.BOLD+", ".join(keywords)+C.RESET
-            title = "%s (%s)" % (task.title, keywords)
-            titleWidth = len(title) - len(C.BOLD) - len(C.RESET)
+            title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (task.title, C.BOLD + keywords + C.RESET)
+            colorWidth = len(C.BOLD) + len(C.RESET)
         else:
             title = task.title
-            titleWidth = len(title)
+            colorWidth = 0
+        titleWidth = len(title) - colorWidth
 
+        # Adjust title to fit in self.width
+        maxWidth = self.width
         hasDescription = task.description != ""
-        maxLength = self.width
         if hasDescription:
-            maxLength -= 1
-        if titleWidth > maxLength:
-            title = title[:maxLength - 1] + ">"
+            maxWidth -= 1
+        if titleWidth > maxWidth:
+            title = title[:maxWidth - 1] + ">"
         else:
-            if keywords:
-                title = title.ljust(maxLength + len(C.BOLD) + len(C.RESET))
-            else:
-                title = title.ljust(maxLength)
+            title = title.ljust(maxWidth + colorWidth)
         if hasDescription:
             title = title + "*"
 
         return title, None
+
+    def keywordStringsForTask(task):
+        keywords = [k for k in task.getKeywordDict().keys() if not k.startswith("_")]
+        keywords.sort()
+        if keywords:
+            return ", ".join(keywords)
+        else:
+            return ""
+    keywordStringsForTask = staticmethod(keywordStringsForTask)
 
 def urgencyFormater(task):
     return str(task.urgency), colorizer(task.urgency)
@@ -141,8 +150,7 @@ class TextListRenderer(object):
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
-        # - 1 to compensate for potential '*' suffix
-        self.maxTitleWidth = len("Title") - 1
+        self.maxTitleWidth = len("Title")
         self.today = datetime.today().replace(microsecond=0)
 
         # All fields set to None must be defined in end()
@@ -170,9 +178,14 @@ class TextListRenderer(object):
         self.taskLists.append((sectionName, taskList))
         # Find max title width
         for task in taskList:
-            self.maxTitleWidth = max(self.maxTitleWidth, len(task.title))
-        # Keep some space for potential '*' suffix
-        self.maxTitleWidth += 1
+            title = task.title
+            keywords = TitleFormater.keywordStringsForTask(task)
+            if keywords:
+                title = TitleFormater.TITLE_WITH_KEYWORDS_TEMPLATE % (title, keywords)
+            titleWidth = len(title)
+            if task.description:
+                titleWidth += 1
+            self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
     def end(self):
         # Adjust idColumn
