@@ -385,12 +385,12 @@ class TaskCmd(object):
                                            TaskKeyword.q.keywordID == keyword.id,
                                            *filters),
                                         orderBy=order, limit=limit)
+                taskList = list(taskList)
                 if keywordDict:
                     # FIXME: factorize (see project oriented rendering below)
                     taskList = [x for x in taskList if taskHasWantedKeywordDict(x, keywordDict)]
-                else:
-                    taskList = list(taskList)
-
+                if projectList:
+                    taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) == 0:
                     continue
 
