@@ -380,7 +380,10 @@ class TaskCmd(object):
 
         # Fill the renderer
         if options.keyword:
+            #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
             for keyword in Keyword.select():
+                if unicode(keyword.name).startswith("_"):
+                    continue
                 taskList = Task.select(AND(TaskKeyword.q.taskID == Task.q.id,
                                            TaskKeyword.q.keywordID == keyword.id,
                                            *filters),
