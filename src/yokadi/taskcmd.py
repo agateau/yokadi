@@ -232,8 +232,7 @@ class TaskCmd(object):
                           help="top 5 urgent tasks of each project based on due date")
 
         parser.add_option("-k", "--keyword", dest="keyword",
-                          default=False, action="store_true",
-                          help="Group tasks by keyword instead of project")
+                          help="Group tasks by given keyword instead of project. The % wildcard can be used.")
 
         parser.add_option("-s", "--search", dest="search",
                           action="append",
@@ -380,9 +379,11 @@ class TaskCmd(object):
 
         # Fill the renderer
         if options.keyword:
-            #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
-            for keyword in Keyword.select():
-                if unicode(keyword.name).startswith("_"):
+            if options.keyword.startswith("@"):
+                options.keyword = options.keyword[1:]
+            for keyword in Keyword.select(LIKE(Keyword.q.name, options.keyword)):
+                if unicode(keyword.name).startswith("_") and not options.keyword.startswith("_"):
+                    #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
                     continue
                 taskList = Task.select(AND(TaskKeyword.q.taskID == Task.q.id,
                                            TaskKeyword.q.keywordID == keyword.id,
