@@ -54,6 +54,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd)
         KeywordCmd.__init__(self)
         BugCmd.__init__(self)
         AliasCmd.__init__(self)
+        ConfCmd.__init__(self)
         self.prompt = "yokadi> "
         self.historyPath=os.path.expandvars("$HOME/.yokadi_history")
         self.loadHistory()
