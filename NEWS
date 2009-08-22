@@ -3,6 +3,7 @@ v0.11 2009/xx/xx
 - display keywords in t_list
 - bugs keywords are prefixed with a '_' to distinguish them from user keywords
 - YOKADI_DB env shell can be defined to set default yokadi database path
+- tasks can be grouped by keyword instead of project
 
 v0.10 2009/07/08
 - ability to assign keywords to a project
