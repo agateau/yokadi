@@ -432,7 +432,7 @@ class TaskCmd(object):
         the order of the lines and save the list. The urgency field will be
         updated to match the order.
         t_reorder <project_name>"""
-        project = Project.byName(projectName)
+        project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status    != 'done'),
                                orderBy=-Task.q.urgency)
