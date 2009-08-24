@@ -53,12 +53,10 @@ class Column(object):
         value, color = self.formater(task)
 
         if color:
-            cell = color
+            cell = color + value.ljust(self.width) + C.RESET
         else:
-            cell = ""
-        cell = cell + value.ljust(self.width)
-        if color:
-            cell = cell + C.RESET
+            cell = value.ljust(self.width)
+
         return cell
 
 
