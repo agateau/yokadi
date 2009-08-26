@@ -255,9 +255,9 @@ def connectDatabase(dbFileName, createIfNeeded=True):
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig={
-        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi Daemon"''',False,
+        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''',False,
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi Daemon"''',False,
+        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''',False,
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
         "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
         "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again"),

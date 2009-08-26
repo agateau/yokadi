@@ -146,6 +146,7 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
         print "Task %s is due soon" % task.title
         cmd=cmdTemplate.replace("{ID}", str(task.id))
         cmd=cmd.replace("{TITLE}", task.title.replace('"', '\"'))
+        cmd=cmd.replace("{PROJECT}", task.project.name.replace('"', '\"'))
         cmd=cmd.replace("{DATE}", str(task.dueDate))
         process=Popen(cmd, shell=True)
         process.wait()
