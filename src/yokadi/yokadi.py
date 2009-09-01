@@ -69,6 +69,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd)
             return self.onecmd(nline)
         elif nline.isdigit():
             self.do_t_show(nline)
+        elif nline == "_":
+            self.do_t_show(nline)
         else:
             raise YokadiException("Unknown command. Use 'help' to see all available commands")
 
