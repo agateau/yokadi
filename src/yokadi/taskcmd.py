@@ -238,7 +238,8 @@ class TaskCmd(object):
                           help="all overdue tasks")
 
         parser.add_option("-k", "--keyword", dest="keyword",
-                          help="Group tasks by given keyword instead of project. The % wildcard can be used.")
+                          help="Group tasks by given keyword instead of project. The % wildcard can be used.",
+                          metavar="<keyword>")
 
         parser.add_option("-s", "--search", dest="search",
                           action="append",
