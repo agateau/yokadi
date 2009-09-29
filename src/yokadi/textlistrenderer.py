@@ -70,7 +70,7 @@ class TitleFormater(object):
 
     def __call__(self, task):
         # Compute title, titleWidth and colorWidth
-        keywords = self.keywordStringsForTask(task)
+        keywords = task.getUserKeywordsNameAsString()
         if keywords:
             title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (task.title, C.BOLD + keywords + C.RESET)
             colorWidth = len(C.BOLD) + len(C.RESET)
@@ -93,14 +93,6 @@ class TitleFormater(object):
 
         return title, None
 
-    def keywordStringsForTask(task):
-        keywords = [k for k in task.getKeywordDict().keys() if not k.startswith("_")]
-        keywords.sort()
-        if keywords:
-            return ", ".join(keywords)
-        else:
-            return ""
-    keywordStringsForTask = staticmethod(keywordStringsForTask)
 
 def urgencyFormater(task):
     return str(task.urgency), colorizer(task.urgency)
@@ -177,7 +169,7 @@ class TextListRenderer(object):
         # Find max title width
         for task in taskList:
             title = task.title
-            keywords = TitleFormater.keywordStringsForTask(task)
+            keywords = task.getUserKeywordsNameAsString()
             if keywords:
                 title = TitleFormater.TITLE_WITH_KEYWORDS_TEMPLATE % (title, keywords)
             titleWidth = len(title)

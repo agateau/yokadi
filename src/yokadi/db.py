@@ -160,6 +160,19 @@ class Task(SQLObject):
         """
         return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
 
+    def getUserKeywordsNameAsString(self):
+        """
+        Returns all keywords keys as a string like "key1, key2, key3...".
+        Internal keywords (starting with _) are ignored.
+        """
+        keywords = [k for k in self.getKeywordDict().keys() if not k.startswith("_")]
+        keywords.sort()
+        if keywords:
+            return ", ".join(keywords)
+        else:
+            return ""
+
+
 class Recurrence(SQLObject):
     """Task reccurrence definition"""
 
