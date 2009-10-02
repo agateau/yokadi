@@ -212,7 +212,9 @@ class TaskCmd(object):
         parser.set_description(
             "List tasks filtered by project and/or keywords. "
             "'%' can be used as a wildcard in the project name: "
-            "to list projects starting with 'foo', use 'foo%'.")
+            "to list projects starting with 'foo', use 'foo%'. "
+            "Keyword filtering is achieved with '@'. Ex.: "
+            "t_list @home, t_list @_bug=2394")
 
         parser.add_option("-a", "--all", dest="all",
                           default=False, action="store_true",
@@ -236,8 +238,8 @@ class TaskCmd(object):
 
         parser.add_option("-s", "--search", dest="search",
                           action="append",
-                          help="only list tasks which title or description match <value>",
-                          metavar="<search>[=<value>]")
+                          help="only list tasks which title or description match <value>. You can repeat this option to search on multiple words.",
+                          metavar="<value>")
 
         formatList = ["auto"] + gRendererClassDict.keys()
         parser.add_option("-f", "--format", dest="format",
