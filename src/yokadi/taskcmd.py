@@ -208,7 +208,7 @@ class TaskCmd(object):
 
     def parser_t_list(self):
         parser = YokadiOptionParser()
-        parser.set_usage("t_list [options] <project_name>")
+        parser.set_usage("t_list [options] <project_or_keyword_filter>")
         parser.set_description(
             "List tasks filtered by project and/or keywords. "
             "'%' can be used as a wildcard in the project name: "
