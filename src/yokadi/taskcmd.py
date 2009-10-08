@@ -530,13 +530,13 @@ class TaskCmd(object):
             except IndexError:
                 return None
 
-        old_completer = readline.get_completer() # Backup previous completer to restore it in the end
-        readline.set_completer(editComplete)     # Switch to specific completer
-
         task = dbutils.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
+
+        old_completer = readline.get_completer() # Backup previous completer to restore it in the end
+        readline.set_completer(editComplete)     # Switch to specific completer
 
         while True:
             # Edit
