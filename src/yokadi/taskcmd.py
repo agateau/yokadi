@@ -233,6 +233,10 @@ class TaskCmd(object):
                           default=False, action="store_true",
                           help="top 5 urgent tasks of each project based on due date")
 
+        parser.add_option("--overdue", dest="overdue",
+                          default=False, action="store_true",
+                          help="all overdue tasks")
+
         parser.add_option("-k", "--keyword", dest="keyword",
                           help="Group tasks by given keyword instead of project. The % wildcard can be used.")
 
@@ -364,6 +368,9 @@ class TaskCmd(object):
             filters.append(Task.q.dueDate!=None)
             order=Task.q.dueDate
             limit=5
+        if options.overdue:
+            filters.append(Task.q.dueDate<datetime.now())
+            order=Task.q.dueDate
         if options.search:
             for word in options.search:
                 filters.append(OR(LIKE(Task.q.title, "%"+word+"%"),
