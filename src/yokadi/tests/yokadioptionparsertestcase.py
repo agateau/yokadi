@@ -8,6 +8,7 @@ Yokadi parser test cases
 import unittest
 
 from yokadioptionparser import YokadiOptionParser
+from yokadiexception import YokadiException
 
 class YokadiOptionParserTestCase(unittest.TestCase):
     def testEmptyLine(self):
@@ -25,7 +26,7 @@ class YokadiOptionParserTestCase(unittest.TestCase):
 
     def testDash(self):
         parser = YokadiOptionParser()
-        srcs = ["foo-bar", "foo - bar", "foo -bar", "--bar -f"]
+        srcs = ["foo-bar", "foo - bar"]
         for src in srcs:
             options, args = parser.parse_args(src)
             # Recreate the line
@@ -33,5 +34,11 @@ class YokadiOptionParserTestCase(unittest.TestCase):
             if src.startswith("-- "):
                 src = src[3:]
             self.assertEqual(line, src)
+
+    def testUknownOption(self):
+        def parseUnknownOption():
+            parser.parse_args("blabla -b")
+        parser = YokadiOptionParser()
+        self.assertRaises(YokadiException, parseUnknownOption)
 
 # vi: ts=4 sw=4 et

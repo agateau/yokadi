@@ -30,41 +30,9 @@ class YokadiOptionParser(OptionParser):
         if argv == [u""]:
             argv = []
 
-        # Escape things that looks like arg but are indeed value (a user text with a dash for example)
-        # For long option with value (--foo=bar) truncate value part to recognize option name
-        for arg in argv:
-            escapeOption = True
-            if self.get_option(arg.split("=")[0]):
-                nargv.append(arg)
-                escapeOption = False
-            elif len(arg)>1 and arg[1]!="-":
-                # This may be a option cluster.
-                # We have to check if all option are real ones
-                realOption = True
-                for subArgs in arg[1:]:
-                    if not self.get_option("-" + subArgs):
-                        realOption = False
-                        break
-                if realOption:
-                    nargv.append(arg)
-                    escapeOption = False
-
-            if escapeOption:
-                arg=arg.replace("-", "\-")
-                earg.append(arg)
-                nargv.append(arg)
-
-        options, args =  OptionParser.parse_args(self, nargv)
-
-        # Now, remove escaping
-        nargs=[] # New args with escaping removed
-        for arg in args:
-            if arg in earg:
-                nargs.append(arg.replace("\-", "-"))
-            else:
-                nargs.append(arg)
-
-        return options, nargs
+        # Unknown options will throw an error
+        options, args =  OptionParser.parse_args(self, argv)
+        return options, args
 
 
     def exit(self, status=0, msg=None):
