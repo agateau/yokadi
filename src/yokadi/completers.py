@@ -6,10 +6,11 @@ Implementation of completers for various Yokadi objects.
 @license: GPLv3
 """
 from sqlobject import LIKE
+from dateutil import rrule
 
 import parseutils
-from dateutil import rrule
 from db import Config, Keyword, Project, Task, FREQUENCY
+import dateutils
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
@@ -80,4 +81,12 @@ def recurrenceCompleter(cmd, text, line, begidx, endidx):
         return [x for x in FREQUENCY.values()+["None"] if x.lower().startswith(text.lower())]
     elif position == 3 and "weekly" in line.lower():
         return [str(x) for x in rrule.weekdays if str(x).lower().startswith(text.lower())]
+
+def dueDateCompleter(cmd, text, line, begidx, endidx):
+    position=computeCompleteParameterPosition(text, line, begidx, endidx)
+    if position == 1: # Task id
+        return taskIdCompleter(cmd, text, line, begidx, endidx)
+    elif position == 2 and not text.startswith("+"): # week day
+        return [str(x) for x in dateutils.WEEKDAYS.keys() if str(x).lower().startswith(text.lower())]
+
 # vi: ts=4 sw=4 et

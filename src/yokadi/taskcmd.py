@@ -19,7 +19,7 @@ import dateutils
 import parseutils
 import tui
 from completers import ProjectCompleter, projectAndKeywordCompleter,\
-                       taskIdCompleter, recurrenceCompleter
+                       taskIdCompleter, recurrenceCompleter, dueDateCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
@@ -628,8 +628,8 @@ class TaskCmd(object):
             task.dueDate = dateutils.parseHumaneDateTime(line)
             print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
 
-    complete_t_set_due = taskIdCompleter
-    complete_t_due = taskIdCompleter
+    complete_t_set_due = dueDateCompleter
+    complete_t_due = dueDateCompleter
 
     def do_t_add_keywords(self, line):
         """Add keywords to an existing task
