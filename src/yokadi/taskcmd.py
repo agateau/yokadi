@@ -350,19 +350,28 @@ class TaskCmd(object):
             # 2. All wantedKeywordDict valued keywords have the same value
             #    in task or project keyword"""
             for wantedKeyword, wantedValue in wantedKeywordDict.items():
-                taskFilters=[Task.q.id==task.id,
-                         TaskKeyword.q.taskID==task.id,
-                         TaskKeyword.q.keywordID==Keyword.q.id,
-                         LIKE(Keyword.q.name, wantedKeyword)]
+                if wantedKeyword.startswith("!"):
+                    wantedKeyword = wantedKeyword[1:]
+                    taskFilters=[TaskKeyword.q.keywordID!=Keyword.q.id,]
+                    projectFilters=[ProjectKeyword.q.keyword!=Keyword.q.id,]
+                    if wantedValue:
+                        taskFilters.append(TaskKeyword.q.value!=wantedValue)
+                        projectFilters.append(ProjectKeyword.q.value!=wantedValue)
+                else:
+                    taskFilters=[TaskKeyword.q.keywordID==Keyword.q.id,]
+                    projectFilters=[ProjectKeyword.q.keyword==Keyword.q.id,]
+                    if wantedValue:
+                        taskFilters.append(TaskKeyword.q.value==wantedValue)
+                        projectFilters.append(ProjectKeyword.q.value==wantedValue)
 
-                projectFilters=[Project.q.id==task.projectID,
+
+                taskFilters.extend([Task.q.id==task.id,
+                                    TaskKeyword.q.taskID==task.id,
+                                    LIKE(Keyword.q.name, wantedKeyword)])
+
+                projectFilters.extend([Project.q.id==task.projectID,
                                 ProjectKeyword.q.projectID==Project.q.id,
-                                ProjectKeyword.q.keyword==Keyword.q.id,
-                                LIKE(Keyword.q.name, wantedKeyword)]
-
-                if wantedValue:
-                    taskFilters.append(TaskKeyword.q.value==wantedValue)
-                    projectFilters.append(ProjectKeyword.q.value==wantedValue)
+                                LIKE(Keyword.q.name, wantedKeyword)])
 
                 if Task.select(AND(*taskFilters)).count()==0 and Task.select(AND(*projectFilters)).count()==0:
                     return False
@@ -418,6 +427,7 @@ class TaskCmd(object):
 
         # Check keywords exist
         for keyword in keywordDict.keys():
+            keyword = keyword.lstrip("!") # Strip any "not" operator
             if Keyword.select(LIKE(Keyword.q.name, keyword)).count()==0:
                 tui.error("Keyword %s is unknown." % keyword)
 

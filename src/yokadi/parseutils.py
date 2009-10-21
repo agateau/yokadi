@@ -7,7 +7,8 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 
-from db import Config
+from db import Config, TaskKeyword, ProjectKeyword, Keyword
+from sqlobject import AND, NOT
 import tui
 
 gSimplifySpaces = re.compile("  +")
@@ -34,7 +35,7 @@ def parseParameters(line):
 def parseLine(line):
     """Parse line of form:
     project some text @keyword1 @keyword2=12 some other text
-    @return: a tuple of ("project", "some text some other text", {keyword1: None, keyword2:12})"""
+    @return: a tuple of ("project", "some text some other text", [keywordFilter1, keywordFilter2])"""
 
     # First extract project name
     line = simplifySpaces(line)
@@ -44,34 +45,23 @@ def parseLine(line):
         project = line
         line = ""
 
-    line, keywordDict = extractKeywords(line)
+    line, keywordFilters = extractKeywords(line)
 
-    return project, line, keywordDict
+    return project, line, keywordFilters
 
 def extractKeywords(line):
     """Extract keywords (@k1 @k2=n..) from line
     @param line: line from which keywords are extracted
-    @returns: (remaining_text, {keywordDict})"""
-    keywordDict = {}
+    @returns: (remaining_text, keywordFilters)"""
+    keywordFilters = []
     remainingText=[]
     for token in line.split():
         if token.startswith("@"):
-            token=token[1:]
-            if "=" in token:
-                keyword, value = token.split("=", 1)
-                try:
-                    value = int(value)
-                except ValueError:
-                    tui.error("Keyword value must be an integer (got %s). Removing value for %s keyword" %
-                              (value, keyword))
-                    value = None
-            else:
-                keyword, value = token, None
-            keywordDict[keyword] = value
+            keywordFilters.append(KeywordFilter(token))
         else:
             remainingText.append(token)
 
-    return (u" ".join(remainingText), keywordDict)
+    return (u" ".join(remainingText), keywordFilters)
 
 def createLine(projectName, title, keywordDict):
     tokens = []
@@ -86,4 +76,71 @@ def createLine(projectName, title, keywordDict):
 
     tokens.append(title)
     return u" ".join(tokens)
+
+class KeywordFilter(object):
+    """Represent a filter on a keyword"""
+    def __init__(self, filterLine=None, keywordClass=TaskKeyword):
+        self.name=None          # Keyword name
+        self.value=None         # Keyword value
+        self.negative=False     # Negative filter
+        self.valueOperator="="  # Operator to compare value
+        self.keywordClass=keywordClass # TaskKeyword or ProjectKeyword class handler
+
+        if filterLine:
+            self.parse(filterLine)
+
+    def __str__(self):
+        """Represent keyword filter as a string. Identical to what parse() method wait for"""
+        if self.negative:
+            prefix="!@"
+        else:
+            prefix="@"
+        if self.value:
+            return prefix+self.name+self.valueOperator+str(self.value)
+        else:
+            return prefix+self.name
+
+    def filter(self):
+        """Return a filter in SQlObject format"""
+        filters=[self.keywordClass.q.keywordID==Keyword.q.id,]
+        if self.name:
+            filters.append(Keyword.q.name==self.name)
+        if self.value:
+            #TODO: take care of operator - use only equal for now
+            filters.append(self.keywordClass.q.value==self.value)
+        if filters:
+            if self.negative:
+                return NOT(AND(*filters))
+            else:
+                return AND(*filters)
+
+    def parse(self, line):
+        """Parse given line to create a keyword filter"""
+        keywordDict = {}
+        operators = ("=<", ">=", "!=", "<", ">", "=")
+        if " " in line:
+            tui.error("No space in keyword filter !")
+            return
+        if line.startswith("!"):
+            self.negative=True
+            line=line[1:]
+        if not line.startswith("@"):
+            tui.error("Keyword name must be be prefixed with a @")
+            return
+        line=line[1:] # Squash @
+        for operator in operators:
+            if operator in line:
+                self.name, self.value = line.split(operator, 1)
+                self.valueOperator = operator
+                try:
+                    self.value = int(self.value)
+                except ValueError:
+                    tui.error("Keyword value must be an integer (got %s)" %
+                              (self.value, self.name))
+                    return
+                break # Exit operator loop
+        else:
+            # No operator found, only keyword name has been provided
+            self.name, self.value = line, None
+
 # vi: ts=4 sw=4 et
