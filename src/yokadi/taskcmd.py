@@ -40,6 +40,7 @@ gRendererClassDict = dict(
 
 class TaskCmd(object):
     def __init__(self):
+        self.lastTaskId = None
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
 
@@ -58,6 +59,7 @@ class TaskCmd(object):
         task.setKeywordDict(keywordDict)
 
         task.urgency = bugutils.computeUrgency(keywordDict)
+        self.lastTaskId = task.id
 
         print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
 
@@ -66,7 +68,7 @@ class TaskCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        task = dbutils.getTaskFromId(line)
+        task = self.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
@@ -92,6 +94,17 @@ class TaskCmd(object):
         # Update bug
         task.urgency = bugutils.computeUrgency(keywordDict)
 
+    def getTaskFromId(self, line):
+        line = line.strip()
+        if line == '_':
+            if self.lastTaskId is None:
+                raise YokadiException("No previous task defined")
+            line = str(self.lastTaskId)
+        task = dbutils.getTaskFromId(line)
+        if line != '_':
+            self.lastTaskId = task.id
+        return task
+
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [@<keyword1>] [@<keyword2>] <Task description>"""
@@ -106,13 +119,14 @@ class TaskCmd(object):
             print "Added task '%s' (id=%d)" % (title, task.id)
         else:
             tui.reinjectInRawInput(u"t_add " + line)
+        self.lastTaskId = task.id
 
     complete_t_add = projectAndKeywordCompleter
 
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
-        task=dbutils.getTaskFromId(line)
+        task=self.getTaskFromId(line)
         try:
             description = tui.editText(task.description)
         except Exception, e:
@@ -132,7 +146,7 @@ class TaskCmd(object):
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You must provide a taskId and an urgency value") 
-        task = dbutils.getTaskFromId(tokens[0])
+        task = self.getTaskFromId(tokens[0])
         try:
             # Do not use isdigit(), so that we can set negative urgency. This
             # make it possible to stick tasks to the bottom of the list.
@@ -174,7 +188,7 @@ class TaskCmd(object):
     complete_t_mark_new = taskIdCompleter
 
     def _t_set_status(self, line, status):
-        task=dbutils.getTaskFromId(line)
+        task=self.getTaskFromId(line)
         if task.recurrence and status == "done":
             task.dueDate = task.recurrence.getNext(task.dueDate)
             print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
@@ -217,7 +231,7 @@ class TaskCmd(object):
     def do_t_remove(self, line):
         parser = self.parser_t_remove()
         options, args = parser.parse_args(line)
-        task=dbutils.getTaskFromId(' '.join(args))
+        task=self.getTaskFromId(' '.join(args))
         if not options.force:
             if not tui.confirm("Remove task '%s'" % task.title):
                 return
@@ -535,7 +549,7 @@ class TaskCmd(object):
         parser = self.parser_t_show()
         options, args = parser.parse_args(line)
 
-        task=dbutils.getTaskFromId(' '.join(args))
+        task=self.getTaskFromId(' '.join(args))
 
         if options.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
@@ -592,7 +606,7 @@ class TaskCmd(object):
             except IndexError:
                 return None
 
-        task = dbutils.getTaskFromId(line)
+        task = self.getTaskFromId(line)
 
         # Create task line
         taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
@@ -633,7 +647,7 @@ class TaskCmd(object):
         tokens = line.split(" ")
         if len(tokens)!=2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        task=dbutils.getTaskFromId(tokens[0])
+        task=self.getTaskFromId(tokens[0])
         projectName = tokens[1]
 
         task.project = dbutils.getOrCreateProject(projectName)
@@ -674,7 +688,7 @@ class TaskCmd(object):
         if len(line.split())<2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line=line.strip().split(" ", 1)
-        task=dbutils.getTaskFromId(taskId)
+        task=self.getTaskFromId(taskId)
 
         if line.lower()=="none":
             task.dueDate=None
@@ -693,11 +707,12 @@ class TaskCmd(object):
         tokens = line.split(" ", 1)
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <keyword>")
-        task = dbutils.getTaskFromId(tokens[0])
+        task = self.getTaskFromId(tokens[0])
         garbage, newKwDict = parseutils.extractKeywords(tokens[1])
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
                                    % garbage)
+
         dbutils.createMissingKeywords(newKwDict.keys())
 
         kwDict = task.getKeywordDict()
@@ -717,7 +732,7 @@ class TaskCmd(object):
         tokens = line.split()
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
-        task = dbutils.getTaskFromId(tokens[0])
+        task = self.getTaskFromId(tokens[0])
         
         # Define recurrence:
         freq = byminute = byhour = byweekday = bymonthday = bymonth = None

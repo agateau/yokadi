@@ -15,15 +15,13 @@ import tui
 from db import Keyword, Project, Task
 from yokadiexception import YokadiException
 
-_lastTaskId = None
 
 def addTask(projectName, title, keywordDict):
-    """Adds a task based on title and keywordDict. It also updates _lastTaskId.
+    """Adds a task based on title and keywordDict.
     @param projectName: name of project as a string
     @param title: task title as a string
     @param keywordDict: dictionary of keywords (name : value)
     @returns : Task instance on success, None if cancelled."""
-    global _lastTaskId
 
     # Create missing keywords
     if not createMissingKeywords(keywordDict.keys()):
@@ -38,7 +36,6 @@ def addTask(projectName, title, keywordDict):
     try:
         task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
         task.setKeywordDict(keywordDict)
-        _lastTaskId = task.id
     except DuplicateEntryError:
         raise YokadiException("A task named %s already exists in this project. Please find another name" % title)
 
@@ -61,41 +58,28 @@ def updateTask(task, projectName, title, keywordDict):
     task.setKeywordDict(keywordDict)
     return True
 
-def clearLastTaskId():
-    """Clear _lastTaskId, useful for unittesting
-    """
-    global _lastTaskId
-    _lastTaskId = None
 
 def getTaskFromId(line, parameterName="id"):
     """Returns a task given its id, or raise a YokadiException if it does not
-    exist. It also updates _lastTaskId.
+    exist.
     @param line: taskId string
     @param parameterName: name of the parameter to mention in exception
     @return: Task instance or None if existingTask is False"""
-    global _lastTaskId
 
     line = line.strip()
     if len(line) == 0:
         raise YokadiException("Missing <%s> parameter" % parameterName)
 
-    if line == "_":
-        if _lastTaskId is not None:
-            taskId = _lastTaskId
-        else:
-            raise YokadiException("No previous task id")
-    else:
-        # We do not use line.isdigit() because it returns True if line is '¹'!
-        try:
-            taskId = int(line)
-        except ValueError:
-            raise YokadiException("<%s> should be a number" % parameterName)
+    # We do not use line.isdigit() because it returns True if line is '¹'!
+    try:
+        taskId = int(line)
+    except ValueError:
+        raise YokadiException("<%s> should be a number" % parameterName)
 
     try:
         task = Task.get(taskId)
     except SQLObjectNotFound:
         raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
-    _lastTaskId = taskId
     return task
 
 #TODO: factorize the two following functions and make a generic one

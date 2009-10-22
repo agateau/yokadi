@@ -18,22 +18,12 @@ from yokadiexception import YokadiException
 class DbUtilsTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
-        dbutils.clearLastTaskId()
         tui.clearInputAnswers()
 
 
     def testGetTaskFromId(self):
-        # Using "_" with no prior task activity should raise an exception
-        self.assertRaises(YokadiException, dbutils.getTaskFromId, "_")
-
         tui.addInputAnswers("y")
         t1 = dbutils.addTask("x", "t1", {})
-        task = dbutils.getTaskFromId("_")
-        self.assertEquals(task, t1)
-
-        t2 = dbutils.addTask("x", "t2", {})
-        task = dbutils.getTaskFromId("_")
-        self.assertEquals(task, t2)
 
         task = dbutils.getTaskFromId(str(t1.id))
         self.assertEquals(task, t1)

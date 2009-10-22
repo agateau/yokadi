@@ -12,6 +12,7 @@ import testutils
 import tui
 from db import Project, Task
 from taskcmd import TaskCmd
+from yokadiexception import YokadiException
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
@@ -54,6 +55,22 @@ class TaskTestCase(unittest.TestCase):
 
         kwDict = task.getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
+
+    def testLastTaskId(self):
+        # Using "_" with no prior task activity should raise an exception   
+        self.assertRaises(YokadiException, self.cmd.getTaskFromId, "_")
+
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        task1 = Task.get(1)
+        self.assertEqual(self.cmd.getTaskFromId("_"), task1)
+
+        self.cmd.do_t_add("x t2")
+        task2 = Task.get(2)
+        self.assertEqual(self.cmd.getTaskFromId("_"), task2)
+
+        self.cmd.do_t_mark_started("1")
+        self.assertEqual(self.cmd.getTaskFromId("_"), task1)
 
     def testRecurs(self):
         tui.addInputAnswers("y")
