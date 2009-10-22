@@ -14,6 +14,7 @@ from sqlobject import SQLObjectNotFound, LIKE, AND, OR
 
 from db import Config, Keyword, Project, Task, \
                TaskKeyword, ProjectKeyword, Recurrence
+import bugutils
 import dbutils
 import dateutils
 import parseutils
@@ -38,6 +39,59 @@ gRendererClassDict = dict(
     )
 
 class TaskCmd(object):
+    def __init__(self):
+        for name in bugutils.PROPERTY_NAMES:
+            dbutils.getOrCreateKeyword(name, interactive=False)
+
+    def do_bug_add(self, line):
+        """Add a bug-type task. Will create a task and ask additional info.
+        bug_add <project_name> [@<keyword1>] [@<keyword2>] <Bug description>
+        """
+        projectName, title, keywordDict = parseutils.parseLine(line)
+
+        task = dbutils.addTask(projectName, title, keywordDict)
+        if not task:
+            tui.reinjectInRawInput(u"bug_add " + line)
+            return
+
+        bugutils.editBugKeywords(keywordDict)
+        task.setKeywordDict(keywordDict)
+
+        task.urgency = bugutils.computeUrgency(keywordDict)
+
+        print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
+
+    complete_bug_add = ProjectCompleter(1)
+
+    def do_bug_edit(self, line):
+        """Edit a bug.
+        bug_edit <id>"""
+        task = dbutils.getTaskFromId(line)
+
+        # Create task line
+        taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
+
+        # Edit
+        while True:
+            print "(Press Ctrl+C to cancel)"
+            try:
+                line = tui.editLine(taskLine)
+                if not line.strip():
+                    tui.warning("Indicate a bug title !")
+                    continue
+            except KeyboardInterrupt:
+                print
+                print "Cancelled"
+                return
+            foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
+            if dbutils.updateTask(task, task.project.name, title, keywordDict):
+                break
+        editBugKeywords(keywordDict)
+        task.setKeywordDict(keywordDict)
+
+        # Update bug
+        task.urgency = bugutils.computeUrgency(keywordDict)
+
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [@<keyword1>] [@<keyword2>] <Task description>"""

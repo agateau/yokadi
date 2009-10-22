@@ -35,7 +35,6 @@ from projectcmd import ProjectCmd
 from keywordcmd import KeywordCmd
 from aliascmd import AliasCmd, resolveAlias
 from confcmd import ConfCmd
-from bugcmd import BugCmd
 from yokadiexception import YokadiException
 import tui
 from yokadioptionparser import YokadiOptionParserNormalExitException
@@ -46,13 +45,12 @@ import utils
 sys.setdefaultencoding(tui.ENCODING)
 
 
-class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, BugCmd, ConfCmd, AliasCmd, Cmd):
+class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)
         ProjectCmd.__init__(self)
         KeywordCmd.__init__(self)
-        BugCmd.__init__(self)
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
         self.prompt = "yokadi> "

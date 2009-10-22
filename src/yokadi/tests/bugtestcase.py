@@ -11,13 +11,13 @@ import testutils
 
 import tui
 from db import Task
-from bugcmd import BugCmd
+from taskcmd import TaskCmd
 
 class BugTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
         tui.clearInputAnswers()
-        self.cmd = BugCmd()
+        self.cmd = TaskCmd()
 
     def testAdd(self):
         tui.addInputAnswers("y", "2", "4", "123")
