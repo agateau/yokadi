@@ -633,14 +633,16 @@ class TaskCmd(object):
 
     def do_t_add_keywords(self, line):
         """Add keywords to an existing task
-        t_add_keyword <id> <keyword1> <keyword2>[=<value>]...
+        t_add_keyword <id> <@keyword1> <@keyword2>[=<value>]...
         """
         tokens = line.split(" ", 1)
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <keyword>")
         task = dbutils.getTaskFromId(tokens[0])
-        remainingText, newKwDict = parseutils.extractKeywords(tokens[1])
-
+        garbage, newKwDict = parseutils.extractKeywords(tokens[1])
+        if garbage:
+            raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
+                                   % garbage)
         dbutils.createMissingKeywords(newKwDict.keys())
 
         kwDict = task.getKeywordDict()
