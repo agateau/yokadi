@@ -111,10 +111,10 @@ class TaskCmd(object):
         if not line:
             print "Give at least a task name !"
             return
-        projectName, title, keywordDict = parseutils.parseLine(line)
+        projectName, title, keywordFilters = parseutils.parseLine(line)
         if not title:
             raise YokadiException("You should give a task title")
-        task = dbutils.addTask(projectName, title, keywordDict)
+        task = dbutils.addTask(projectName, title, parseutils.keywordFiltersToDict(keywordFilters))
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
         else:
@@ -341,42 +341,6 @@ class TaskCmd(object):
                     return False
             return True
 
-        def taskHasWantedKeywordDict(task, wantedKeywordDict):
-            """
-            @param task: task object
-            @param wantedKeywordDict: dict of name/value of wanted keyword
-            # a task is considered a subset of wantedKeywordDict if:
-            # 1. All wantedKeywordDict keys are in task or project keywords
-            # 2. All wantedKeywordDict valued keywords have the same value
-            #    in task or project keyword"""
-            for wantedKeyword, wantedValue in wantedKeywordDict.items():
-                if wantedKeyword.startswith("!"):
-                    wantedKeyword = wantedKeyword[1:]
-                    taskFilters=[TaskKeyword.q.keywordID!=Keyword.q.id,]
-                    projectFilters=[ProjectKeyword.q.keyword!=Keyword.q.id,]
-                    if wantedValue:
-                        taskFilters.append(TaskKeyword.q.value!=wantedValue)
-                        projectFilters.append(ProjectKeyword.q.value!=wantedValue)
-                else:
-                    taskFilters=[TaskKeyword.q.keywordID==Keyword.q.id,]
-                    projectFilters=[ProjectKeyword.q.keyword==Keyword.q.id,]
-                    if wantedValue:
-                        taskFilters.append(TaskKeyword.q.value==wantedValue)
-                        projectFilters.append(ProjectKeyword.q.value==wantedValue)
-
-
-                taskFilters.extend([Task.q.id==task.id,
-                                    TaskKeyword.q.taskID==task.id,
-                                    LIKE(Keyword.q.name, wantedKeyword)])
-
-                projectFilters.extend([Project.q.id==task.projectID,
-                                ProjectKeyword.q.projectID==Project.q.id,
-                                LIKE(Keyword.q.name, wantedKeyword)])
-
-                if Task.select(AND(*taskFilters)).count()==0 and Task.select(AND(*projectFilters)).count()==0:
-                    return False
-            # All critera were met, return ok
-            return True
 
         def createFilterFromRange(_range):
             # Parse the _range string and return an SQLObject filter
@@ -410,10 +374,10 @@ class TaskCmd(object):
         parser = self.parser_t_list()
         options, args = parser.parse_args(line)
         if len(args) > 0:
-            projectName, keywordDict = parseutils.extractKeywords(u" ".join(args))
+            projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args))
         else:
             projectName = ""
-            keywordDict = {}
+            keywordFilters = []
 
         if not projectName:
             # Take all project if none provided
@@ -426,13 +390,17 @@ class TaskCmd(object):
             return
 
         # Check keywords exist
-        for keyword in keywordDict.keys():
-            keyword = keyword.lstrip("!") # Strip any "not" operator
+        for keyword in [k.name for k in keywordFilters]:
             if Keyword.select(LIKE(Keyword.q.name, keyword)).count()==0:
                 tui.error("Keyword %s is unknown." % keyword)
 
         # Filtering and sorting according to parameters
         filters=[]
+
+        # Filter on keywords
+        for keywordFilter in keywordFilters:
+            filters.append(keywordFilter.filter())
+
         order=-Task.q.urgency, Task.q.creationDate
         limit=None
         if options.done:
@@ -474,14 +442,11 @@ class TaskCmd(object):
                 if unicode(keyword.name).startswith("_") and not options.keyword.startswith("_"):
                     #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
                     continue
-                taskList = Task.select(AND(TaskKeyword.q.taskID == Task.q.id,
-                                           TaskKeyword.q.keywordID == keyword.id,
+                taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
+                                           TaskKeyword.q.taskID == Task.q.id,
                                            *filters),
-                                        orderBy=order, limit=limit)
+                                       orderBy=order, limit=limit, distinct=True)
                 taskList = list(taskList)
-                if keywordDict:
-                    # FIXME: factorize (see project oriented rendering below)
-                    taskList = [x for x in taskList if taskHasWantedKeywordDict(x, keywordDict)]
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) == 0:
@@ -497,13 +462,9 @@ class TaskCmd(object):
                     hiddenProjectNames.append(project.name)
                     continue
                 taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
-                                       orderBy=order, limit=limit)
+                                       orderBy=order, limit=limit, distinct=True)
+                taskList = list(taskList)
 
-                if keywordDict:
-                    taskList = [x for x in taskList if taskHasWantedKeywordDict(x, keywordDict)]
-                else:
-                    taskList = list(taskList)
-    
                 if len(taskList) == 0:
                     continue
 
