@@ -77,6 +77,13 @@ def createLine(projectName, title, keywordDict):
     tokens.append(title)
     return u" ".join(tokens)
 
+def keywordFiltersToDict(keywordFilters):
+    """Convert a list of KeywordFilter instnance to a simple keyword dictionary"""
+    keywordDict={}
+    for keywordFilter in keywordFilters:
+        keywordDict[keywordFilter.name] = keywordFilter.value
+    return keywordDict
+
 class KeywordFilter(object):
     """Represent a filter on a keyword"""
     def __init__(self, filterLine=None, keywordClass=TaskKeyword):
