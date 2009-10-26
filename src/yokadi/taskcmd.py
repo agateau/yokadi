@@ -111,10 +111,10 @@ class TaskCmd(object):
         if not line:
             print "Give at least a task name !"
             return
-        projectName, title, keywordFilters = parseutils.parseLine(line)
+        projectName, title, keywordDict = parseutils.parseLine(line)
         if not title:
             raise YokadiException("You should give a task title")
-        task = dbutils.addTask(projectName, title, parseutils.keywordFiltersToDict(keywordFilters))
+        task = dbutils.addTask(projectName, title, keywordDict)
         if task:
             print "Added task '%s' (id=%d)" % (title, task.id)
         else:
@@ -682,8 +682,9 @@ class TaskCmd(object):
         tokens = line.split(" ", 1)
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <keyword>")
-        task = self.getTaskFromId(tokens[0])
-        garbage, newKwDict = parseutils.extractKeywords(tokens[1])
+        task = dbutils.getTaskFromId(tokens[0])
+        garbage, keywordFilters = parseutils.extractKeywords(tokens[1])
+        newKwDict = parseutils.keywordFiltersToDict(keywordFilters)
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
                                    % garbage)

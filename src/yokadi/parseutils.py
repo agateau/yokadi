@@ -35,7 +35,7 @@ def parseParameters(line):
 def parseLine(line):
     """Parse line of form:
     project some text @keyword1 @keyword2=12 some other text
-    @return: a tuple of ("project", "some text some other text", [keywordFilter1, keywordFilter2])"""
+    @return: a tuple of ("project", "some text some other text", keywordDict"""
 
     # First extract project name
     line = simplifySpaces(line)
@@ -47,7 +47,7 @@ def parseLine(line):
 
     line, keywordFilters = extractKeywords(line)
 
-    return project, line, keywordFilters
+    return project, line, keywordFiltersToDict(keywordFilters)
 
 def extractKeywords(line):
     """Extract keywords (@k1 @k2=n..) from line
