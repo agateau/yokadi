@@ -7,8 +7,9 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 
-from db import Config, TaskKeyword, ProjectKeyword, Keyword
+from db import Config, TaskKeyword, ProjectKeyword, Keyword, Task
 from sqlobject import AND, NOT
+from sqlobject.sqlbuilder import IN, NOTIN, Select
 import tui
 
 gSimplifySpaces = re.compile("  +")
@@ -56,7 +57,7 @@ def extractKeywords(line):
     keywordFilters = []
     remainingText=[]
     for token in line.split():
-        if token.startswith("@"):
+        if token.startswith("@") or token.startswith("!@"):
             keywordFilters.append(KeywordFilter(token))
         else:
             remainingText.append(token)
@@ -109,17 +110,19 @@ class KeywordFilter(object):
 
     def filter(self):
         """Return a filter in SQlObject format"""
-        filters=[self.keywordClass.q.keywordID==Keyword.q.id,]
+        filters=[]
         if self.name:
-            filters.append(Keyword.q.name==self.name)
+            taskIDs = Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
+                                         TaskKeyword.q.keywordID==Keyword.q.id,
+                                         TaskKeyword.q.taskID==Task.q.id)))
+            if self.negative:
+                filters.append(NOTIN(Task.q.id, taskIDs))
+            else:
+                filters.append(IN(Task.q.id, taskIDs))
         if self.value:
             #TODO: take care of operator - use only equal for now
             filters.append(self.keywordClass.q.value==self.value)
-        if filters:
-            if self.negative:
-                return NOT(AND(*filters))
-            else:
-                return AND(*filters)
+        return AND(*filters)
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""

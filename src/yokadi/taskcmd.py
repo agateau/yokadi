@@ -11,6 +11,7 @@ import readline
 from datetime import datetime, date, timedelta
 from dateutil import rrule
 from sqlobject import SQLObjectNotFound, LIKE, AND, OR
+from sqlobject.sqlbuilder import LEFTJOINOn, Alias
 
 from db import Config, Keyword, Project, Task, \
                TaskKeyword, ProjectKeyword, Recurrence
@@ -397,10 +398,6 @@ class TaskCmd(object):
         # Filtering and sorting according to parameters
         filters=[]
 
-        # Join on keyword if at least on filter is defined or if keyword grouping is required
-        # TODO: should check if at least on positive filter is defined
-        if keywordFilters or options.keyword:
-            filters.append(TaskKeyword.q.taskID == Task.q.id,)
         # Filter on keywords
         for keywordFilter in keywordFilters:
             filters.append(keywordFilter.filter())
@@ -448,7 +445,8 @@ class TaskCmd(object):
                     continue
                 taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
                                            *filters),
-                                       orderBy=order, limit=limit, distinct=True)
+                                       orderBy=order, limit=limit, distinct=True,
+                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
                 taskList = list(taskList)
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
@@ -464,8 +462,10 @@ class TaskCmd(object):
                 if not project.active:
                     hiddenProjectNames.append(project.name)
                     continue
+                TaskKeyword2 = Alias(TaskKeyword)
                 taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
-                                       orderBy=order, limit=limit, distinct=True)
+                                       orderBy=order, limit=limit, distinct=True,
+                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
                 taskList = list(taskList)
 
                 if len(taskList) == 0:
