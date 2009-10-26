@@ -397,6 +397,10 @@ class TaskCmd(object):
         # Filtering and sorting according to parameters
         filters=[]
 
+        # Join on keyword if at least on filter is defined or if keyword grouping is required
+        # TODO: should check if at least on positive filter is defined
+        if keywordFilters or options.keyword:
+            filters.append(TaskKeyword.q.taskID == Task.q.id,)
         # Filter on keywords
         for keywordFilter in keywordFilters:
             filters.append(keywordFilter.filter())
@@ -443,7 +447,6 @@ class TaskCmd(object):
                     #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
                     continue
                 taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
-                                           TaskKeyword.q.taskID == Task.q.id,
                                            *filters),
                                        orderBy=order, limit=limit, distinct=True)
                 taskList = list(taskList)
