@@ -111,27 +111,34 @@ class KeywordFilter(object):
 
     def filter(self):
         """Return a filter in SQlObject format"""
-        filters=[]
+        taskValueFilter = (1==1)
+        projectValueFilter = (1==1)
         if self.name:
+            if self.value:
+                if self.valueOperator=="=":
+                    taskValueFilter = (TaskKeyword.q.value==self.value)
+                    projectValueFilter = (ProjectKeyword.q.value==self.value)
+                elif self.valueOperator=="!=":
+                    taskValueFilter = (TaskKeyword.q.value!=self.value)
+                    projectValueFilter = (ProjectKeyword.q.value!=self.value)
+                #TODO: handle also <, >, =< and >=
+
             taskKeywordTaskIDs =    Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
                                                    TaskKeyword.q.keywordID==Keyword.q.id,
-                                                   TaskKeyword.q.taskID==Task.q.id)))
+                                                   TaskKeyword.q.taskID==Task.q.id,
+                                                   taskValueFilter)))
             projectKeywordTaskIDs = Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
                                                       ProjectKeyword.q.keywordID==Keyword.q.id,
                                                       ProjectKeyword.q.projectID==Project.q.id,
-                                                      Project.q.id==Task.q.project)))
+                                                      Project.q.id==Task.q.project,
+                                                      projectValueFilter)))
 
             if self.negative:
-                filters.append(AND(NOTIN(Task.q.id, taskKeywordTaskIDs),
-                                   NOTIN(Task.q.id, projectKeywordTaskIDs)))
+                return AND(NOTIN(Task.q.id, taskKeywordTaskIDs),
+                           NOTIN(Task.q.id, projectKeywordTaskIDs))
             else:
-                filters.append(OR(IN(Task.q.id, taskKeywordTaskIDs),
-                                  IN(Task.q.id, projectKeywordTaskIDs)))
-        if self.value:
-            #TODO: take care of operator - use only equal for now
-            filters.append(OR(TaskKeyword.q.value==self.value,
-                              ProjectKeyword.q.value==self.value))
-        return AND(*filters)
+                return OR(IN(Task.q.id, taskKeywordTaskIDs),
+                          IN(Task.q.id, projectKeywordTaskIDs))
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""
@@ -147,6 +154,7 @@ class KeywordFilter(object):
             tui.error("Keyword name must be be prefixed with a @")
             return
         line=line[1:] # Squash @
+        line=line.replace("==", "=") # Tolerate == syntax
         for operator in operators:
             if operator in line:
                 self.name, self.value = line.split(operator, 1)
