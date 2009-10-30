@@ -7,8 +7,8 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 
-from db import Config, TaskKeyword, ProjectKeyword, Keyword, Task
-from sqlobject import AND, NOT
+from db import Config, TaskKeyword, ProjectKeyword, Keyword, Task, Project
+from sqlobject import AND, NOT, OR
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 import tui
 
@@ -87,12 +87,11 @@ def keywordFiltersToDict(keywordFilters):
 
 class KeywordFilter(object):
     """Represent a filter on a keyword"""
-    def __init__(self, filterLine=None, keywordClass=TaskKeyword):
+    def __init__(self, filterLine=None):
         self.name=None          # Keyword name
         self.value=None         # Keyword value
         self.negative=False     # Negative filter
         self.valueOperator="="  # Operator to compare value
-        self.keywordClass=keywordClass # TaskKeyword or ProjectKeyword class handler
 
         if filterLine:
             self.parse(filterLine)
@@ -112,16 +111,24 @@ class KeywordFilter(object):
         """Return a filter in SQlObject format"""
         filters=[]
         if self.name:
-            taskIDs = Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
-                                         TaskKeyword.q.keywordID==Keyword.q.id,
-                                         TaskKeyword.q.taskID==Task.q.id)))
+            taskKeywordTaskIDs =    Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
+                                                   TaskKeyword.q.keywordID==Keyword.q.id,
+                                                   TaskKeyword.q.taskID==Task.q.id)))
+            projectKeywordTaskIDs = Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
+                                                      ProjectKeyword.q.keywordID==Keyword.q.id,
+                                                      ProjectKeyword.q.projectID==Project.q.id,
+                                                      Project.q.id==Task.q.project)))
+
             if self.negative:
-                filters.append(NOTIN(Task.q.id, taskIDs))
+                filters.append(AND(NOTIN(Task.q.id, taskKeywordTaskIDs),
+                                   NOTIN(Task.q.id, projectKeywordTaskIDs)))
             else:
-                filters.append(IN(Task.q.id, taskIDs))
+                filters.append(OR(IN(Task.q.id, taskKeywordTaskIDs),
+                                  IN(Task.q.id, projectKeywordTaskIDs)))
         if self.value:
             #TODO: take care of operator - use only equal for now
-            filters.append(self.keywordClass.q.value==self.value)
+            filters.append(OR(TaskKeyword.q.value==self.value,
+                              ProjectKeyword.q.value==self.value))
         return AND(*filters)
 
     def parse(self, line):
