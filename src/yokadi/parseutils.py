@@ -6,11 +6,13 @@ Parse utilities. Used to manipulate command line text.
 @license: GPL v3 or later
 """
 import re
+from datetime import datetime, date, timedelta
 
 from db import Config, TaskKeyword, ProjectKeyword, Keyword, Task, Project
 from sqlobject import AND, NOT, OR
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 import tui
+from yokadiexception import YokadiException
 
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):
@@ -159,5 +161,19 @@ class KeywordFilter(object):
         else:
             # No operator found, only keyword name has been provided
             self.name, self.value = line, None
+
+def createFilterFromRange(dateRange):
+    # Parse the dateRange string and return an SQLObject filter
+    minDate = date.today()
+    if dateRange == "today":
+        pass
+    elif dateRange == "thisweek":
+        minDate -= timedelta(minDate.weekday())
+    elif dateRange == "thismonth":
+        minDate = minDate.replace(day = 1)
+    else:
+        raise YokadiException("Invalid range value '%s'" % dateRange)
+
+    return Task.q.doneDate>=minDate
 
 # vi: ts=4 sw=4 et

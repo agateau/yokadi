@@ -329,34 +329,6 @@ class TaskCmd(object):
     def do_t_list(self, line):
         doneRangeList= ["today", "thisweek", "thismonth"]
 
-        def keywordDictIsSubsetOf(taskKeywordDict, wantedKeywordDict):
-            # Returns true if taskKeywordDict is a subset of wantedKeywordDict
-            # taskKeywordDict is considered a subset of wantedKeywordDict if:
-            # 1. All wantedKeywordDict keys are in taskKeywordDict
-            # 2. All wantedKeywordDict valued keywords have the same value
-            #    in taskKeywordDict
-            for wantedKeyword, wantedValue in wantedKeywordDict.items():
-                if not wantedKeyword in taskKeywordDict:
-                    return False
-                if wantedValue and taskKeywordDict[wantedKeyword] != wantedValue:
-                    return False
-            return True
-
-
-        def createFilterFromRange(_range):
-            # Parse the _range string and return an SQLObject filter
-            minDate = date.today()
-            if _range == "today":
-                pass
-            elif _range == "thisweek":
-                minDate -= timedelta(minDate.weekday())
-            elif _range == "thismonth":
-                minDate = minDate.replace(day = 1)
-            else:
-                raise YokadiException("Invalid range value '%s'" % _range)
-
-            return Task.q.doneDate>=minDate
-
         def selectRendererClass():
             if options.format != "auto":
                 return gRendererClassDict[options.format]
@@ -407,7 +379,7 @@ class TaskCmd(object):
         if options.done:
             filters.append(Task.q.status=='done')
             if options.done != "all":
-                filters.append(createFilterFromRange(options.done))
+                filters.append(parseutils.createFilterFromRange(options.done))
         elif not options.all:
             filters.append(Task.q.status!='done')
         if options.topUrgent:
