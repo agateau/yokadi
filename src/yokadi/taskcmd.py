@@ -10,7 +10,7 @@ import os
 import readline
 from datetime import datetime, date, timedelta
 from dateutil import rrule
-from sqlobject import SQLObjectNotFound, LIKE, AND, OR
+from sqlobject import SQLObjectNotFound, LIKE, AND, OR, NOT
 from sqlobject.sqlbuilder import LEFTJOINOn, Alias
 
 from db import Config, Keyword, Project, Task, \
@@ -356,7 +356,11 @@ class TaskCmd(object):
             # Take all project if none provided
             projectName="%"
 
-        projectList = Project.select(LIKE(Project.q.name, projectName))
+        if projectName.startswith("!"):
+            projectName = projectName[1:]
+            projectList = Project.select(NOT(LIKE(Project.q.name, projectName)))
+        else:
+            projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count()==0:
             tui.error("Found no project matching '%s'" % projectName)
