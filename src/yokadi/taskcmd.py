@@ -119,7 +119,8 @@ class TaskCmd(object):
             print "Added task '%s' (id=%d)" % (title, task.id)
         else:
             tui.reinjectInRawInput(u"t_add " + line)
-        self.lastTaskId = task.id
+        if task:
+            self.lastTaskId = task.id
 
     complete_t_add = projectAndKeywordCompleter
 
