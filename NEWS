@@ -1,4 +1,4 @@
-v0.11 2009/xx/xx
+v0.11 2009/11/01
 - dynamic display width according to user terminal
 - display keywords in t_list
 - bugs keywords are prefixed with a '_' to distinguish them from user keywords
@@ -6,6 +6,7 @@ v0.11 2009/xx/xx
 - tasks can be grouped by keyword instead of project
 - special character _ can be used to represent last task id
 - custom aliases can be defined for all commands with a_add
+- switch from GPL 3 to GPL v3 or newer license
 
 v0.10 2009/07/08
 - ability to assign keywords to a project
