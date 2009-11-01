@@ -5,7 +5,7 @@
  This wrapper is intended to be placed in user PATH and to be executable
 
 @author: Sébastien Renard (sebastien.renard@digitalfox.org)
-@license:GNU GPL V3
+@license:GPL v3 or later
  """
 
 from yokadi import yokadi 

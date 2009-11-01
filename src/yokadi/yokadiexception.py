@@ -3,7 +3,7 @@
 A simple exception class for Yokadi
 
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 class YokadiException(Exception):

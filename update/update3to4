@@ -4,7 +4,7 @@
 Update from version 3 to version 4 of Yokadi DB
 
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or newer
 """
 import sys
 from os.path import dirname, join

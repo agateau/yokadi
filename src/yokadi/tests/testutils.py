@@ -2,7 +2,7 @@
 """
 Utils for unit-test
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or later
 """
 import unittest
 

@@ -4,7 +4,7 @@
 """Setup script used to build and install Yokadi
 
 @author: Sébastien Renard (sebastien.renard@digitalfox.org)
-@license:GNU GPL V3
+@license:GPL v3 or newer
 """
 
 from distutils.core import setup

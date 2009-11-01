@@ -3,7 +3,7 @@
 Database access layer using sqlobject
 
 @author: Aurélien Gâteau <aurelien@.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 import os

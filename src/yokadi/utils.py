@@ -2,7 +2,7 @@
 """
 Common utils functions that cannot fit into dateutils, dbutils or parseutils.
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
-@license: GPL v3
+@license: GPL v3 or later
 """
 
 import os

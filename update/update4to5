@@ -4,7 +4,7 @@
 Update from version 4 to version 5 of Yokadi DB
 
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or newer
 """
 import sys
 from sqlobject import connectionForURI, sqlhub

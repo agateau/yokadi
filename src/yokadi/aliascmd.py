@@ -3,7 +3,7 @@
 Alias related commands.
 
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
-@license: GPLv3 or newer
+@license: GPL v3 or later
 """
 from db import Config
 from yokadiexception import YokadiException

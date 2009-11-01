@@ -4,7 +4,7 @@
 Yokadi daemon. Used to monitor due tasks and warn user.
 
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 import sys

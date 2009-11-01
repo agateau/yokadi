@@ -5,7 +5,7 @@ Generates a data-only sqlite dump, with insert statements including column
 names.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or newer
 """
 
 import os

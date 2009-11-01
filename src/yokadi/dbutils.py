@@ -4,7 +4,7 @@ Database utilities.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 from datetime import datetime
 

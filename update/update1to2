@@ -4,7 +4,7 @@
 Update from version 1 to version 2 of Yokadi DB
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or newer
 """
 import sys
 

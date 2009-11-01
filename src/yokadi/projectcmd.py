@@ -3,7 +3,7 @@
 Project related commands.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or later
 """
 from sqlobject import SQLObjectNotFound
 from sqlobject.dberrors import DuplicateEntryError

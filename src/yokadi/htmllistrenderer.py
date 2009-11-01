@@ -4,7 +4,7 @@ HTML rendering of t_list output
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 import xml.sax.saxutils as saxutils
 

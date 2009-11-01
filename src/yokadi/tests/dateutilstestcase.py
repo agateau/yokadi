@@ -2,7 +2,7 @@
 """
 Date utilities test cases
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 import unittest

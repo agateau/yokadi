@@ -5,7 +5,7 @@
 Post installation script for win32 system
 Thanks to the coin coin projet for the inspiration for this postinstall script
 @author: Sébastien Renard (sebastien.renard@digitalfox.org)
-@license:GNU GPL V3
+@license:GPL v3 or newer
 """
 
 from os.path import abspath, join

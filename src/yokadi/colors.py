@@ -3,7 +3,7 @@
 Standard codes for shell colors.
 
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 import sys

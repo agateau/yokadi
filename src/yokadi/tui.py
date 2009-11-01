@@ -3,7 +3,7 @@
 Helper functions to build CLI applications
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 import os

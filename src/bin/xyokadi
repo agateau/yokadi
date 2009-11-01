@@ -1,5 +1,5 @@
 #!/bin/sh
-# GPL v3
+# GPL v3 or later
 # Sebastien Renard (Sebastien.Renard@digitalfox.org) 2009
 
 # Simple wrapper to start yokadi in a shell Terminal

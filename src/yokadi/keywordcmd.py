@@ -3,7 +3,7 @@
 Keyword related commands.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
-@license: GPLv3
+@license: GPL v3 or later
 """
 from db import Keyword
 from yokadiexception import YokadiException

@@ -3,7 +3,7 @@
 Configuration management related commands.
 
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 from db import Config

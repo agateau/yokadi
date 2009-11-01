@@ -5,7 +5,7 @@ Command line oriented, sqlite powered, todo list
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
-@license: GPLv3
+@license: GPL v3 or later
 """
 
 import locale
