@@ -1,3 +1,6 @@
+v0.11.1 2009/11/02
+- yokadi symlink (useful to run yokadi without installing it) was broken
+
 v0.11 2009/11/01
 - dynamic display width according to user terminal
 - display keywords in t_list
