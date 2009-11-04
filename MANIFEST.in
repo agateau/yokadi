@@ -2,6 +2,7 @@ include update/update*to*
 include update/*py
 include update/README.markdown
 include doc/*markdown
+include man/*.1
 include *py
 include README.markdown
 include LICENSE
