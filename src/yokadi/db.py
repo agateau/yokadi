@@ -259,10 +259,12 @@ def connectDatabase(dbFileName, createIfNeeded=True):
     # Check version
     version = getVersion()
     if version != DB_VERSION:
+        sharePath = os.path.abspath(utils.shareDirPath())
         tui.error("Your database version is %d but Yokadi wants version %d." \
             % (version, DB_VERSION))
-        print "Please, run the %s/update.py script to migrate your database prior to running Yokadi" % \
-                os.path.abspath(utils.shareDirPath())
+        print "Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
+                sharePath
+        print "See %s/update/README.markdown for details" % sharePath
         sys.exit(1)
 
 def setDefaultConfig():
