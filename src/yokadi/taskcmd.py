@@ -773,5 +773,6 @@ class TaskCmd(object):
             self.kFilters = filters
             self.prompt = "y %s> " % (" ".join([str(k) for k in filters]))
         else:
+            self.kFilters = []
             self.prompt = "yokadi> "
 # vi: ts=4 sw=4 et
