@@ -43,6 +43,7 @@ class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None
         self.kFilters = [] # Permanent keyword filters (List of KeywordFilter)
+        self.pFilter = ""  # Permanent project filter (name of project)
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
 
@@ -358,8 +359,12 @@ class TaskCmd(object):
             keywordFilters.extend(self.kFilters)
 
         if not projectName:
-            # Take all project if none provided
-            projectName="%"
+            if self.pFilter:
+                # If a project filter is defined, use it as none was provided
+                projectName=self.pFilter
+            else:
+                # Take all project if none provided
+                projectName="%"
 
         if projectName.startswith("!"):
             projectName = projectName[1:]
@@ -372,9 +377,7 @@ class TaskCmd(object):
             return
 
         # Check keywords exist
-        for keyword in [k.name for k in keywordFilters]:
-            if Keyword.select(LIKE(Keyword.q.name, keyword)).count()==0:
-                tui.error("Keyword %s is unknown." % keyword)
+        parseutils.warnIfKeywordDoesNotExist(keywordFilters)
 
         # Filtering and sorting according to parameters
         filters=[]
@@ -758,21 +761,24 @@ class TaskCmd(object):
             - t_filter @work (filter all task that have the "work" keyword)
             - t_filter none (remove filter)"""
         #TODO: add completion and check if keyword exist
-        line = parseutils.simplifySpaces(line)
+
         if not line:
             raise YokadiException("You must give keyword as argument or 'none' to reset filter")
 
-        filters = []
-        if line.lower()!="none":
-            for token in line.split():
-                filter = parseutils.KeywordFilter(token)
-                if filter.name:
-                    filters.append(filter)
-
-        if filters:
-            self.kFilters = filters
-            self.prompt = "y %s> " % (" ".join([str(k) for k in filters]))
-        else:
+        if parseutils.simplifySpaces(line).lower()=="none":
             self.kFilters = []
+            self.pFilter = ""
             self.prompt = "yokadi> "
+        else:
+            projectName, keywordFilters = parseutils.extractKeywords(line)
+            self.kFilters = keywordFilters
+            self.pFilter = projectName
+            prompt="y"
+            if self.pFilter:
+                prompt+=" %s" % projectName
+            if self.kFilters:
+                parseutils.warnIfKeywordDoesNotExist(self.kFilters)
+                prompt+=" %s" % (" ".join([str(k) for k in keywordFilters]))
+            self.prompt = "%s> " % prompt
+
 # vi: ts=4 sw=4 et

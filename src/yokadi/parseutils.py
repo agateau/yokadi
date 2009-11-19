@@ -9,7 +9,7 @@ import re
 from datetime import datetime, date, timedelta
 
 from db import Config, TaskKeyword, ProjectKeyword, Keyword, Task, Project
-from sqlobject import AND, NOT, OR
+from sqlobject import AND, NOT, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 import tui
 from yokadiexception import YokadiException
@@ -86,6 +86,16 @@ def keywordFiltersToDict(keywordFilters):
     for keywordFilter in keywordFilters:
         keywordDict[keywordFilter.name] = keywordFilter.value
     return keywordDict
+
+def warnIfKeywordDoesNotExist(keywordFilters):
+    """Warn user is keyword does not exist
+    @return: True if at least one keyword does not exist, else False"""
+    doesNotExist=False
+    for keyword in [k.name for k in keywordFilters]:
+            if Keyword.select(LIKE(Keyword.q.name, keyword)).count()==0:
+                tui.error("Keyword %s is unknown." % keyword)
+                doesNotExist=True
+    return doesNotExist
 
 class KeywordFilter(object):
     """Represent a filter on a keyword"""
