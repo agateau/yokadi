@@ -42,6 +42,7 @@ gRendererClassDict = dict(
 class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None
+        self.kFilters = [] # Permanent keyword filters (List of KeywordFilter)
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
 
@@ -351,6 +352,10 @@ class TaskCmd(object):
         else:
             projectName = ""
             keywordFilters = []
+
+        if self.kFilters:
+            # Add keyword filter
+            keywordFilters.extend(self.kFilters)
 
         if not projectName:
             # Take all project if none provided
@@ -745,4 +750,28 @@ class TaskCmd(object):
         task.recurrence.setRrule(rr)
         task.dueDate = task.recurrence.getNext()
     complete_t_recurs = recurrenceCompleter
+
+
+    def do_t_filter(self, line):
+        """Define permanent keyword filter used by t_list
+        Ex.:
+            - t_filter @work (filter all task that have the "work" keyword)
+            - t_filter none (remove filter)"""
+        #TODO: add completion and check if keyword exist
+        line = parseutils.simplifySpaces(line)
+        if not line:
+            raise YokadiException("You must give keyword as argument or 'none' to reset filter")
+
+        filters = []
+        if line.lower()!="none":
+            for token in line.split():
+                filter = parseutils.KeywordFilter(token)
+                if filter.name:
+                    filters.append(filter)
+
+        if filters:
+            self.kFilters = filters
+            self.prompt = "y %s> " % (" ".join([str(k) for k in filters]))
+        else:
+            self.prompt = "yokadi> "
 # vi: ts=4 sw=4 et

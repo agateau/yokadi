@@ -90,8 +90,8 @@ def keywordFiltersToDict(keywordFilters):
 class KeywordFilter(object):
     """Represent a filter on a keyword"""
     def __init__(self, filterLine=None):
-        self.name=None          # Keyword name
-        self.value=None         # Keyword value
+        self.name=""            # Keyword name
+        self.value=""           # Keyword value
         self.negative=False     # Negative filter
         self.valueOperator="="  # Operator to compare value
 
