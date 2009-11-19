@@ -133,11 +133,11 @@ class KeywordFilter(object):
                     projectValueFilter = (ProjectKeyword.q.value!=self.value)
                 #TODO: handle also <, >, =< and >=
 
-            taskKeywordTaskIDs =    Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
+            taskKeywordTaskIDs =    Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
                                                    TaskKeyword.q.keywordID==Keyword.q.id,
                                                    TaskKeyword.q.taskID==Task.q.id,
                                                    taskValueFilter)))
-            projectKeywordTaskIDs = Select(Task.q.id, where=(AND(Keyword.q.name==self.name,
+            projectKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
                                                       ProjectKeyword.q.keywordID==Keyword.q.id,
                                                       ProjectKeyword.q.projectID==Project.q.id,
                                                       Project.q.id==Task.q.project,

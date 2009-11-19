@@ -760,7 +760,7 @@ class TaskCmd(object):
         Ex.:
             - t_filter @work (filter all task that have the "work" keyword)
             - t_filter none (remove filter)"""
-        #TODO: add completion and check if keyword exist
+        #TODO: add completion
 
         if not line:
             raise YokadiException("You must give keyword as argument or 'none' to reset filter")
