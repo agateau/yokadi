@@ -54,7 +54,7 @@ class ProjectCmd(object):
     def do_p_edit(self, line):
         """Edit a project.
         p_edit <project name>"""
-        project=dbutils.getOrCreateProject(line, createIfNeeded=False)
+        project = dbutils.getOrCreateProject(line, createIfNeeded=False)
 
         if not project:
             raise YokadiException("Project does not exist.")
@@ -88,12 +88,12 @@ class ProjectCmd(object):
 
     def do_p_set_active(self, line):
         """Activate the given project"""
-        getProjectFromName(line).active=True
+        getProjectFromName(line).active = True
     complete_p_set_active = ProjectCompleter(1)
 
     def do_p_set_inactive(self, line):
         """Desactivate the given project"""
-        getProjectFromName(line).active=False
+        getProjectFromName(line).active = False
     complete_p_set_inactive = ProjectCompleter(1)
 
     def parser_p_remove(self):

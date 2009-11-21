@@ -26,7 +26,7 @@ class AliasCmd(object):
         """List all aliases."""
         if self.aliases:
             for name, command in self.aliases.items():
-                print C.BOLD+name.ljust(10) + C.RESET + "=> " + command
+                print C.BOLD + name.ljust(10) + C.RESET + "=> " + command
         else:
             print "No alias defined. Use a_add to create one"
 
@@ -35,10 +35,10 @@ class AliasCmd(object):
         Ex. create an alias 'la' for 't_list -a':
         a_add la t_list -a"""
         tokens = line.split()
-        if len(tokens)<2:
+        if len(tokens) < 2:
             raise YokadiException("You should provide an alias name and a command")
-        name=tokens[0]
-        command=" ".join(tokens[1:])
+        name = tokens[0]
+        command = " ".join(tokens[1:])
         self.aliases.update({ name : command})
         try:
             aliases = Config.selectBy(name="ALIASES")[0]
@@ -63,6 +63,6 @@ def resolveAlias(line, aliasDict):
     @param aliasDict: aliases dictionnary
     @return: modified line"""
     tokens = line.split()
-    if len(tokens)>0 and tokens[0] in aliasDict:
+    if len(tokens) > 0 and tokens[0] in aliasDict:
         line = "%s %s" % (aliasDict[tokens[0]], " ".join(tokens[1:]))
     return line

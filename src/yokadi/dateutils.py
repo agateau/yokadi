@@ -19,12 +19,12 @@ def guessDateFormat(tDate):
     """Guess a date format.
     @param tDate: date string like 30/08/2008 or 30/08 or 30
     @return: date format as a string like %d/%m/%Y or %d/%m or %d"""
-    if tDate.count("/")==2:
-        fDate="%d/%m/%Y"
-    elif tDate.count("/")==1:
-        fDate="%d/%m"
+    if tDate.count("/") == 2:
+        fDate = "%d/%m/%Y"
+    elif tDate.count("/") == 1:
+        fDate = "%d/%m"
     else:
-        fDate="%d"
+        fDate = "%d"
     return fDate
 
 
@@ -32,12 +32,12 @@ def guessTimeFormat(tTime):
     """Guess a time format.
     @param tTime: time string like 12:30:45 or 12:30 or 12
     @return: time format as a string like %H:%M:%S or %H:%M or %H"""
-    if tTime.count(":")==2:
-        fTime="%H:%M:%S"
-    elif tTime.count(":")==1:
-        fTime="%H:%M"
+    if tTime.count(":") == 2:
+        fTime = "%H:%M:%S"
+    elif tTime.count(":") == 1:
+        fTime = "%H:%M"
     else:
-        fTime="%H"
+        fTime = "%H"
     return fTime
 
 
@@ -75,8 +75,8 @@ def parseHumaneDateTime(line, today=None):
         raise YokadiException("Date is empty")
 
     # Date & Time format
-    fDate=None
-    fTime=None
+    fDate = None
+    fTime = None
 
     if today is None:
         today = datetime.today().replace(microsecond=0)
@@ -108,25 +108,25 @@ def parseHumaneDateTime(line, today=None):
     date = None
     if " " in line:
         # We assume user give date & time
-        tDate, tTime=line.split()
-        fDate=guessDateFormat(tDate)
-        fTime=guessTimeFormat(tTime)
+        tDate, tTime = line.split()
+        fDate = guessDateFormat(tDate)
+        fTime = guessTimeFormat(tTime)
         try:
-            date=datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
+            date = datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
         except Exception, e:
             raise YokadiException("Unable to understand date & time format:\t%s" % e)
     else:
         if ":" in line:
-            fTime=guessTimeFormat(line)
+            fTime = guessTimeFormat(line)
             try:
-                tTime=datetime(*time.strptime(line, fTime)[0:5]).time()
+                tTime = datetime(*time.strptime(line, fTime)[0:5]).time()
             except ValueError, e:
                 raise YokadiException("Invalid date format: %s" % e)
-            date=datetime.combine(today, tTime)
+            date = datetime.combine(today, tTime)
         else:
-            fDate=guessDateFormat(line)
+            fDate = guessDateFormat(line)
             try:
-                date=datetime(*time.strptime(line, fDate)[0:5])
+                date = datetime(*time.strptime(line, fDate)[0:5])
             except ValueError, e:
                 raise YokadiException("Invalid date format: %s" % e)
     assert date
@@ -135,9 +135,9 @@ def parseHumaneDateTime(line, today=None):
         # Set year and/or month to current date if not given
         try:
             if not "%Y" in fDate:
-                date=date.replace(year=today.year)
+                date = date.replace(year=today.year)
             if not "%m" in fDate:
-                date=date.replace(month=today.month)
+                date = date.replace(month=today.month)
         except ValueError, e:
                 raise YokadiException("Invalid date format: %s" % e)
     return date

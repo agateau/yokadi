@@ -22,13 +22,13 @@ class PlainListRenderer(object):
         """
 
         if not self.first:
-            print >>self.out
+            print >> self.out
         else:
             self.first = False
-        print >>self.out, sectionName.encode(tui.ENCODING)
+        print >> self.out, sectionName.encode(tui.ENCODING)
 
         for task in taskList:
-            print >>self.out, (u"- " + task.title).encode(tui.ENCODING)
+            print >> self.out, (u"- " + task.title).encode(tui.ENCODING)
 
     def end(self):
         pass

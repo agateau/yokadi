@@ -14,18 +14,18 @@ def escape(text):
     return saxutils.escape(unicode(text))
 
 def printRow(out, tag, lst):
-    print >>out, "<tr>"
+    print >> out, "<tr>"
     for value in lst:
         text = escape(value).encode("utf-8") or "&nbsp;"
-        print >>out, "<%s>%s</%s>" % (tag, text, tag)
-    print >>out, "</tr>"
+        print >> out, "<%s>%s</%s>" % (tag, text, tag)
+    print >> out, "</tr>"
 
 class HtmlListRenderer(object):
     def __init__(self, out):
         self.out = out
 
         #TODO: make this fancier
-        print >>self.out, """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        print >> self.out, """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
                 <html>
                 <head>
                     <style>
@@ -47,15 +47,15 @@ class HtmlListRenderer(object):
         @type taskList: list of db.Task instances
         """
 
-        print >>self.out, (u"<h1>%s</h1>" % escape(sectionName)).encode("utf-8")
-        print >>self.out, "<table width='100%'>"
+        print >> self.out, (u"<h1>%s</h1>" % escape(sectionName)).encode("utf-8")
+        print >> self.out, "<table width='100%'>"
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:
-            lst = [getattr(task, field) for field in TASK_FIELDS if field!="keywords"]
+            lst = [getattr(task, field) for field in TASK_FIELDS if field != "keywords"]
             lst.append(task.getKeywordsAsString())
             printRow(self.out, "td", lst)
-        print >>self.out, "</table>"
+        print >> self.out, "</table>"
 
     def end(self):
-        print >>self.out, "</body></html>"
+        print >> self.out, "</body></html>"
 # vi: ts=4 sw=4 et

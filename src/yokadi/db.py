@@ -130,7 +130,7 @@ class Task(SQLObject):
         joinColumn="task_id",
         otherColumn="keyword_id")
     recurrence = ForeignKey("Recurrence", default=None)
-    uniqTaskTitlePerProject=DatabaseIndex(title, project, unique=True)
+    uniqTaskTitlePerProject = DatabaseIndex(title, project, unique=True)
 
     def setKeywordDict(self, dct):
         """
@@ -205,7 +205,7 @@ class Config(SQLObject):
     """yokadi config"""
     class sqlmeta:
         defaultOrder = "name"
-    name  = UnicodeCol(alternateID=True, notNone=True)
+    name = UnicodeCol(alternateID=True, notNone=True)
     value = UnicodeCol(default="", notNone=True)
     system = BoolCol(default=False, notNone=True)
     desc = UnicodeCol(default="", notNone=True)
@@ -236,13 +236,13 @@ def connectDatabase(dbFileName, createIfNeeded=True):
     @param createIfNeeded: Indicate if database must be created if it does not exists (default True)
     @type createIfNeeded: bool"""
 
-    dbFileName=os.path.abspath(dbFileName)
+    dbFileName = os.path.abspath(dbFileName)
 
     if sys.platform == 'win32':
-        connectionString = 'sqlite:/'+ dbFileName[0] +'|' + dbFileName[2:]
+        connectionString = 'sqlite:/' + dbFileName[0] + '|' + dbFileName[2:]
     else:
         connectionString = 'sqlite:' + dbFileName
-        
+
     connection = connectionForURI(connectionString)
     sqlhub.processConnection = connection
 
@@ -269,17 +269,17 @@ def connectDatabase(dbFileName, createIfNeeded=True):
 
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
-    defaultConfig={
-        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''',False,
+    defaultConfig = {
+        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''',False,
+        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''', False,
                              "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
         "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
         "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again"),
         "PURGE_DELAY"     : ("90", False, "Default delay (in days) for the t_purge command")}
 
     for name, value in defaultConfig.items():
-        if Config.select(Config.q.name==name).count()==0:
+        if Config.select(Config.q.name == name).count() == 0:
             Config(name=name, value=value[0], system=value[1], desc=value[2])
 
 # vi: ts=4 sw=4 et

@@ -136,7 +136,7 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth = None):
+    def __init__(self, out, termWidth=None):
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
@@ -212,13 +212,13 @@ class TextListRenderer(object):
         cells = [x.createHeader() for x in self.columns]
         line = "|".join(cells)
         width = len(line)
-        print >>self.out
-        print >>self.out, C.CYAN + sectionName.center(width) + C.RESET
-        print >>self.out, C.BOLD + line + C.RESET
-        print >>self.out, "-" * width
+        print >> self.out
+        print >> self.out, C.CYAN + sectionName.center(width) + C.RESET
+        print >> self.out, C.BOLD + line + C.RESET
+        print >> self.out, "-" * width
 
 
     def _renderTaskListRow(self, task):
         cells = [column.createCell(task) for column in self.columns]
-        print >>self.out, "|".join(cells)
+        print >> self.out, "|".join(cells)
 # vi: ts=4 sw=4 et

@@ -34,7 +34,7 @@ def addTask(projectName, title, keywordDict):
 
     # Create task
     try:
-        task = Task(creationDate = datetime.now(), project=project, title=title, description="", status="new")
+        task = Task(creationDate=datetime.now(), project=project, title=title, description="", status="new")
         task.setKeywordDict(keywordDict)
     except DuplicateEntryError:
         raise YokadiException("A task named %s already exists in this project. Please find another name" % title)

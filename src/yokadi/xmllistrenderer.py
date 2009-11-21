@@ -53,7 +53,7 @@ class XmlListRenderer(object):
 
     def _exportKeywords(self, taskElement, keywordDict):
         for key, value in keywordDict.items():
-            keywordElement=self.doc.createElement("keyword")
+            keywordElement = self.doc.createElement("keyword")
             taskElement.appendChild(keywordElement)
             keywordElement.setAttribute("name", unicode(key))
             if value:

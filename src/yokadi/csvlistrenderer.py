@@ -19,7 +19,7 @@ class CsvListRenderer(object):
 
     def addTaskList(self, project, taskList):
         for task in taskList:
-            row = [getattr(task, field) for field in TASK_FIELDS if field!="keywords"]
+            row = [getattr(task, field) for field in TASK_FIELDS if field != "keywords"]
             row.append(task.getKeywordsAsString())
             self._writerow(row)
 

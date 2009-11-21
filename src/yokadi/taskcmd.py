@@ -11,7 +11,7 @@ import readline
 from datetime import datetime, timedelta
 from dateutil import rrule
 from sqlobject import LIKE, AND, OR, NOT
-from sqlobject.sqlbuilder import LEFTJOINOn, Alias
+from sqlobject.sqlbuilder import LEFTJOINOn
 
 from db import Config, Keyword, Project, Task, \
                TaskKeyword, Recurrence
@@ -20,7 +20,7 @@ import dbutils
 import dateutils
 import parseutils
 import tui
-from completers import ProjectCompleter, projectAndKeywordCompleter,\
+from completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
 from yokadiexception import YokadiException
 from textlistrenderer import TextListRenderer
@@ -28,7 +28,6 @@ from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
 from htmllistrenderer import HtmlListRenderer
 from plainlistrenderer import PlainListRenderer
-
 from yokadioptionparser import YokadiOptionParser
 
 gRendererClassDict = dict(
@@ -88,7 +87,7 @@ class TaskCmd(object):
                 print
                 print "Cancelled"
                 return
-            foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
+            foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
         bugutils.editBugKeywords(keywordDict)
@@ -130,7 +129,7 @@ class TaskCmd(object):
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
-        task=self.getTaskFromId(line)
+        task = self.getTaskFromId(line)
         try:
             description = tui.editText(task.description)
         except Exception, e:
@@ -148,8 +147,8 @@ class TaskCmd(object):
         """Defines urgency of a task.
         t_urgency <id> <value>"""
         tokens = line.split(" ")
-        if len(tokens)!=2:
-            raise YokadiException("You must provide a taskId and an urgency value") 
+        if len(tokens) != 2:
+            raise YokadiException("You must provide a taskId and an urgency value")
         task = self.getTaskFromId(tokens[0])
         try:
             # Do not use isdigit(), so that we can set negative urgency. This
@@ -158,12 +157,12 @@ class TaskCmd(object):
         except ValueError:
             raise YokadiException("Task urgency must be a digit")
 
-        if urgency>100:
+        if urgency > 100:
             tui.warning("Max urgency is 100")
-            urgency=100
-        elif urgency<-99:
+            urgency = 100
+        elif urgency < -99:
             tui.warning("Min urgency is -99")
-            urgency=-99
+            urgency = -99
 
         task.urgency = urgency
 
@@ -192,7 +191,7 @@ class TaskCmd(object):
     complete_t_mark_new = taskIdCompleter
 
     def _t_set_status(self, line, status):
-        task=self.getTaskFromId(line)
+        task = self.getTaskFromId(line)
         if task.recurrence and status == "done":
             task.dueDate = task.recurrence.getNext(task.dueDate)
             print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
@@ -209,7 +208,7 @@ class TaskCmd(object):
         """Apply a command to several tasks.
         t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
         tokens = line.split(" ", 2)
-        if len(tokens)<2:
+        if len(tokens) < 2:
             raise YokadiException("Give at least a task id and a command. See 'help t_apply'")
         idStringList = tokens[0]
         cmd = tokens[1]
@@ -235,7 +234,7 @@ class TaskCmd(object):
     def do_t_remove(self, line):
         parser = self.parser_t_remove()
         options, args = parser.parse_args(line)
-        task=self.getTaskFromId(' '.join(args))
+        task = self.getTaskFromId(' '.join(args))
         if not options.force:
             if not tui.confirm("Remove task '%s'" % task.title):
                 return
@@ -263,11 +262,11 @@ class TaskCmd(object):
     def do_t_purge(self, line):
         parser = self.parser_t_purge()
         options, args = parser.parse_args(line)
-        filters=[]
-        filters.append(Task.q.status=="done")
-        filters.append(Task.q.doneDate<(datetime.now()-timedelta(days=options.delay)))
-        tasks=Task.select(AND(*filters))
-        if tasks.count()==0:
+        filters = []
+        filters.append(Task.q.status == "done")
+        filters.append(Task.q.doneDate < (datetime.now() - timedelta(days=options.delay)))
+        tasks = Task.select(AND(*filters))
+        if tasks.count() == 0:
             print "No tasks need to be purged"
             return
         print "The following tasks will be removed:"
@@ -360,10 +359,10 @@ class TaskCmd(object):
         if not projectName:
             if self.pFilter:
                 # If a project filter is defined, use it as none was provided
-                projectName=self.pFilter
+                projectName = self.pFilter
             else:
                 # Take all project if none provided
-                projectName="%"
+                projectName = "%"
 
         if projectName.startswith("!"):
             projectName = projectName[1:]
@@ -371,7 +370,7 @@ class TaskCmd(object):
         else:
             projectList = Project.select(LIKE(Project.q.name, projectName))
 
-        if projectList.count()==0:
+        if projectList.count() == 0:
             tui.error("Found no project matching '%s'" % projectName)
             return
 
@@ -379,34 +378,34 @@ class TaskCmd(object):
         parseutils.warnIfKeywordDoesNotExist(keywordFilters)
 
         # Filtering and sorting according to parameters
-        filters=[]
+        filters = []
 
         # Filter on keywords
         for keywordFilter in keywordFilters:
             filters.append(keywordFilter.filter())
 
-        order=-Task.q.urgency, Task.q.creationDate
-        limit=None
+        order = -Task.q.urgency, Task.q.creationDate
+        limit = None
         if options.done:
-            filters.append(Task.q.status=='done')
+            filters.append(Task.q.status == 'done')
             if options.done != "all":
                 filters.append(parseutils.createFilterFromRange(options.done))
         elif not options.all:
-            filters.append(Task.q.status!='done')
+            filters.append(Task.q.status != 'done')
         if options.topUrgent:
-            order=-Task.q.urgency
-            limit=5
+            order = -Task.q.urgency
+            limit = 5
         if options.topDue:
-            filters.append(Task.q.dueDate!=None)
-            order=Task.q.dueDate
-            limit=5
+            filters.append(Task.q.dueDate != None)
+            order = Task.q.dueDate
+            limit = 5
         if options.overdue:
-            filters.append(Task.q.dueDate<datetime.now())
-            order=Task.q.dueDate
+            filters.append(Task.q.dueDate < datetime.now())
+            order = Task.q.dueDate
         if options.search:
             for word in options.search:
-                filters.append(OR(LIKE(Task.q.title, "%"+word+"%"),
-                                  LIKE(Task.q.description, "%"+word+"%")))
+                filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
+                                  LIKE(Task.q.description, "%" + word + "%")))
 
         # Define output
         if options.output:
@@ -455,7 +454,7 @@ class TaskCmd(object):
 
                 renderer.addTaskList(unicode(project), taskList)
             renderer.end()
-    
+
             if len(hiddenProjectNames) > 0:
                 tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
@@ -469,8 +468,8 @@ class TaskCmd(object):
         t_reorder <project_name>"""
         project = Project.byName(line)
         taskList = Task.select(AND(Task.q.projectID == project.id,
-                                   Task.q.status    != 'done'),
-                               orderBy=-Task.q.urgency)
+                                   Task.q.status != 'done'),
+                               orderBy= -Task.q.urgency)
         lines = [ "%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
@@ -506,7 +505,7 @@ class TaskCmd(object):
         parser = self.parser_t_show()
         options, args = parser.parse_args(line)
 
-        task=self.getTaskFromId(' '.join(args))
+        task = self.getTaskFromId(' '.join(args))
 
         if options.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
@@ -554,7 +553,7 @@ class TaskCmd(object):
                 stripped = len(origline) - len(line)
                 begidx = readline.get_begidx() - stripped
                 endidx = readline.get_endidx() - stripped
-                if begidx>0:
+                if begidx > 0:
                     self.completion_matches = projectAndKeywordCompleter("", text, line, begidx, endidx, shift=1)
                 else:
                     self.completion_matches = []
@@ -584,7 +583,7 @@ class TaskCmd(object):
                 print "Cancelled"
                 readline.set_completer(old_completer)   # Restore standard completer
                 return
-            foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
+            foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 
@@ -602,9 +601,9 @@ class TaskCmd(object):
         """Set task's project.
         t_project <id> <project>"""
         tokens = line.split(" ")
-        if len(tokens)!=2:
+        if len(tokens) != 2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        task=self.getTaskFromId(tokens[0])
+        task = self.getTaskFromId(tokens[0])
         projectName = tokens[1]
 
         task.project = dbutils.getOrCreateProject(projectName)
@@ -642,13 +641,13 @@ class TaskCmd(object):
         - 12:               on the 12th of current month
 
         To reset a due date, use "none"."""
-        if len(line.split())<2:
+        if len(line.split()) < 2:
             raise YokadiException("Give a task id and time, date or date & time")
-        taskId, line=line.strip().split(" ", 1)
-        task=self.getTaskFromId(taskId)
+        taskId, line = line.strip().split(" ", 1)
+        task = self.getTaskFromId(taskId)
 
-        if line.lower()=="none":
-            task.dueDate=None
+        if line.lower() == "none":
+            task.dueDate = None
             print "Due date for task '%s' reset" % task.title
         else:
             task.dueDate = dateutils.parseHumaneDateTime(line)
@@ -691,7 +690,7 @@ class TaskCmd(object):
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = self.getTaskFromId(tokens[0])
-        
+
         # Define recurrence:
         freq = byminute = byhour = byweekday = bymonthday = bymonth = None
 
@@ -713,20 +712,20 @@ class TaskCmd(object):
                 raise YokadiException("You should give day and time for weekly task")
             byweekday = dateutils.getWeekDayNumberFromDay(tokens[2].lower())
             byhour, byminute = dateutils.getHourAndMinute(tokens[3])
-        elif tokens[1] in ("monthly","quarterly"):
+        elif tokens[1] in ("monthly", "quarterly"):
             if tokens[1] == "monthly":
                 freq = rrule.MONTHLY
             else:
                 # quarterly
                 freq = rrule.YEARLY
-                bymonth = [1,4,7,10]
+                bymonth = [1, 4, 7, 10]
             if len(tokens) < 4:
                 raise YokadiException("You should give day and time for %s task" % (tokens[1],))
             try:
                 bymonthday = int(tokens[2])
                 byhour, byminute = dateutils.getHourAndMinute(tokens[3])
             except ValueError:
-                POSITION = { "first" : 1, "second" : 2, "third" : 3, "fourth" : 4, "last" : -1 }
+                POSITION = { "first" : 1, "second" : 2, "third" : 3, "fourth" : 4, "last" :-1 }
                 if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
                     byweekday = rrule.weekday(dateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
@@ -763,7 +762,7 @@ class TaskCmd(object):
         if not line:
             raise YokadiException("You must give keyword as argument or 'none' to reset filter")
 
-        if parseutils.simplifySpaces(line).lower()=="none":
+        if parseutils.simplifySpaces(line).lower() == "none":
             self.kFilters = []
             self.pFilter = ""
             self.prompt = "yokadi> "
@@ -771,12 +770,12 @@ class TaskCmd(object):
             projectName, keywordFilters = parseutils.extractKeywords(line)
             self.kFilters = keywordFilters
             self.pFilter = projectName
-            prompt="y"
+            prompt = "y"
             if self.pFilter:
-                prompt+=" %s" % projectName
+                prompt += " %s" % projectName
             if self.kFilters:
                 parseutils.warnIfKeywordDoesNotExist(self.kFilters)
-                prompt+=" %s" % (" ".join([str(k) for k in keywordFilters]))
+                prompt += " %s" % (" ".join([str(k) for k in keywordFilters]))
             self.prompt = "%s> " % prompt
 
 # vi: ts=4 sw=4 et

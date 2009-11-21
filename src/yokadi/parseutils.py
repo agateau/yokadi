@@ -3,13 +3,14 @@
 Parse utilities. Used to manipulate command line text.
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
 import re
 from datetime import date, timedelta
 
 from db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
-from sqlobject import AND, NOT, OR, LIKE
+from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 import tui
 from yokadiexception import YokadiException
@@ -24,11 +25,11 @@ def parseParameters(line):
     """Parse line of form -a -b -c some text
     @return: ((a, b, c), some text)
     """
-    parameters=[]
-    text=[]
-    line=simplifySpaces(line)
+    parameters = []
+    text = []
+    line = simplifySpaces(line)
     for word in line.split():
-        if word.startswith("-") and len(word)==2:
+        if word.startswith("-") and len(word) == 2:
             parameters.append(word[1])
         else:
             text.append(word)
@@ -57,7 +58,7 @@ def extractKeywords(line):
     @param line: line from which keywords are extracted
     @returns: (remaining_text, keywordFilters)"""
     keywordFilters = []
-    remainingText=[]
+    remainingText = []
     for token in line.split():
         if token.startswith("@") or token.startswith("!@"):
             keywordFilters.append(KeywordFilter(token))
@@ -82,7 +83,7 @@ def createLine(projectName, title, keywordDict):
 
 def keywordFiltersToDict(keywordFilters):
     """Convert a list of KeywordFilter instnance to a simple keyword dictionary"""
-    keywordDict={}
+    keywordDict = {}
     for keywordFilter in keywordFilters:
         keywordDict[keywordFilter.name] = keywordFilter.value
     return keywordDict
@@ -90,20 +91,20 @@ def keywordFiltersToDict(keywordFilters):
 def warnIfKeywordDoesNotExist(keywordFilters):
     """Warn user is keyword does not exist
     @return: True if at least one keyword does not exist, else False"""
-    doesNotExist=False
+    doesNotExist = False
     for keyword in [k.name for k in keywordFilters]:
-            if Keyword.select(LIKE(Keyword.q.name, keyword)).count()==0:
+            if Keyword.select(LIKE(Keyword.q.name, keyword)).count() == 0:
                 tui.error("Keyword %s is unknown." % keyword)
-                doesNotExist=True
+                doesNotExist = True
     return doesNotExist
 
 class KeywordFilter(object):
     """Represent a filter on a keyword"""
     def __init__(self, filterLine=None):
-        self.name=""            # Keyword name
-        self.value=""           # Keyword value
-        self.negative=False     # Negative filter
-        self.valueOperator="="  # Operator to compare value
+        self.name = ""            # Keyword name
+        self.value = ""           # Keyword value
+        self.negative = False     # Negative filter
+        self.valueOperator = "="  # Operator to compare value
 
         if filterLine:
             self.parse(filterLine)
@@ -111,36 +112,36 @@ class KeywordFilter(object):
     def __str__(self):
         """Represent keyword filter as a string. Identical to what parse() method wait for"""
         if self.negative:
-            prefix="!@"
+            prefix = "!@"
         else:
-            prefix="@"
+            prefix = "@"
         if self.value:
-            return prefix+self.name+self.valueOperator+str(self.value)
+            return prefix + self.name + self.valueOperator + str(self.value)
         else:
-            return prefix+self.name
+            return prefix + self.name
 
     def filter(self):
         """Return a filter in SQlObject format"""
-        taskValueFilter = (1==1)
-        projectValueFilter = (1==1)
+        taskValueFilter = (1 == 1)
+        projectValueFilter = (1 == 1)
         if self.name:
             if self.value:
-                if self.valueOperator=="=":
-                    taskValueFilter = (TaskKeyword.q.value==self.value)
-                    projectValueFilter = (ProjectKeyword.q.value==self.value)
-                elif self.valueOperator=="!=":
-                    taskValueFilter = (TaskKeyword.q.value!=self.value)
-                    projectValueFilter = (ProjectKeyword.q.value!=self.value)
+                if self.valueOperator == "=":
+                    taskValueFilter = (TaskKeyword.q.value == self.value)
+                    projectValueFilter = (ProjectKeyword.q.value == self.value)
+                elif self.valueOperator == "!=":
+                    taskValueFilter = (TaskKeyword.q.value != self.value)
+                    projectValueFilter = (ProjectKeyword.q.value != self.value)
                 #TODO: handle also <, >, =< and >=
 
-            taskKeywordTaskIDs =    Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
-                                                   TaskKeyword.q.keywordID==Keyword.q.id,
-                                                   TaskKeyword.q.taskID==Task.q.id,
+            taskKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
+                                                   TaskKeyword.q.keywordID == Keyword.q.id,
+                                                   TaskKeyword.q.taskID == Task.q.id,
                                                    taskValueFilter)))
             projectKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
-                                                      ProjectKeyword.q.keywordID==Keyword.q.id,
-                                                      ProjectKeyword.q.projectID==Project.q.id,
-                                                      Project.q.id==Task.q.project,
+                                                      ProjectKeyword.q.keywordID == Keyword.q.id,
+                                                      ProjectKeyword.q.projectID == Project.q.id,
+                                                      Project.q.id == Task.q.project,
                                                       projectValueFilter)))
 
             if self.negative:
@@ -157,13 +158,13 @@ class KeywordFilter(object):
             tui.error("No space in keyword filter !")
             return
         if line.startswith("!"):
-            self.negative=True
-            line=line[1:]
+            self.negative = True
+            line = line[1:]
         if not line.startswith("@"):
             tui.error("Keyword name must be be prefixed with a @")
             return
-        line=line[1:] # Squash @
-        line=line.replace("==", "=") # Tolerate == syntax
+        line = line[1:] # Squash @
+        line = line.replace("==", "=") # Tolerate == syntax
         for operator in operators:
             if operator in line:
                 self.name, self.value = line.split(operator, 1)
@@ -187,10 +188,10 @@ def createFilterFromRange(dateRange):
     elif dateRange == "thisweek":
         minDate -= timedelta(minDate.weekday())
     elif dateRange == "thismonth":
-        minDate = minDate.replace(day = 1)
+        minDate = minDate.replace(day=1)
     else:
         raise YokadiException("Invalid range value '%s'" % dateRange)
 
-    return Task.q.doneDate>=minDate
+    return Task.q.doneDate >= minDate
 
 # vi: ts=4 sw=4 et

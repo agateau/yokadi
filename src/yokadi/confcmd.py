@@ -28,34 +28,34 @@ class ConfCmd(object):
         options, args = parser.parse_args(line)
         line = u" ".join(args)
         if not line:
-            line="%"
-        k=Config.select(AND(LIKE(Config.q.name, line), Config.q.system==options.system))
-        fields=[(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
+            line = "%"
+        k = Config.select(AND(LIKE(Config.q.name, line), Config.q.system == options.system))
+        fields = [(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
         if fields:
             tui.renderFields(fields)
         else:
             raise YokadiException("Configuration key %s does not exist" % line)
 
-    complete_c_get=confCompleter
+    complete_c_get = confCompleter
 
     def do_c_set(self, line):
         """Set a configuration key to value : c_set <key> <value>"""
-        line=line.split()
-        if len(line)<2:
+        line = line.split()
+        if len(line) < 2:
             raise YokadiException("You should provide two arguments : the parameter key and the value")
-        name=line[0]
-        value=" ".join(line[1:])
-        p=Config.select(AND(Config.q.name==name, Config.q.system==False))
-        if p.count()==0:
+        name = line[0]
+        value = " ".join(line[1:])
+        p = Config.select(AND(Config.q.name == name, Config.q.system == False))
+        if p.count() == 0:
             tui.error("Sorry, no parameter match")
         else:
             if self.checkParameterValue(name, value):
-                p[0].value=value
+                p[0].value = value
                 tui.info("Parameter updated")
             else:
                 tui.error("Parameter value is incorrect")
 
-    complete_c_set=confCompleter
+    complete_c_set = confCompleter
 
     def checkParameterValue(self, name, value):
         """Control that the value if ok for a parameter
@@ -65,8 +65,8 @@ class ConfCmd(object):
         # Positive int parameters
         if name in ("ALARM_DELAY", "ALARM_SUSPEND", "PURGE_DELAY"):
             try:
-                value=int(value)
-                assert(value>=0)
+                value = int(value)
+                assert(value >= 0)
                 return True
             except (ValueError, AssertionError):
                 return False

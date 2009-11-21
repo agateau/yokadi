@@ -53,7 +53,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
         self.prompt = "yokadi> "
-        self.historyPath=os.path.expandvars("$HOME/.yokadi_history")
+        self.historyPath = os.path.expandvars("$HOME/.yokadi_history")
         self.loadHistory()
 
     def emptyline(self):
@@ -86,16 +86,16 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         return True
 
     #Some standard alias
-    do_quit=do_EOF
-    do_q=do_EOF
-    do_exit=do_EOF
+    do_quit = do_EOF
+    do_q = do_EOF
+    do_exit = do_EOF
 
     def onecmd(self, line):
         """This method is subclassed just to be
         able to encapsulate it with a try/except bloc"""
         try:
             # Decode user input
-            line=line.decode(tui.ENCODING)
+            line = line.decode(tui.ENCODING)
             return Cmd.onecmd(self, line)
         except YokadiOptionParserNormalExitException:
             pass
@@ -106,14 +106,14 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         except IOError, e:
             # We can get I/O errors when yokadi is piped onto another shell commands
             # that breaks.
-            print >>sys.stderr, "*** I/O error ***\n\t%s" % e
+            print >> sys.stderr, "*** I/O error ***\n\t%s" % e
         except KeyboardInterrupt:
             print "*** Break ***"
         except Exception, e:
             tui.error("Unhandled exception (oups)\n\t%s" % e)
             print "This is a bug of Yokadi, sorry."
             print "Send the above message by email to Yokadi developers (ml-yokadi@sequanux.org) to help them make Yokadi better."
-            cut="---------------------8<----------------------------------------------"
+            cut = "---------------------8<----------------------------------------------"
             print cut
             traceback.print_exc()
             print "--"
@@ -136,7 +136,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         """Writes shell history to disk"""
         try:
             # Open r/w and close file to create one if needed
-            historyFile=file(self.historyPath, "w")
+            historyFile = file(self.historyPath, "w")
             historyFile.close()
             readline.set_history_length(1000)
             readline.write_history_file(self.historyPath)
@@ -166,7 +166,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
     def completenames(self, text, *ignored):
         """Complete commands names. Same as Cmd.cmd one but with support
         for command aliases. Code kindly borrowed to Pysql"""
-        dotext = 'do_'+text
+        dotext = 'do_' + text
         names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
         names.extend([a for a in self.aliases.keys() if a.startswith(text)])
         return names
@@ -195,11 +195,11 @@ def main():
 
     if not options.filename:
         # Look if user define an env VAR for yokadi db
-        options.filename=os.getenv("YOKADI_DB")
+        options.filename = os.getenv("YOKADI_DB")
         if options.filename:
             print "Using env defined database (%s)" % options.filename
         else:
-            options.filename=os.path.normcase(os.path.expanduser("~/.yokadi.db"))
+            options.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
             print "Using default database (%s)" % options.filename
 
     db.connectDatabase(options.filename)
@@ -221,6 +221,6 @@ def main():
     # Save history
     cmd.writeHistory()
 
-if __name__=="__main__":
+if __name__ == "__main__":
     main()
 # vi: ts=4 sw=4 et

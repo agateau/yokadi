@@ -28,7 +28,7 @@ class YokadiOptionParser(OptionParser):
             argv = []
 
         # Unknown options will throw an error
-        options, args =  OptionParser.parse_args(self, argv)
+        options, args = OptionParser.parse_args(self, argv)
         return options, args
 
 
