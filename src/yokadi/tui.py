@@ -78,7 +78,7 @@ def reinjectInRawInput(line):
 def editLine(line, prompt="edit> "):
     """Edit a line using readline"""
     if line:
-       reinjectInRawInput(line)
+        reinjectInRawInput(line)
 
     if len(_answers) > 0:
         line = _answers.pop(0)

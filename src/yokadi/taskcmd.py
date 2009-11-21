@@ -8,13 +8,13 @@ Task related commands.
 """
 import os
 import readline
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from dateutil import rrule
-from sqlobject import SQLObjectNotFound, LIKE, AND, OR, NOT
+from sqlobject import LIKE, AND, OR, NOT
 from sqlobject.sqlbuilder import LEFTJOINOn, Alias
 
 from db import Config, Keyword, Project, Task, \
-               TaskKeyword, ProjectKeyword, Recurrence
+               TaskKeyword, Recurrence
 import bugutils
 import dbutils
 import dateutils
@@ -329,7 +329,6 @@ class TaskCmd(object):
         return parser
 
     def do_t_list(self, line):
-        doneRangeList= ["today", "thisweek", "thismonth"]
 
         def selectRendererClass():
             if options.format != "auto":
@@ -446,7 +445,6 @@ class TaskCmd(object):
                 if not project.active:
                     hiddenProjectNames.append(project.name)
                     continue
-                TaskKeyword2 = Alias(TaskKeyword)
                 taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
                                        orderBy=order, limit=limit, distinct=True,
                                        join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))

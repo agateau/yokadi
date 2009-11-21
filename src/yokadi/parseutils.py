@@ -6,9 +6,9 @@ Parse utilities. Used to manipulate command line text.
 @license: GPL v3 or later
 """
 import re
-from datetime import datetime, date, timedelta
+from datetime import date, timedelta
 
-from db import Config, TaskKeyword, ProjectKeyword, Keyword, Task, Project
+from db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 from sqlobject import AND, NOT, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 import tui
@@ -152,7 +152,6 @@ class KeywordFilter(object):
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""
-        keywordDict = {}
         operators = ("=<", ">=", "!=", "<", ">", "=")
         if " " in line:
             tui.error("No space in keyword filter !")

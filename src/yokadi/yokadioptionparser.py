@@ -22,9 +22,6 @@ class YokadiOptionParser(OptionParser):
         OptionParser.__init__(self)
 
     def parse_args(self, line):
-        nargv = [] # New argv with escaped arg if needed or keyword switch change
-        earg = []  # Escaped argument
-
         argv = line.split(u" ")
         # Splitting an empty line gives us [""], not an empty array
         if argv == [u""]:

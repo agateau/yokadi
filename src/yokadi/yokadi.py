@@ -21,7 +21,6 @@ from optparse import OptionParser
 
 try:
     from sqlobject import __doc__ as sqlobjectVersion
-    from sqlobject import SQLObjectNotFound
 
 except ImportError:
     print "You must install SQLObject to use Yokadi"
@@ -129,7 +128,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         """Tries to load previous history list from disk"""
         try:
             readline.read_history_file(self.historyPath)
-        except Exception, e:
+        except Exception:
             # Cannot load any previous history. Start from a clear one
             pass
 

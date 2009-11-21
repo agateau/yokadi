@@ -18,7 +18,7 @@ class AliasCmd(object):
             self.aliases = eval(Config.byName("ALIASES").value)
         except SQLObjectNotFound:
             self.aliases = {}
-        except Exception, e:
+        except Exception:
             tui.error("Aliases syntax error. Ignored")
             self.aliases = {}
 

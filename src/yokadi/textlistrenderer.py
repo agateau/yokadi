@@ -10,7 +10,7 @@ from datetime import datetime
 
 import colors as C
 import dateutils
-from db import Config, Task
+from db import Task
 import tui
 
 
