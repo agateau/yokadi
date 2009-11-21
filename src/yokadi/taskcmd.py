@@ -91,7 +91,7 @@ class TaskCmd(object):
             foo, title, keywordDict = parseutils.parseLine(task.project.name+" "+line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
-        editBugKeywords(keywordDict)
+        bugutils.editBugKeywords(keywordDict)
         task.setKeywordDict(keywordDict)
 
         # Update bug
