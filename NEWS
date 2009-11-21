@@ -1,3 +1,7 @@
+v0.12 200x/xx/xx
+- Negative keyword support. Ex.: t_list !@home
+- Permanent filters on keyword or project. 't_filter @foo' will filter any further call to t_list on @foo keyword.
+
 v0.11.1 2009/11/02
 - yokadi symlink (useful to run yokadi without installing it) was broken
 
