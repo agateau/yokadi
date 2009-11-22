@@ -31,8 +31,6 @@ class YokadiOptionParserTestCase(unittest.TestCase):
             options, args = parser.parse_args(src)
             # Recreate the line
             line = " ".join(args)
-            if src.startswith("-- "):
-                src = src[3:]
             self.assertEqual(line, src)
 
     def testUknownOption(self):
