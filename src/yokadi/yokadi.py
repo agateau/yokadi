@@ -11,7 +11,15 @@ Command line oriented, sqlite powered, todo list
 import locale
 import os
 import sys
-import readline
+try:
+    import readline
+except ImportError:
+    print "You don't have a working readline library."
+    print "Windows users must install Pyreadline."
+    print "Get it on https://launchpad.net/pyreadline/+download"
+    print "Or use 'easy_install pyreadline'"
+    sys.exit(1)
+
 readline.parse_and_bind("set show-all-if-ambiguous on")
 reload(sys)  ## So as to enable setdefaultencoding
 
