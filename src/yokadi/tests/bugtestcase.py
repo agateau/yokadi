@@ -12,6 +12,7 @@ import testutils
 import tui
 from db import Task
 from taskcmd import TaskCmd
+from yokadiexception import YokadiException
 
 class BugTestCase(unittest.TestCase):
     def setUp(self):
@@ -30,5 +31,10 @@ class BugTestCase(unittest.TestCase):
 
         kwDict = Task.get(1).getKeywordDict()
         self.assertEqual(kwDict, dict(_severity=2, _likelihood=4, _bug=123))
+
+        for bad_input in ("", # No project
+                          "x", # No task name
+                          "x t1"): # Existing task
+            self.assertRaises(YokadiException, self.cmd.do_t_add, bad_input)
 
 # vi: ts=4 sw=4 et

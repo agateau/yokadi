@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 import tui
-from db import Project, Task
+from db import Task
 from taskcmd import TaskCmd
 from yokadiexception import YokadiException
 
@@ -27,6 +27,9 @@ class TaskTestCase(unittest.TestCase):
         tui.addInputAnswers("y", "y")
         self.cmd.do_t_add("x @kw1 @kw2=12 t2")
 
+        tui.addInputAnswers("n")
+        self.cmd.do_t_add("notExistingProject newTask")
+
         tasks = list(Task.select())
         result = [x.title for x in tasks]
         expected = [u"t1", u"t2"]
@@ -34,6 +37,11 @@ class TaskTestCase(unittest.TestCase):
 
         kwDict = Task.get(2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
+
+        for bad_input in ("", # No project
+                          "x", # No task name
+                          "x t1"): # Existing task
+            self.assertRaises(YokadiException, self.cmd.do_t_add, bad_input)
 
     def testMark(self):
         tui.addInputAnswers("y")
