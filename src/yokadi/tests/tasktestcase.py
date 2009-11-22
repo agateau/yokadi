@@ -2,10 +2,12 @@
 """
 Task test cases
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-
+import sys
 import unittest
+from StringIO import StringIO
 
 import testutils
 
@@ -64,6 +66,11 @@ class TaskTestCase(unittest.TestCase):
         kwDict = task.getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
+        for bad_input in ("", # No task
+                          "1", # No keyword
+                          "1 kw1"): # No @ before kw1
+            self.assertRaises(YokadiException, self.cmd.do_t_add_keywords, bad_input)
+
     def testLastTaskId(self):
         # Using "_" with no prior task activity should raise an exception   
         self.assertRaises(YokadiException, self.cmd.getTaskFromId, "_")
@@ -87,6 +94,7 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_recurs("1 daily 10:00")
         desc = str(task.recurrence)
         self.cmd.do_t_recurs("1 weekly FR 23:00")
+        self.cmd.do_t_recurs("1 none")
         self.cmd.do_t_recurs("1 weekly fr 23:00")
         self.cmd.do_t_recurs("1 weekly Fr 23:00")
         self.cmd.do_t_recurs("1 weekly Friday 23:00")
@@ -100,6 +108,20 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_mark_done("1")
         self.assertEqual(task.status, "new")
 
+        for bad_input in ("", # No task
+                          "1", # No recurence
+                          "1 foo", # Unknown recurrence
+                          "1 daily", # No time
+                          "1 weekly", # No day
+                          "1 weekly monday", # No time
+                          "1 monthly", # No day
+                          "1 monthly 10", # No time
+                          "1 quarterly", # No day
+                          "1 quarterly 10", # No time
+                          "1 monthly foo 12:00", # Bad date
+                          ):
+            self.assertRaises(YokadiException, self.cmd.do_t_recurs, bad_input)
+
     def testTlist(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
@@ -107,6 +129,34 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_add("x @kw1 @kw2=12 t2")
 
         for line in ("", "-a", "-t", "-d today", "-u", "-k %", "-k _%", "-s t", "--overdue",
-                     "-f plain", "-f xml", "-f html"):
+                     "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html"):
             self.cmd.do_t_list(line)
+
+    def testTfilter(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_t_add("x @kw1 @kw2=12 t2")
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("y t3")
+
+        for filter in ("@kw1", "x", "x @kw1", "none"):
+            self.cmd.do_t_filter(filter)
+            out = StringIO()
+            oldstdout = sys.stdout
+            tui.stdout = out
+            self.cmd.do_t_list("")
+            self.assertTrue("t2" in out.getvalue())
+            if filter in ("x", "none"):
+                self.assertTrue("t1" in out.getvalue())
+            else:
+                self.assertFalse("t1" in out.getvalue())
+            if filter == "none":
+                self.assertTrue("t3" in out.getvalue())
+            else:
+                self.assertFalse("t3" in out.getvalue())
+
+            tui.stdout = oldstdout
+
+        self.assertRaises(YokadiException, self.cmd.do_t_filter, "")
 # vi: ts=4 sw=4 et

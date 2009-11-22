@@ -4,7 +4,6 @@ Utils for unit-test
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-import unittest
 
 import db
 
