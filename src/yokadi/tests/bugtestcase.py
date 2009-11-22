@@ -24,6 +24,9 @@ class BugTestCase(unittest.TestCase):
         tui.addInputAnswers("y", "2", "4", "123")
         self.cmd.do_bug_add("x t1")
 
+        tui.addInputAnswers("n")
+        self.cmd.do_bug_add("notExistingProject newBug")
+
         tasks = list(Task.select())
         result = [x.title for x in tasks]
         expected = [u"t1"]
@@ -35,6 +38,6 @@ class BugTestCase(unittest.TestCase):
         for bad_input in ("", # No project
                           "x", # No task name
                           "x t1"): # Existing task
-            self.assertRaises(YokadiException, self.cmd.do_t_add, bad_input)
+            self.assertRaises(YokadiException, self.cmd.do_bug_add, bad_input)
 
 # vi: ts=4 sw=4 et
