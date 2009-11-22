@@ -61,7 +61,11 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
         self.prompt = "yokadi> "
-        self.historyPath = os.path.expandvars("$HOME/.yokadi_history")
+        if os.name == "posix":
+            self.historyPath = os.path.join(os.path.expandvars("$HOME"), ".yokadi_history")
+        else:
+            # Windows location
+            self.historyPath = os.path.join(os.path.expandvars("$APPDATA"), ".yokadi_history")
         self.loadHistory()
 
     def emptyline(self):
