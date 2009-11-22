@@ -51,7 +51,8 @@ class TaskCmd(object):
         bug_add <project_name> [@<keyword1>] [@<keyword2>] <Bug description>
         """
         projectName, title, keywordDict = parseutils.parseLine(line)
-
+        if not title:
+            raise YokadiException("You should give a bug title")
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             tui.reinjectInRawInput(u"bug_add " + line)
@@ -110,9 +111,6 @@ class TaskCmd(object):
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [@<keyword1>] [@<keyword2>] <Task description>"""
-        if not line:
-            print "Give at least a task name !"
-            return
         projectName, title, keywordDict = parseutils.parseLine(line)
         if not title:
             raise YokadiException("You should give a task title")
