@@ -1,3 +1,6 @@
+v0.11.2 2009/11/25
+- fix crash in bug_edit function
+
 v0.11.1 2009/11/02
 - yokadi symlink (useful to run yokadi without installing it) was broken
 
