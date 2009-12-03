@@ -144,7 +144,8 @@ class TaskCmd(object):
     def do_t_urgency(self, line):
         """Defines urgency of a task.
         t_urgency <id> <value>"""
-        tokens = line.split(" ")
+
+        tokens = parseutils.simplifySpaces(line).split(" ")
         if len(tokens) != 2:
             raise YokadiException("You must provide a taskId and an urgency value")
         task = self.getTaskFromId(tokens[0])
@@ -598,7 +599,7 @@ class TaskCmd(object):
     def do_t_project(self, line):
         """Set task's project.
         t_project <id> <project>"""
-        tokens = line.split(" ")
+        tokens = parseutils.simplifySpaces(line).split(" ")
         if len(tokens) != 2:
             raise YokadiException("You should give two arguments: <task id> <project>")
         task = self.getTaskFromId(tokens[0])
@@ -639,6 +640,7 @@ class TaskCmd(object):
         - 12:               on the 12th of current month
 
         To reset a due date, use "none"."""
+        line = parseutils.simplifySpaces(line)
         if len(line.split()) < 2:
             raise YokadiException("Give a task id and time, date or date & time")
         taskId, line = line.strip().split(" ", 1)
@@ -658,7 +660,7 @@ class TaskCmd(object):
         """Add keywords to an existing task
         t_add_keyword <id> <@keyword1> <@keyword2>[=<value>]...
         """
-        tokens = line.split(" ", 1)
+        tokens = parseutils.simplifySpaces(line).split(" ", 1)
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <keyword>")
         task = dbutils.getTaskFromId(tokens[0])
@@ -684,7 +686,7 @@ class TaskCmd(object):
         t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
-        tokens = line.split()
+        tokens = parseutils.simplifySpaces(line).split()
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = self.getTaskFromId(tokens[0])
