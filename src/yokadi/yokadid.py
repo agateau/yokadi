@@ -19,6 +19,7 @@ from commands import getoutput
 from sqlobject import AND
 
 import tui
+from yical import YokadiIcalServer
 
 # Force default encoding to prefered encoding
 reload(sys)
@@ -178,6 +179,10 @@ def parseOptions():
     parser.add_option("-d", "--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
+    parser.add_option("-i", "--icalserver",
+                      dest="icalserver", default=False, action="store_true",
+                      help="Start the optional HTTP Ical Server")
+
     parser.add_option("-k", "--kill",
                       dest="kill", default=False, action="store_true",
                       help="Kill Yokadi Daemon (you can specify database with -db if you run multiple Yokadid")
@@ -219,6 +224,11 @@ def main():
     if not (Task.tableExists() and Config.tableExists()):
         print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
         sys.exit(1)
+
+    # Start ical http handler
+    if options.icalserver:
+        yokadiIcalServer = YokadiIcalServer()
+        yokadiIcalServer.start()
 
     # Start the main event Loop
     try:

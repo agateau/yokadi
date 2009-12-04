@@ -9,6 +9,7 @@ import os
 import sys
 import icalendar
 import BaseHTTPServer
+from threading import Thread
 
 import tui
 # Force default encoding to prefered encoding
@@ -52,27 +53,15 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         cal = generateCal()
         self.wfile.write(cal.as_string())
 
+class YokadiIcalServer(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.setDaemon(True)
 
-def main():
+    def run(self):
+        """Method executed when the thread object start() method is called"""
+        print "Yokadi IcalServer starting..."
+        icalServer = BaseHTTPServer.HTTPServer(("", 8000), IcalHttpRequestHandler)
+        icalServer.serve_forever()
+        print "Yokadi IcalServer exiting..."
 
-    filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
-    print "Using default database (%s)" % filename
-
-    connectDatabase(filename, createIfNeeded=False)
-
-    icalServer = BaseHTTPServer.HTTPServer(("", 8000), IcalHttpRequestHandler)
-    icalServer.serve_forever()
-
-#    cal = generateCal()
-
-
-
-#    f = open("/tmp/yokadi.ics", "wb")
-#    f.write(cal.as_string())
-#    f.close()
-
-
-    print "Exiting"
-
-if __name__ == "__main__":
-    main()
