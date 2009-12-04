@@ -8,6 +8,7 @@ Yokadi iCalendar interface
 import os
 import sys
 import icalendar
+import BaseHTTPServer
 
 import tui
 # Force default encoding to prefered encoding
@@ -41,6 +42,17 @@ def generateCal():
 
     return cal
 
+class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+    """Simple Ical http request handler that only implement GET method"""
+    def do_GET(self):
+        """Serve a GET request with complete todolist ignoring path"""
+        self.send_response(200)
+        self.send_header("Content-type", "text/x-vcalendar")
+        self.end_headers()
+        cal = generateCal()
+        self.wfile.write(cal.as_string())
+
+
 def main():
 
     filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
@@ -48,11 +60,16 @@ def main():
 
     connectDatabase(filename, createIfNeeded=False)
 
-    cal = generateCal()
+    icalServer = BaseHTTPServer.HTTPServer(("", 8000), IcalHttpRequestHandler)
+    icalServer.serve_forever()
 
-    f = open("/tmp/yokadi.ics", "wb")
-    f.write(cal.as_string())
-    f.close()
+#    cal = generateCal()
+
+
+
+#    f = open("/tmp/yokadi.ics", "wb")
+#    f.write(cal.as_string())
+#    f.close()
 
 
     print "Exiting"
