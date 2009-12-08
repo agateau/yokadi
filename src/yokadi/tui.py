@@ -193,12 +193,12 @@ def getTermWidth():
     """Gets the terminal width. Works only on Unix system.
     @return: terminal width or "120" is system not supported
     Kindly borrowed from pysql code"""
+    width = 120
     if os.name == "posix":
-        result = os.popen("tput cols").readline().strip()
-        if result:
-            return int(result)
-    else:
-        # Unsupported system, use default 120
-        return 120
+        result = subprocess.Popen(["tput", "cols"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]
+        result = result.strip()
+        if result.isdigit():
+            width = int(result)
+    return width
 
 # vi: ts=4 sw=4 et
