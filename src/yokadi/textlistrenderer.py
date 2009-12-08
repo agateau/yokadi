@@ -142,6 +142,7 @@ class TextListRenderer(object):
         self.taskLists = []
         self.maxTitleWidth = len("Title")
         self.today = datetime.today().replace(microsecond=0)
+        self.firstHeader = True
 
         # All fields set to None must be defined in end()
         self.columns = [
@@ -212,7 +213,10 @@ class TextListRenderer(object):
         cells = [x.createHeader() for x in self.columns]
         line = "|".join(cells)
         width = len(line)
-        print >> self.out
+        if self.firstHeader:
+            self.firstHeader = False
+        else:
+            print >> self.out
         print >> self.out, C.CYAN + sectionName.center(width) + C.RESET
         print >> self.out, C.BOLD + line + C.RESET
         print >> self.out, "-" * width
