@@ -23,7 +23,7 @@ from db import Task, Project
 def generateCal():
     cal = icalendar.Calendar()
     cal.add("prodid", '-//Yokadi calendar //yokadi.github.com//')
-    cal.add("version", "1.0")
+    cal.add("version", "2.0")
     # Add projects
     for project in Project.select(Project.q.active == True):
         todo = icalendar.Todo()
@@ -37,7 +37,7 @@ def generateCal():
         todo["related-to"] = "p%s" % task.project.id
         todo.add("dtstamp", task.creationDate)
         todo.add("priority", task.urgency)
-        todo.add("summary", task.title)
+        todo.add("summary", "%s (%s)" % (task.title, task.id))
         todo.add("dtstart", task.creationDate)
         if task.dueDate:
             todo.add("due", task.dueDate)
