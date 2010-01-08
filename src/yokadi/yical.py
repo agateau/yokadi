@@ -40,8 +40,10 @@ def generateCal():
             todo.add("due", task.dueDate)
         if task.description:
             todo.add("description", task.description)
+        categories = [task.project, ] # Add project as a keyword
         if task.keywords:
-            todo.add("categories", [k.name for k in task.keywords])
+            categories.extend([k.name for k in task.keywords])
+        todo.add("categories", categories)
         cal.add_component(todo)
 
     return cal
