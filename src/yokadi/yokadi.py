@@ -37,15 +37,16 @@ except ImportError:
     sys.exit(1)
 
 import db
-from taskcmd import TaskCmd
-from projectcmd import ProjectCmd
-from keywordcmd import KeywordCmd
+import tui
+import utils
+
 from aliascmd import AliasCmd, resolveAlias
 from confcmd import ConfCmd
+from keywordcmd import KeywordCmd
+from projectcmd import ProjectCmd
+from taskcmd import TaskCmd
 from yokadiexception import YokadiException
-import tui
 from yokadioptionparser import YokadiOptionParserNormalExitException
-import utils
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command
