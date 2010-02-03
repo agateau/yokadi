@@ -93,31 +93,15 @@ class TaskCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        task = self.getTaskFromId(line)
+        task = self._t_edit(line)
+        if not task:
+            return
 
-        # Create task line
-        taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
-
-        # Edit
-        while True:
-            print "(Press Ctrl+C to cancel)"
-            try:
-                line = tui.editLine(taskLine)
-                if not line.strip():
-                    tui.warning("Indicate a bug title !")
-                    continue
-            except KeyboardInterrupt:
-                print
-                print "Cancelled"
-                return
-            foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
-            if dbutils.updateTask(task, task.project.name, title, keywordDict):
-                break
+        keywordDict = task.getKeywordDict()
         bugutils.editBugKeywords(keywordDict)
         task.setKeywordDict(keywordDict)
-
-        # Update bug
         task.urgency = bugutils.computeUrgency(keywordDict)
+    complete_bug_edit = taskIdCompleter
 
     def getTaskFromId(self, line):
         line = line.strip()
@@ -545,10 +529,8 @@ class TaskCmd(object):
 
     complete_t_show = taskIdCompleter
 
-    def do_t_edit(self, line):
-        """Edit a task.
-        t_edit <id>"""
-
+    def _t_edit(self, line):
+        """Code shared by t_edit and bug_edit."""
         def editComplete(text, state):
             """ Specific completer for the edit prompt.
             This subfunction should stay here because it needs to access to cmd members"""
@@ -581,19 +563,24 @@ class TaskCmd(object):
             try:
                 line = tui.editLine(taskLine)
                 if not line.strip():
-                    tui.warning("Indicate a task title !")
+                    tui.warning("Missing title")
                     continue
             except KeyboardInterrupt:
                 print
                 print "Cancelled"
                 readline.set_completer(old_completer)   # Restore standard completer
-                return
+                return None
             foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 
         readline.set_completer(old_completer)   # Restore standard completer
+        return task
 
+    def do_t_edit(self, line):
+        """Edit a task.
+        t_edit <id>"""
+        self._t_edit(line)
     complete_t_edit = taskIdCompleter
 
     def do_t_set_project(self, line):
