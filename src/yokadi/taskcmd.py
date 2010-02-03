@@ -46,25 +46,35 @@ class TaskCmd(object):
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
 
+    def _t_add(self, cmd, line):
+        """Code shared by t_add and bug_add."""
+        if not line:
+            print "Give at least a task name !"
+            return None
+        projectName, title, keywordDict = parseutils.parseLine(line)
+        if not title:
+            raise YokadiException("You should give a task title")
+        task = dbutils.addTask(projectName, title, keywordDict)
+        if not task:
+            tui.reinjectInRawInput(u"%s %s" % (cmd, line))
+            return None
+        self.lastTaskId = task.id
+        return task
+
     def do_bug_add(self, line):
         """Add a bug-type task. Will create a task and ask additional info.
         bug_add <project_name> [@<keyword1>] [@<keyword2>] <Bug description>
         """
-        projectName, title, keywordDict = parseutils.parseLine(line)
-        if not title:
-            raise YokadiException("You should give a bug title")
-        task = dbutils.addTask(projectName, title, keywordDict)
+        task = self._t_add("bug_add", line)
         if not task:
-            tui.reinjectInRawInput(u"bug_add " + line)
             return
 
+        keywordDict = task.getKeywordDict()
         bugutils.editBugKeywords(keywordDict)
         task.setKeywordDict(keywordDict)
-
         task.urgency = bugutils.computeUrgency(keywordDict)
-        self.lastTaskId = task.id
 
-        print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
+        print "Added bug '%s' (id=%d, urgency=%d)" % (task.title, task.id, task.urgency)
 
     complete_bug_add = ProjectCompleter(1)
 
@@ -111,17 +121,9 @@ class TaskCmd(object):
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [@<keyword1>] [@<keyword2>] <Task description>"""
-        projectName, title, keywordDict = parseutils.parseLine(line)
-        if not title:
-            raise YokadiException("You should give a task title")
-        task = dbutils.addTask(projectName, title, keywordDict)
+        task = self._t_add("t_add", line)
         if task:
-            print "Added task '%s' (id=%d)" % (title, task.id)
-        else:
-            tui.reinjectInRawInput(u"t_add " + line)
-        if task:
-            self.lastTaskId = task.id
-
+            print "Added task '%s' (id=%d)" % (task.title, task.id)
     complete_t_add = projectAndKeywordCompleter
 
     def do_t_describe(self, line):
