@@ -38,6 +38,8 @@ gRendererClassDict = dict(
     plain=PlainListRenderer,
     )
 
+NOTE_KEYWORD = "note"
+
 class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None
@@ -45,9 +47,10 @@ class TaskCmd(object):
         self.pFilter = ""  # Permanent project filter (name of project)
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
+        dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
 
     def _t_add(self, cmd, line):
-        """Code shared by t_add and bug_add."""
+        """Code shared by t_add, bug_add and n_add."""
         line = line.strip()
         if not line:
             raise BadUsageException("Missing parameters")
@@ -85,6 +88,19 @@ class TaskCmd(object):
         print "Added bug '%s' (id=%d, urgency=%d)" % (task.title, task.id, task.urgency)
 
     complete_bug_add = ProjectCompleter(1)
+
+    def do_n_add(self, line):
+        """Add a note. A note is a task with the @note keyword.
+        n_add <project_name> [@<keyword1>] [@<keyword2>] <title>
+        """
+        task = self._t_add("n_add", line)
+        if not task:
+            return
+        keywordDict = task.getKeywordDict()
+        keywordDict[NOTE_KEYWORD] = None
+        task.setKeywordDict(keywordDict)
+        print "Added note '%s' (id=%d)" % (task.title, task.id)
+    complete_n_add = projectAndKeywordCompleter
 
     def do_bug_edit(self, line):
         """Edit a bug.
@@ -444,6 +460,13 @@ class TaskCmd(object):
                 tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
     complete_t_list = projectAndKeywordCompleter
+
+    def do_n_list(self, line):
+        """List notes of a project.
+        n_list [<project_name>] [<@keyword1>] [<@keyword2>]"""
+        line += " @" + NOTE_KEYWORD
+        self.do_t_list(line)
+    complete_n_list = projectAndKeywordCompleter
 
     def do_t_reorder(self, line):
         """Reorder tasks of a project.
