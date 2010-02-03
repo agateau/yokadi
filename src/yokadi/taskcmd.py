@@ -554,8 +554,8 @@ class TaskCmd(object):
         # Create task line
         taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
 
-        old_completer = readline.get_completer() # Backup previous completer to restore it in the end
-        readline.set_completer(editComplete)     # Switch to specific completer
+        oldCompleter = readline.get_completer() # Backup previous completer to restore it in the end
+        readline.set_completer(editComplete)    # Switch to specific completer
 
         while True:
             # Edit
@@ -568,13 +568,13 @@ class TaskCmd(object):
             except KeyboardInterrupt:
                 print
                 print "Cancelled"
-                readline.set_completer(old_completer)   # Restore standard completer
-                return None
+                task = None
+                break
             foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 
-        readline.set_completer(old_completer)   # Restore standard completer
+        readline.set_completer(oldCompleter)   # Restore standard completer
         return task
 
     def do_t_edit(self, line):
