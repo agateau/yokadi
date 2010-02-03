@@ -48,12 +48,16 @@ class TaskCmd(object):
 
     def _t_add(self, cmd, line):
         """Code shared by t_add and bug_add."""
+        line = line.strip()
         if not line:
-            print "Give at least a task name !"
+            tui.error("Missing parameters")
+            self.do_help(cmd)
             return None
         projectName, title, keywordDict = parseutils.parseLine(line)
         if not title:
-            raise YokadiException("You should give a task title")
+            tui.error("Missing title")
+            self.do_help(cmd)
+            return None
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             tui.reinjectInRawInput(u"%s %s" % (cmd, line))
@@ -63,7 +67,7 @@ class TaskCmd(object):
 
     def do_bug_add(self, line):
         """Add a bug-type task. Will create a task and ask additional info.
-        bug_add <project_name> [@<keyword1>] [@<keyword2>] <Bug description>
+        bug_add <project_name> [@<keyword1>] [@<keyword2>] <title>
         """
         task = self._t_add("bug_add", line)
         if not task:
@@ -120,7 +124,7 @@ class TaskCmd(object):
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
-        t_add <projectName> [@<keyword1>] [@<keyword2>] <Task description>"""
+        t_add <projectName> [@<keyword1>] [@<keyword2>] <title>"""
         task = self._t_add("t_add", line)
         if task:
             print "Added task '%s' (id=%d)" % (task.title, task.id)
