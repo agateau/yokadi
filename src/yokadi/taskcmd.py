@@ -65,6 +65,14 @@ class TaskCmd(object):
         self.lastTaskId = task.id
         return task
 
+    def do_t_add(self, line):
+        """Add new task. Will prompt to create keywords if they do not exist.
+        t_add <projectName> [@<keyword1>] [@<keyword2>] <title>"""
+        task = self._t_add("t_add", line)
+        if task:
+            print "Added task '%s' (id=%d)" % (task.title, task.id)
+    complete_t_add = projectAndKeywordCompleter
+
     def do_bug_add(self, line):
         """Add a bug-type task. Will create a task and ask additional info.
         bug_add <project_name> [@<keyword1>] [@<keyword2>] <title>
@@ -121,14 +129,6 @@ class TaskCmd(object):
         if line != '_':
             self.lastTaskId = task.id
         return task
-
-    def do_t_add(self, line):
-        """Add new task. Will prompt to create keywords if they do not exist.
-        t_add <projectName> [@<keyword1>] [@<keyword2>] <title>"""
-        task = self._t_add("t_add", line)
-        if task:
-            print "Added task '%s' (id=%d)" % (task.title, task.id)
-    complete_t_add = projectAndKeywordCompleter
 
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
