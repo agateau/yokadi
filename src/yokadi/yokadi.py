@@ -156,7 +156,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             readline.set_history_length(1000)
             readline.write_history_file(self.historyPath)
         except Exception, e:
-            raise YokadiException("Fail to save history to %s. Error was:\n\t%s"
+            tui.warning("Fail to save history to %s. Error was:\n\t%s"
                         % (self.historyPath, e))
 
     def do_help(self, arg):
