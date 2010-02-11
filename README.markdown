@@ -183,6 +183,16 @@ the `YOKADI_DB` env variable to point to your database:
 
     export YOKADI_DB=$HOME/work/yokadi.db
 
+## History location
+
+By default, Yokadi will store input history in `$HOME/.yokadi_history`. This file
+stores commands used in Yokadi for future use and reference.
+
+If you do now want to use the default history file location, you can define
+the `YOKADI_HISTORY` env variable to point to your history file:
+
+    export YOKADI_HISTORY=$HOME/.hist/yokadi_history
+
 ## Yokadid, the Yokadid daemon
 
 If you want to be automatically reminded of due tasks, you can use the Yokadi
