@@ -156,10 +156,10 @@ is due, you can use the Yokadi Daemon for that. See below for details.
 
 If you have periodic tasks, you can tell it to yokadi with `t_recurs`:
 
-    yokadi>t_recurs 1 weekly monday 21:30
-    yokadi>t_recurs 1 monthly 3 11:00
-    yokadi>t_recurs 1 monthly last saturday 11:00
-    yokadi>t_recurs 1 yearly 23/2 14:00
+    yokadi> t_recurs 1 weekly monday 21:30
+    yokadi> t_recurs 1 monthly 3 11:00
+    yokadi> t_recurs 1 monthly last saturday 11:00
+    yokadi> t_recurs 1 yearly 23/2 14:00
 
 Type `help t_recurs` to see all possible syntax
 
