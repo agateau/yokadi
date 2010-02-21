@@ -9,4 +9,9 @@ A simple exception class for Yokadi
 class YokadiException(Exception):
     """Yokadi Exceptions"""
     pass
+
+class BadUsageException(YokadiException):
+    """Exception when user does not pass correct arguments to a command"""
+    def __init__(self, message):
+        self.message = message
 # vi: ts=4 sw=4 et

@@ -45,7 +45,7 @@ from confcmd import ConfCmd
 from keywordcmd import KeywordCmd
 from projectcmd import ProjectCmd
 from taskcmd import TaskCmd
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 from yokadioptionparser import YokadiOptionParserNormalExitException
 
 # Force default encoding to prefered encoding
@@ -118,6 +118,10 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             tui.error("Unicode decoding error. Please check you locale and terminal settings (%s)." % e)
         except UnicodeEncodeError, e:
             tui.error("Unicode encoding error. Please check you locale and terminal settings (%s)." % e)
+        except BadUsageException, e:
+            tui.error(e.message)
+            cmd = line.split(' ')[0]
+            self.do_help(cmd)
         except YokadiException, e:
             tui.error("*** Yokadi error ***\n\t%s" % e)
         except IOError, e:

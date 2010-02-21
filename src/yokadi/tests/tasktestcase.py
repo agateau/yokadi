@@ -14,7 +14,7 @@ import testutils
 import tui
 from db import Task
 from taskcmd import TaskCmd
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
@@ -41,9 +41,11 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
         for bad_input in ("", # No project
-                          "x", # No task name
-                          "x t1"): # Existing task
-            self.assertRaises(YokadiException, self.cmd.do_t_add, bad_input)
+                          "x"): # No task name
+            self.assertRaises(BadUsageException, self.cmd.do_t_add, bad_input)
+
+        # Existing task
+        self.assertRaises(YokadiException, self.cmd.do_t_add, "x t1")
 
     def testMark(self):
         tui.addInputAnswers("y")

@@ -22,7 +22,7 @@ import parseutils
 import tui
 from completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
@@ -50,14 +50,10 @@ class TaskCmd(object):
         """Code shared by t_add and bug_add."""
         line = line.strip()
         if not line:
-            tui.error("Missing parameters")
-            self.do_help(cmd)
-            return None
+            raise BadUsageException("Missing parameters")
         projectName, title, keywordDict = parseutils.parseLine(line)
         if not title:
-            tui.error("Missing title")
-            self.do_help(cmd)
-            return None
+            raise BadUsageException("Missing title")
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             tui.reinjectInRawInput(u"%s %s" % (cmd, line))
@@ -137,14 +133,14 @@ class TaskCmd(object):
 
         tokens = parseutils.simplifySpaces(line).split(" ")
         if len(tokens) != 2:
-            raise YokadiException("You must provide a taskId and an urgency value")
+            raise BadUsageException("You must provide a taskId and an urgency value")
         task = self.getTaskFromId(tokens[0])
         try:
             # Do not use isdigit(), so that we can set negative urgency. This
             # make it possible to stick tasks to the bottom of the list.
             urgency = int(tokens[1])
         except ValueError:
-            raise YokadiException("Task urgency must be a digit")
+            raise BadUsageException("Task urgency must be a digit")
 
         if urgency > 100:
             tui.warning("Max urgency is 100")
@@ -198,7 +194,7 @@ class TaskCmd(object):
         t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
         tokens = line.split(" ", 2)
         if len(tokens) < 2:
-            raise YokadiException("Give at least a task id and a command. See 'help t_apply'")
+            raise BadUsageException("Give at least a task id and a command")
         idStringList = tokens[0]
         cmd = tokens[1]
         if len(tokens) == 3:
