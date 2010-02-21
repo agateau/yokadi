@@ -34,8 +34,8 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer.addTaskList("Foo", [t1])
         self.assertEquals(renderer.maxTitleWidth, 5)
         renderer.end()
-        expected=(u"\n" \
-            + "%(CYAN)s              Foo               %(RESET)s\n" \
+        expected = unicode( \
+              "%(CYAN)s              Foo               %(RESET)s\n" \
             + "%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s\n" \
             +         "--------------------------------\n" \
             +         "1 |t1   |0  |N|0m      |        \n" \
@@ -47,8 +47,8 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer.addTaskList("Foo", [t1, t2])
         self.assertEquals(renderer.maxTitleWidth, 11)
         renderer.end()
-        expected=(u"\n" \
-            + "%(CYAN)s                 Foo                  %(RESET)s\n" \
+        expected = unicode( \
+              "%(CYAN)s                 Foo                  %(RESET)s\n" \
             + "%(BOLD)sID|Title      |U  |S|Age     |Due date%(RESET)s\n" \
             +         "--------------------------------------\n" \
             +         "1 |t1         |0  |N|0m      |        \n" \
@@ -61,8 +61,8 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer.addTaskList("Foo", [t2, longerTask])
         self.assertEquals(renderer.maxTitleWidth, len(longerTask.title) + 1)
         renderer.end()
-        expected=(u"\n" \
-            + "%(CYAN)s                     Foo                      %(RESET)s\n" \
+        expected = unicode( \
+              "%(CYAN)s                     Foo                      %(RESET)s\n" \
             + "%(BOLD)sID|Title              |U  |S|Age     |Due date%(RESET)s\n" \
             +         "----------------------------------------------\n" \
             +         "2 |t2 (%(BOLD)sk1, k2%(RESET)s)        |0  |N|0m      |        \n" \
