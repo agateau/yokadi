@@ -315,7 +315,7 @@ class TaskCmd(object):
 
         parser.add_option("-s", "--search", dest="search",
                           action="append",
-                          help="only list tasks which title or description match <value>. You can repeat this option to search on multiple words.",
+                          help="only list tasks whose title or description match <value>. You can repeat this option to search on multiple words.",
                           metavar="<value>")
 
         formatList = ["auto"] + gRendererClassDict.keys()
@@ -328,24 +328,11 @@ class TaskCmd(object):
                           metavar="<file>")
         return parser
 
-    def do_t_list(self, line):
-
-        def selectRendererClass():
-            if options.format != "auto":
-                return gRendererClassDict[options.format]
-
-            defaultRendererClass = TextListRenderer
-            if not options.output:
-                return defaultRendererClass
-
-            ext = os.path.splitext(options.output)[1]
-            if not ext:
-                return defaultRendererClass
-
-            return gRendererClassDict.get(ext[1:], defaultRendererClass)
-
-        #BUG: completion based on parameter position is broken when parameter is given
-        parser = self.parser_t_list()
+    def _parseListLine(self, parser, line):
+        """
+        Parse line with parser, returns a tuple of the form
+        (options, projectList, filters)
+        """
         options, args = parser.parse_args(line)
         if len(args) > 0:
             projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args))
@@ -372,8 +359,7 @@ class TaskCmd(object):
             projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count() == 0:
-            tui.error("Found no project matching '%s'" % projectName)
-            return
+            raise YokadiException("Found no project matching '%s'" % projectName)
 
         # Check keywords exist
         parseutils.warnIfKeywordDoesNotExist(keywordFilters)
@@ -385,6 +371,77 @@ class TaskCmd(object):
         for keywordFilter in keywordFilters:
             filters.append(keywordFilter.filter())
 
+        # Search
+        if options.search:
+            for word in options.search:
+                filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
+                                  LIKE(Task.q.description, "%" + word + "%")))
+
+        return options, projectList, filters
+
+    def _renderList(self, renderer, projectList, filters, order, limit, groupKeyword):
+        """
+        Render a list using renderer, according to the restrictions set by the
+        other parameters
+        """
+        if groupKeyword:
+            if groupKeyword.startswith("@"):
+                groupKeyword = groupKeyword[1:]
+            for keyword in Keyword.select(LIKE(Keyword.q.name, groupKeyword)):
+                if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
+                    #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
+                    continue
+                taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
+                                           *filters),
+                                       orderBy=order, limit=limit, distinct=True,
+                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
+                taskList = list(taskList)
+                if projectList:
+                    taskList = [x for x in taskList if x.project in projectList]
+                if len(taskList) > 0:
+                    renderer.addTaskList(unicode(keyword), taskList)
+            renderer.end()
+        else:
+            hiddenProjectNames = []
+            for project in projectList:
+                if not project.active:
+                    hiddenProjectNames.append(project.name)
+                    continue
+                taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
+                                       orderBy=order, limit=limit, distinct=True,
+                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
+                taskList = list(taskList)
+
+                if len(taskList) > 0:
+                    renderer.addTaskList(unicode(project), taskList)
+            renderer.end()
+
+            if len(hiddenProjectNames) > 0:
+                tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
+
+    def do_t_list(self, line):
+
+        def selectRendererClass():
+            if options.format != "auto":
+                return gRendererClassDict[options.format]
+
+            defaultRendererClass = TextListRenderer
+            if not options.output:
+                return defaultRendererClass
+
+            ext = os.path.splitext(options.output)[1]
+            if not ext:
+                return defaultRendererClass
+
+            return gRendererClassDict.get(ext[1:], defaultRendererClass)
+
+        #BUG: completion based on parameter position is broken when parameter is given
+        options, projectList, filters = self._parseListLine(self.parser_t_list(), line)
+
+        # Skip notes
+        filters.append(parseutils.KeywordFilter("!@note").filter())
+
+        # Handle t_list specific options
         order = -Task.q.urgency, Task.q.creationDate
         limit = None
         if options.done:
@@ -403,10 +460,6 @@ class TaskCmd(object):
         if options.overdue:
             filters.append(Task.q.dueDate < datetime.now())
             order = Task.q.dueDate
-        if options.search:
-            for word in options.search:
-                filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
-                                  LIKE(Task.q.description, "%" + word + "%")))
 
         # Define output
         if options.output:
@@ -419,53 +472,35 @@ class TaskCmd(object):
         renderer = rendererClass(out)
 
         # Fill the renderer
-        if options.keyword:
-            if options.keyword.startswith("@"):
-                options.keyword = options.keyword[1:]
-            for keyword in Keyword.select(LIKE(Keyword.q.name, options.keyword)):
-                if unicode(keyword.name).startswith("_") and not options.keyword.startswith("_"):
-                    #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
-                    continue
-                taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
-                                           *filters),
-                                       orderBy=order, limit=limit, distinct=True,
-                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
-                taskList = list(taskList)
-                if projectList:
-                    taskList = [x for x in taskList if x.project in projectList]
-                if len(taskList) == 0:
-                    continue
-
-                renderer.addTaskList(unicode(keyword), taskList)
-            # Call renderer
-            renderer.end()
-        else:
-            hiddenProjectNames = []
-            for project in projectList:
-                if not project.active:
-                    hiddenProjectNames.append(project.name)
-                    continue
-                taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
-                                       orderBy=order, limit=limit, distinct=True,
-                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
-                taskList = list(taskList)
-
-                if len(taskList) == 0:
-                    continue
-
-                renderer.addTaskList(unicode(project), taskList)
-            renderer.end()
-
-            if len(hiddenProjectNames) > 0:
-                tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
-
+        self._renderList(renderer, projectList, filters, order, limit, options.keyword)
     complete_t_list = projectAndKeywordCompleter
 
+    def parser_n_list(self):
+        parser = YokadiOptionParser()
+        parser.set_usage("n_list [options] <project_or_keyword_filter>")
+        parser.set_description(
+            "List notes filtered by project and/or keywords. "
+            "'%' can be used as a wildcard in the project name: "
+            "to list projects starting with 'foo', use 'foo%'. "
+            "Keyword filtering is achieved with '@'. Ex.: "
+            "n_list @home, n_list @_bug=2394")
+
+        parser.add_option("-s", "--search", dest="search",
+                          action="append",
+                          help="only list notes whose title or description match <value>. You can repeat this option to search on multiple words.",
+                          metavar="<value>")
+
+        parser.add_option("-k", "--keyword", dest="keyword",
+                          help="Group tasks by given keyword instead of project. The % wildcard can be used.",
+                          metavar="<keyword>")
+        return parser
+
     def do_n_list(self, line):
-        """List notes of a project.
-        n_list [<project_name>] [<@keyword1>] [<@keyword2>]"""
-        line += " @" + NOTE_KEYWORD
-        self.do_t_list(line)
+        options, projectList, filters = self._parseListLine(self.parser_n_list(), line)
+        filters.append(parseutils.KeywordFilter("@note").filter())
+        order = Task.q.creationDate
+        renderer = TextListRenderer(tui.stdout)
+        self._renderList(renderer, projectList, filters, order, limit=None, groupKeyword=options.keyword)
     complete_n_list = projectAndKeywordCompleter
 
     def do_t_reorder(self, line):
