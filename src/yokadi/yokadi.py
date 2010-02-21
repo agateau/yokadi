@@ -116,6 +116,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             pass
         except UnicodeDecodeError, e:
             tui.error("Unicode decoding error. Please check you locale and terminal settings (%s)." % e)
+        except UnicodeEncodeError, e:
+            tui.error("Unicode encoding error. Please check you locale and terminal settings (%s)." % e)
         except YokadiException, e:
             tui.error("*** Yokadi error ***\n\t%s" % e)
         except IOError, e:
