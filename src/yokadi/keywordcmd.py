@@ -6,7 +6,7 @@ Keyword related commands.
 @license: GPL v3 or later
 """
 from db import Keyword
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 from completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import LIKE
@@ -21,7 +21,7 @@ class KeywordCmd(object):
     def do_k_add(self, line):
         """Add a keyword"""
         if not line:
-            raise YokadiException("You should provide at least a keyword name")
+            raise BadUsageException("You should provide at least a keyword name")
         for keyword in line.split():
             try:
                 Keyword(name=keyword)

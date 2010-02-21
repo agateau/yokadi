@@ -8,7 +8,7 @@ Configuration management related commands.
 
 from db import Config
 from sqlobject import AND, LIKE, SQLObjectNotFound
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 from completers import confCompleter
 import tui
 from yokadioptionparser import YokadiOptionParser
@@ -42,7 +42,7 @@ class ConfCmd(object):
         """Set a configuration key to value : c_set <key> <value>"""
         line = line.split()
         if len(line) < 2:
-            raise YokadiException("You should provide two arguments : the parameter key and the value")
+            raise BadUsageException("You should provide two arguments : the parameter key and the value")
         name = line[0]
         value = " ".join(line[1:])
         p = Config.select(AND(Config.q.name == name, Config.q.system == False))

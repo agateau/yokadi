@@ -6,7 +6,7 @@ Alias related commands.
 @license: GPL v3 or later
 """
 from db import Config
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 import tui
 import colors as C
 
@@ -36,7 +36,7 @@ class AliasCmd(object):
         a_add la t_list -a"""
         tokens = line.split()
         if len(tokens) < 2:
-            raise YokadiException("You should provide an alias name and a command")
+            raise BadUsageException("You should provide an alias name and a command")
         name = tokens[0]
         command = " ".join(tokens[1:])
         self.aliases.update({ name : command})

@@ -11,7 +11,7 @@ from sqlobject.dberrors import DuplicateEntryError
 import tui
 from completers import ProjectCompleter
 from db import Project, Task
-from yokadiexception import YokadiException
+from yokadiexception import YokadiException, BadUsageException
 from yokadioptionparser import YokadiOptionParser
 import parseutils
 import dbutils
@@ -24,7 +24,7 @@ def getProjectFromName(name, parameterName="project_name"):
     """
     name = name.strip()
     if len(name) == 0:
-        raise YokadiException("Missing <%s> parameter" % parameterName)
+        raise BadUsageException("Missing <%s> parameter" % parameterName)
 
     try:
         return Project.byName(name)
@@ -41,7 +41,7 @@ class ProjectCmd(object):
             return
         projectName, garbage, keywordDict = parseutils.parseLine(line)
         if garbage:
-            raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
+            raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
         try:
             project = Project(name=projectName)
         except DuplicateEntryError:
@@ -68,7 +68,7 @@ class ProjectCmd(object):
         # Update project
         projectName, garbage, keywordDict = parseutils.parseLine(line)
         if garbage:
-            raise YokadiException("Cannot parse line, got garbage (%s)" % garbage)
+            raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
         if not dbutils.createMissingKeywords(keywordDict.keys()):
             return
         project.name = projectName
