@@ -32,7 +32,6 @@ def generateCal():
         todo = icalendar.Todo()
         todo["uid"] = TASK_UID % task.id
         todo["related-to"] = PROJECT_UID % task.project.id
-        todo.add("dtstamp", task.creationDate)
         todo.add("priority", task.urgency)
         todo.add("summary", "%s (%s)" % (task.title, task.id))
         todo.add("dtstart", task.creationDate)
@@ -59,7 +58,18 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_PUT(self):
         """Receive a todolist for updating"""
-        pass
+        length = int(self.headers.getheader('content-length'))
+        cal = icalendar.Calendar.from_string(self.rfile.read(length))
+        self.send_response(200)
+        self.end_headers()
+        for task in cal.walk():
+            if not task.has_key("UID"):
+                # Don't consider non task object
+                continue
+            if task["LAST-MODIFIED"].dt > task["CREATED"].dt:
+                # Task has been modified
+                print "Modified task: %s" % task["UID"]
+
 
 class YokadiIcalServer(Thread):
     def __init__(self, port, listen):
