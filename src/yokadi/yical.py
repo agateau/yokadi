@@ -6,7 +6,16 @@ Yokadi iCalendar interface
 @license: GPL v3 or later
 """
 
-import icalendar
+import sys
+
+try:
+    import icalendar
+except ImportError:
+    print "You don't have the icalendar package."
+    print "Get it on http://pypi.python.org/pypi/icalendar/"
+    print "Or use 'easy_install icalendar'"
+    sys.exit(1)
+
 import BaseHTTPServer
 from threading import Thread
 
