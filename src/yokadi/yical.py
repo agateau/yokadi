@@ -71,7 +71,6 @@ def createVTodoFromTask(task):
     # Add standard attribute
     for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
         attr = getattr(task, yokadiAttribute)
-        print "%s : %s" % (yokadiAttribute, attr)
         if attr:
             vTodo.add(icalAttribute, attr)
 
@@ -103,6 +102,8 @@ def updateTaskFromVTodo(task, vTodo):
 
 class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
+    newTask = {} # Dict recording new task origin UID
+
     def do_GET(self):
         """Serve a GET request with complete todolist ignoring path"""
         self.send_response(200)
@@ -120,6 +121,13 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if not vTodo.has_key("UID"):
                 # Don't consider non task objects
                 continue
+
+            if vTodo["UID"] in self.newTask:
+                # This is a recent new task but remote ical calendar tool is not
+                # aware of new Yokadi UID. Update it here to avoid duplicate new tasks
+                print "update UID to avoid duplicate task"
+                vTodo["UID"] = TASK_UID % self.newTask[vTodo["UID"]]
+
             if vTodo["UID"].startswith(UID_PREFIX):
                 # This is a yokadi Task.
                 if vTodo["LAST-MODIFIED"].dt > vTodo["CREATED"].dt:
@@ -139,6 +147,11 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                 keywordDict = {}
                 task = dbutils.addTask(INBOX_PROJECT, vTodo["summary"],
                                        keywordDict, interactive=False)
+                # Keep record of new task origin UID to avoid duplicate
+                # if user update it right after creation without reloading the
+                # yokadi UID
+                #TODO: add purge for old UID
+                self.newTask[vTodo["UID"]] = task.id
 
 class YokadiIcalServer(Thread):
     def __init__(self, port, listen):
