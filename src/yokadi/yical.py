@@ -42,7 +42,8 @@ YOKADI_ICAL_ATT_MAPPING = {"title" : "summary",
                            "description" : "description" }
 
 def generateCal():
-    """Generate an ical calendar from yokadi database"""
+    """Generate an ical calendar from yokadi database
+    @return: icalendar.Calendar object"""
     cal = icalendar.Calendar()
     cal.add("prodid", '-//Yokadi calendar //yokadi.github.com//')
     cal.add("version", "2.0")
@@ -54,24 +55,33 @@ def generateCal():
         cal.add_component(vTodo)
     # Add tasks
     for task in Task.select(Task.q.status != "done"):
-        #TODO: use dict mapping for standard attributes
-        vTodo = icalendar.Todo()
-        vTodo["uid"] = TASK_UID % task.id
-        vTodo["related-to"] = PROJECT_UID % task.project.id
-        vTodo.add("priority", task.urgency)
-        vTodo.add("summary", "%s (%s)" % (task.title, task.id))
-        vTodo.add("dtstart", task.creationDate)
-        if task.dueDate:
-            vTodo.add("due", task.dueDate)
-        if task.description:
-            vTodo.add("description", task.description)
-        categories = [task.project, ] # Add project as a keyword
-        if task.keywords:
-            categories.extend([k.name for k in task.keywords])
-        vTodo.add("categories", categories)
+        vTodo = createVTodoFromTask(task)
         cal.add_component(vTodo)
 
     return cal
+
+def createVTodoFromTask(task):
+    """Create a VTodo object from a yokadi task
+    @param task: yokadi task (db.Task object)
+    @return: ical VTODO (icalendar.Calendar.Todo object)"""
+    vTodo = icalendar.Todo()
+    vTodo["uid"] = TASK_UID % task.id
+    vTodo["related-to"] = PROJECT_UID % task.project.id
+
+    # Add standard attribute
+    for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
+        attr = getattr(task, yokadiAttribute)
+        print "%s : %s" % (yokadiAttribute, attr)
+        if attr:
+            vTodo.add(icalAttribute, attr)
+
+    # Add categories from keywords
+    categories = [task.project, ] # Add project as a keyword
+    if task.keywords:
+        categories.extend([k.name for k in task.keywords])
+    vTodo.add("categories", categories)
+
+    return vTodo
 
 def updateTaskFromVTodo(task, vTodo):
     """Update a yokadi task with an ical VTODO object
@@ -80,7 +90,6 @@ def updateTaskFromVTodo(task, vTodo):
 
     for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
         attr = vTodo.get(icalAttribute)
-        print "%s : %s" % (icalAttribute, attr)
         if attr:
             if yokadiAttribute == "title":
                 # Remove (id)
@@ -109,7 +118,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
         for vTodo in cal.walk():
             if not vTodo.has_key("UID"):
-                # Don't consider non task object
+                # Don't consider non task objects
                 continue
             if vTodo["UID"].startswith(UID_PREFIX):
                 # This is a yokadi Task.
