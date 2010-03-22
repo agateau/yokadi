@@ -23,6 +23,7 @@ import re
 from db import Task, Project
 import dbutils
 from dbutils import updateTask
+from yokadiexception import YokadiException
 
 # UID pattern
 UID_PREFIX = "yokadi"
@@ -72,6 +73,10 @@ def createVTodoFromTask(task):
     for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
         attr = getattr(task, yokadiAttribute)
         if attr:
+            if yokadiAttribute == "urgency":
+                attr = -(attr - 100) / 20
+                if attr > 9 : attr = 9
+                if attr < 1 : attr = 1
             vTodo.add(icalAttribute, attr)
 
     # Add categories from keywords
@@ -90,15 +95,34 @@ def updateTaskFromVTodo(task, vTodo):
     for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
         attr = vTodo.get(icalAttribute)
         if attr:
+            # Convert ical type (vDates, vInt..) to sqlobjectunderstandable type (datetime, int...)
+            attr = convertIcalType(attr)
             if yokadiAttribute == "title":
                 # Remove (id)
                 attr = re.sub(" \(\d+\)$", "", attr)
-            if isinstance(attr, (icalendar.vDate, icalendar.vDatetime,
-                                 icalendar.vDuration, icalendar.vDDDTypes)):
-                attr = attr.dt
+            if yokadiAttribute == "urgency":
+                if "_bug" in task.getKeywordDict():
+                    # Don't update bugs urgency
+                    continue
+                else:
+                    attr = 100 - 20 * attr
+                    if attr > 100 : attr = 100
+                    if attr < -99 : attr = -99
             # Update attribute
             setattr(task, yokadiAttribute, attr)
 
+def convertIcalType(attr):
+    """Convert data from icalendar types (vDates, vInt etc.) to python standard equivalent
+    @param attr: icalendar type
+    @return: python type"""
+    if isinstance(attr, (icalendar.vDate, icalendar.vDatetime,
+                         icalendar.vDuration, icalendar.vDDDTypes)):
+        return attr.dt
+    elif isinstance(attr, (icalendar.vInt, icalendar.vFloat)):
+        return int(attr)
+    else:
+        # Default to unicode string
+        return unicode(attr)
 
 class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
@@ -115,43 +139,50 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """Receive a todolist for updating"""
         length = int(self.headers.getheader('content-length'))
         cal = icalendar.Calendar.from_string(self.rfile.read(length))
+        for vTodo in cal.walk():
+            if vTodo.has_key("UID"):
+                try:
+                    self._processVTodo(vTodo)
+                except YokadiException, e:
+                    self.send_response(503, e)
+
+        # Tell caller everything is ok
         self.send_response(200)
         self.end_headers()
-        for vTodo in cal.walk():
-            if not vTodo.has_key("UID"):
-                # Don't consider non task objects
-                continue
 
-            if vTodo["UID"] in self.newTask:
-                # This is a recent new task but remote ical calendar tool is not
-                # aware of new Yokadi UID. Update it here to avoid duplicate new tasks
-                print "update UID to avoid duplicate task"
-                vTodo["UID"] = TASK_UID % self.newTask[vTodo["UID"]]
 
-            if vTodo["UID"].startswith(UID_PREFIX):
-                # This is a yokadi Task.
-                if vTodo["LAST-MODIFIED"].dt > vTodo["CREATED"].dt:
-                    # Task has been modified
-                    print "Modified task: %s" % vTodo["UID"]
-                    result = TASK_RE.match(vTodo["UID"])
-                    if result:
-                        id = result.group(1)
-                        task = dbutils.getTaskFromId(id)
-                        print "Task found in yokadi db: %s" % task.title
-                        updateTaskFromVTodo(task, vTodo)
-                    else:
-                        print "Task %s does exist in yokadi db " % id
-            else:
-                # This is a new task
-                print "New task %s (%s)" % (vTodo["summary"], vTodo["UID"])
-                keywordDict = {}
-                task = dbutils.addTask(INBOX_PROJECT, vTodo["summary"],
-                                       keywordDict, interactive=False)
-                # Keep record of new task origin UID to avoid duplicate
-                # if user update it right after creation without reloading the
-                # yokadi UID
-                #TODO: add purge for old UID
-                self.newTask[vTodo["UID"]] = task.id
+    def _processVTodo(self, vTodo):
+        if vTodo["UID"] in self.newTask:
+            # This is a recent new task but remote ical calendar tool is not
+            # aware of new Yokadi UID. Update it here to avoid duplicate new tasks
+            print "update UID to avoid duplicate task"
+            vTodo["UID"] = TASK_UID % self.newTask[vTodo["UID"]]
+
+        if vTodo["UID"].startswith(UID_PREFIX):
+            # This is a yokadi Task.
+            if vTodo["LAST-MODIFIED"].dt > vTodo["CREATED"].dt:
+                # Task has been modified
+                print "Modified task: %s" % vTodo["UID"]
+                result = TASK_RE.match(vTodo["UID"])
+                if result:
+                    id = result.group(1)
+                    task = dbutils.getTaskFromId(id)
+                    print "Task found in yokadi db: %s" % task.title
+                    updateTaskFromVTodo(task, vTodo)
+                else:
+                    raise YokadiException("Task %s does exist in yokadi db " % id)
+        else:
+            # This is a new task
+            print "New task %s (%s)" % (vTodo["summary"], vTodo["UID"])
+            keywordDict = {}
+            task = dbutils.addTask(INBOX_PROJECT, vTodo["summary"],
+                               keywordDict, interactive=False)
+            # Keep record of new task origin UID to avoid duplicate
+            # if user update it right after creation without reloading the
+            # yokadi UID
+            #TODO: add purge for old UID
+            self.newTask[vTodo["UID"]] = task.id
+
 
 class YokadiIcalServer(Thread):
     def __init__(self, port, listen):
