@@ -33,6 +33,9 @@ from db import Config, Project, Task, connectDatabase
 # Daemon polling delay (in seconds)
 DELAY = 30
 
+# Ical daemon default port
+DEFAULT_TCP_ICAL_PORT = 8000
+
 # Event sender to main loop
 event = [True, ""]
 
@@ -127,8 +130,9 @@ def parseOptions():
                       help="Start the optional HTTP Ical Server")
 
     parser.add_option("-p", "--port",
-                      dest="tcpPort", default=8000,
-                      help="TCP port of ical server", metavar="PORT")
+                      dest="tcpPort", default=DEFAULT_TCP_ICAL_PORT,
+                      help="TCP port of ical server (default: %s)" % DEFAULT_TCP_ICAL_PORT,
+                      metavar="PORT")
 
     parser.add_option("-l", "--listen",
                       dest="tcpListen", default=False, action="store_true",

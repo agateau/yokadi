@@ -288,9 +288,13 @@ class TaskCmd(object):
             "Keyword filtering is achieved with '@'. Ex.: "
             "t_list @home, t_list @_bug=2394")
 
-        parser.add_option("-a", "--all", dest="all",
-                          default=False, action="store_true",
+        parser.add_option("-a", "--all", dest="status",
+                          action="store_const", const="all",
                           help="all tasks (done and to be done)")
+
+        parser.add_option("--started", dest="status",
+                          action="store_const", const="started",
+                          help="only started tasks")
 
         rangeList = ["today", "thisweek", "thismonth", "all"]
         parser.add_option("-d", "--done", dest="done",
@@ -448,7 +452,11 @@ class TaskCmd(object):
             filters.append(Task.q.status == 'done')
             if options.done != "all":
                 filters.append(parseutils.createFilterFromRange(options.done))
-        elif not options.all:
+        elif options.status == "all":
+            pass
+        elif options.status == "started":
+            filters.append(Task.q.status == 'started')
+        else:
             filters.append(Task.q.status != 'done')
         if options.topUrgent:
             order = -Task.q.urgency

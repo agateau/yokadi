@@ -16,11 +16,13 @@ from db import Keyword, Project, Task
 from yokadiexception import YokadiException
 
 
-def addTask(projectName, title, keywordDict):
+def addTask(projectName, title, keywordDict, interactive=True):
     """Adds a task based on title and keywordDict.
     @param projectName: name of project as a string
     @param title: task title as a string
     @param keywordDict: dictionary of keywords (name : value)
+    @param interactive: Ask user before creating project (this is the default)
+    @type interactive: Bool
     @returns : Task instance on success, None if cancelled."""
 
     # Create missing keywords
@@ -28,7 +30,7 @@ def addTask(projectName, title, keywordDict):
         return None
 
     # Create missing project
-    project = getOrCreateProject(projectName)
+    project = getOrCreateProject(projectName, interactive=interactive)
     if not project:
         return None
 
