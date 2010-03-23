@@ -40,6 +40,7 @@ YOKADI_ICAL_ATT_MAPPING = {"title" : "summary",
                            "urgency" : "priority",
                            "creationDate": "dtstart",
                            "dueDate" : "due",
+                           "doneDate" : "completed",
                            "description" : "description" }
 
 def generateCal():
@@ -100,6 +101,10 @@ def updateTaskFromVTodo(task, vTodo):
             if yokadiAttribute == "title":
                 # Remove (id)
                 attr = re.sub(" \(\d+\)$", "", attr)
+            if yokadiAttribute == "doneDate":
+                # A done date defined indicate that task is done
+                task.status = "done"
+                #BUG: Done date is UTC, we must compute local time for yokadi
             if yokadiAttribute == "urgency":
                 if "_bug" in task.getKeywordDict():
                     # Don't update bugs urgency
