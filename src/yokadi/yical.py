@@ -22,7 +22,7 @@ import re
 
 from db import Task, Project
 import dbutils
-from dbutils import updateTask
+import icalutils
 from yokadiexception import YokadiException
 
 # UID pattern
@@ -75,9 +75,7 @@ def createVTodoFromTask(task):
         attr = getattr(task, yokadiAttribute)
         if attr:
             if yokadiAttribute == "urgency":
-                attr = -(attr - 100) / 20
-                if attr > 9 : attr = 9
-                if attr < 1 : attr = 1
+                attr = icalutils.yokadiUrgencyToIcalPriority(attr)
             vTodo.add(icalAttribute, attr)
 
     # Add categories from keywords
@@ -97,7 +95,7 @@ def updateTaskFromVTodo(task, vTodo):
         attr = vTodo.get(icalAttribute)
         if attr:
             # Convert ical type (vDates, vInt..) to sqlobjectunderstandable type (datetime, int...)
-            attr = convertIcalType(attr)
+            attr = icalutils.convertIcalType(attr)
             if yokadiAttribute == "title":
                 # Remove (id)
                 attr = re.sub(" \(\d+\)$", "", attr)
@@ -106,28 +104,16 @@ def updateTaskFromVTodo(task, vTodo):
                 task.status = "done"
                 #BUG: Done date is UTC, we must compute local time for yokadi
             if yokadiAttribute == "urgency":
-                if "_bug" in task.getKeywordDict():
-                    # Don't update bugs urgency
+                if attr == icalutils.yokadiUrgencyToIcalPriority(task.urgency):
+                    # Priority does not change - don't update it
                     continue
                 else:
-                    attr = 100 - 20 * attr
-                    if attr > 100 : attr = 100
-                    if attr < -99 : attr = -99
+                    # Priority has changed, we need to update urgency
+                    attr = icalutils.icalPriorityToYokadiUrgency(attr)
+
             # Update attribute
             setattr(task, yokadiAttribute, attr)
 
-def convertIcalType(attr):
-    """Convert data from icalendar types (vDates, vInt etc.) to python standard equivalent
-    @param attr: icalendar type
-    @return: python type"""
-    if isinstance(attr, (icalendar.vDate, icalendar.vDatetime,
-                         icalendar.vDuration, icalendar.vDDDTypes)):
-        return attr.dt
-    elif isinstance(attr, (icalendar.vInt, icalendar.vFloat)):
-        return int(attr)
-    else:
-        # Default to unicode string
-        return unicode(attr)
 
 class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
