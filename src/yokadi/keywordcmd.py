@@ -5,6 +5,7 @@ Keyword related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
+import dbutils
 import tui
 
 from db import Keyword
@@ -45,3 +46,53 @@ class KeywordCmd(object):
                 print "Keyword %s has been removed" % keyword.name
 
     complete_k_remove = KeywordCompleter(1)
+
+    def do_k_edit(self, line):
+        """Edit a keyword
+        k_edit @<keyword>"""
+        keyword = dbutils.getKeywordFromName(line)
+        oldName = keyword.name
+        newName = tui.editLine(oldName)
+        if newName == "":
+            print "Cancelled"
+            return
+
+        lst = list(Keyword.selectBy(name=newName))
+        if len(lst) == 0:
+            # Simple case: newName does not exist, just rename the existing keyword
+            keyword.name = newName
+            print "Keyword %s has been renamed to %s" % (oldName, newName)
+            return
+
+        # We already have a keyword with this name, we need to merge
+        print "Keyword %s already exists" % newName
+        if not tui.confirm("Do you want to merge %s and %s" % (oldName, newName)):
+            return
+
+        # Check we can merge
+        conflictingTasks = []
+        for task in keyword.tasks:
+            kwDict = task.getKeywordDict()
+            if oldName in kwDict and newName in kwDict and kwDict[oldName] != kwDict[newName]:
+                conflictingTasks.append(task)
+
+        if len(conflictingTasks) > 0:
+            # We cannot merge
+            tui.error("Cannot merge keywords %s and %s because they are both used with different values in these tasks:" % (oldName, newName))
+            for task in conflictingTasks:
+                print "- %d, %s" % (task.id, task.title)
+            print "Edit these tasks and try again"
+            return
+
+        # Merge
+        for task in keyword.tasks:
+            kwDict = task.getKeywordDict()
+            if not newName in kwDict:
+                kwDict[newName] = kwDict[oldName]
+            del kwDict[oldName]
+            task.setKeywordDict(kwDict)
+        keyword.destroySelf()
+        print "Keyword %s has been merged with %s" % (oldName, newName)
+
+
+    complete_k_edit = KeywordCompleter(1)
