@@ -35,15 +35,7 @@ class KeywordCmd(object):
     def do_k_remove(self, line):
         """Remove a keyword
         k_remove @<keyword>"""
-        if not line:
-            raise BadUsageException("You must provide a keyword name")
-        if line.startswith("@"):
-            line = line[1:]
-        lst = list(Keyword.selectBy(name=line))
-        if len(lst) == 0:
-            tui.error("Could not find any keyword named %s" % line)
-            return
-        keyword = lst[0]
+        keyword = dbutils.getKeywordFromName(line)
 
         if keyword.tasks:
             print "The keyword %s is used by the following tasks: %s" % (keyword.name,
