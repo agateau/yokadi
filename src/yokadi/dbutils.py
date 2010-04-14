@@ -26,7 +26,7 @@ def addTask(projectName, title, keywordDict, interactive=True):
     @returns : Task instance on success, None if cancelled."""
 
     # Create missing keywords
-    if not createMissingKeywords(keywordDict.keys()):
+    if not createMissingKeywords(keywordDict.keys(), interactive=interactive):
         return None
 
     # Create missing project
@@ -127,13 +127,26 @@ def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
     return project
 
 
-def createMissingKeywords(lst):
+def createMissingKeywords(lst, interactive=True):
     """Create all keywords from lst which does not exist
     @param lst: list of keyword
     @return: True, if ok, False if user canceled"""
     for keywordName in lst:
-        if not getOrCreateKeyword(keywordName):
+        if not getOrCreateKeyword(keywordName, interactive=interactive):
             return False
     return True
 
+def getKeywordFromName(name):
+    """Returns a keyword from its name, which may start with "@"
+    raises a YokadiException if not found
+    @param name: the keyword name
+    @return: The keyword"""
+    if not name:
+        raise YokadiException("No keyword supplied")
+    if name.startswith("@"):
+        name = name[1:]
+    lst = list(Keyword.selectBy(name=name))
+    if len(lst) == 0:
+        raise YokadiException("No keyword named '%s' found" % name)
+    return lst[0]
 # vi: ts=4 sw=4 et

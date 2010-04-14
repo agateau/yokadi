@@ -53,4 +53,12 @@ class DbUtilsTestCase(unittest.TestCase):
 
     def _assertOneObject(self, result):
         self.assertEquals(len(list(result)), 1)
+
+
+    def testGetKeywordFromName(self):
+        tui.addInputAnswers("y")
+        k1 = dbutils.getOrCreateKeyword("k1")
+        self.assertRaises(YokadiException, dbutils.getKeywordFromName, "")
+        self.assertRaises(YokadiException, dbutils.getKeywordFromName, "foo")
+        self.assertEqual(k1, dbutils.getKeywordFromName("k1"))
 # vi: ts=4 sw=4 et
