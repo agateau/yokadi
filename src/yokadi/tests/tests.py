@@ -25,6 +25,8 @@ from tasktestcase import TaskTestCase
 from bugtestcase import BugTestCase
 from aliastestcase import AliasTestCase
 from textlistrenderertestcase import TextListRendererTestCase
+from icaltestcase import IcalTestCase
+from keywordtestcase import KeywordTestCase
 
 DB_FILENAME = "unittest.db"
 
