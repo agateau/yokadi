@@ -211,6 +211,7 @@ All discussion happens on Yokadi mailing-list, hosted by our friends from the
 Sequanux LUG. To join, visit
 <http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi>.
 
+You can also find some of us on #yokadi, on the Freenode IRC network.
 
 # Authors
 
