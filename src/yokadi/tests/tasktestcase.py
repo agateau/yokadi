@@ -130,7 +130,7 @@ class TaskTestCase(unittest.TestCase):
         tui.addInputAnswers("y", "y")
         self.cmd.do_t_add("x @kw1 @kw2=12 t2")
 
-        for line in ("", "-a", "-t", "-d today", "-u", "-k %", "-k _%", "-s t", "--overdue",
+        for line in ("", "-a", "-t", "-d today", "-u 10", "-k %", "-k _%", "-s t", "--overdue",
                      "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html"):
             self.cmd.do_t_list(line)
 
