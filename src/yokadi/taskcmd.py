@@ -17,7 +17,7 @@ from db import Config, Keyword, Project, Task, \
                TaskKeyword, Recurrence
 import bugutils
 import dbutils
-import dateutils
+import ydateutils
 import parseutils
 import tui
 from completers import ProjectCompleter, projectAndKeywordCompleter, \
@@ -648,7 +648,7 @@ class TaskCmd(object):
             task.dueDate = None
             print "Due date for task '%s' reset" % task.title
         else:
-            task.dueDate = dateutils.parseHumaneDateTime(line)
+            task.dueDate = ydateutils.parseHumaneDateTime(line)
             print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
 
     complete_t_set_due = dueDateCompleter
@@ -703,13 +703,13 @@ class TaskCmd(object):
             if len(tokens) != 3:
                 raise YokadiException("You should give time for daily task")
             freq = rrule.DAILY
-            byhour, byminute = dateutils.getHourAndMinute(tokens[2])
+            byhour, byminute = ydateutils.getHourAndMinute(tokens[2])
         elif tokens[1] == "weekly":
             freq = rrule.WEEKLY
             if len(tokens) != 4:
                 raise YokadiException("You should give day and time for weekly task")
-            byweekday = dateutils.getWeekDayNumberFromDay(tokens[2].lower())
-            byhour, byminute = dateutils.getHourAndMinute(tokens[3])
+            byweekday = ydateutils.getWeekDayNumberFromDay(tokens[2].lower())
+            byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
         elif tokens[1] in ("monthly", "quarterly"):
             if tokens[1] == "monthly":
                 freq = rrule.MONTHLY
@@ -721,19 +721,19 @@ class TaskCmd(object):
                 raise YokadiException("You should give day and time for %s task" % (tokens[1],))
             try:
                 bymonthday = int(tokens[2])
-                byhour, byminute = dateutils.getHourAndMinute(tokens[3])
+                byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
             except ValueError:
                 POSITION = { "first" : 1, "second" : 2, "third" : 3, "fourth" : 4, "last" :-1 }
                 if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
-                    byweekday = rrule.weekday(dateutils.getWeekDayNumberFromDay(tokens[3].lower()),
+                    byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
-                    byhour, byminute = dateutils.getHourAndMinute(tokens[4])
+                    byhour, byminute = ydateutils.getHourAndMinute(tokens[4])
                     bymonthday = None # Default to current day number - need to be blanked                    
                 else:
                     raise YokadiException("Unable to understand date. See help t_recurs for details")
         elif tokens[1] == "yearly":
             freq = rrule.YEARLY
-            rDate = dateutils.parseHumaneDateTime(" ".join(tokens[2:]))
+            rDate = ydateutils.parseHumaneDateTime(" ".join(tokens[2:]))
             bymonth = rDate.month
             bymonthday = rDate.day
             byhour = rDate.hour

@@ -10,7 +10,7 @@ from dateutil import rrule
 
 import parseutils
 from db import Config, Keyword, Project, Task, FREQUENCY
-import dateutils
+import ydateutils
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
@@ -87,6 +87,6 @@ def dueDateCompleter(cmd, text, line, begidx, endidx):
     if position == 1: # Task id
         return taskIdCompleter(cmd, text, line, begidx, endidx)
     elif position == 2 and not text.startswith("+"): # week day
-        return [str(x) for x in dateutils.WEEKDAYS.keys() if str(x).lower().startswith(text.lower())]
+        return [str(x) for x in ydateutils.WEEKDAYS.keys() if str(x).lower().startswith(text.lower())]
 
 # vi: ts=4 sw=4 et

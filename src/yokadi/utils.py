@@ -1,6 +1,6 @@
 # coding:utf-8
 """
-Common utils functions that cannot fit into dateutils, dbutils or parseutils.
+Common utils functions that cannot fit into ydateutils, dbutils or parseutils.
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """

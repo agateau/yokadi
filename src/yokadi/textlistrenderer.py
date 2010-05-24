@@ -9,7 +9,7 @@ Text rendering of t_list output
 from datetime import datetime
 
 import colors as C
-import dateutils
+import ydateutils
 from db import Task
 import tui
 
@@ -110,7 +110,7 @@ class AgeFormater(object):
 
     def __call__(self, task):
         delta = self.today - task.creationDate
-        return dateutils.formatTimeDelta(delta), colorizer(delta.days)
+        return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
 
 class DueDateFormater(object):
     def __init__(self, today, shortFormat):
@@ -127,9 +127,9 @@ class DueDateFormater(object):
             value = task.dueDate.strftime("%H:%M")
 
         if self.shortFormat:
-            value = dateutils.formatTimeDelta(delta)
+            value = ydateutils.formatTimeDelta(delta)
         else:
-            value = value + " (%s)" % dateutils.formatTimeDelta(delta)
+            value = value + " (%s)" % ydateutils.formatTimeDelta(delta)
 
         color = colorizer(delta.days * 33, reverse=True)
         return value, color

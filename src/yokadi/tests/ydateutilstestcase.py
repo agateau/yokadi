@@ -7,11 +7,11 @@ Date utilities test cases
 
 import unittest
 from datetime import datetime, timedelta
- 
-import dateutils
-from yokadiexception import YokadiException 
 
-class DateUtilsTestCase(unittest.TestCase):
+import ydateutils
+from yokadiexception import YokadiException
+
+class YDateUtilsTestCase(unittest.TestCase):
     def testGuessDateFormat(self):
         testData = [
             ("06/02/2009", "%d/%m/%Y"),
@@ -19,7 +19,7 @@ class DateUtilsTestCase(unittest.TestCase):
             ]
 
         for text, expected in testData:
-            output = dateutils.guessDateFormat(text)
+            output = ydateutils.guessDateFormat(text)
             self.assertEquals(expected, output)
 
 
@@ -29,21 +29,21 @@ class DateUtilsTestCase(unittest.TestCase):
             ("3M", timedelta(minutes=3)),
             ("5H", timedelta(hours=5)),
             ("6.5D", timedelta(days=6, hours=12)),
-            ("12W", timedelta(days=12*7)),
+            ("12W", timedelta(days=12 * 7)),
             ]
 
         for text, expected in testData:
-            output = dateutils.parseDateTimeDelta(text)
+            output = ydateutils.parseDateTimeDelta(text)
             self.assertEquals(expected, output)
 
 
-    def testParseHumaneDateTime(self):        
+    def testParseHumaneDateTime(self):
         for date in ("+5M", "+1m", "+2H", "+3h", "+9D", "+14d", "+432W", "+0w",
                      "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
-            dateutils.parseHumaneDateTime(date)
-            
+            ydateutils.parseHumaneDateTime(date)
+
         for invalidDate in ("2008", "01/2009", "01//02/01", "02/20/2009", "", "-23d", "+3e", "lkjljlkjlkj", "200/200/2009"):
-            self.assertRaises(YokadiException, dateutils.parseHumaneDateTime, invalidDate)
+            self.assertRaises(YokadiException, ydateutils.parseHumaneDateTime, invalidDate)
 
         # Fake today to a fixed date. This is a saturday (weekday=5).
         today = datetime(2009, 1, 3)
@@ -56,7 +56,7 @@ class DateUtilsTestCase(unittest.TestCase):
             ]
 
         for text, expected in testData:
-            output = dateutils.parseHumaneDateTime(text, today=today)
+            output = ydateutils.parseHumaneDateTime(text, today=today)
             self.assertEquals(expected, output)
 
 
@@ -64,12 +64,12 @@ class DateUtilsTestCase(unittest.TestCase):
         testData = [
             (timedelta(minutes=1), "1m"),
             (timedelta(days=2, hours=5), "2d"),
-            (timedelta(days=12*7), "12w"),
+            (timedelta(days=12 * 7), "12w"),
             ]
 
         for input, expected in testData:
-            output = dateutils.formatTimeDelta(input)
+            output = ydateutils.formatTimeDelta(input)
             self.assertEquals(expected, output)
-            output = dateutils.formatTimeDelta(-input)
+            output = ydateutils.formatTimeDelta(-input)
             self.assertEquals("-" + expected, output)
 # vi: ts=4 sw=4 et
