@@ -285,9 +285,10 @@ class TaskCmd(object):
                           help="only done tasks. <range> must be one of %s" % ", ".join(rangeList),
                           metavar="<range>")
 
-        parser.add_option("-u", "--top-urgent", dest="topUrgent",
-                          default=False, action="store_true",
-                          help="top 5 urgent tasks of each project based on urgency")
+        parser.add_option("-u", "--urgency", dest="urgency",
+                          type="int",
+                          help="tasks with urgency greater or equal than <urgency>",
+                          metavar="<urgency>")
 
         parser.add_option("-t", "--top-due", dest="topDue",
                           default=False, action="store_true",
@@ -385,9 +386,9 @@ class TaskCmd(object):
             filters.append(Task.q.status == 'started')
         else:
             filters.append(Task.q.status != 'done')
-        if options.topUrgent:
+        if options.urgency:
             order = -Task.q.urgency
-            limit = 5
+            filters.append(Task.q.urgency >= options.urgency)
         if options.topDue:
             filters.append(Task.q.dueDate != None)
             order = Task.q.dueDate
