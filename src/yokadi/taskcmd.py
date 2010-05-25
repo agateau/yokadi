@@ -294,9 +294,22 @@ class TaskCmd(object):
                           default=False, action="store_true",
                           help="top 5 urgent tasks of each project based on due date")
 
-        parser.add_option("--overdue", dest="overdue",
-                          default=False, action="store_true",
+        parser.add_option("--overdue", dest="due",
+                          action="append_const", const="now",
                           help="all overdue tasks")
+
+        parser.add_option("--due", dest="due",
+                          action="append",
+                          help="""only list tasks due before/after <limit>. <limit> is a
+                          date optionaly prefixed with a comparison operator.
+                          Valid operators are: <, <=, >=, and >.
+                          Example of valid limits:
+
+                          - tomorrow: due date <= tomorrow, 23:59:59
+                          - today: due date <= today, 23:59:59
+                          - >today: due date > today: 23:59:59
+                          """,
+                          metavar="<limit>")
 
         parser.add_option("-k", "--keyword", dest="keyword",
                           help="Group tasks by given keyword instead of project. The % wildcard can be used.",
@@ -393,8 +406,10 @@ class TaskCmd(object):
             filters.append(Task.q.dueDate != None)
             order = Task.q.dueDate
             limit = 5
-        if options.overdue:
-            filters.append(Task.q.dueDate < datetime.now())
+        if options.due:
+            for due in options.due:
+                dueOperator, dueLimit = ydateutils.parseDateLimit(due)
+                filters.append(dueOperator(Task.q.dueDate, dueLimit))
             order = Task.q.dueDate
         if options.search:
             for word in options.search:
