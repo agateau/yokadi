@@ -47,6 +47,8 @@ class YDateUtilsTestCase(unittest.TestCase):
 
         # Fake today to a fixed date. This is a saturday (weekday=5).
         today = datetime(2009, 1, 3)
+        endOfDay = dict(hour=23, minute=59, second=59)
+        startOfDay = dict(hour=0, minute=0, second=0)
         testData = [
             ("06/02/2009",       None,                       datetime(2009, 2, 6)),
             ("06/02/2009 12:30", None,                       datetime(2009, 2, 6, 12, 30)),
@@ -56,6 +58,9 @@ class YDateUtilsTestCase(unittest.TestCase):
             ("tomorrow",         ydateutils.TIME_HINT_END,   today.replace(day=4, hour=23, minute=59, second=59)),
             ("sunday",           None,                       datetime(2009, 1, 4)),
             ("tu 11:45",         None,                       datetime(2009, 1, 6, 11, 45)),
+            ("today",            ydateutils.TIME_HINT_END,   today.replace(**endOfDay)),
+            ("today",            ydateutils.TIME_HINT_BEGIN, today.replace(**startOfDay)),
+            ("now",              None,                       today),
             ]
 
         for text, hint, expected in testData:
