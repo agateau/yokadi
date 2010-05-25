@@ -6,6 +6,7 @@ Date utilities.
 @license: GPL v3 or later
 """
 import time
+import operator
 from datetime import datetime, timedelta
 import parseutils
 
@@ -223,4 +224,35 @@ def getWeekDayNumberFromDay(day):
     else:
         raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
     return dayNumber
+
+
+def parseDateLimit(line, today=None):
+    """Parse a string of the form <operator><limit>
+    - operator is one of: < <= >= > (default to <=)
+    - limit is a date as understood by parseHumaneDateTime()
+
+    @param line: the string to parse
+    @param today: optional specification of current day, for unit testing
+    @return: (operator, date)"""
+
+    # Order matters: match longest operators first!
+    operators = [
+        ("<=", operator.__le__, TIME_HINT_END),
+        (">=", operator.__ge__, TIME_HINT_BEGIN),
+        (">",  operator.__gt__, TIME_HINT_END),
+        ("<",  operator.__lt__, TIME_HINT_BEGIN),
+        ]
+
+    op = operator.__le__
+    hint = TIME_HINT_END
+    for txt, loopOp, loopHint in operators:
+        if line.startswith(txt):
+            op = loopOp
+            hint = loopHint
+            line = line[len(txt):]
+            break
+
+    limit = parseHumaneDateTime(line, today=today, hint=hint)
+    return op, limit
+
 # vi: ts=4 sw=4 et

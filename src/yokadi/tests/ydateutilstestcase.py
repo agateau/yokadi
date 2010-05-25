@@ -6,6 +6,7 @@ Date utilities test cases
 """
 
 import unittest
+import operator
 from datetime import datetime, timedelta
 
 import ydateutils
@@ -102,6 +103,7 @@ class YDateUtilsTestCase(unittest.TestCase):
             ]
 
         for text, expectedOp, expectedDate in testData:
+            output = ydateutils.parseDateLimit(text, today=today)
             output = ydateutils.parseDateLimit(text, today=today)
             self.assertEquals(expectedOp, output[0])
             self.assertEquals(expectedDate, output[1])
