@@ -38,7 +38,7 @@ gRendererClassDict = dict(
     plain=PlainListRenderer,
     )
 
-NOTE_KEYWORD = "note"
+NOTE_KEYWORD = "_note"
 
 class TaskCmd(object):
     def __init__(self):
