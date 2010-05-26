@@ -90,7 +90,7 @@ class TaskCmd(object):
     complete_bug_add = ProjectCompleter(1)
 
     def do_n_add(self, line):
-        """Add a note. A note is a task with the @note keyword.
+        """Add a note. A note is a task with the @_note keyword.
         n_add <project_name> [@<keyword1>] [@<keyword2>] <title>
         """
         task = self._t_add("n_add", line)
@@ -444,7 +444,7 @@ class TaskCmd(object):
         options, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
-        filters.append(parseutils.KeywordFilter("!@note").filter())
+        filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
 
         # Handle t_list specific options
         order = -Task.q.urgency, Task.q.creationDate
@@ -506,7 +506,7 @@ class TaskCmd(object):
 
     def do_n_list(self, line):
         options, projectList, filters = self._parseListLine(self.parser_n_list(), line)
-        filters.append(parseutils.KeywordFilter("@note").filter())
+        filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
         renderer = TextListRenderer(tui.stdout)
         self._renderList(renderer, projectList, filters, order, limit=None, groupKeyword=options.keyword)
