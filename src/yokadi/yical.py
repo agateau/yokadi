@@ -76,6 +76,8 @@ def createVTodoFromTask(task):
         if attr:
             if yokadiAttribute == "urgency":
                 attr = icalutils.yokadiUrgencyToIcalPriority(attr)
+            if yokadiAttribute == "title":
+                attr += " (%s)" % task.id
             vTodo.add(icalAttribute, attr)
 
     # Add categories from keywords
@@ -98,7 +100,7 @@ def updateTaskFromVTodo(task, vTodo):
             attr = icalutils.convertIcalType(attr)
             if yokadiAttribute == "title":
                 # Remove (id)
-                attr = re.sub(" \(\d+\)$", "", attr)
+                attr = re.sub("\s?\(%s\)" % task.id, "", attr)
             if yokadiAttribute == "doneDate":
                 # A done date defined indicate that task is done
                 task.status = "done"

@@ -36,3 +36,34 @@ class IcalTestCase(unittest.TestCase):
         yical.updateTaskFromVTodo(t1, v1)
         self.assertEquals(t1.urgency, 20) # Check urgency is updated
 
+    def testTitleMapping(self):
+        tui.addInputAnswers("y")
+        t1 = dbutils.addTask("x", "t1", {})
+        v1 = yical.createVTodoFromTask(t1)
+
+        # Check id is here
+        self.assertEqual(v1.get("summary")[-4:], " (%s)" % t1.id)
+
+        # Title and id should not change with update
+        origin_id = t1.id
+        origin_title = t1.title
+        yical.updateTaskFromVTodo(t1, v1)
+        self.assertEqual(t1.id, origin_id)
+        self.assertEqual(t1.title, origin_title)
+
+        # Update vtodo summary and remove (id) or space before (id) info.
+        # Only task title should be changed
+        for new_summary in ("hello", "hello(%s)" % origin_id, "hello (%s)" % origin_id,
+                            "(%s)hello" % origin_id, " (%s)hello" % origin_id):
+            v1.set("summary", new_summary)
+            yical.updateTaskFromVTodo(t1, v1)
+            self.assertEqual(t1.id, origin_id)
+            self.assertEqual(t1.title, "hello")
+
+        # Update votod with fake id info.
+        # Should be present in task title
+        for new_summary in ("hello", "hello()", "hello(123456)", "hello (123456)"):
+            v1.set("summary", new_summary)
+            yical.updateTaskFromVTodo(t1, v1)
+            self.assertEqual(t1.id, origin_id)
+            self.assertEqual(t1.title, new_summary)
