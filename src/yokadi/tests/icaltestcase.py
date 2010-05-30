@@ -67,3 +67,40 @@ class IcalTestCase(unittest.TestCase):
             yical.updateTaskFromVTodo(t1, v1)
             self.assertEqual(t1.id, origin_id)
             self.assertEqual(t1.title, new_summary)
+
+    def testKeywordMapping(self):
+        tui.addInputAnswers("y")
+        tui.addInputAnswers("y")
+        tui.addInputAnswers("y")
+        t1 = dbutils.addTask("x", "t1", {"k1":None, "k2":123})
+        v1 = yical.createVTodoFromTask(t1)
+
+        # Check categories are created
+        categories = [unicode(c) for c in v1.get("categories")]
+        categories.sort()
+        self.assertEqual(categories, ["k1", "k2=123", "x"])
+
+        # Check keywords are still here
+        yical.updateTaskFromVTodo(t1, v1)
+        keywords = t1.getKeywordDict().keys()
+        keywords.sort()
+        self.assertEqual(keywords, [u"k1", u"k2"])
+        self.assertEqual(t1.getKeywordDict()["k2"], 123)
+
+        # Remove k2 category
+        v1.set("categories", ["x", "k1"])
+        yical.updateTaskFromVTodo(t1, v1)
+        self.assertEqual(t1.getKeywordDict().keys(), [u"k1", ])
+
+        # Set k1 value
+        v1.set("categories", ["x", "k1=456"])
+        yical.updateTaskFromVTodo(t1, v1)
+        self.assertEqual(t1.getKeywordDict()["k1"], 456)
+
+        # Create a category
+        v1.set("categories", ["x", "k1", "k4=789"])
+        yical.updateTaskFromVTodo(t1, v1)
+        keywords = t1.getKeywordDict().keys()
+        keywords.sort()
+        self.assertEqual(keywords, [u"k1", "k4"])
+        self.assertEqual(t1.getKeywordDict()["k4"], 789)

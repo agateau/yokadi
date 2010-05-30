@@ -23,6 +23,7 @@ import re
 from db import Task, Project
 import dbutils
 import icalutils
+import parseutils
 from yokadiexception import YokadiException
 
 # UID pattern
@@ -83,7 +84,11 @@ def createVTodoFromTask(task):
     # Add categories from keywords
     categories = [task.project, ] # Add project as a keyword
     if task.keywords:
-        categories.extend([k.name for k in task.keywords])
+        for name, value in task.getKeywordDict().items():
+            if value:
+                categories.append("%s=%s" % (name, value))
+            else:
+                categories.append(name)
     vTodo.add("categories", categories)
 
     return vTodo
@@ -116,6 +121,14 @@ def updateTaskFromVTodo(task, vTodo):
             # Update attribute
             setattr(task, yokadiAttribute, attr)
 
+    # Update keywords from categories
+    keywords = ["@%s" % k for k in vTodo.get("categories") if k != unicode(task.project)]
+    garbage, keywordFilters = parseutils.extractKeywords(" ".join(keywords))
+    newKwDict = parseutils.keywordFiltersToDict(keywordFilters)
+    if garbage:
+        print "Got garbage while parsing categories: %s" % garbage
+    dbutils.createMissingKeywords(newKwDict.keys(), interactive=False)
+    task.setKeywordDict(newKwDict)
 
 class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
