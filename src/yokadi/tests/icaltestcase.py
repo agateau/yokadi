@@ -8,6 +8,7 @@ Ical features test cases
 
 import unittest
 import testutils
+import datetime
 
 import tui
 import yical
@@ -104,3 +105,12 @@ class IcalTestCase(unittest.TestCase):
         keywords.sort()
         self.assertEqual(keywords, [u"k1", "k4"])
         self.assertEqual(t1.getKeywordDict()["k4"], 789)
+
+    def testTaskDoneMapping(self):
+        tui.addInputAnswers("y")
+        t1 = dbutils.addTask("x", "t1", {})
+        v1 = yical.createVTodoFromTask(t1)
+
+        v1.set("completed", datetime.datetime.now())
+        yical.updateTaskFromVTodo(t1, v1)
+        self.assertEqual(t1.status, "done")
