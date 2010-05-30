@@ -28,12 +28,9 @@ from textlistrenderertestcase import TextListRendererTestCase
 from icaltestcase import IcalTestCase
 from keywordtestcase import KeywordTestCase
 
-DB_FILENAME = "unittest.db"
 
 def main():
-    if os.path.exists(DB_FILENAME):
-        os.unlink(DB_FILENAME)
-    db.connectDatabase(DB_FILENAME)
+    db.connectDatabase("", memoryDatabase=True)
 
     unittest.main()
 

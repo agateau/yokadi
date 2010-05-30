@@ -229,12 +229,15 @@ def getVersion():
         raise YokadiException("Configuration key '%s' does not exist. This should not happen!" % DB_VERSION_KEY)
 
 
-def connectDatabase(dbFileName, createIfNeeded=True):
+def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
     """Connect to database and create it if needed
     @param dbFileName: path to database file
     @type dbFileName: str
     @param createIfNeeded: Indicate if database must be created if it does not exists (default True)
-    @type createIfNeeded: bool"""
+    @type createIfNeeded: bool
+    @param memoryDatabase: create db in memory. Only usefull for unit test. Default is false.
+    @type memoryDatabase: bool
+    """
 
     dbFileName = os.path.abspath(dbFileName)
 
@@ -243,10 +246,13 @@ def connectDatabase(dbFileName, createIfNeeded=True):
     else:
         connectionString = 'sqlite:' + dbFileName
 
+    if memoryDatabase:
+        connectionString = "sqlite:/:memory:"
+
     connection = connectionForURI(connectionString)
     sqlhub.processConnection = connection
 
-    if not os.path.exists(dbFileName):
+    if not os.path.exists(dbFileName) or memoryDatabase:
         if createIfNeeded:
             print "Creating database"
             createTables()
