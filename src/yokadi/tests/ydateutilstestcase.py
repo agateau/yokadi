@@ -6,6 +6,7 @@ Date utilities test cases
 """
 
 import unittest
+import operator
 from datetime import datetime, timedelta
 
 import ydateutils
@@ -47,16 +48,24 @@ class YDateUtilsTestCase(unittest.TestCase):
 
         # Fake today to a fixed date. This is a saturday (weekday=5).
         today = datetime(2009, 1, 3)
+        endOfDay = dict(hour=23, minute=59, second=59)
+        startOfDay = dict(hour=0, minute=0, second=0)
         testData = [
-            ("06/02/2009", datetime(2009, 2, 6)),
-            ("06/02/2009 12:30", datetime(2009, 2, 6, 12, 30)),
-            ("tomorrow 18:00", today + timedelta(days=1, hours=18)),
-            ("sunday", datetime(2009, 1, 4)),
-            ("tu 11:45", datetime(2009, 1, 6, 11, 45)),
+            ("06/02/2009",       None,                       datetime(2009, 2, 6)),
+            ("06/02/2009 12:30", None,                       datetime(2009, 2, 6, 12, 30)),
+            ("06/02/2009",       ydateutils.TIME_HINT_BEGIN, datetime(2009, 2, 6, 0, 0, 0)),
+            ("06/02/2009",       ydateutils.TIME_HINT_END,   datetime(2009, 2, 6, 23, 59, 59)),
+            ("tomorrow 18:00",   None,                       today + timedelta(days=1, hours=18)),
+            ("tomorrow",         ydateutils.TIME_HINT_END,   today.replace(day=4, hour=23, minute=59, second=59)),
+            ("sunday",           None,                       datetime(2009, 1, 4)),
+            ("tu 11:45",         None,                       datetime(2009, 1, 6, 11, 45)),
+            ("today",            ydateutils.TIME_HINT_END,   today.replace(**endOfDay)),
+            ("today",            ydateutils.TIME_HINT_BEGIN, today.replace(**startOfDay)),
+            ("now",              None,                       today),
             ]
 
-        for text, expected in testData:
-            output = ydateutils.parseHumaneDateTime(text, today=today)
+        for text, hint, expected in testData:
+            output = ydateutils.parseHumaneDateTime(text, hint=hint, today=today)
             self.assertEquals(expected, output)
 
 
@@ -72,4 +81,31 @@ class YDateUtilsTestCase(unittest.TestCase):
             self.assertEquals(expected, output)
             output = ydateutils.formatTimeDelta(-input)
             self.assertEquals("-" + expected, output)
+
+
+    def testParseDateLimit(self):
+        # Fake today to a fixed date. This is a saturday (weekday=5).
+        today = datetime(2009, 1, 3)
+        endOfDay = dict(hour=23, minute=59, second=59)
+        startOfDay = dict(hour=0, minute=0, second=0)
+
+        testData = [
+            ("today",          operator.__le__, today.replace(**endOfDay)                  ),
+            ("<=today",        operator.__le__, today.replace(**endOfDay)                  ),
+            ("<today",         operator.__lt__, today.replace(**startOfDay)                ),
+            (">today",         operator.__gt__, today.replace(**endOfDay)                  ),
+            (">=today",        operator.__ge__, today.replace(**startOfDay)                ),
+            ("<=06/02/2009",   operator.__le__, datetime(2009, 2, 6).replace(**endOfDay)   ),
+            ("<06/02/2009",    operator.__lt__, datetime(2009, 2, 6).replace(**startOfDay) ),
+            ("tomorrow 18:00", operator.__le__, today + timedelta(days=1, hours=18)        ),
+            ("sunday",         operator.__le__, datetime(2009, 1, 4).replace(**endOfDay)   ),
+            ("tu 11:45",       operator.__le__, datetime(2009, 1, 6, 11, 45)               ),
+            ]
+
+        for text, expectedOp, expectedDate in testData:
+            output = ydateutils.parseDateLimit(text, today=today)
+            output = ydateutils.parseDateLimit(text, today=today)
+            self.assertEquals(expectedOp, output[0])
+            self.assertEquals(expectedDate, output[1])
+
 # vi: ts=4 sw=4 et

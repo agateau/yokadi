@@ -6,6 +6,7 @@ Date utilities.
 @license: GPL v3 or later
 """
 import time
+import operator
 from datetime import datetime, timedelta
 import parseutils
 
@@ -14,6 +15,8 @@ from yokadiexception import YokadiException
 WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
 SHORT_WEEKDAYS = { "mo" : 0, "tu" : 1, "we" : 2, "th" : 3, "fr" : 4, "sa" : 5, "su" : 6 }
 
+TIME_HINT_BEGIN = "begin"
+TIME_HINT_END = "end"
 
 def guessDateFormat(tDate):
     """Guess a date format.
@@ -61,14 +64,26 @@ def parseDateTimeDelta(line):
         raise YokadiException("Unable to understand time shift. See help t_set_due")
 
 
-def parseHumaneDateTime(line, today=None):
+def parseHumaneDateTime(line, hint=None, today=None):
     """Parse human date and time and return structured datetime object
     Datetime  can be absolute (23/10/2008 10:38) or relative (+5M, +3H, +1D, +6W)
     @param line: human date / time
+    @param hint: optional hint to tell whether time should be set to the
+    beginning or the end of the day when not specified.
     @param today: optional parameter to define a fake today date. Useful for
     unit testing.
     @type line: str
     @return: datetime object"""
+
+    def applyTimeHint(date, hint):
+        if not hint:
+            return date
+        if hint == TIME_HINT_BEGIN:
+            return date.replace(hour=0, minute=0, second=0)
+        elif hint == TIME_HINT_END:
+            return date.replace(hour=23, minute=59, second=59)
+        else:
+            raise Exception("Unknown hint %s" % hint)
 
     line = parseutils.simplifySpaces(line)
     if not line:
@@ -80,6 +95,12 @@ def parseHumaneDateTime(line, today=None):
 
     if today is None:
         today = datetime.today().replace(microsecond=0)
+
+    if line == "now":
+        return today
+
+    if line == "today":
+        return applyTimeHint(today, hint)
 
     # Check for "+<delta>" format
     if line.startswith("+"):
@@ -102,6 +123,8 @@ def parseHumaneDateTime(line, today=None):
             except ValueError, e:
                 raise YokadiException("Invalid date format: %s" % e)
             date = datetime.combine(date, tTime)
+        else:
+            date = applyTimeHint(date, hint)
         return date
 
     # Absolute date and/or time
@@ -129,6 +152,7 @@ def parseHumaneDateTime(line, today=None):
                 date = datetime(*time.strptime(line, fDate)[0:5])
             except ValueError, e:
                 raise YokadiException("Invalid date format: %s" % e)
+            date = applyTimeHint(date, hint)
     assert date
 
     if fDate:
@@ -200,4 +224,35 @@ def getWeekDayNumberFromDay(day):
     else:
         raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
     return dayNumber
+
+
+def parseDateLimit(line, today=None):
+    """Parse a string of the form <operator><limit>
+    - operator is one of: < <= >= > (default to <=)
+    - limit is a date as understood by parseHumaneDateTime()
+
+    @param line: the string to parse
+    @param today: optional specification of current day, for unit testing
+    @return: (operator, date)"""
+
+    # Order matters: match longest operators first!
+    operators = [
+        ("<=", operator.__le__, TIME_HINT_END),
+        (">=", operator.__ge__, TIME_HINT_BEGIN),
+        (">",  operator.__gt__, TIME_HINT_END),
+        ("<",  operator.__lt__, TIME_HINT_BEGIN),
+        ]
+
+    op = operator.__le__
+    hint = TIME_HINT_END
+    for txt, loopOp, loopHint in operators:
+        if line.startswith(txt):
+            op = loopOp
+            hint = loopHint
+            line = line[len(txt):]
+            break
+
+    limit = parseHumaneDateTime(line, today=today, hint=hint)
+    return op, limit
+
 # vi: ts=4 sw=4 et
