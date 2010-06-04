@@ -30,16 +30,30 @@ Another useful keyword is `diy_store`: Everytime you find that you need to buy
 some supply from a do-it-yourself store, add it with this keyword. Next time you
 are planning a trip to the store, get the list of what to buy with:
 
-    t_list -k diy_store
+    t_list @diy_store
 
 Or even nicer, directly print your list (from the shell):
 
-    yokadi t_list -k diy_store --format plain | lp
+    yokadi t_list @diy_store --format plain | lp
 
 # Keep track of your meetings
 
 To track my meetings, I like to use a `meeting` keyword together with an
 assigned due date. Yokadi ability to add long descriptions to tasks is also
 handy to associate address or contact information to a meeting task.
+
+# Keep track of tasks you delegate to people
+
+When you delegate a task to someone, add a keyword with its name to the task.
+So you can check that people really do what they promise to do even if they
+are not as organized as you are.
+
+To list all task asigned to Bob:
+
+    t_list -@bob
+
+To check all task that Bob should have done:
+
+    t_list --overdue @bob
 
 <!-- vim: set ts=4 sw=4 et: -->
