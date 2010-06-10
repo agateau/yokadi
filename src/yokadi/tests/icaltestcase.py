@@ -79,7 +79,7 @@ class IcalTestCase(unittest.TestCase):
         # Check categories are created
         categories = [unicode(c) for c in v1.get("categories")]
         categories.sort()
-        self.assertEqual(categories, ["k1", "k2=123", "x"])
+        self.assertEqual(categories, ["k1", "k2=123"])
 
         # Check keywords are still here
         yical.updateTaskFromVTodo(t1, v1)
@@ -89,17 +89,17 @@ class IcalTestCase(unittest.TestCase):
         self.assertEqual(t1.getKeywordDict()["k2"], 123)
 
         # Remove k2 category
-        v1.set("categories", ["x", "k1"])
+        v1.set("categories", ["k1"])
         yical.updateTaskFromVTodo(t1, v1)
         self.assertEqual(t1.getKeywordDict().keys(), [u"k1", ])
 
         # Set k1 value
-        v1.set("categories", ["x", "k1=456"])
+        v1.set("categories", ["k1=456", ])
         yical.updateTaskFromVTodo(t1, v1)
         self.assertEqual(t1.getKeywordDict()["k1"], 456)
 
         # Create a category
-        v1.set("categories", ["x", "k1", "k4=789"])
+        v1.set("categories", ["k1", "k4=789"])
         yical.updateTaskFromVTodo(t1, v1)
         keywords = t1.getKeywordDict().keys()
         keywords.sort()

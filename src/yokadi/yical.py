@@ -82,7 +82,7 @@ def createVTodoFromTask(task):
             vTodo.add(icalAttribute, attr)
 
     # Add categories from keywords
-    categories = [task.project, ] # Add project as a keyword
+    categories = []
     if task.keywords:
         for name, value in task.getKeywordDict().items():
             if value:
@@ -122,13 +122,19 @@ def updateTaskFromVTodo(task, vTodo):
             setattr(task, yokadiAttribute, attr)
 
     # Update keywords from categories
-    keywords = ["@%s" % k for k in vTodo.get("categories") if k != unicode(task.project)]
-    garbage, keywordFilters = parseutils.extractKeywords(" ".join(keywords))
-    newKwDict = parseutils.keywordFiltersToDict(keywordFilters)
-    if garbage:
-        print "Got garbage while parsing categories: %s" % garbage
-    dbutils.createMissingKeywords(newKwDict.keys(), interactive=False)
-    task.setKeywordDict(newKwDict)
+    if vTodo.get("categories"):
+        if isinstance(vTodo.get("categories"), (list)):
+            categories = vTodo.get("categories")
+        else:
+            categories = vTodo.get("categories").split(",")
+
+        keywords = ["@%s" % k for k in categories]
+        garbage, keywordFilters = parseutils.extractKeywords(" ".join(keywords))
+        newKwDict = parseutils.keywordFiltersToDict(keywordFilters)
+        if garbage:
+            print "Got garbage while parsing categories: %s" % garbage
+        dbutils.createMissingKeywords(newKwDict.keys(), interactive=False)
+        task.setKeywordDict(newKwDict)
 
 class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
