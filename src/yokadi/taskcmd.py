@@ -667,8 +667,10 @@ class TaskCmd(object):
 
         task = self.getTaskFromId(line)
 
+        if self.cryptoMgr.isEncrypted(task.title):
+            title = self.cryptoMgr.decrypt(task.title)
         # Create task line
-        taskLine = parseutils.createLine("", task.title, task.getKeywordDict())
+        taskLine = parseutils.createLine("", title, task.getKeywordDict())
 
         oldCompleter = readline.get_completer() # Backup previous completer to restore it in the end
         readline.set_completer(editComplete)    # Switch to specific completer
@@ -687,6 +689,8 @@ class TaskCmd(object):
                 task = None
                 break
             foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
+            if self.cryptoMgr.isEncrypted(task.title):
+                title = self.cryptoMgr.encrypt(title)
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 

@@ -43,7 +43,6 @@ class YokadiCryptoManager(object):
             self.crypto_check = None
 
 
-
     def encrypt(self, data):
         """Encrypt user data.
         @return: encrypted data"""
