@@ -12,6 +12,7 @@ from StringIO import StringIO
 import testutils
 
 import tui
+import cryptutils
 from db import Task
 from yokadi import YokadiCmd
 from yokadiexception import YokadiException, BadUsageException
@@ -46,6 +47,12 @@ class TaskTestCase(unittest.TestCase):
 
         # Existing task
         self.assertRaises(YokadiException, self.cmd.do_t_add, "x t1")
+
+        # Crypto stuff
+        tui.addInputAnswers("a Secret passphrase")
+        self.cmd.do_t_add("-c x encrypted t1")
+        self.assertTrue(Task.get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
+
 
     def testMark(self):
         tui.addInputAnswers("y")
