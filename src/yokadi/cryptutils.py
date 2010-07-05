@@ -56,7 +56,9 @@ class YokadiCryptoManager(object):
 
     def _encrypt(self, data):
         """Low level encryption interface. For internal usage only"""
-        data = adjustString(data, KEY_LENGTH) # Complete data with blanck
+        # Complete data with blanck
+        data_length = (1 + (len(data) / KEY_LENGTH)) * KEY_LENGTH
+        data = adjustString(data, data_length)
         cypher = Cypher.new(self.passphrase)
         return CRYPTO_PREFIX + base64.b64encode(cypher.encrypt(data))
 

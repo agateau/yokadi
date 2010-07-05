@@ -30,6 +30,18 @@ class CryptoTestCase(unittest.TestCase):
         mgr = YokadiCryptoManager()
         tui.addInputAnswers("mySecretPassphrase")
 
+    def testEncryptLongSentence(self):
+        mgr = YokadiCryptoManager()
+        tui.addInputAnswers("mySecretPassphrase")
+        important_sentence = '''This sentence is long long long long
+                                This sentence is long
+                                This sentence is long
+                                This sentence is long
+                                This sentence is long long long'''
+        encrypted_sentence = mgr.encrypt(important_sentence)
+        decrypted_sentence = mgr.decrypt(encrypted_sentence)
+        self.assertEqual(important_sentence, decrypted_sentence)
+
     def testBadPassphrase(self):
         mgr = YokadiCryptoManager()
         tui.addInputAnswers("mySecretPassphrase")
