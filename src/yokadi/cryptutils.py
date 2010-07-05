@@ -112,6 +112,9 @@ class YokadiCryptoManager(object):
     def isPassphraseValid(self):
         """Check if user passphrase is valid.
         ie. : if it can decrypt the check crypto word"""
+        if not self.passphrase:
+            # If no passphrase has been defined, it is definitively not valid !
+            return False
         if self.crypto_check:
             try:
                 int(self._decrypt(self.crypto_check))

@@ -166,10 +166,18 @@ class TaskCmd(object):
         t_describe <id>"""
         task = self.getTaskFromId(line)
         try:
-            description = tui.editText(task.description)
+            if self.cryptoMgr.isEncrypted(task.title):
+                # As title is encrypted, we assume description will be encrypted as well
+                description = self.cryptoMgr.decrypt(task.description)
+            else:
+                description = task.description
+            description = tui.editText(description)
         except Exception, e:
             raise YokadiException(e)
-        task.description = description
+        if self.cryptoMgr.isEncrypted(task.title):
+            task.description = self.cryptoMgr.encrypt(description)
+        else:
+            task.description = description
 
     complete_t_describe = taskIdCompleter
 
@@ -604,6 +612,9 @@ class TaskCmd(object):
                           default="all",
                           help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
                           metavar="<output>")
+        parser.add_option("-d", dest="decrypt", default=False, action="store_true",
+                          help="Decrypt task description")
+
         return parser
 
     def do_t_show(self, line):
@@ -611,6 +622,17 @@ class TaskCmd(object):
         options, args = parser.parse_args(line)
 
         task = self.getTaskFromId(' '.join(args))
+
+        if self.cryptoMgr.isEncrypted(task.title):
+            if self.cryptoMgr.isPassphraseValid() or options.decrypt:
+                title = self.cryptoMgr.decrypt(task.title)
+                description = self.cryptoMgr.decrypt(task.description)
+            else:
+                title = "<... encrypted data...>"
+                description = "<... encrypted data...>"
+        else:
+            title = task.title
+            description = task.description
 
         if options.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
@@ -624,7 +646,7 @@ class TaskCmd(object):
             keywords = ", ".join(keywordArray)
             fields = [
                 ("Project", task.project.name),
-                ("Title", task.title),
+                ("Title", title),
                 ("Created", task.creationDate),
                 ("Due", task.dueDate),
                 ("Status", task.status),
@@ -641,7 +663,7 @@ class TaskCmd(object):
         if options.output in ("all", "description") and task.description:
             if options.output == "all":
                 print
-            print task.description
+            print description
 
     complete_t_show = taskIdCompleter
 
@@ -669,6 +691,9 @@ class TaskCmd(object):
 
         if self.cryptoMgr.isEncrypted(task.title):
             title = self.cryptoMgr.decrypt(task.title)
+        else:
+            title = task.title
+
         # Create task line
         taskLine = parseutils.createLine("", title, task.getKeywordDict())
 
