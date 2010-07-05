@@ -49,14 +49,35 @@ class TaskCmd(object):
             dbutils.getOrCreateKeyword(name, interactive=False)
         dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
 
+    def parser_n_add(self, cmd):
+        parser = YokadiOptionParser()
+        parser.set_usage("%s [options] <projectName> [@<keyword1>] [@<keyword2>] <title>" % cmd)
+        parser.set_description("Add new %s. Will prompt to create keywords if they do not exist." % cmd)
+        parser.add_option("-c", dest="crypt", default=False, action="store_true",
+                          help="Encrypt title")
+        return parser
+
+
     def _t_add(self, cmd, line):
         """Code shared by t_add, bug_add and n_add."""
-        line = line.strip()
+        parser = self.parser_n_add(cmd)
+        options, args = parser.parse_args(line)
+
+        line = " ".join(args)
         if not line:
             raise BadUsageException("Missing parameters")
         projectName, title, keywordDict = parseutils.parseLine(line)
         if not title:
             raise BadUsageException("Missing title")
+
+        if options.crypt:
+            # Obfuscate line in history
+            length = readline.get_current_history_length()
+            readline.replace_history_item(length - 1, "%s %s " % (cmd,
+                                                                  line.replace(title, "<...encrypted...>")))
+            # Encrypt title
+            title = self.cryptoMgr.encrypt(title)
+
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             tui.reinjectInRawInput(u"%s %s" % (cmd, line))
@@ -64,12 +85,17 @@ class TaskCmd(object):
         self.lastTaskId = task.id
         return task
 
+
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
         t_add <projectName> [@<keyword1>] [@<keyword2>] <title>"""
         task = self._t_add("t_add", line)
         if task:
-            print "Added task '%s' (id=%d)" % (task.title, task.id)
+            if self.cryptoMgr.isEncrypted(task.title):
+                title = "<... encrypted data...>"
+            else:
+                title = task.title
+            print "Added task '%s' (id=%d)" % (title, task.id)
     complete_t_add = projectAndKeywordCompleter
 
     def do_bug_add(self, line):
@@ -85,7 +111,12 @@ class TaskCmd(object):
         task.setKeywordDict(keywordDict)
         task.urgency = bugutils.computeUrgency(keywordDict)
 
-        print "Added bug '%s' (id=%d, urgency=%d)" % (task.title, task.id, task.urgency)
+        if self.cryptoMgr.isEncrypted(task.title):
+            title = "<... encrypted data...>"
+        else:
+            title = task.title
+
+        print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
 
     complete_bug_add = ProjectCompleter(1)
 
@@ -99,7 +130,11 @@ class TaskCmd(object):
         keywordDict = task.getKeywordDict()
         keywordDict[NOTE_KEYWORD] = None
         task.setKeywordDict(keywordDict)
-        print "Added note '%s' (id=%d)" % (task.title, task.id)
+        if self.cryptoMgr.isEncrypted(task.title):
+            title = "<... encrypted data...>"
+        else:
+            title = task.title
+        print "Added note '%s' (id=%d)" % (title, task.id)
     complete_n_add = projectAndKeywordCompleter
 
     def do_bug_edit(self, line):
