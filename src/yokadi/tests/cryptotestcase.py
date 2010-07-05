@@ -12,6 +12,7 @@ import testutils
 import tui
 
 from cryptutils import YokadiCryptoManager
+from yokadiexception import YokadiException
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
@@ -25,6 +26,9 @@ class CryptoTestCase(unittest.TestCase):
         encrypted_sentence = mgr.encrypt(important_sentence)
         decrypted_sentence = mgr.decrypt(encrypted_sentence)
         self.assertEqual(important_sentence, decrypted_sentence)
+        # Enter again same passphrase and check it is ok
+        mgr = YokadiCryptoManager()
+        tui.addInputAnswers("mySecretPassphrase")
 
     def testBadPassphrase(self):
         mgr = YokadiCryptoManager()
@@ -34,8 +38,7 @@ class CryptoTestCase(unittest.TestCase):
 
         mgr = YokadiCryptoManager() # Define new manager with other passphrase
         tui.addInputAnswers("theWrongSecretPassphrase")
-        decrypted_sentence = mgr.decrypt(encrypted_sentence)
-        self.assertNotEqual(important_sentence, decrypted_sentence)
+        self.assertRaises(YokadiException, mgr.decrypt, encrypted_sentence)
 
     def testIfEncrypted(self):
         mgr = YokadiCryptoManager()

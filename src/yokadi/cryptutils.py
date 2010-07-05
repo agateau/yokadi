@@ -8,11 +8,11 @@ Temporary file are used by only contains encrypted data.
 """
 
 import base64
-import hashlib
 from random import Random
 
 import tui
 import db
+from yokadiexception import YokadiException
 
 from sqlobject import SQLObjectNotFound
 
@@ -66,16 +66,20 @@ class YokadiCryptoManager(object):
         if not CRYPT:
             tui.warning("Crypto functions not available")
             return data
-        data = data[len(CRYPTO_PREFIX):] # Remove crypto prefix
-        data = base64.b64decode(data)
+
         self.askPassphrase()
         if self.passphrase:
-            cypher = Cypher.new(self.passphrase)
-            data = cypher.decrypt(data).rstrip()
+            data = self._decrypt(data)
         else:
             data = "<...Failed to decrypt data...>"
         return data
 
+    def _decrypt(self, data):
+        """Low level decryption interface. For internal use only"""
+        data = data[len(CRYPTO_PREFIX):] # Remove crypto prefix
+        data = base64.b64decode(data)
+        cypher = Cypher.new(self.passphrase)
+        return cypher.decrypt(data).rstrip()
 
     def askPassphrase(self):
         """Ask user for passphrase if needed"""
@@ -87,13 +91,14 @@ class YokadiCryptoManager(object):
         self.passphrase = adjustString(self.passphrase, KEY_LENGTH)
 
         if not self.isPassphraseValid() and cache:
-            tui.warning("Passphrase differ from previous one."
-                        "If you really want to change passphrase, "
-                        "you should blank the  CRYPTO_CHEKC parameter"
-                        "with c_set CRYPTO_CHECK '' "
-                        "Note that you won't be able to retrieve previous tasks you"
-                        "encrypted with your lost passphrase")
             self.passphrase = None
+            raise YokadiException("Passphrase differ from previous one."
+                        "If you really want to change passphrase, "
+                        "you should blank the  CRYPTO_CHECK parameter "
+                        "with c_set CRYPTO_CHECK '' "
+                        "Note that you won't be able to retrieve previous tasks you "
+                        "encrypted with your lost passphrase")
+
 
     def isEncrypted(self, data):
         """Check if data is encrypted
@@ -108,8 +113,7 @@ class YokadiCryptoManager(object):
         ie. : if it can decrypt the check crypto word"""
         if self.crypto_check:
             try:
-                cypher = Cypher.new(self.passphrase)
-                int(cypher.decrypt(self.crypto_check))
+                int(self._decrypt(self.crypto_check))
                 return True
             except ValueError:
                 return False
