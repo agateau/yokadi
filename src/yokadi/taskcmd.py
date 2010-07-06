@@ -588,9 +588,9 @@ class TaskCmd(object):
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
-        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.crytoMgr)
+        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr)
         self._renderList(renderer, projectList, filters, order, limit=None,
-                         groupKeyword=options.keyword, decrypt=options.decrypt)
+                         groupKeyword=options.keyword)
     complete_n_list = projectAndKeywordCompleter
 
     def do_t_reorder(self, line):
