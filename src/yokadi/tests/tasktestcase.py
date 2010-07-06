@@ -138,7 +138,7 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_add("x @kw1 @kw2=12 t2")
 
         for line in ("", "-a", "-t", "-d today", "-u 10", "-k %", "-k _%", "-s t", "--overdue",
-                     "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html"):
+                     "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html", "-f csv"):
             self.cmd.do_t_list(line)
 
     def testTfilter(self):

@@ -35,7 +35,11 @@ except ImportError:
 class YokadiCryptoManager(object):
     """Manager object for Yokadi cryptographic operation"""
     def __init__(self):
-        self.passphrase = None # Cache encryption passphrase
+        # Cache encryption passphrase
+        self.passphrase = None
+        # Force decryption (and ask passphrase) instead of decrypting only when passphrase was
+        # previously provided
+        self.force_decrypt = False
         try:
             self.crypto_check = db.Config.byName("CRYPTO_CHECK").value
         except SQLObjectNotFound:
@@ -64,10 +68,20 @@ class YokadiCryptoManager(object):
     def decrypt(self, data):
         """Decrypt user data.
         @return: decrypted data"""
+        if not self.isEncrypted(data):
+            # Just return data as is if it's not encrypted
+            return data
+
         if not CRYPT:
             tui.warning("Crypto functions not available")
             return data
 
+        if not self.force_decrypt:
+            # No flag to force decryption, just return fixed string to indicate
+            # data is encrypted
+            return "<... encrypted data...>"
+
+        # Ask passphrase if needed and decrypt data
         self.askPassphrase()
         if self.passphrase:
             data = self._decrypt(data)
@@ -99,7 +113,9 @@ class YokadiCryptoManager(object):
                         "with c_set CRYPTO_CHECK '' "
                         "Note that you won't be able to retrieve previous tasks you "
                         "encrypted with your lost passphrase")
-
+        else:
+            # Now that passphrase is valid, we will always decrypt encrypted data
+            self.force_decrypt = True
 
     def isEncrypted(self, data):
         """Check if data is encrypted

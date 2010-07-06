@@ -9,7 +9,7 @@ Simple rendering of t_list output
 import tui
 
 class PlainListRenderer(object):
-    def __init__(self, out):
+    def __init__(self, out, cryptoMgr=None):
         self.out = out
         self.first = True
 

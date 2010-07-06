@@ -21,7 +21,7 @@ def printRow(out, tag, lst):
     print >> out, "</tr>"
 
 class HtmlListRenderer(object):
-    def __init__(self, out):
+    def __init__(self, out, cryptoMgr=None):
         self.out = out
 
         #TODO: make this fancier

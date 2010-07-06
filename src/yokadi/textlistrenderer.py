@@ -136,13 +136,18 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth=None):
+    def __init__(self, out, termWidth=None, cryptoMgr=None):
+        """
+        @param out: output target
+        @param termWidth: terminal width (int)
+        @param decrypt: wether to decrypt or not (bool)"""
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
         self.maxTitleWidth = len("Title")
         self.today = datetime.today().replace(microsecond=0)
         self.firstHeader = True
+        self.cryptoMgr = cryptoMgr
 
         # All fields set to None must be defined in end()
         self.columns = [

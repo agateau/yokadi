@@ -168,12 +168,12 @@ class TaskCmd(object):
         try:
             if self.cryptoMgr.isEncrypted(task.title):
                 # As title is encrypted, we assume description will be encrypted as well
-                description = self.cryptoMgr.decrypt(task.description)
-            else:
-                description = task.description
-            description = tui.editText(description)
+                self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+
+            description = tui.editText(self.cryptoMgr.decrypt(task.description))
         except Exception, e:
             raise YokadiException(e)
+
         if self.cryptoMgr.isEncrypted(task.title):
             task.description = self.cryptoMgr.encrypt(description)
         else:
@@ -387,6 +387,9 @@ class TaskCmd(object):
         parser.add_option("-o", "--output", dest="output",
                           help="Output task list to <file>",
                           metavar="<file>")
+        parser.add_option("--decrypt", dest="decrypt", default=False, action="store_true",
+                          help="Decrypt task title and description")
+
         return parser
 
     def _parseListLine(self, parser, line):
@@ -443,10 +446,17 @@ class TaskCmd(object):
 
         return options, projectList, filters
 
-    def _renderList(self, renderer, projectList, filters, order, limit, groupKeyword):
+    def _renderList(self, renderer, projectList, filters, order,
+                    limit=None, groupKeyword=None):
         """
         Render a list using renderer, according to the restrictions set by the
         other parameters
+        @param renderer: renderer class (for example: TextListRenderer)
+        @param projectList: list of project name (as unicode string)
+        @param filters: filters in sqlobject format (example: Task.q.status == 'done')
+        @param order: ordering in sqlobject format (example: -Task.q.urgency)
+        @param limit: limit number tasks (int) or None for no limit
+        @param groupKeyword: keyword used for grouping (as unicode string) or None
         """
         if groupKeyword:
             if groupKeyword.startswith("@"):
@@ -539,7 +549,7 @@ class TaskCmd(object):
 
         # Instantiate renderer
         rendererClass = selectRendererClass()
-        renderer = rendererClass(out)
+        renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
 
         # Fill the renderer
         self._renderList(renderer, projectList, filters, order, limit, options.keyword)
@@ -563,6 +573,9 @@ class TaskCmd(object):
         parser.add_option("-k", "--keyword", dest="keyword",
                           help="Group tasks by given keyword instead of project. The % wildcard can be used.",
                           metavar="<keyword>")
+        parser.add_option("--decrypt", dest="decrypt", default=False, action="store_true",
+                          help="Decrypt note title and description")
+
         return parser
 
     def do_n_list(self, line):
@@ -570,7 +583,8 @@ class TaskCmd(object):
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
         renderer = TextListRenderer(tui.stdout)
-        self._renderList(renderer, projectList, filters, order, limit=None, groupKeyword=options.keyword)
+        self._renderList(renderer, projectList, filters, order, limit=None,
+                         groupKeyword=options.keyword, decrypt=options.decrypt)
     complete_n_list = projectAndKeywordCompleter
 
     def do_t_reorder(self, line):
@@ -612,8 +626,8 @@ class TaskCmd(object):
                           default="all",
                           help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
                           metavar="<output>")
-        parser.add_option("-d", dest="decrypt", default=False, action="store_true",
-                          help="Decrypt task description")
+        parser.add_option("--decrypt", dest="decrypt", default=False, action="store_true",
+                          help="Decrypt task title and description")
 
         return parser
 
@@ -621,18 +635,13 @@ class TaskCmd(object):
         parser = self.parser_t_show()
         options, args = parser.parse_args(line)
 
+        if options.decrypt:
+            self.cryptoMgr.force_decrypt = True
+
         task = self.getTaskFromId(' '.join(args))
 
-        if self.cryptoMgr.isEncrypted(task.title):
-            if self.cryptoMgr.isPassphraseValid() or options.decrypt:
-                title = self.cryptoMgr.decrypt(task.title)
-                description = self.cryptoMgr.decrypt(task.description)
-            else:
-                title = "<... encrypted data...>"
-                description = "<... encrypted data...>"
-        else:
-            title = task.title
-            description = task.description
+        title = self.cryptoMgr.decrypt(task.title)
+        description = self.cryptoMgr.decrypt(task.description)
 
         if options.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
@@ -690,9 +699,8 @@ class TaskCmd(object):
         task = self.getTaskFromId(line)
 
         if self.cryptoMgr.isEncrypted(task.title):
-            title = self.cryptoMgr.decrypt(task.title)
-        else:
-            title = task.title
+            self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+        title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
         taskLine = parseutils.createLine("", title, task.getKeywordDict())
