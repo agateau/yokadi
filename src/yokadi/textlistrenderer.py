@@ -178,6 +178,7 @@ class TextListRenderer(object):
                 titleWidth += 1
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
+
     def end(self):
         # Adjust idColumn
         maxId = Task.select().max(Task.q.id)
@@ -193,8 +194,8 @@ class TextListRenderer(object):
 
         # Adjust titleColumn
         self.titleColumn.width = self.maxTitleWidth
-        totalWidth = sum([x.width for x in self.columns])
-        if totalWidth > self.termWidth:
+        totalWidth = sum([x.width for x in self.columns]) + len(self.columns)
+        if totalWidth >= self.termWidth:
             self.titleColumn.width -= (totalWidth - self.termWidth) + len(self.columns)
         self.titleColumn.formater = TitleFormater(self.titleColumn.width)
 
