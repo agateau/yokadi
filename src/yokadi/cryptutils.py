@@ -107,6 +107,7 @@ class YokadiCryptoManager(object):
 
         if not self.isPassphraseValid() and cache:
             self.passphrase = None
+            self.force_decrypt = False # As passphrase is invalid, don't force decrypt for next time
             raise YokadiException("Passphrase differ from previous one."
                         "If you really want to change passphrase, "
                         "you should blank the  CRYPTO_CHECK parameter "
