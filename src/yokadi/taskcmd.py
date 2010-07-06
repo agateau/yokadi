@@ -540,6 +540,9 @@ class TaskCmd(object):
                 dueOperator, dueLimit = ydateutils.parseDateLimit(due)
                 filters.append(dueOperator(Task.q.dueDate, dueLimit))
             order = Task.q.dueDate
+        if options.decrypt:
+            self.cryptoMgr.force_decrypt = True
+
 
         # Define output
         if options.output:
@@ -580,9 +583,12 @@ class TaskCmd(object):
 
     def do_n_list(self, line):
         options, projectList, filters = self._parseListLine(self.parser_n_list(), line)
+        if options.decrypt:
+            self.cryptoMgr.force_decrypt = True
+
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
-        renderer = TextListRenderer(tui.stdout)
+        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.crytoMgr)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=options.keyword, decrypt=options.decrypt)
     complete_n_list = projectAndKeywordCompleter
