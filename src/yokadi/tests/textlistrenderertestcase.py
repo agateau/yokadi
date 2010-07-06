@@ -34,12 +34,12 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer.addTaskList("Foo", [t1])
         self.assertEquals(renderer.maxTitleWidth, 5)
         renderer.end()
-        expected = unicode( \
+        expected = unicode(\
               "%(CYAN)s              Foo               %(RESET)s\n" \
             + "%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s\n" \
-            +         "--------------------------------\n" \
-            +         "1 |t1   |0  |N|0m      |        \n" \
-            )% dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
+            + "--------------------------------\n" \
+            + "1 |t1   %(RESET)s|0  |N|0m      |        \n" \
+            ) % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
         testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
 
         out = StringIO()
@@ -47,13 +47,13 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer.addTaskList("Foo", [t1, t2])
         self.assertEquals(renderer.maxTitleWidth, 11)
         renderer.end()
-        expected = unicode( \
+        expected = unicode(\
               "%(CYAN)s                 Foo                  %(RESET)s\n" \
             + "%(BOLD)sID|Title      |U  |S|Age     |Due date%(RESET)s\n" \
-            +         "--------------------------------------\n" \
-            +         "1 |t1         |0  |N|0m      |        \n" \
-            +         "2 |t2 (%(BOLD)sk1, k2%(RESET)s)|0  |N|0m      |        \n" \
-            )% dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
+            + "--------------------------------------\n" \
+            + "1 |t1         %(RESET)s|0  |N|0m      |        \n" \
+            + "2 |t2 (%(BOLD)sk1, k2)%(RESET)s|0  |N|0m      |        \n" \
+            ) % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
         testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
 
         out = StringIO()
@@ -61,13 +61,13 @@ class TextListRendererTestCase(unittest.TestCase):
         renderer.addTaskList("Foo", [t2, longerTask])
         self.assertEquals(renderer.maxTitleWidth, len(longerTask.title) + 1)
         renderer.end()
-        expected = unicode( \
+        expected = unicode(\
               "%(CYAN)s                     Foo                      %(RESET)s\n" \
             + "%(BOLD)sID|Title              |U  |S|Age     |Due date%(RESET)s\n" \
-            +         "----------------------------------------------\n" \
-            +         "2 |t2 (%(BOLD)sk1, k2%(RESET)s)        |0  |N|0m      |        \n" \
-            +         "3 |A longer task name*|0  |N|0m      |        \n" \
-            )% dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
+            + "----------------------------------------------\n" \
+            + "2 |t2 (%(BOLD)sk1, k2)        %(RESET)s|0  |N|0m      |        \n" \
+            + "3 |A longer task name%(RESET)s*|0  |N|0m      |        \n" \
+            ) % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
         testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
 
 
