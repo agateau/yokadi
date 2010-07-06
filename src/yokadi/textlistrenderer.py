@@ -69,25 +69,25 @@ class TitleFormater(object):
         self.width = width
 
     def __call__(self, task):
-        # Compute title, titleWidth and colorWidth
         keywords = task.getUserKeywordsNameAsString()
-        if keywords:
-            title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (task.title, C.BOLD + keywords + C.RESET)
-            colorWidth = len(C.BOLD) + len(C.RESET)
+        hasDescription = task.description != ""
+        # Compute title, titleWidth and colorWidth
+        maxWidth = self.width
+        if hasDescription:
+            maxWidth -= 1
+        if keywords and len(task.title) < maxWidth:
+            title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (task.title, C.BOLD + keywords)
+            colorWidth = len(C.BOLD)
         else:
             title = task.title
             colorWidth = 0
-        titleWidth = len(title) - colorWidth
 
         # Adjust title to fit in self.width
-        maxWidth = self.width
-        hasDescription = task.description != ""
-        if hasDescription:
-            maxWidth -= 1
+        titleWidth = len(title) - colorWidth
         if titleWidth > maxWidth:
-            title = title[:maxWidth - 1] + ">"
+            title = title[:maxWidth - 1 + colorWidth] + C.RESET + ">"
         else:
-            title = title.ljust(maxWidth + colorWidth)
+            title = title.ljust(maxWidth + colorWidth) + C.RESET
         if hasDescription:
             title = title + "*"
 
