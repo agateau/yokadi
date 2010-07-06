@@ -392,6 +392,9 @@ class TaskCmd(object):
         # Search
         if options.search:
             for word in options.search:
+                if word.startswith("@"):
+                    tui.warning("Maybe you want keyword search (without -s option) "
+                                "instead of plain text search?")
                 filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
                                   LIKE(Task.q.description, "%" + word + "%")))
 
