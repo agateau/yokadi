@@ -141,6 +141,18 @@ class TaskTestCase(unittest.TestCase):
                      "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html", "-f csv"):
             self.cmd.do_t_list(line)
 
+    def testNlist(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_n_add("x t1")
+        self.cmd.do_t_add("x t2")
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_n_add("x @kw1 @kw2=12 t3")
+        self.cmd.do_t_add("x @kw1 @kw2=12 t4")
+
+        for line in ("", "-k %", "-k _%", "-s t",
+                     "@%", "@k%", "!@%", "!@kw1", "-f plain"):
+            self.cmd.do_t_list(line)
+
     def testTfilter(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
