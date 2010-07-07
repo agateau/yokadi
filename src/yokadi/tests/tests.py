@@ -27,10 +27,12 @@ from aliastestcase import AliasTestCase
 from textlistrenderertestcase import TextListRendererTestCase
 from icaltestcase import IcalTestCase
 from keywordtestcase import KeywordTestCase
+from cryptotestcase import CryptoTestCase
 
 
 def main():
     db.connectDatabase("", memoryDatabase=True)
+    db.setDefaultConfig()
 
     unittest.main()
 

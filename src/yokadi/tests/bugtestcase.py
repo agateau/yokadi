@@ -11,14 +11,14 @@ import testutils
 
 import tui
 from db import Task
-from taskcmd import TaskCmd
 from yokadiexception import YokadiException
+from yokadi import YokadiCmd
 
 class BugTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
         tui.clearInputAnswers()
-        self.cmd = TaskCmd()
+        self.cmd = YokadiCmd()
 
     def testAdd(self):
         tui.addInputAnswers("y", "2", "4", "123")

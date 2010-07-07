@@ -9,8 +9,9 @@ Simple rendering of t_list output
 import tui
 
 class PlainListRenderer(object):
-    def __init__(self, out):
+    def __init__(self, out, cryptoMgr):
         self.out = out
+        self.cryptoMgr = cryptoMgr
         self.first = True
 
     def addTaskList(self, sectionName, taskList):
@@ -28,7 +29,8 @@ class PlainListRenderer(object):
         print >> self.out, sectionName.encode(tui.ENCODING)
 
         for task in taskList:
-            print >> self.out, (u"- " + task.title).encode(tui.ENCODING)
+            title = self.cryptoMgr.decrypt(task.title)
+            print >> self.out, (u"- " + title).encode(tui.ENCODING)
 
     def end(self):
         pass

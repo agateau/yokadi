@@ -65,21 +65,22 @@ def idFormater(task):
 
 class TitleFormater(object):
     TITLE_WITH_KEYWORDS_TEMPLATE = "%s (%s)"
-    def __init__(self, width):
+    def __init__(self, width, cryptoMgr):
+        self.cryptoMgr = cryptoMgr
         self.width = width
 
     def __call__(self, task):
         keywords = task.getUserKeywordsNameAsString()
         hasDescription = task.description != ""
+        title = self.cryptoMgr.decrypt(task.title)
         # Compute title, titleWidth and colorWidth
         maxWidth = self.width
         if hasDescription:
             maxWidth -= 1
         if keywords and len(task.title) < maxWidth:
-            title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (task.title, C.BOLD + keywords)
+            title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (title, C.BOLD + keywords)
             colorWidth = len(C.BOLD)
         else:
-            title = task.title
             colorWidth = 0
 
         # Adjust title to fit in self.width
@@ -136,13 +137,18 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth=None):
+    def __init__(self, out, termWidth=None, cryptoMgr=None):
+        """
+        @param out: output target
+        @param termWidth: terminal width (int)
+        @param decrypt: wether to decrypt or not (bool)"""
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
         self.maxTitleWidth = len("Title")
         self.today = datetime.today().replace(microsecond=0)
         self.firstHeader = True
+        self.cryptoMgr = cryptoMgr
 
         # All fields set to None must be defined in end()
         self.columns = [
@@ -169,7 +175,7 @@ class TextListRenderer(object):
         self.taskLists.append((sectionName, taskList))
         # Find max title width
         for task in taskList:
-            title = task.title
+            title = self.cryptoMgr.decrypt(task.title)
             keywords = task.getUserKeywordsNameAsString()
             if keywords:
                 title = TitleFormater.TITLE_WITH_KEYWORDS_TEMPLATE % (title, keywords)
@@ -197,7 +203,7 @@ class TextListRenderer(object):
         totalWidth = sum([x.width for x in self.columns]) + len(self.columns)
         if totalWidth >= self.termWidth:
             self.titleColumn.width -= (totalWidth - self.termWidth) + len(self.columns)
-        self.titleColumn.formater = TitleFormater(self.titleColumn.width)
+        self.titleColumn.formater = TitleFormater(self.titleColumn.width, self.cryptoMgr)
 
         # Print table
         for sectionName, taskList in self.taskLists:

@@ -62,6 +62,14 @@ class ConfCmd(object):
         @param key: parameter name
         @param value: parameter value
         @return: True if parameter is ok, else False"""
+        # Boolean parameters
+        if name in ("PASSPHRASE_CACHE",):
+            try:
+                value = int(value)
+                assert(value == 0 or value == 1)
+                return True
+            except (ValueError, AssertionError):
+                return False
         # Positive int parameters
         if name in ("ALARM_DELAY", "ALARM_SUSPEND", "PURGE_DELAY"):
             try:

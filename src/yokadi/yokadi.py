@@ -39,6 +39,7 @@ except ImportError:
 import db
 import tui
 import utils
+import cryptutils
 
 from aliascmd import AliasCmd, resolveAlias
 from confcmd import ConfCmd
@@ -70,6 +71,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
                 # Windows location
                 self.historyPath = os.path.join(os.path.expandvars("$APPDATA"), ".yokadi_history")
         self.loadHistory()
+        self.cryptoMgr = cryptutils.YokadiCryptoManager() # Load shared cryptographic manager
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""

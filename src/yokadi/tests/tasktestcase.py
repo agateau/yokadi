@@ -12,15 +12,16 @@ from StringIO import StringIO
 import testutils
 
 import tui
+import cryptutils
 from db import Task
-from taskcmd import TaskCmd
+from yokadi import YokadiCmd
 from yokadiexception import YokadiException, BadUsageException
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
         tui.clearInputAnswers()
-        self.cmd = TaskCmd()
+        self.cmd = YokadiCmd()
 
     def testAdd(self):
         tui.addInputAnswers("y")
@@ -46,6 +47,12 @@ class TaskTestCase(unittest.TestCase):
 
         # Existing task
         self.assertRaises(YokadiException, self.cmd.do_t_add, "x t1")
+
+        # Crypto stuff
+        tui.addInputAnswers("a Secret passphrase")
+        self.cmd.do_t_add("-c x encrypted t1")
+        self.assertTrue(Task.get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
+
 
     def testMark(self):
         tui.addInputAnswers("y")
@@ -131,7 +138,19 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_add("x @kw1 @kw2=12 t2")
 
         for line in ("", "-a", "-t", "-d today", "-u 10", "-k %", "-k _%", "-s t", "--overdue",
-                     "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html"):
+                     "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html", "-f csv"):
+            self.cmd.do_t_list(line)
+
+    def testNlist(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_n_add("x t1")
+        self.cmd.do_t_add("x t2")
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_n_add("x @kw1 @kw2=12 t3")
+        self.cmd.do_t_add("x @kw1 @kw2=12 t4")
+
+        for line in ("", "-k %", "-k _%", "-s t",
+                     "@%", "@k%", "!@%", "!@kw1", "-f plain"):
             self.cmd.do_t_list(line)
 
     def testTfilter(self):

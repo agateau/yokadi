@@ -8,7 +8,7 @@ HTML rendering of t_list output
 """
 import xml.sax.saxutils as saxutils
 
-TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "keywords"]
+TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "urgency", "status", "description", "keywords"]
 
 def escape(text):
     return saxutils.escape(unicode(text))
@@ -21,8 +21,9 @@ def printRow(out, tag, lst):
     print >> out, "</tr>"
 
 class HtmlListRenderer(object):
-    def __init__(self, out):
+    def __init__(self, out, cryptoMgr):
         self.out = out
+        self.cryptoMgr = cryptoMgr
 
         #TODO: make this fancier
         print >> self.out, """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -51,7 +52,11 @@ class HtmlListRenderer(object):
         print >> self.out, "<table width='100%'>"
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:
-            lst = [getattr(task, field) for field in TASK_FIELDS if field != "keywords"]
+            lst = [self.cryptoMgr.decrypt(task.title), ]
+            lst.extend([getattr(task, field) for field in TASK_FIELDS if field not in ("title",
+                                                                                  "description",
+                                                                                  "keywords")])
+            lst.append(self.cryptoMgr.decrypt(task.description))
             lst.append(task.getKeywordsAsString())
             printRow(self.out, "td", lst)
         print >> self.out, "</table>"

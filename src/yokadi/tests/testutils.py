@@ -14,6 +14,8 @@ def clearDatabase():
     """
     for table in db.TABLE_LIST:
         table.clearTable()
+    # Recreate default parameters
+    db.setDefaultConfig()
 
 
 def multiLinesAssertEqual(test, str1, str2):

@@ -12,6 +12,7 @@ import subprocess
 import sys
 import tempfile
 import locale
+from getpass import getpass
 
 import colors as C
 
@@ -75,8 +76,11 @@ def reinjectInRawInput(line):
         readline.set_pre_input_hook(pre_input_hook)
 
 
-def editLine(line, prompt="edit> "):
-    """Edit a line using readline"""
+def editLine(line, prompt="edit> ", echo=True):
+    """Edit a line using readline
+    @param prompt: change prompt
+    @param echo: whether to echo user text or not"""
+
     if line:
         reinjectInRawInput(line)
 
@@ -84,7 +88,10 @@ def editLine(line, prompt="edit> "):
         line = _answers.pop(0)
     else:
         try:
-            line = raw_input(prompt)
+            if echo:
+                line = raw_input(prompt)
+            else:
+                line = getpass(prompt)
         except EOFError:
             line = ""
 

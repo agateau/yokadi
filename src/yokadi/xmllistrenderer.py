@@ -13,7 +13,7 @@ import tui
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "keywords"]
 
 class XmlListRenderer(object):
-    def __init__(self, out):
+    def __init__(self, out, cryptoMgr=None):
         self.out = out
         self.doc = dom.Document()
         self.rootElement = self.doc.createElement("yokadi")
