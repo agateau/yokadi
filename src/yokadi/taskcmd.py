@@ -254,13 +254,13 @@ class TaskCmd(object):
         tokens = line.split(" ", 2)
         if len(tokens) < 2:
             raise BadUsageException("Give at least a task id and a command")
-        idStringList = tokens[0]
+        idStringList = tokens[0].strip(",")
         cmd = tokens[1]
         if len(tokens) == 3:
             args = tokens[2]
         else:
             args = ""
-        ids = [int(x) for x in idStringList.split(",")]
+        ids = [int(x.strip()) for x in idStringList.split(",")]
         for id in ids:
             line = " ".join([cmd, str(id), args])
             self.onecmd(line.strip())
