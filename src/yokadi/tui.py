@@ -46,7 +46,7 @@ def editText(text):
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
     try:
         fl = file(name, "w")
-        fl.write(text.encode(ENCODING))
+        fl.write(text.encode(ENCODING, "replace"))
         fl.close()
         editor = os.environ.get("EDITOR", "vi")
         retcode = subprocess.call([editor, name])
