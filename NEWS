@@ -1,6 +1,12 @@
-v0.12 200x/xx/xx
+v0.13 2010/xx/xx
+- cryptographic support to encrypt tasks title and description
+- t_apply now accept id range (x-y)
+- Special keyword __ can used in t_apply to affect all tasks previously select by t_list
+
+v0.12 2010/07/06
 - Negative keyword support. Ex.: t_list !@home
 - Permanent filters on keyword or project. 't_filter @foo' will filter any further call to t_list on @foo keyword.
+
 
 v0.11.1 2009/11/02
 - yokadi symlink (useful to run yokadi without installing it) was broken
