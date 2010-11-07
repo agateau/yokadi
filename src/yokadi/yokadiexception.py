@@ -12,6 +12,5 @@ class YokadiException(Exception):
 
 class BadUsageException(YokadiException):
     """Exception when user does not pass correct arguments to a command"""
-    def __init__(self, message):
-        self.message = message
+    pass
 # vi: ts=4 sw=4 et

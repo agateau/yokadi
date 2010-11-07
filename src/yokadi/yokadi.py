@@ -121,7 +121,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         except UnicodeEncodeError, e:
             tui.error("Unicode encoding error. Please check you locale and terminal settings (%s)." % e)
         except BadUsageException, e:
-            tui.error(e.message)
+            tui.error("*** Bad usage ***\n\t%s" % e)
             cmd = line.split(' ')[0]
             self.do_help(cmd)
         except YokadiException, e:
