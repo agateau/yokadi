@@ -810,7 +810,7 @@ class TaskCmd(object):
 
     def do_t_add_keywords(self, line):
         """Add keywords to an existing task
-        t_add_keyword <id> <@keyword1> <@keyword2>[=<value>]...
+        t_add_keywords <id> <@keyword1> <@keyword2>[=<value>]...
         """
         tokens = parseutils.simplifySpaces(line).split(" ", 1)
         if len(tokens) < 2:
@@ -822,7 +822,9 @@ class TaskCmd(object):
             raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
                                    % garbage)
 
-        dbutils.createMissingKeywords(newKwDict.keys())
+        if not dbutils.createMissingKeywords(newKwDict.keys()):
+            # User cancel keyword creation
+            return
 
         kwDict = task.getKeywordDict()
         kwDict.update(newKwDict)
