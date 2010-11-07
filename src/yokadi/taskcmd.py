@@ -8,6 +8,7 @@ Task related commands.
 """
 import os
 import readline
+import re
 from datetime import datetime, timedelta
 from dateutil import rrule
 from sqlobject import LIKE, AND, OR, NOT
@@ -251,18 +252,36 @@ class TaskCmd(object):
     def do_t_apply(self, line):
         """Apply a command to several tasks.
         t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
-        tokens = line.split(" ", 2)
+        ids = []
+        rangeId = re.compile("(\d+)-(\d+)")
+        tokens = re.split("[\s|,]", line)
         if len(tokens) < 2:
             raise BadUsageException("Give at least a task id and a command")
-        idStringList = tokens[0].strip(",")
-        cmd = tokens[1]
-        if len(tokens) == 3:
-            args = tokens[2]
-        else:
-            args = ""
-        ids = [int(x.strip()) for x in idStringList.split(",")]
+
+        idScan = True # Indicate we are parsing ids
+        cmdTokens = []      # Command that we want to apply
+        for token in tokens:
+            if token == "":
+                continue
+            if idScan:
+                result = rangeId.match(token)
+                if result:
+                    ids.extend(range(int(result.group(1)), int(result.group(2)) + 1))
+                elif token.isdigit():
+                    ids.append(int(token))
+                else:
+                    # Id list is finished. Grab rest of line.
+                    cmdTokens.append(token)
+                    idScan = False
+            else:
+                cmdTokens.append(token)
+
+        if not cmdTokens:
+            raise BadUsageException("Give a command to apply")
+        cmd = cmdTokens.pop(0)
         for id in ids:
-            line = " ".join([cmd, str(id), args])
+            line = " ".join([cmd, str(id), " ".join(cmdTokens)])
+            print "Executing: %s" % line
             self.onecmd(line.strip())
 
     complete_t_apply = taskIdCompleter

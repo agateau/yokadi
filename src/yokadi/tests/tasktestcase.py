@@ -180,4 +180,20 @@ class TaskTestCase(unittest.TestCase):
             tui.stdout = oldstdout
 
         self.assertRaises(YokadiException, self.cmd.do_t_filter, "")
+
+    def testTApply(self):
+        self.cmd.do_k_add("lala")
+        for i in range(10):
+            tui.addInputAnswers("y")
+            self.cmd.do_t_add("x t%s" % i)
+        ids = [1, 2, 4, 5, 6, 9]
+        self.cmd.do_t_apply("1 2,4-6 9 t_add_keywords @lala")
+        for taskId in range(1, 10):
+            kwDict = Task.get(taskId).getKeywordDict()
+            if taskId in ids:
+                self.assertEqual(kwDict, dict(lala=None))
+            else:
+                self.assertNotEqual(kwDict, dict(lala=None))
+
+
 # vi: ts=4 sw=4 et
