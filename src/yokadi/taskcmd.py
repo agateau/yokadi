@@ -43,7 +43,8 @@ NOTE_KEYWORD = "_note"
 
 class TaskCmd(object):
     def __init__(self):
-        self.lastTaskId = None
+        self.lastTaskId = None  # Last id created, used
+        self.lastTaskIds = []   # Last list of ids selected with t_list
         self.kFilters = [] # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
         for name in bugutils.PROPERTY_NAMES:
@@ -251,8 +252,15 @@ class TaskCmd(object):
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
-        t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>"""
+        t_apply <id1>[,<id2>,[<id3>]...]] <command> <args>
+        Use x-y to select task range from x to y
+        Use __ to select all tasks previously selected with t_list"""
         ids = []
+        if "__" in line:
+            if self.lastTaskIds:
+                line = line.replace("__", ",".join([str(i) for i in self.lastTaskIds]))
+            else:
+                raise BadUsageException("You must select tasks with t_list prior to use __")
         rangeId = re.compile("(\d+)-(\d+)")
         tokens = re.split("[\s|,]", line)
         if len(tokens) < 2:
@@ -492,6 +500,7 @@ class TaskCmd(object):
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) > 0:
+                    self.lastTaskIds.extend([t.id for t in taskList]) # Keep selected id for further use
                     renderer.addTaskList(unicode(keyword), taskList)
             renderer.end()
         else:
@@ -506,6 +515,7 @@ class TaskCmd(object):
                 taskList = list(taskList)
 
                 if len(taskList) > 0:
+                    self.lastTaskIds.extend([t.id for t in taskList]) # Keep selected id for further use
                     renderer.addTaskList(unicode(project), taskList)
             renderer.end()
 
@@ -527,6 +537,9 @@ class TaskCmd(object):
                 return defaultRendererClass
 
             return gRendererClassDict.get(ext[1:], defaultRendererClass)
+
+        # Reset last tasks id list
+        self.lastTaskIds = []
 
         #BUG: completion based on parameter position is broken when parameter is given
         options, projectList, filters = self._parseListLine(self.parser_t_list(), line)

@@ -195,5 +195,16 @@ class TaskTestCase(unittest.TestCase):
             else:
                 self.assertNotEqual(kwDict, dict(lala=None))
 
+        # raise error if t_list had not been called previously
+        self.assertRaises(BadUsageException, self.cmd.do_t_apply, "__ t_add_keywords @toto")
+
+        self.cmd.do_t_list("@lala")
+        self.cmd.do_t_apply("__ t_add_keywords @toto")
+        for taskId in range(1, 10):
+            kwDict = Task.get(taskId).getKeywordDict()
+            if taskId in ids:
+                self.assertEqual(kwDict, dict(lala=None, toto=None))
+            else:
+                self.assertNotEqual(kwDict, dict(lala=None, toto=None))
 
 # vi: ts=4 sw=4 et
