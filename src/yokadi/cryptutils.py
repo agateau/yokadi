@@ -121,10 +121,7 @@ class YokadiCryptoManager(object):
     def isEncrypted(self, data):
         """Check if data is encrypted
         @return: True is the data seems encrypted, else False"""
-        if data.startswith(CRYPTO_PREFIX):
-            return True
-        else:
-            return False
+        return data is not None and data.startswith(CRYPTO_PREFIX)
 
     def isPassphraseValid(self):
         """Check if user passphrase is valid.

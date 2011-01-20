@@ -64,3 +64,6 @@ class CryptoTestCase(unittest.TestCase):
         encrypted_sentence = mgr.encrypt(important_sentence)
         self.assertTrue(mgr.isEncrypted(encrypted_sentence))
         self.assertFalse(mgr.isEncrypted(important_sentence))
+
+        # Should not fail with empty data
+        self.assertFalse(mgr.isEncrypted(None))
