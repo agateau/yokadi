@@ -11,7 +11,7 @@ import readline
 import re
 from datetime import datetime, timedelta
 from dateutil import rrule
-from sqlobject import LIKE, AND, OR, NOT
+from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
 from sqlobject.sqlbuilder import LEFTJOINOn
 
 from db import Config, Keyword, Project, Task, \
@@ -631,7 +631,11 @@ class TaskCmd(object):
         the order of the lines and save the list. The urgency field will be
         updated to match the order.
         t_reorder <project_name>"""
-        project = Project.byName(line)
+        try:
+            project = Project.byName(line)
+        except SQLObjectNotFound:
+            raise BadUsageException("You must provide a valid project name")
+
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status != 'done'),
                                orderBy= -Task.q.urgency)
