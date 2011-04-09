@@ -1,9 +1,4 @@
----
-title: README
-layout: default
----
-
-## What is it?
+# What is it?
 
 Yokadi is a command-line oriented, SQLite powered, TODO list tool.  It helps
 you organize all the things you have to do and you must not forget. It aims to
@@ -13,7 +8,7 @@ In Yokadi you manage projects, which contains tasks. At the minimum, a task has
 a title, but it can also have a description, a due date, an urgency or
 keywords. Keywords can be any word that help you to find and sort your tasks.
 
-## Dependencies
+# Dependencies
 
 - Unix or Linux system. Mac OS X and Windows should work but have not been
   tested yet.
@@ -21,7 +16,7 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
 - Sqlite module (included in Python since 2.5 release).
 - SQLObject 0.9 or higher.
 
-## Quickstart
+# Quickstart
 
 Here is an example of a short Yokadi session:
 
@@ -130,9 +125,9 @@ There is much more, we only scratched the surface, but this should get you
 started. You can get a list of all commands by typing `help` and get the
 detailed documentation of a command with `help <command>`.
 
-## Advanced stuff
+# Advanced stuff
 
-### Quick access to last task
+## Quick access to last task
 
 When you execute multiple commands on the same task, you can use `_` as a shortcut to the last task id. Assuming you created a task like this:
 
@@ -144,7 +139,7 @@ Then the following commands are equivalents (until you work on another task):
     yokadi> t_edit 1069
     yokadi> t_edit _
 
-### Due dates
+## Due dates
 
 You can define due dates for your tasks with `t_due`. This can be done with a relative or absolute date:
 
@@ -157,7 +152,7 @@ You can define due dates for your tasks with `t_due`. This can be done with a re
 Due dates are shown by `t_list`. Due date is colored according to time left. If you want to be reminded when a task
 is due, you can use the Yokadi Daemon for that. See below for details.
 
-### Periodic tasks
+## Periodic tasks
 
 If you have periodic tasks, you can tell it to yokadi with `t_recurs`:
 
@@ -168,7 +163,7 @@ If you have periodic tasks, you can tell it to yokadi with `t_recurs`:
 
 Type `help t_recurs` to see all possible syntax
 
-### Encrypt your tasks
+## Encrypt your tasks
 
 Whenever you want to protect your todo list data, yokadi provide a simple mechanism
 to encrypt a task title or description. This is usefull when you store passwords like tasks
@@ -210,7 +205,7 @@ To reveal secret data, you have to use the --decrypt option and type your passph
 
 Note: when you encrypt a task or note title, the description will be also encrypted. 
 
-### Tasks range and magic __ keyword
+## Tasks range and magic __ keyword
 
 t_apply is a very function but sometimes you have to use it on numerous tasks. First, you can use task range like this:
 
@@ -233,9 +228,9 @@ Oh, by the way, some yokadi dev use the followings alias which is quite self exp
     yokadi> a_list
     procrastinate => t_apply __ t_due +1d
 
-## Integration
+# Integration
 
-### Database location
+## Database location
 
 By default, Yokadi creates a database in `$HOME/.yokadi.db`, but you can
 specify an alternative location with the `--db` option.
@@ -253,7 +248,7 @@ the `YOKADI_DB` env variable to point to your database:
 
     export YOKADI_DB=$HOME/work/yokadi.db
 
-### History location
+## History location
 
 By default, Yokadi will store input history in `$HOME/.yokadi_history`. This file
 stores commands used in Yokadi for future use and reference.
@@ -263,7 +258,7 @@ the `YOKADI_HISTORY` env variable to point to your history file:
 
     export YOKADI_HISTORY=$HOME/.hist/yokadi_history
 
-### Yokadid, the Yokadid daemon
+## Yokadid, the Yokadid daemon
 
 If you want to be automatically reminded of due tasks, you can use the Yokadi
 daemon.
@@ -273,7 +268,7 @@ must create a symlink to yokadid (or a shell script that calls it) in `$HOME/.kd
 
     ln -s `which yokadid` $HOME/.kde/Autostart/
 
-## Contact
+# Contact
 
 The project is hosted on http://yokadi.github.com.
 
@@ -283,7 +278,7 @@ Sequanux LUG. To join, visit
 
 You can also find some of us on #yokadi, on the Freenode IRC network.
 
-## Authors
+# Authors
 
 Yokadi has been brought to you by:
 
