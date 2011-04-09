@@ -1,4 +1,4 @@
-v0.13 2010/xx/xx
+v0.13 2011/04/9
 - cryptographic support to encrypt tasks title and description
 - t_apply now accept id range (x-y)
 - Special keyword __ can used in t_apply to affect all tasks previously select by t_list
