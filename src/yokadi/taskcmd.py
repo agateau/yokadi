@@ -75,7 +75,8 @@ class TaskCmd(object):
         if options.crypt:
             # Obfuscate line in history
             length = readline.get_current_history_length()
-            readline.replace_history_item(length - 1, "%s %s " % (cmd,
+            if length > 0 : # Ensure history is positive to avoid crash with bad readline setup
+                readline.replace_history_item(length - 1, "%s %s " % (cmd,
                                                                   line.replace(title, "<...encrypted...>")))
             # Encrypt title
             title = self.cryptoMgr.encrypt(title)
