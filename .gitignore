@@ -2,8 +2,10 @@
 *.db
 .*.swp
 .py*
+*~
 .pydevproject
 .project
 .settings
 dist
+build
 MANIFEST
