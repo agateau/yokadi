@@ -1,7 +1,12 @@
-# Intro
+---
+title: Using Manage Yokadi tasks with third party ical aware tool
+layout: default
+---
+
+## Intro
 
 This document presents how to use Yokadi with a third party calendar/todolist
-application that support the ical format (RFC2345).
+application that support the ical format (RFC2445).
 
 To use ical Yokadi features, you have to start the Yokadi daemon. That daemon
 also managed alarms for due tasks. 
@@ -16,7 +21,7 @@ Example, to start yokadi daemon with the icalserver on non standard tcp port 900
 
     yokadid --icalserver --port=9000
 
-# Read your yokadi tasks in a third party tool
+## Read your yokadi tasks in a third party tool
 
 With a third party tool that support ical format and is able to read it through
 http, just set it up to read on localhost:8000 (or whatever port you setup)
@@ -32,12 +37,12 @@ You can use wget for that:
 Each yokadi task is defined as an ical VTODO object. Yokadi project are represented
 as special tasks on which included tasks are related.
 
-# Create and update yokadi tasks from a third party tool
+## Create and update yokadi tasks from a third party tool
 
 On the same tcp socket, you can write tasks with the PUT http method. Only tasks new and
 updated tasks will be consided.
 
-# Supported third party ical tool
+## Supported third party ical tool
 
 Yokadi should support any tool that respect RFC2345. But we are not in a perfect
 world.
@@ -48,7 +53,7 @@ If you successfully plugged Yokadi with another calendar/todolist tool, please
 let us now in order to complete this list.
 
 
-# Some security consideration
+## Some security consideration
 
 By default, the ical server only listen on localhost (loopback). You can bypass this
 restriction with the --listen switch that make the icalserver listening on all interfaces.
@@ -65,3 +70,4 @@ strongly recommanded.
 
 
 <!-- vim: set ts=4 sw=4 et: -->
+
