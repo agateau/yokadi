@@ -44,6 +44,8 @@ def editText(text):
     """Edit text with external editor
     @return: newText"""
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
+    if text is None:
+        text = ""
     try:
         fl = file(name, "w")
         fl.write(text.encode(ENCODING, "replace"))

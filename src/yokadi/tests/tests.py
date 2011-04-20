@@ -28,7 +28,7 @@ from textlistrenderertestcase import TextListRendererTestCase
 from icaltestcase import IcalTestCase
 from keywordtestcase import KeywordTestCase
 from cryptotestcase import CryptoTestCase
-
+from tuitestcase import TuiTestCase
 
 def main():
     db.connectDatabase("", memoryDatabase=True)
