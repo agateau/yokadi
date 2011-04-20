@@ -71,7 +71,7 @@ class TitleFormater(object):
 
     def __call__(self, task):
         keywords = task.getUserKeywordsNameAsString()
-        hasDescription = task.description != ""
+        hasDescription = task.description is not None and task.description != ""
         title = self.cryptoMgr.decrypt(task.title)
         # Compute title, titleWidth and colorWidth
         maxWidth = self.width
