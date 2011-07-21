@@ -15,6 +15,13 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 import db
 
+try:
+    import icalendar
+    hasIcalendar = True
+except ImportError:
+    hasIcalendar = False
+    print "icalendar is not installed, some tests won't be run"
+
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
 from ydateutilstestcase import YDateUtilsTestCase
@@ -25,7 +32,8 @@ from tasktestcase import TaskTestCase
 from bugtestcase import BugTestCase
 from aliastestcase import AliasTestCase
 from textlistrenderertestcase import TextListRendererTestCase
-from icaltestcase import IcalTestCase
+if hasIcalendar:
+    from icaltestcase import IcalTestCase
 from keywordtestcase import KeywordTestCase
 from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
