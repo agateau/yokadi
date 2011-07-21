@@ -14,7 +14,7 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
   tested yet.
 - Python 2.4 or higher.
 - Sqlite module (included in Python since 2.5 release).
-- iCalendar module (optionnal, for Yokadi Daemon only)
+- iCalendar module (optional, for Yokadi Daemon only)
 - SQLObject 0.9 or higher.
 
 # Quickstart
@@ -130,7 +130,8 @@ detailed documentation of a command with `help <command>`.
 
 ## Quick access to last task
 
-When you execute multiple commands on the same task, you can use `_` as a shortcut to the last task id. Assuming you created a task like this:
+When you execute multiple commands on the same task, you can use `_` as a
+shortcut to the last task id. Assuming you created a task like this:
 
     yokadi> t_add home Buy chocolate
     Added task 'Buy chocolate' (id=1069)
@@ -142,7 +143,8 @@ Then the following commands are equivalents (until you work on another task):
 
 ## Due dates
 
-You can define due dates for your tasks with `t_due`. This can be done with a relative or absolute date:
+You can define due dates for your tasks with `t_due`. This can be done with a
+relative or absolute date:
 
     yokadi> t_due 21 +3d
     Due date for task 'Buy chocolate' set to Sat Jul 11 17:16:20 2009
@@ -150,12 +152,13 @@ You can define due dates for your tasks with `t_due`. This can be done with a re
     yokadi> t_due 21 23/07 10:30
     Due date for task 'Buy chocolate' set to Thu Jul 23 10:30:00 2009
 
-Due dates are shown by `t_list`. Due date is colored according to time left. If you want to be reminded when a task
-is due, you can use the Yokadi Daemon for that. See below for details.
+Due dates are shown by `t_list`. Due date is colored according to time left. If
+you want to be reminded when a task is due, you can use the Yokadi Daemon for
+that. See below for details.
 
 ## Periodic tasks
 
-If you have periodic tasks, you can tell it to yokadi with `t_recurs`:
+If you have periodic tasks, you can tell it to Yokadi with `t_recurs`:
 
     yokadi> t_recurs 1 weekly monday 21:30
     yokadi> t_recurs 1 monthly 3 11:00
@@ -166,9 +169,9 @@ Type `help t_recurs` to see all possible syntax
 
 ## Encrypt your tasks
 
-Whenever you want to protect your todo list data, yokadi provide a simple mechanism
-to encrypt a task title or description. This is usefull when you store passwords like tasks
-or notes. 
+Whenever you want to protect your todo list data, Yokadi provides a simple
+mechanism to encrypt a task title or description. This is useful when you store
+passwords like tasks or notes.
 
 Let's encrypt a task and a note title with the -c option:
 
@@ -176,16 +179,19 @@ Let's encrypt a task and a note title with the -c option:
     passphrase>
     Added task '<... encrypted data...>' (id=1)
 
-Yokadi ask you for a passphrase. Don't forget it! It is a global passphrase for this yokadi database.
-Each time you will want to encrypt something, you will have to use this passphrase. For convenience, Yokadi
-will keep this passphrase in memory during your yokadi session. If you are quite paranoiac and feel bad with that,
-don't panic, you can set the PASSPHRASE_CACHE option to 0 to disable passphrase cache:
+Yokadi asks you for a passphrase. Don't forget it! It is a global passphrase
+for this Yokadi database.  Each time you will want to encrypt something, you
+will have to use this passphrase. For convenience, Yokadi will keep this
+passphrase in memory during your Yokadi session. If you are quite paranoiac
+and feel bad with that, don't panic, you can set the PASSPHRASE_CACHE
+option to 0 to disable passphrase cache:
 
     yokadi> c_set PASSPHRASE_CACHE 0
     Info: Parameter updated
 
-If you list encrypted stuff but have still give your passphrase in the current session, yokadi won't bother you with asking
-for passphrase, but won't data in a clear way:
+If you list encrypted stuff but haven't given your passphrase in the current
+session, Yokadi won't bother you with asking for passphrase, but won't display
+data in a clear way:
 
     yokadi> t_list
                                  my_project                             
@@ -194,7 +200,8 @@ for passphrase, but won't data in a clear way:
     1 |<... encrypted data...>|0  |N|5m      |                          
     yokadi> 
 
-To reveal secret data, you have to use the --decrypt option and type your passphrase when prompted to:
+To reveal secret data, you have to use the --decrypt option and type your
+passphrase when prompted to:
 
     yokadi> t_list --decrypt
     passphrase> 
@@ -204,11 +211,13 @@ To reveal secret data, you have to use the --decrypt option and type your passph
     1 |this is a very secret task, don't tell anyone !|0  |N|6m      |                          
     yokadi> 
 
-Note: when you encrypt a task or note title, the description will be also encrypted. 
+Note: when you encrypt a task or note title, the description will be also
+encrypted. 
 
 ## Tasks range and magic __ keyword
 
-t_apply is a very function but sometimes you have to use it on numerous tasks. First, you can use task range like this:
+t_apply is a very powerful function but sometimes you have to use it on
+numerous tasks.  First, you can use task range like this:
 
     yokadi> t_apply 1-3 t_urgency 10
     Executing: t_urgency 1 10
@@ -216,15 +225,17 @@ t_apply is a very function but sometimes you have to use it on numerous tasks. F
     Executing: t_urgency 3 10
     yokadi> 
 
-But sometimes tasks are not consecutive and you would like to use wonderful t_list options to select your tasks.
-Here's the trick: each time you display tasks with t_list, yokadi store the id list in the magic keywod __ that you can
-give to t_apply like this:
+But sometimes tasks are not consecutive and you would like to use wonderful
+t_list options to select your tasks.  Here's the trick: each time you display
+tasks with t_list, Yokadi stores the id list in the magic keyword __ that you
+can give to t_apply like this:
 
     yokadi> t_list @keyword myProject
     (...)
     yokadi> t_apply __ t_urgency 35
 
-Oh, by the way, some yokadi dev use the followings alias which is quite self explicit :
+Oh, by the way, some Yokadi dev use the following alias which is quite self
+explicit:
 
     yokadi> a_list
     procrastinate => t_apply __ t_due +1d
