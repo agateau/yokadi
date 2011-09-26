@@ -43,7 +43,7 @@ class YDateUtilsTestCase(unittest.TestCase):
                      "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
             ydateutils.parseHumaneDateTime(date)
 
-        for invalidDate in ("2008", "01/2009", "01//02/01", "02/20/2009", "", "-23d", "+3e", "lkjljlkjlkj", "200/200/2009"):
+        for invalidDate in ("2008", "01/2009", "01//02/01", "02/20/2009", "", "+3e", "lkjljlkjlkj", "200/200/2009"):
             self.assertRaises(YokadiException, ydateutils.parseHumaneDateTime, invalidDate)
 
         # Fake today to a fixed date. This is a saturday (weekday=5).
@@ -62,6 +62,11 @@ class YDateUtilsTestCase(unittest.TestCase):
             ("today",            ydateutils.TIME_HINT_END,   today.replace(**endOfDay)),
             ("today",            ydateutils.TIME_HINT_BEGIN, today.replace(**startOfDay)),
             ("now",              None,                       today),
+            ("+2w",              None,                       datetime(2009, 1, 17)),
+            ("+1d",              None,                       datetime(2009, 1, 4)),
+            ("-1d",              None,                       datetime(2009, 1, 2)),
+            ("+3h",              None,                       datetime(2009, 1, 3, 3, 0)),
+            ("-1M",              None,                       datetime(2009, 1, 2, 23, 59)),
             ]
 
         for text, hint, expected in testData:

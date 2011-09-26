@@ -105,6 +105,8 @@ def parseHumaneDateTime(line, hint=None, today=None):
     # Check for "+<delta>" format
     if line.startswith("+"):
         return today + parseDateTimeDelta(line[1:])
+    if line.startswith("-"):
+        return today - parseDateTimeDelta(line[1:])
 
     # Check for "<weekday> [<time>]" format
     firstWord = line.split()[0].lower()
