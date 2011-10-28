@@ -16,6 +16,7 @@ class YDateUtilsTestCase(unittest.TestCase):
     def testGuessDateFormat(self):
         testData = [
             ("06/02/2009", "%d/%m/%Y"),
+            ("06/02/09", "%d/%m/%y"),
             ("06/02", "%d/%m"),
             ]
 
@@ -52,6 +53,7 @@ class YDateUtilsTestCase(unittest.TestCase):
         startOfDay = dict(hour=0, minute=0, second=0)
         testData = [
             ("06/02/2009",       None,                       datetime(2009, 2, 6)),
+            ("06/02/09",         None,                       datetime(2009, 2, 6)),
             ("06/02/2009 12:30", None,                       datetime(2009, 2, 6, 12, 30)),
             ("06/02/2009",       ydateutils.TIME_HINT_BEGIN, datetime(2009, 2, 6, 0, 0, 0)),
             ("06/02/2009",       ydateutils.TIME_HINT_END,   datetime(2009, 2, 6, 23, 59, 59)),

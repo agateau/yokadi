@@ -23,7 +23,11 @@ def guessDateFormat(tDate):
     @param tDate: date string like 30/08/2008 or 30/08 or 30
     @return: date format as a string like %d/%m/%Y or %d/%m or %d"""
     if tDate.count("/") == 2:
-        fDate = "%d/%m/%Y"
+        year = tDate.split("/")[2]
+        if len(year) == 4:
+            fDate = "%d/%m/%Y"
+        elif len(year) == 2:
+            fDate = "%d/%m/%y"
     elif tDate.count("/") == 1:
         fDate = "%d/%m"
     else:
