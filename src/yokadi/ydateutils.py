@@ -127,7 +127,7 @@ def parseHumaneDateTime(line, hint=None, today=None):
             try:
                 tTime = datetime(*time.strptime(timeText, fTime)[0:5]).time()
             except ValueError, e:
-                raise YokadiException("Invalid date format: %s" % e)
+                raise YokadiException("Invalid time format: %s" % e)
             date = datetime.combine(date, tTime)
         else:
             date = applyTimeHint(date, hint)
