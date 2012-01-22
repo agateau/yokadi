@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 from core.db import Project
-import completers
+from ycli import completers
 
 
 class CompletersTestCase(unittest.TestCase):

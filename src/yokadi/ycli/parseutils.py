@@ -13,7 +13,7 @@ from core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 from ycli import tui
-from yokadiexception import YokadiException
+from core.yokadiexception import YokadiException
 
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):

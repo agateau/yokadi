@@ -12,10 +12,11 @@ from StringIO import StringIO
 import testutils
 
 from ycli import tui
-import cryptutils
+from core import cryptutils
 from core.db import Task
 from yokadi import YokadiCmd
-from yokadiexception import YokadiException, BadUsageException
+from core.yokadiexception import YokadiException, BadUsageException
+
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):

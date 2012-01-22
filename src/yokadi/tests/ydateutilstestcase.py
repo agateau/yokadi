@@ -9,8 +9,9 @@ import unittest
 import operator
 from datetime import datetime, timedelta
 
-import ydateutils
-from yokadiexception import YokadiException
+from core import ydateutils
+from core.yokadiexception import YokadiException
+
 
 class YDateUtilsTestCase(unittest.TestCase):
     def testGuessDateFormat(self):
@@ -52,23 +53,23 @@ class YDateUtilsTestCase(unittest.TestCase):
         endOfDay = dict(hour=23, minute=59, second=59)
         startOfDay = dict(hour=0, minute=0, second=0)
         testData = [
-            ("06/02/2009",       None,                       datetime(2009, 2, 6)),
-            ("06/02/09",         None,                       datetime(2009, 2, 6)),
-            ("06/02/2009 12:30", None,                       datetime(2009, 2, 6, 12, 30)),
-            ("06/02/2009",       ydateutils.TIME_HINT_BEGIN, datetime(2009, 2, 6, 0, 0, 0)),
-            ("06/02/2009",       ydateutils.TIME_HINT_END,   datetime(2009, 2, 6, 23, 59, 59)),
-            ("tomorrow 18:00",   None,                       today + timedelta(days=1, hours=18)),
-            ("tomorrow",         ydateutils.TIME_HINT_END,   today.replace(day=4, hour=23, minute=59, second=59)),
-            ("sunday",           None,                       datetime(2009, 1, 4)),
-            ("tu 11:45",         None,                       datetime(2009, 1, 6, 11, 45)),
-            ("today",            ydateutils.TIME_HINT_END,   today.replace(**endOfDay)),
-            ("today",            ydateutils.TIME_HINT_BEGIN, today.replace(**startOfDay)),
-            ("now",              None,                       today),
-            ("+2w",              None,                       datetime(2009, 1, 17)),
-            ("+1d",              None,                       datetime(2009, 1, 4)),
-            ("-1d",              None,                       datetime(2009, 1, 2)),
-            ("+3h",              None,                       datetime(2009, 1, 3, 3, 0)),
-            ("-1M",              None,                       datetime(2009, 1, 2, 23, 59)),
+            ("06/02/2009", None, datetime(2009, 2, 6)),
+            ("06/02/09", None, datetime(2009, 2, 6)),
+            ("06/02/2009 12:30", None, datetime(2009, 2, 6, 12, 30)),
+            ("06/02/2009", ydateutils.TIME_HINT_BEGIN, datetime(2009, 2, 6, 0, 0, 0)),
+            ("06/02/2009", ydateutils.TIME_HINT_END, datetime(2009, 2, 6, 23, 59, 59)),
+            ("tomorrow 18:00", None, today + timedelta(days=1, hours=18)),
+            ("tomorrow", ydateutils.TIME_HINT_END, today.replace(day=4, hour=23, minute=59, second=59)),
+            ("sunday", None, datetime(2009, 1, 4)),
+            ("tu 11:45", None, datetime(2009, 1, 6, 11, 45)),
+            ("today", ydateutils.TIME_HINT_END, today.replace(**endOfDay)),
+            ("today", ydateutils.TIME_HINT_BEGIN, today.replace(**startOfDay)),
+            ("now", None, today),
+            ("+2w", None, datetime(2009, 1, 17)),
+            ("+1d", None, datetime(2009, 1, 4)),
+            ("-1d", None, datetime(2009, 1, 2)),
+            ("+3h", None, datetime(2009, 1, 3, 3, 0)),
+            ("-1M", None, datetime(2009, 1, 2, 23, 59)),
             ]
 
         for text, hint, expected in testData:
@@ -97,16 +98,16 @@ class YDateUtilsTestCase(unittest.TestCase):
         startOfDay = dict(hour=0, minute=0, second=0)
 
         testData = [
-            ("today",          operator.__le__, today.replace(**endOfDay)                  ),
-            ("<=today",        operator.__le__, today.replace(**endOfDay)                  ),
-            ("<today",         operator.__lt__, today.replace(**startOfDay)                ),
-            (">today",         operator.__gt__, today.replace(**endOfDay)                  ),
-            (">=today",        operator.__ge__, today.replace(**startOfDay)                ),
-            ("<=06/02/2009",   operator.__le__, datetime(2009, 2, 6).replace(**endOfDay)   ),
-            ("<06/02/2009",    operator.__lt__, datetime(2009, 2, 6).replace(**startOfDay) ),
-            ("tomorrow 18:00", operator.__le__, today + timedelta(days=1, hours=18)        ),
-            ("sunday",         operator.__le__, datetime(2009, 1, 4).replace(**endOfDay)   ),
-            ("tu 11:45",       operator.__le__, datetime(2009, 1, 6, 11, 45)               ),
+            ("today", operator.__le__, today.replace(**endOfDay)),
+            ("<=today", operator.__le__, today.replace(**endOfDay)),
+            ("<today", operator.__lt__, today.replace(**startOfDay)),
+            (">today", operator.__gt__, today.replace(**endOfDay)),
+            (">=today", operator.__ge__, today.replace(**startOfDay)),
+            ("<=06/02/2009", operator.__le__, datetime(2009, 2, 6).replace(**endOfDay)),
+            ("<06/02/2009", operator.__lt__, datetime(2009, 2, 6).replace(**startOfDay)),
+            ("tomorrow 18:00", operator.__le__, today + timedelta(days=1, hours=18)),
+            ("sunday", operator.__le__, datetime(2009, 1, 4).replace(**endOfDay)),
+            ("tu 11:45", operator.__le__, datetime(2009, 1, 6, 11, 45)),
             ]
 
         for text, expectedOp, expectedDate in testData:

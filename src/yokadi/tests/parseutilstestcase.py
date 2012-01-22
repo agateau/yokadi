@@ -6,14 +6,15 @@ Parser utilities test cases
 """
 
 import unittest
-import parseutils
+from ycli import parseutils
 
 gTaskLineToParsedStructList = [
-    (u"project some text @keyword1 @keyword2=12 some other text", (u"project", u"some text some other text", {u"keyword1":None, u"keyword2":12} )),
-    (u"project ééé", (u"project", u"ééé", {} )),
-    (u"project let's include quotes\"", (u"project", u"let's include quotes\"", {} )),
-    (u"   project this  one has  extra spaces  ", (u"project", u"this one has extra spaces", {} )),
+    (u"project some text @keyword1 @keyword2=12 some other text", (u"project", u"some text some other text", {u"keyword1":None, u"keyword2":12})),
+    (u"project ééé", (u"project", u"ééé", {})),
+    (u"project let's include quotes\"", (u"project", u"let's include quotes\"", {})),
+    (u"   project this  one has  extra spaces  ", (u"project", u"this one has extra spaces", {})),
     ]
+
 
 class ParseUtilsTestCase(unittest.TestCase):
     def testExtractKeywords(self):

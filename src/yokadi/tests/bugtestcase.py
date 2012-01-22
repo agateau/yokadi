@@ -11,7 +11,7 @@ import testutils
 
 from ycli import tui
 from core.db import Task
-from yokadiexception import YokadiException
+from core.yokadiexception import YokadiException
 from yokadi import YokadiCmd
 
 

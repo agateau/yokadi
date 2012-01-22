@@ -7,8 +7,9 @@ Yokadi parser test cases
 
 import unittest
 
-from yokadioptionparser import YokadiOptionParser
-from yokadiexception import YokadiException
+from core.yokadioptionparser import YokadiOptionParser
+from core.yokadiexception import YokadiException
+
 
 class YokadiOptionParserTestCase(unittest.TestCase):
     def testEmptyLine(self):

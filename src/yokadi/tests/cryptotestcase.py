@@ -9,10 +9,11 @@ Crypto functions test cases
 import unittest
 
 import testutils
-from ycli import tui
 
-from cryptutils import YokadiCryptoManager
-from yokadiexception import YokadiException
+from ycli import tui
+from core.cryptutils import YokadiCryptoManager
+from core.yokadiexception import YokadiException
+
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):

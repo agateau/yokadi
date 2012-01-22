@@ -15,10 +15,10 @@ from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from optparse import OptionParser
 from commands import getoutput
-from daemonutils import doubleFork
 
 from sqlobject import AND
 
+from core.daemonutils import doubleFork
 from ycli import tui
 from yical.yical import YokadiIcalServer
 

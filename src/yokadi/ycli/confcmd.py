@@ -7,11 +7,12 @@ Configuration management related commands.
 """
 
 from core.db import Config
-from sqlobject import AND, LIKE, SQLObjectNotFound
-from yokadiexception import YokadiException, BadUsageException
+from sqlobject import AND, LIKE
+from core.yokadiexception import YokadiException, BadUsageException
 from completers import confCompleter
 import tui
-from yokadioptionparser import YokadiOptionParser
+from core.yokadioptionparser import YokadiOptionParser
+
 
 class ConfCmd(object):
 

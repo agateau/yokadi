@@ -9,7 +9,7 @@ Text rendering of t_list output
 from datetime import datetime
 
 import ycli.colors as C
-import ydateutils
+from core import ydateutils
 from core.db import Task
 from ycli import tui
 

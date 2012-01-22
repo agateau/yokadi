@@ -9,10 +9,10 @@ from core import dbutils
 import tui
 
 from core.db import Keyword
-from yokadiexception import YokadiException, BadUsageException
+from core.yokadiexception import BadUsageException
 from completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError
-from sqlobject import LIKE
+
 
 class KeywordCmd(object):
     def do_k_list(self, line):

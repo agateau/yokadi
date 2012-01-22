@@ -38,16 +38,16 @@ except ImportError:
 
 from core import db
 from  ycli import tui
-import utils
-import cryptutils
+from core import utils
+from core import cryptutils
 
 from ycli.aliascmd import AliasCmd, resolveAlias
 from ycli.confcmd import ConfCmd
 from ycli.keywordcmd import KeywordCmd
 from ycli.projectcmd import ProjectCmd
 from ycli.taskcmd import TaskCmd
-from yokadiexception import YokadiException, BadUsageException
-from yokadioptionparser import YokadiOptionParserNormalExitException
+from core.yokadiexception import YokadiException, BadUsageException
+from core.yokadioptionparser import YokadiOptionParserNormalExitException
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command

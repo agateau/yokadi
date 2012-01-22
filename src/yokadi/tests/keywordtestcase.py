@@ -11,7 +11,7 @@ import testutils
 from core import dbutils
 from ycli import tui
 from ycli.keywordcmd import KeywordCmd
-from yokadiexception import YokadiException
+from core.yokadiexception import YokadiException
 
 
 class KeywordTestCase(unittest.TestCase):

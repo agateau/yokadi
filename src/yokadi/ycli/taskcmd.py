@@ -16,20 +16,20 @@ from sqlobject.sqlbuilder import LEFTJOINOn
 
 from core.db import Config, Keyword, Project, Task, \
                     TaskKeyword, Recurrence
-import bugutils
+from core import bugutils
 from core import dbutils
-import ydateutils
+from core import ydateutils
 import parseutils
 from ycli import tui
 from completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
-from yokadiexception import YokadiException, BadUsageException
+from core.yokadiexception import YokadiException, BadUsageException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
 from htmllistrenderer import HtmlListRenderer
 from plainlistrenderer import PlainListRenderer
-from yokadioptionparser import YokadiOptionParser
+from core.yokadioptionparser import YokadiOptionParser
 
 gRendererClassDict = dict(
     text=TextListRenderer,

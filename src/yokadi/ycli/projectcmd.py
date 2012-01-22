@@ -11,8 +11,8 @@ from sqlobject.dberrors import DuplicateEntryError
 import tui
 from completers import ProjectCompleter
 from core.db import Project, Task
-from yokadiexception import YokadiException, BadUsageException
-from yokadioptionparser import YokadiOptionParser
+from core.yokadiexception import YokadiException, BadUsageException
+from core.yokadioptionparser import YokadiOptionParser
 import parseutils
 from core import dbutils
 

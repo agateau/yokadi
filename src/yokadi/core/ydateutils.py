@@ -8,15 +8,16 @@ Date utilities.
 import time
 import operator
 from datetime import datetime, timedelta
-import parseutils
 
-from yokadiexception import YokadiException
+from ycli import parseutils
+from core.yokadiexception import YokadiException
 
-WEEKDAYS = { "monday" : 0, "tuesday" : 1, "wednesday" : 2, "thursday" : 3, "friday" : 4, "saturday" : 5, "sunday" : 6 }
-SHORT_WEEKDAYS = { "mo" : 0, "tu" : 1, "we" : 2, "th" : 3, "fr" : 4, "sa" : 5, "su" : 6 }
+WEEKDAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
+SHORT_WEEKDAYS = {"mo": 0, "tu": 1, "we": 2, "th": 3, "fr": 4, "sa": 5, "su": 6}
 
 TIME_HINT_BEGIN = "begin"
 TIME_HINT_END = "end"
+
 
 def guessDateFormat(tDate):
     """Guess a date format.
@@ -245,8 +246,8 @@ def parseDateLimit(line, today=None):
     operators = [
         ("<=", operator.__le__, TIME_HINT_END),
         (">=", operator.__ge__, TIME_HINT_BEGIN),
-        (">",  operator.__gt__, TIME_HINT_END),
-        ("<",  operator.__lt__, TIME_HINT_BEGIN),
+        (">", operator.__gt__, TIME_HINT_END),
+        ("<", operator.__lt__, TIME_HINT_BEGIN),
         ]
 
     op = operator.__le__

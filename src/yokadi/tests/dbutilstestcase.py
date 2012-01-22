@@ -12,7 +12,7 @@ import testutils
 from core import dbutils
 from ycli import tui
 from core.db import Keyword, Project
-from yokadiexception import YokadiException
+from core.yokadiexception import YokadiException
 
 
 class DbUtilsTestCase(unittest.TestCase):

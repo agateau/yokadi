@@ -11,11 +11,11 @@ import os
 import sys
 from optparse import OptionParser
 
-import db
-import dbutils
-import ydateutils
+from core import db
+from core import dbutils
+from core import ydateutils
 
-USAGE="%prog <db>"
+USAGE = "%prog <db>"
 
 PROJECTS = ["birthday", "work", "home"]
 

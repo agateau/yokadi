@@ -13,8 +13,8 @@ from core import dbutils
 import testutils
 
 from ycli import tui
-from textlistrenderer import TextListRenderer
-from cryptutils import YokadiCryptoManager
+from ycli.textlistrenderer import TextListRenderer
+from core.cryptutils import YokadiCryptoManager
 
 
 class TextListRendererTestCase(unittest.TestCase):

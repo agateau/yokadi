@@ -10,7 +10,7 @@ from dateutil import rrule
 
 import parseutils
 from core.db import Config, Keyword, Project, Task, FREQUENCY
-import ydateutils
+from core import ydateutils
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):

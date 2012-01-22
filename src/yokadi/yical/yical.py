@@ -23,8 +23,8 @@ import re
 from core.db import Task, Project
 from core import dbutils
 import icalutils
-import parseutils
-from yokadiexception import YokadiException
+from ycli import parseutils
+from core.yokadiexception import YokadiException
 
 # UID pattern
 UID_PREFIX = "yokadi"

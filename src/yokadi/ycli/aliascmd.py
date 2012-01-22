@@ -6,11 +6,12 @@ Alias related commands.
 @license: GPL v3 or later
 """
 from core.db import Config
-from yokadiexception import YokadiException, BadUsageException
+from core.yokadiexception import BadUsageException
 import tui
 import colors as C
 
 from sqlobject import SQLObjectNotFound
+
 
 class AliasCmd(object):
     def __init__(self):
