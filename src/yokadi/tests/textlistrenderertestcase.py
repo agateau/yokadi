@@ -9,12 +9,13 @@ import unittest
 from StringIO import StringIO
 
 import ycli.colors as C
-import dbutils
+from core import dbutils
 import testutils
 
 from ycli import tui
 from textlistrenderer import TextListRenderer
 from cryptutils import YokadiCryptoManager
+
 
 class TextListRendererTestCase(unittest.TestCase):
     def setUp(self):

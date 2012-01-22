@@ -10,9 +10,10 @@ import unittest
 import testutils
 
 from ycli import tui
-from db import Task
+from core.db import Task
 from yokadiexception import YokadiException
 from yokadi import YokadiCmd
+
 
 class BugTestCase(unittest.TestCase):
     def setUp(self):

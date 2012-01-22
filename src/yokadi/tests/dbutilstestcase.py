@@ -9,9 +9,9 @@ import unittest
 
 import testutils
 
-import dbutils
+from core import dbutils
 from ycli import tui
-from db import Keyword, Project
+from core.db import Keyword, Project
 from yokadiexception import YokadiException
 
 

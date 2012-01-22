@@ -5,7 +5,7 @@ Utils for unit-test
 @license: GPL v3 or later
 """
 
-import db
+from core import db
 
 def clearDatabase():
     """

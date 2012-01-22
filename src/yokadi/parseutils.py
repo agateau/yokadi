@@ -9,7 +9,7 @@ Parse utilities. Used to manipulate command line text.
 import re
 from datetime import date, timedelta
 
-from db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
+from core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
 from ycli import tui

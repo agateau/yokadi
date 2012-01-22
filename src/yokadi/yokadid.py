@@ -19,7 +19,7 @@ from daemonutils import doubleFork
 
 from sqlobject import AND
 
-import tui
+from ycli import tui
 from yical.yical import YokadiIcalServer
 
 # Force default encoding to prefered encoding
@@ -27,7 +27,7 @@ reload(sys)
 sys.setdefaultencoding(tui.ENCODING)
 
 
-from db import Config, Project, Task, connectDatabase
+from core.db import Config, Project, Task, connectDatabase
 
 
 # Daemon polling delay (in seconds)

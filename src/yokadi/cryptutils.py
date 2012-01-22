@@ -11,7 +11,7 @@ import base64
 from random import Random
 
 from ycli import tui
-import db
+from core import db
 from yokadiexception import YokadiException
 
 from sqlobject import SQLObjectNotFound

@@ -6,7 +6,7 @@ Configuration management related commands.
 @license: GPL v3 or later
 """
 
-from db import Config
+from core.db import Config
 from sqlobject import AND, LIKE, SQLObjectNotFound
 from yokadiexception import YokadiException, BadUsageException
 from completers import confCompleter

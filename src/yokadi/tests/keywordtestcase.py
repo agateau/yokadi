@@ -4,16 +4,15 @@ Task test cases
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-import sys
 import unittest
 
 import testutils
 
-import dbutils
+from core import dbutils
 from ycli import tui
-from db import Task
 from ycli.keywordcmd import KeywordCmd
 from yokadiexception import YokadiException
+
 
 class KeywordTestCase(unittest.TestCase):
     def setUp(self):

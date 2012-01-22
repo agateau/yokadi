@@ -9,7 +9,7 @@ from sqlobject import LIKE
 from dateutil import rrule
 
 import parseutils
-from db import Config, Keyword, Project, Task, FREQUENCY
+from core.db import Config, Keyword, Project, Task, FREQUENCY
 import ydateutils
 
 

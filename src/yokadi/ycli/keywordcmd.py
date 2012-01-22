@@ -5,10 +5,10 @@ Keyword related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-import dbutils
+from core import dbutils
 import tui
 
-from db import Keyword
+from core.db import Keyword
 from yokadiexception import YokadiException, BadUsageException
 from completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError

@@ -36,7 +36,7 @@ except ImportError:
     print "Or use 'easy_install sqlobject'"
     sys.exit(1)
 
-import db
+from core import db
 from  ycli import tui
 import utils
 import cryptutils

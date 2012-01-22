@@ -20,8 +20,8 @@ import BaseHTTPServer
 from threading import Thread
 import re
 
-from db import Task, Project
-import dbutils
+from core.db import Task, Project
+from core import dbutils
 import icalutils
 import parseutils
 from yokadiexception import YokadiException

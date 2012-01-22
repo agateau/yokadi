@@ -10,7 +10,7 @@ from datetime import datetime
 
 import ycli.colors as C
 import ydateutils
-from db import Task
+from core.db import Task
 from ycli import tui
 
 

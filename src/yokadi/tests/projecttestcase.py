@@ -9,7 +9,7 @@ import unittest
 
 import testutils
 
-from db import Project
+from core.db import Project
 from ycli.projectcmd import ProjectCmd
 from ycli import tui
 

@@ -12,7 +12,8 @@ import datetime
 
 from ycli import tui
 from yical import yical
-import dbutils
+from core import dbutils
+
 
 class IcalTestCase(unittest.TestCase):
     def setUp(self):

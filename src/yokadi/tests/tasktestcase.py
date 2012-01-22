@@ -13,7 +13,7 @@ import testutils
 
 from ycli import tui
 import cryptutils
-from db import Task
+from core.db import Task
 from yokadi import YokadiCmd
 from yokadiexception import YokadiException, BadUsageException
 

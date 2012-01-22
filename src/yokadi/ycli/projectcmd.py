@@ -10,11 +10,11 @@ from sqlobject.dberrors import DuplicateEntryError
 
 import tui
 from completers import ProjectCompleter
-from db import Project, Task
+from core.db import Project, Task
 from yokadiexception import YokadiException, BadUsageException
 from yokadioptionparser import YokadiOptionParser
 import parseutils
-import dbutils
+from core import dbutils
 
 
 def getProjectFromName(name, parameterName="project_name"):

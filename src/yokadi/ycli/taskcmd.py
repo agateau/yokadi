@@ -14,10 +14,10 @@ from dateutil import rrule
 from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
 from sqlobject.sqlbuilder import LEFTJOINOn
 
-from db import Config, Keyword, Project, Task, \
-               TaskKeyword, Recurrence
+from core.db import Config, Keyword, Project, Task, \
+                    TaskKeyword, Recurrence
 import bugutils
-import dbutils
+from core import dbutils
 import ydateutils
 import parseutils
 from ycli import tui
