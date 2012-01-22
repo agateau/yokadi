@@ -41,11 +41,11 @@ import tui
 import utils
 import cryptutils
 
-from aliascmd import AliasCmd, resolveAlias
-from confcmd import ConfCmd
-from keywordcmd import KeywordCmd
-from projectcmd import ProjectCmd
-from taskcmd import TaskCmd
+from ycli.aliascmd import AliasCmd, resolveAlias
+from ycli.confcmd import ConfCmd
+from ycli.keywordcmd import KeywordCmd
+from ycli.projectcmd import ProjectCmd
+from ycli.taskcmd import TaskCmd
 from yokadiexception import YokadiException, BadUsageException
 from yokadioptionparser import YokadiOptionParserNormalExitException
 
@@ -54,6 +54,7 @@ from yokadioptionparser import YokadiOptionParserNormalExitException
 sys.setdefaultencoding(tui.ENCODING)
 
 
+#TODO: move YokadiCmd to a separate module in ycli package
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)

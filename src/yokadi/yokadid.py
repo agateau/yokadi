@@ -20,7 +20,7 @@ from daemonutils import doubleFork
 from sqlobject import AND
 
 import tui
-from yical import YokadiIcalServer
+from yical.yical import YokadiIcalServer
 
 # Force default encoding to prefered encoding
 reload(sys)

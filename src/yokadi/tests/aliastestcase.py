@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 from db import Config
-from aliascmd import AliasCmd
+from ycli.aliascmd import AliasCmd
 
 class AliasTestCase(unittest.TestCase):
     def setUp(self):

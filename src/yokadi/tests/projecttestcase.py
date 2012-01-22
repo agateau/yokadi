@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 from db import Project
-from projectcmd import ProjectCmd
+from ycli.projectcmd import ProjectCmd
 import tui
 
 class ProjectTestCase(unittest.TestCase):

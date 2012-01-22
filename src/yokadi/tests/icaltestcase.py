@@ -11,7 +11,7 @@ import testutils
 import datetime
 
 import tui
-import yical
+from yical import yical
 import dbutils
 
 class IcalTestCase(unittest.TestCase):

@@ -12,7 +12,7 @@ import testutils
 import dbutils
 import tui
 from db import Task
-from keywordcmd import KeywordCmd
+from ycli.keywordcmd import KeywordCmd
 from yokadiexception import YokadiException
 
 class KeywordTestCase(unittest.TestCase):
@@ -22,7 +22,7 @@ class KeywordTestCase(unittest.TestCase):
         self.cmd = KeywordCmd()
 
     def testKEditNoMerge(self):
-        t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive = False)
+        t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive=False)
         tui.addInputAnswers("newk1")
         self.cmd.do_k_edit("k1")
         kwDict = t1.getKeywordDict()
@@ -31,8 +31,8 @@ class KeywordTestCase(unittest.TestCase):
         self.assertRaises(YokadiException, dbutils.getKeywordFromName, "k1")
 
     def testKEditMerge(self):
-        t1 = dbutils.addTask("x", "t1", dict(k1=None, k2=None), interactive = False)
-        t2 = dbutils.addTask("x", "t2", dict(k1=None), interactive = False)
+        t1 = dbutils.addTask("x", "t1", dict(k1=None, k2=None), interactive=False)
+        t2 = dbutils.addTask("x", "t2", dict(k1=None), interactive=False)
         tui.addInputAnswers("k2", "y")
         self.cmd.do_k_edit("k1")
 
@@ -50,7 +50,7 @@ class KeywordTestCase(unittest.TestCase):
         """
         One can't merge keywords if they have different values
         """
-        t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive = False)
+        t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive=False)
         tui.addInputAnswers("k2", "y")
         self.cmd.do_k_edit("k1")
         kwDict = t1.getKeywordDict()
