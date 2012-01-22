@@ -20,7 +20,7 @@ import bugutils
 import dbutils
 import ydateutils
 import parseutils
-import tui
+from ycli import tui
 from completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
 from yokadiexception import YokadiException, BadUsageException

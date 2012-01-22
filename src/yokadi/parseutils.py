@@ -12,7 +12,7 @@ from datetime import date, timedelta
 from db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
-import tui
+from ycli import tui
 from yokadiexception import YokadiException
 
 gSimplifySpaces = re.compile("  +")

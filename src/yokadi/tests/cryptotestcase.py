@@ -9,7 +9,7 @@ Crypto functions test cases
 import unittest
 
 import testutils
-import tui
+from ycli import tui
 
 from cryptutils import YokadiCryptoManager
 from yokadiexception import YokadiException

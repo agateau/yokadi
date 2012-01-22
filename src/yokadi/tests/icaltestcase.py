@@ -10,7 +10,7 @@ import unittest
 import testutils
 import datetime
 
-import tui
+from ycli import tui
 from yical import yical
 import dbutils
 

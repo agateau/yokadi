@@ -8,10 +8,10 @@ Text rendering of t_list output
 """
 from datetime import datetime
 
-import colors as C
+import ycli.colors as C
 import ydateutils
 from db import Task
-import tui
+from ycli import tui
 
 
 def colorizer(value, reverse=False):

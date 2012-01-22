@@ -37,7 +37,7 @@ except ImportError:
     sys.exit(1)
 
 import db
-import tui
+from  ycli import tui
 import utils
 import cryptutils
 

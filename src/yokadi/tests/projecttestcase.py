@@ -11,7 +11,7 @@ import testutils
 
 from db import Project
 from ycli.projectcmd import ProjectCmd
-import tui
+from ycli import tui
 
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):

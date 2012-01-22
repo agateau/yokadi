@@ -11,7 +11,7 @@ from StringIO import StringIO
 
 import testutils
 
-import tui
+from ycli import tui
 import cryptutils
 from db import Task
 from yokadi import YokadiCmd

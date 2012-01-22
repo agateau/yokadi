@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 import dbutils
-import tui
+from ycli import tui
 from db import Keyword, Project
 from yokadiexception import YokadiException
 

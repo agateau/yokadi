@@ -9,7 +9,7 @@ import unittest
 
 import testutils
 
-import tui
+from ycli import tui
 from db import Task
 from yokadiexception import YokadiException
 from yokadi import YokadiCmd

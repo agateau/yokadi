@@ -11,7 +11,7 @@ from datetime import datetime
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import SQLObjectNotFound
 
-import tui
+from ycli import tui
 from db import Keyword, Project, Task
 from yokadiexception import YokadiException
 

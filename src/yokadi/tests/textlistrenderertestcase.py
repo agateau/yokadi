@@ -8,11 +8,11 @@ TextListRenderer test cases
 import unittest
 from StringIO import StringIO
 
-import colors as C
+import ycli.colors as C
 import dbutils
 import testutils
 
-import tui
+from ycli import tui
 from textlistrenderer import TextListRenderer
 from cryptutils import YokadiCryptoManager
 

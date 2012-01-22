@@ -10,7 +10,7 @@ Temporary file are used by only contains encrypted data.
 import base64
 from random import Random
 
-import tui
+from ycli import tui
 import db
 from yokadiexception import YokadiException
 
