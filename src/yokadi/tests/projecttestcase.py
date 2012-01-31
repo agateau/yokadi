@@ -10,6 +10,7 @@ import unittest
 import testutils
 
 from core.db import Project
+from core.yokadiexception import YokadiException
 from ycli.projectcmd import ProjectCmd
 from ycli import tui
 
@@ -34,5 +35,24 @@ class ProjectTestCase(unittest.TestCase):
 
         kwDict = Project.get(2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
+
+    def testEdit(self):
+        # Create project p1 and rename it to p2
+        self.cmd.do_p_add("p1")
+        project = Project.get(1)
+        self.assertEqual(project.name, "p1")
+
+        tui.addInputAnswers("p2")
+        self.cmd.do_p_edit("p1")
+        self.assertEqual(project.name, "p2")
+
+        # Create project p3 and try to rename it to p2
+        self.cmd.do_p_add("p3")
+        project = Project.get(2)
+        self.assertEqual(project.name, "p3")
+
+        tui.addInputAnswers("p2")
+        self.assertRaises(YokadiException, self.cmd.do_p_edit, "p3")
+        self.assertEqual(project.name, "p3")
 
 # vi: ts=4 sw=4 et

@@ -71,7 +71,10 @@ class ProjectCmd(object):
             raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
         if not dbutils.createMissingKeywords(keywordDict.keys()):
             return
-        project.name = projectName
+        try:
+            project.name = projectName
+        except DuplicateEntryError:
+            raise YokadiException("A project named %s already exists. Please find another name" % projectName)
         project.setKeywordDict(keywordDict)
 
     complete_p_edit = ProjectCompleter(1)
