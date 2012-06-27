@@ -51,7 +51,8 @@ class TaskCmd(object):
             dbutils.getOrCreateKeyword(name, interactive=False)
         dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
 
-    def parser_n_add(self, cmd):
+    def _parser_t_add(self, cmd):
+        """Code shared by t_add, bug_add and n_add parsers."""
         parser = YokadiOptionParser()
         parser.set_usage("%s [options] <projectName> [@<keyword1>] [@<keyword2>] <title>" % cmd)
         parser.set_description("Add new %s. Will prompt to create keywords if they do not exist." % cmd)
@@ -62,7 +63,7 @@ class TaskCmd(object):
 
     def _t_add(self, cmd, line):
         """Code shared by t_add, bug_add and n_add."""
-        parser = self.parser_n_add(cmd)
+        parser = self._parser_t_add(cmd)
         options, args = parser.parse_args(line)
 
         line = " ".join(args)
