@@ -14,7 +14,7 @@ def shareDirPath():
         #TODO: handle windows case
         if os.path.join("src", "yokadi") in __file__:
             # We are in a source tree, look at source root
-            sharePath = os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir)
+            sharePath = os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, os.path.pardir)
         else:
             # We are in a standard Yokadi installation or called by a symlink
             paths = [os.path.dirname(__file__), # Current dir
