@@ -138,13 +138,13 @@ def parseHumaneDateTime(line, hint=None, today=None):
     date = None
     if " " in line:
         # We assume user give date & time
-        tDate, tTime = line.split()
+        tDate, tTime = line.split(' ', 1)
         fDate = guessDateFormat(tDate)
         fTime = guessTimeFormat(tTime)
         try:
             date = datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
         except Exception, e:
-            raise YokadiException("Unable to understand date & time format:\t%s" % e)
+            raise YokadiException("Unable to understand date & time format: %s" % e)
     else:
         if ":" in line:
             fTime = guessTimeFormat(line)
