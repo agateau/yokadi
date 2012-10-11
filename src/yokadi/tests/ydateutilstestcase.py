@@ -13,17 +13,6 @@ import ydateutils
 from yokadiexception import YokadiException
 
 class YDateUtilsTestCase(unittest.TestCase):
-    def testGuessDateFormat(self):
-        testData = [
-            ("06/02/2009", "%d/%m/%Y"),
-            ("06/02", "%d/%m"),
-            ]
-
-        for text, expected in testData:
-            output = ydateutils.guessDateFormat(text)
-            self.assertEquals(expected, output)
-
-
     def testParseDateTimeDelta(self):
         testData = [
             ("1m", timedelta(minutes=1)),
@@ -62,6 +51,9 @@ class YDateUtilsTestCase(unittest.TestCase):
             ("today",            ydateutils.TIME_HINT_END,   today.replace(**endOfDay)),
             ("today",            ydateutils.TIME_HINT_BEGIN, today.replace(**startOfDay)),
             ("now",              None,                       today),
+            ("today 5 PM",       None,                       today.replace(hour=17)),
+            ("6:32pm",           None,                       today.replace(hour=18, minute=32)),
+            ("06/02 2:40 am",    None,                       datetime(2009, 2, 6, 2, 40)),
             ]
 
         for text, hint, expected in testData:
