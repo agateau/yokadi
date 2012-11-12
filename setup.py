@@ -56,6 +56,7 @@ setup(name="yokadi",
       url="http://yokadi.github.com/",
       package_dir={"yokadi" : "src/yokadi"},
       packages=["yokadi", "yokadi.tests"],
+      install_requires=['sqlobject', 'dateutils'],
       scripts=scripts,
       data_files=data_files
       )
