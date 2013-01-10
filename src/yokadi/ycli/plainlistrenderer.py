@@ -6,7 +6,7 @@ Simple rendering of t_list output
 @license: GPL v3 or later
 """
 
-from ycli import tui
+from yokadi.ycli import tui
 
 class PlainListRenderer(object):
     def __init__(self, out, cryptoMgr):

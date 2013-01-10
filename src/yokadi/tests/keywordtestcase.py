@@ -8,10 +8,10 @@ import unittest
 
 import testutils
 
-from core import dbutils
-from ycli import tui
-from ycli.keywordcmd import KeywordCmd
-from core.yokadiexception import YokadiException
+from yokadi.core import dbutils
+from yokadi.ycli import tui
+from yokadi.ycli.keywordcmd import KeywordCmd
+from yokadi.core.yokadiexception import YokadiException
 
 
 class KeywordTestCase(unittest.TestCase):

@@ -10,8 +10,8 @@ Temporary file are used by only contains encrypted data.
 import base64
 from random import Random
 
-from ycli import tui
-from core import db
+from yokadi.ycli import tui
+from yokadi.core import db
 from yokadiexception import YokadiException
 
 from sqlobject import SQLObjectNotFound

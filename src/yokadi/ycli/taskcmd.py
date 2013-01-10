@@ -14,22 +14,22 @@ from dateutil import rrule
 from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
 from sqlobject.sqlbuilder import LEFTJOINOn
 
-from core.db import Config, Keyword, Project, Task, \
+from yokadi.core.db import Config, Keyword, Project, Task, \
                     TaskKeyword, Recurrence
-from core import bugutils
-from core import dbutils
-from core import ydateutils
+from yokadi.core import bugutils
+from yokadi.core import dbutils
+from yokadi.core import ydateutils
 import parseutils
-from ycli import tui
+from yokadi.ycli import tui
 from completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
-from core.yokadiexception import YokadiException, BadUsageException
+from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from textlistrenderer import TextListRenderer
 from xmllistrenderer import XmlListRenderer
 from csvlistrenderer import CsvListRenderer
 from htmllistrenderer import HtmlListRenderer
 from plainlistrenderer import PlainListRenderer
-from core.yokadioptionparser import YokadiOptionParser
+from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 gRendererClassDict = dict(
     text=TextListRenderer,

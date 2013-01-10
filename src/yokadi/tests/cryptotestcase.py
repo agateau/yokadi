@@ -10,9 +10,9 @@ import unittest
 
 import testutils
 
-from ycli import tui
-from core.cryptutils import YokadiCryptoManager
-from core.yokadiexception import YokadiException
+from yokadi.ycli import tui
+from yokadi.core.cryptutils import YokadiCryptoManager
+from yokadi.core.yokadiexception import YokadiException
 
 
 class CryptoTestCase(unittest.TestCase):

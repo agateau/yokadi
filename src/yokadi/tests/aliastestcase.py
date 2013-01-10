@@ -9,8 +9,8 @@ import unittest
 
 import testutils
 
-from core.db import Config
-from ycli.aliascmd import AliasCmd
+from yokadi.core.db import Config
+from yokadi.ycli.aliascmd import AliasCmd
 
 
 class AliasTestCase(unittest.TestCase):

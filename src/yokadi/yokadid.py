@@ -18,16 +18,16 @@ from commands import getoutput
 
 from sqlobject import AND
 
-from core.daemonutils import doubleFork
-from ycli import tui
-from yical.yical import YokadiIcalServer
+from yokadi.core.daemonutils import doubleFork
+from yokadi.ycli import tui
+from yokadi.yical.yical import YokadiIcalServer
 
 # Force default encoding to prefered encoding
 reload(sys)
 sys.setdefaultencoding(tui.ENCODING)
 
 
-from core.db import Config, Project, Task, connectDatabase
+from yokadi.core.db import Config, Project, Task, connectDatabase
 
 
 # Daemon polling delay (in seconds)

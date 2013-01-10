@@ -12,8 +12,8 @@ import unittest
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
-from core import db
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+from yokadi.core import db
 
 try:
     import icalendar

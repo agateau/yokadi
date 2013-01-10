@@ -9,8 +9,8 @@ import unittest
 
 import testutils
 
-from core.db import Project
-from ycli import completers
+from yokadi.core.db import Project
+from yokadi.ycli import completers
 
 
 class CompletersTestCase(unittest.TestCase):

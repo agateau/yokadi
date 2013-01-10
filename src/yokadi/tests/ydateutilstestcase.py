@@ -9,8 +9,8 @@ import unittest
 import operator
 from datetime import datetime, timedelta
 
-from core import ydateutils
-from core.yokadiexception import YokadiException
+from yokadi.core import ydateutils
+from yokadi.core.yokadiexception import YokadiException
 
 
 class YDateUtilsTestCase(unittest.TestCase):

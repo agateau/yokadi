@@ -6,12 +6,12 @@ Configuration management related commands.
 @license: GPL v3 or later
 """
 
-from core.db import Config
+from yokadi.core.db import Config
 from sqlobject import AND, LIKE
-from core.yokadiexception import YokadiException, BadUsageException
+from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from completers import confCompleter
 import tui
-from core.yokadioptionparser import YokadiOptionParser
+from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 
 class ConfCmd(object):

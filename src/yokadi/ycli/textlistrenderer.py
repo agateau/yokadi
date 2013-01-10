@@ -8,10 +8,10 @@ Text rendering of t_list output
 """
 from datetime import datetime
 
-import ycli.colors as C
-from core import ydateutils
-from core.db import Task
-from ycli import tui
+import yokadi.ycli.colors as C
+from yokadi.core import ydateutils
+from yokadi.core.db import Task
+from yokadi.ycli import tui
 
 
 def colorizer(value, reverse=False):

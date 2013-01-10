@@ -23,7 +23,7 @@ except ImportError:
     sys.exit(1)
 
 from yokadiexception import YokadiException
-from ycli import tui #TODO: try to remove dependancy on tui
+from yokadi.ycli import tui #TODO: try to remove dependancy on tui
 import utils
 
 # Yokadi database version needed for this code

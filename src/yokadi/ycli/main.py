@@ -36,18 +36,18 @@ except ImportError:
     print "Or use 'easy_install sqlobject'"
     sys.exit(1)
 
-from core import db
-from  ycli import tui
-from core import utils
-from core import cryptutils
+from yokadi.core import db
+from yokadi.ycli import tui
+from yokadi.core import utils
+from yokadi.core import cryptutils
 
-from ycli.aliascmd import AliasCmd, resolveAlias
-from ycli.confcmd import ConfCmd
-from ycli.keywordcmd import KeywordCmd
-from ycli.projectcmd import ProjectCmd
-from ycli.taskcmd import TaskCmd
-from core.yokadiexception import YokadiException, BadUsageException
-from core.yokadioptionparser import YokadiOptionParserNormalExitException
+from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
+from yokadi.ycli.confcmd import ConfCmd
+from yokadi.ycli.keywordcmd import KeywordCmd
+from yokadi.ycli.projectcmd import ProjectCmd
+from yokadi.ycli.taskcmd import TaskCmd
+from yokadi.core.yokadiexception import YokadiException, BadUsageException
+from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
 
 # Force default encoding to prefered encoding
 # This is mandatory when yokadi output is piped in another command

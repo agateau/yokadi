@@ -9,8 +9,8 @@ from sqlobject import LIKE
 from dateutil import rrule
 
 import parseutils
-from core.db import Config, Keyword, Project, Task, FREQUENCY
-from core import ydateutils
+from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY
+from yokadi.core import ydateutils
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
