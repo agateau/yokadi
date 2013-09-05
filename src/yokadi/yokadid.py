@@ -67,7 +67,6 @@ def eventLoop():
                       Task.q.projectID == Project.q.id,
                       Project.q.active == True]
     while event[0]:
-        time.sleep(DELAY)
         now = datetime.today().replace(microsecond=0)
         delayTasks = Task.select(AND(Task.q.dueDate < now + delta,
                                    Task.q.dueDate > now,
@@ -76,6 +75,7 @@ def eventLoop():
                                  *activeTaskFilter))
         processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate, suspend)
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
+        time.sleep(DELAY)
 
 def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
     """Process a list of tasks and trigger action if needed
