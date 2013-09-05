@@ -27,7 +27,7 @@ reload(sys)
 sys.setdefaultencoding(tui.ENCODING)
 
 
-from core.db import Config, Project, Task, connectDatabase
+from core.db import Config, Project, Task, connectDatabase, getConfigKey
 
 
 # Daemon polling delay (in seconds)
@@ -56,10 +56,10 @@ def sigHupHandler(signal, stack):
 
 def eventLoop():
     """Main event loop"""
-    delta = timedelta(hours=float(Config.byName("ALARM_DELAY").value))
-    suspend = timedelta(hours=float(Config.byName("ALARM_SUSPEND").value))
-    cmdDelayTemplate = Config.byName("ALARM_DELAY_CMD").value
-    cmdDueTemplate = Config.byName("ALARM_DUE_CMD").value
+    delta = timedelta(hours=float(getConfigKey("ALARM_DELAY")))
+    suspend = timedelta(hours=float(getConfigKey("ALARM_SUSPEND")))
+    cmdDelayTemplate = getConfigKey("ALARM_DELAY_CMD")
+    cmdDueTemplate = getConfigKey("ALARM_DUE_CMD")
     # For the two following dict, task id is key, and value is (duedate, triggerdate)
     triggeredDelayTasks = {}
     triggeredDueTasks = {}
