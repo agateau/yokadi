@@ -370,7 +370,7 @@ class TaskCmd(object):
 
         rangeList = ["today", "thisweek", "thismonth", "all"]
         parser.add_option("-d", "--done", dest="done",
-                          help="only done tasks. <range> must be one of %s" % ", ".join(rangeList),
+                          help="only done tasks. <range> must be either one of %s or a date using the same format as t_due" % ", ".join(rangeList),
                           metavar="<range>")
 
         parser.add_option("-u", "--urgency", dest="urgency",
@@ -555,7 +555,8 @@ class TaskCmd(object):
         if options.done:
             filters.append(Task.q.status == 'done')
             if options.done != "all":
-                filters.append(parseutils.createFilterFromRange(options.done))
+                minDate = ydateutils.parseMinDate(options.done)
+                filters.append(Task.q.doneDate >= minDate)
         elif options.status == "all":
             pass
         elif options.status == "started":
