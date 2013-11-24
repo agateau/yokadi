@@ -7,7 +7,6 @@ Parse utilities. Used to manipulate command line text.
 @license: GPL v3 or later
 """
 import re
-from datetime import date, timedelta
 
 from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
@@ -179,19 +178,5 @@ class KeywordFilter(object):
         else:
             # No operator found, only keyword name has been provided
             self.name, self.value = line, None
-
-def createFilterFromRange(dateRange):
-    # Parse the dateRange string and return an SQLObject filter
-    minDate = date.today()
-    if dateRange == "today":
-        pass
-    elif dateRange == "thisweek":
-        minDate -= timedelta(minDate.weekday())
-    elif dateRange == "thismonth":
-        minDate = minDate.replace(day=1)
-    else:
-        raise YokadiException("Invalid range value '%s'" % dateRange)
-
-    return Task.q.doneDate >= minDate
 
 # vi: ts=4 sw=4 et

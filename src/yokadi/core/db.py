@@ -211,6 +211,10 @@ class Config(SQLObject):
     desc = UnicodeCol(default="", notNone=True)
 
 
+def getConfigKey(name):
+    return os.environ.get(name, Config.byName(name).value)
+
+
 TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence]
 
 def createTables():
