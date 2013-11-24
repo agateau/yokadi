@@ -7,7 +7,7 @@ Date utilities.
 """
 import time
 import operator
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from ycli import parseutils
 from core.yokadiexception import YokadiException
@@ -261,5 +261,19 @@ def parseDateLimit(line, today=None):
 
     limit = parseHumaneDateTime(line, today=today, hint=hint)
     return op, limit
+
+def parseMinDate(line):
+    # Parse the line string and return a minimum date
+    minDate = date.today()
+    if line == "today":
+        pass
+    elif line == "thisweek":
+        minDate -= timedelta(minDate.weekday())
+    elif line == "thismonth":
+        minDate = minDate.replace(day=1)
+    else:
+        minDate = parseHumaneDateTime(line).date()
+
+    return minDate
 
 # vi: ts=4 sw=4 et
