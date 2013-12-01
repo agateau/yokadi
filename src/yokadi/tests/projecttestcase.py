@@ -9,10 +9,10 @@ import unittest
 
 import testutils
 
-from core.db import Project
-from core.yokadiexception import YokadiException
-from ycli.projectcmd import ProjectCmd
-from ycli import tui
+from yokadi.core.db import Project
+from yokadi.core.yokadiexception import YokadiException
+from yokadi.ycli.projectcmd import ProjectCmd
+from yokadi.ycli import tui
 
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):

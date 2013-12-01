@@ -20,11 +20,11 @@ import BaseHTTPServer
 from threading import Thread
 import re
 
-from core.db import Task, Project
-from core import dbutils
+from yokadi.core.db import Task, Project
+from yokadi.core import dbutils
 import icalutils
-from ycli import parseutils
-from core.yokadiexception import YokadiException
+from yokadi.ycli import parseutils
+from yokadi.core.yokadiexception import YokadiException
 
 # UID pattern
 UID_PREFIX = "yokadi"

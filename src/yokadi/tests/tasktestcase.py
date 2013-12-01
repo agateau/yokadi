@@ -11,11 +11,11 @@ from StringIO import StringIO
 
 import testutils
 
-from ycli import tui
-from core import cryptutils
-from core.db import Task
-from yokadi import YokadiCmd
-from core.yokadiexception import YokadiException, BadUsageException
+from yokadi.ycli import tui
+from yokadi.ycli.main import YokadiCmd
+from yokadi.core import cryptutils
+from yokadi.core.db import Task
+from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
 class TaskTestCase(unittest.TestCase):

@@ -11,9 +11,9 @@ import os
 import sys
 from optparse import OptionParser
 
-from core import db
-from core import dbutils
-from core import ydateutils
+from yokadi.core import db
+from yokadi.core import dbutils
+from yokadi.core import ydateutils
 
 USAGE = "%prog <db>"
 

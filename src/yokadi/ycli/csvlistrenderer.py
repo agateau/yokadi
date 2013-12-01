@@ -8,7 +8,7 @@ Csv rendering of t_list output
 """
 import csv
 
-from ycli import tui
+from yokadi.ycli import tui
 
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
 

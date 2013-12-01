@@ -5,7 +5,7 @@ Bug related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-from ycli import tui
+from yokadi.ycli import tui
 
 SEVERITY_PROPERTY_NAME = "_severity"
 LIKELIHOOD_PROPERTY_NAME = "_likelihood"

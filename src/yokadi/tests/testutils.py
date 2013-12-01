@@ -5,7 +5,7 @@ Utils for unit-test
 @license: GPL v3 or later
 """
 
-from core import db
+from yokadi.core import db
 
 def clearDatabase():
     """

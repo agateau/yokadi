@@ -8,5 +8,5 @@
 @license:GPL v3 or later
  """
 
-from yokadi import yokadi 
-yokadi.main()
+from yokadi.ycli import main
+main.main()

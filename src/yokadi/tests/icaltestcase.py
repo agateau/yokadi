@@ -10,9 +10,9 @@ import unittest
 import testutils
 import datetime
 
-from ycli import tui
-from yical import yical
-from core import dbutils
+from yokadi.ycli import tui
+from yokadi.yical import yical
+from yokadi.core import dbutils
 
 
 class IcalTestCase(unittest.TestCase):

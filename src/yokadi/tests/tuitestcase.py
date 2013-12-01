@@ -8,7 +8,7 @@ TUI module test cases
 import os
 import unittest
 
-from ycli import tui
+from yokadi.ycli import tui
 
 class TuiTestCase(unittest.TestCase):
     def testEditEmptyText(self):

@@ -5,11 +5,11 @@ Keyword related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-from core import dbutils
+from yokadi.core import dbutils
 import tui
 
-from core.db import Keyword
-from core.yokadiexception import BadUsageException
+from yokadi.core.db import Keyword
+from yokadi.core.yokadiexception import BadUsageException
 from completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError
 

@@ -6,7 +6,7 @@ Parser utilities test cases
 """
 
 import unittest
-from ycli import parseutils
+from yokadi.ycli import parseutils
 
 gTaskLineToParsedStructList = [
     (u"project some text @keyword1 @keyword2=12 some other text", (u"project", u"some text some other text", {u"keyword1":None, u"keyword2":12})),

@@ -9,8 +9,8 @@ import time
 import operator
 from datetime import date, datetime, timedelta
 
-from ycli import parseutils
-from core.yokadiexception import YokadiException
+from yokadi.ycli import parseutils
+from yokadiexception import YokadiException
 
 WEEKDAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
 SHORT_WEEKDAYS = {"mo": 0, "tu": 1, "we": 2, "th": 3, "fr": 4, "sa": 5, "su": 6}

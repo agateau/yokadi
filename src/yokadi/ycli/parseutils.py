@@ -8,11 +8,11 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 
-from core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
-from ycli import tui
-from core.yokadiexception import YokadiException
+import tui
+from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
+from yokadi.core.yokadiexception import YokadiException
 
 gSimplifySpaces = re.compile("  +")
 def simplifySpaces(line):

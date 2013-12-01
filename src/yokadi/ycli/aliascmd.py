@@ -5,8 +5,8 @@ Alias related commands.
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-from core.db import Config
-from core.yokadiexception import BadUsageException
+from yokadi.core.db import Config
+from yokadi.core.yokadiexception import BadUsageException
 import tui
 import colors as C
 

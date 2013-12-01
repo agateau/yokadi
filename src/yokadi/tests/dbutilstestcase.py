@@ -9,10 +9,10 @@ import unittest
 
 import testutils
 
-from core import dbutils
-from ycli import tui
-from core.db import Keyword, Project
-from core.yokadiexception import YokadiException
+from yokadi.core import dbutils
+from yokadi.ycli import tui
+from yokadi.core.db import Keyword, Project
+from yokadi.core.yokadiexception import YokadiException
 
 
 class DbUtilsTestCase(unittest.TestCase):

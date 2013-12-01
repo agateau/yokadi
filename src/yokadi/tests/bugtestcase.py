@@ -9,10 +9,10 @@ import unittest
 
 import testutils
 
-from ycli import tui
-from core.db import Task
-from core.yokadiexception import YokadiException
-from yokadi import YokadiCmd
+from yokadi.ycli import tui
+from yokadi.ycli.main import YokadiCmd
+from yokadi.core.db import Task
+from yokadi.core.yokadiexception import YokadiException
 
 
 class BugTestCase(unittest.TestCase):
