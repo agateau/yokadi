@@ -18,35 +18,17 @@ SHORT_WEEKDAYS = {"mo": 0, "tu": 1, "we": 2, "th": 3, "fr": 4, "sa": 5, "su": 6}
 TIME_HINT_BEGIN = "begin"
 TIME_HINT_END = "end"
 
+DATE_FORMATS = [
+    "%d/%m/%Y",
+    "%d/%m/%y",
+    "%d/%m",
+    ]
 
-def guessDateFormat(tDate):
-    """Guess a date format.
-    @param tDate: date string like 30/08/2008 or 30/08 or 30
-    @return: date format as a string like %d/%m/%Y or %d/%m or %d"""
-    if tDate.count("/") == 2:
-        year = tDate.split("/")[2]
-        if len(year) == 4:
-            fDate = "%d/%m/%Y"
-        elif len(year) == 2:
-            fDate = "%d/%m/%y"
-    elif tDate.count("/") == 1:
-        fDate = "%d/%m"
-    else:
-        fDate = "%d"
-    return fDate
-
-
-def guessTimeFormat(tTime):
-    """Guess a time format.
-    @param tTime: time string like 12:30:45 or 12:30 or 12
-    @return: time format as a string like %H:%M:%S or %H:%M or %H"""
-    if tTime.count(":") == 2:
-        fTime = "%H:%M:%S"
-    elif tTime.count(":") == 1:
-        fTime = "%H:%M"
-    else:
-        fTime = "%H"
-    return fTime
+TIME_FORMATS = [
+    "%H:%M:%S",
+    "%H:%M",
+    "%H",
+    ]
 
 
 def parseDateTimeDelta(line):
@@ -69,6 +51,37 @@ def parseDateTimeDelta(line):
         raise YokadiException("Unable to understand time shift. See help t_set_due")
 
 
+def testFormats(text, formats):
+    for fmt in formats:
+        try:
+            return datetime.strptime(text, fmt), fmt
+        except ValueError:
+            pass
+    return None, None
+
+
+def guessTime(text):
+    afternoon = False
+    # We do not use the "%p" format to handle AM/PM because its behavior is
+    # locale-dependent
+    if text[-1] == "m":
+        suffix = text[-2:]
+        if suffix == "am":
+            pass
+        elif suffix == "pm":
+            afternoon = True
+        else:
+            raise ValueError
+        text = text[:-2].strip()
+
+    out, fmt = testFormats(text, TIME_FORMATS)
+    if out is None:
+        return None
+    if afternoon:
+        out += timedelta(hours=12)
+    return out.time()
+
+
 def parseHumaneDateTime(line, hint=None, today=None):
     """Parse human date and time and return structured datetime object
     Datetime  can be absolute (23/10/2008 10:38) or relative (+5M, +3H, +1D, +6W)
@@ -79,6 +92,13 @@ def parseHumaneDateTime(line, hint=None, today=None):
     unit testing.
     @type line: str
     @return: datetime object"""
+    def guessDate(text):
+        out, fmt = testFormats(text, DATE_FORMATS)
+        if not out:
+            return None
+        if not "%y" in fmt and not "%Y" in fmt:
+            out = out.replace(year=today.year)
+        return out.date()
 
     def applyTimeHint(date, hint):
         if not hint:
@@ -90,13 +110,9 @@ def parseHumaneDateTime(line, hint=None, today=None):
         else:
             raise Exception("Unknown hint %s" % hint)
 
-    line = parseutils.simplifySpaces(line)
+    line = parseutils.simplifySpaces(line).lower()
     if not line:
         raise YokadiException("Date is empty")
-
-    # Date & Time format
-    fDate = None
-    fTime = None
 
     if today is None:
         today = datetime.today().replace(microsecond=0)
@@ -114,61 +130,48 @@ def parseHumaneDateTime(line, hint=None, today=None):
         return today - parseDateTimeDelta(line[1:])
 
     # Check for "<weekday> [<time>]" format
-    firstWord = line.split()[0].lower()
+    firstWord = line.split()[0]
 
-    weekdayDict = {"tomorrow": (today.weekday() + 1) % 7}
+    weekdayDict = {
+        "today": today.weekday(),
+        "tomorrow": (today.weekday() + 1) % 7,
+        }
     weekdayDict.update(WEEKDAYS)
     weekdayDict.update(SHORT_WEEKDAYS)
     weekday = weekdayDict.get(firstWord)
     if weekday is not None:
         date = today + timedelta(days=(weekday - today.weekday()) % 7)
         if " " in line:
-            timeText = line.split()[1]
-            fTime = guessTimeFormat(timeText)
-            try:
-                tTime = datetime(*time.strptime(timeText, fTime)[0:5]).time()
-            except ValueError, e:
-                raise YokadiException("Invalid time format: %s" % e)
+            timeText = line.split(' ', 1)[1]
+            tTime = guessTime(timeText)
+            if tTime is None:
+                raise YokadiException("Unable to understand time '%s'" % timeText)
             date = datetime.combine(date, tTime)
         else:
             date = applyTimeHint(date, hint)
         return date
 
-    # Absolute date and/or time
-    date = None
     if " " in line:
-        # We assume user give date & time
-        tDate, tTime = line.split(' ', 1)
-        fDate = guessDateFormat(tDate)
-        fTime = guessTimeFormat(tTime)
-        try:
-            date = datetime(*time.strptime(line, "%s %s" % (fDate, fTime))[0:5])
-        except Exception, e:
-            raise YokadiException("Unable to understand date & time format: %s" % e)
-    else:
-        if ":" in line:
-            fTime = guessTimeFormat(line)
-            try:
-                tTime = datetime(*time.strptime(line, fTime)[0:5]).time()
-            except ValueError, e:
-                raise YokadiException("Invalid time format: %s" % e)
-            date = datetime.combine(today, tTime)
-        else:
-            fDate = guessDateFormat(line)
-            try:
-                date = datetime(*time.strptime(line, fDate)[0:5])
-            except ValueError, e:
-                raise YokadiException("Invalid date format: %s" % e)
-            date = applyTimeHint(date, hint)
-    assert date
+        # Absolute date and time?
+        dateText, timeText = line.split(' ', 1)
+        tDate = guessDate(dateText)
+        if tDate is not None:
+            tTime = guessTime(timeText)
+            if tTime is not None:
+                return datetime.combine(tDate, tTime)
 
-    if fDate:
-        # Set year and/or month to current date if not given
-        if not "%Y" in fDate:
-            date = date.replace(year=today.year)
-        if not "%m" in fDate:
-            date = date.replace(month=today.month)
-    return date
+    # Only date?
+    tDate = guessDate(line)
+    if tDate is not None:
+        dt = datetime.combine(tDate, today.time())
+        return applyTimeHint(dt, hint)
+
+    # Only time?
+    tTime = guessTime(line)
+    if tTime is not None:
+        return datetime.combine(today.date(), tTime)
+
+    raise YokadiException("Unable to understand date '%s'" % line)
 
 
 def formatTimeDelta(delta):
