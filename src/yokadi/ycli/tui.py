@@ -47,7 +47,7 @@ def editText(text, onChanged=None):
     # Number of seconds between checks for end of process
     PROC_POLL_INTERVAL = 0.5
     # Number of seconds between checks for file modification
-    MTIME_POLL_INTERVAL  = 1
+    MTIME_POLL_INTERVAL  = 10
 
     def readFile(name):
         return unicode(file(name).read(), ENCODING)
