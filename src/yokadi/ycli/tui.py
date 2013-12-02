@@ -11,6 +11,7 @@ import readline
 import subprocess
 import sys
 import tempfile
+import time
 import locale
 from getpass import getpass
 
@@ -40,9 +41,25 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text):
+def editText(text, onChanged=None):
     """Edit text with external editor
     @return: newText"""
+    # Number of seconds between checks for end of process
+    PROC_POLL_INTERVAL = 0.5
+    # Number of seconds between checks for file modification
+    MTIME_POLL_INTERVAL  = 10
+
+    def readFile(name):
+        return unicode(file(name).read(), ENCODING)
+
+    def waitProcess(proc):
+        start = time.time()
+        while (time.time() - start) < MTIME_POLL_INTERVAL:
+            proc.poll()
+            if not proc.returncode is None:
+                return
+            time.sleep(PROC_POLL_INTERVAL)
+
     (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
     if text is None:
         text = ""
@@ -51,10 +68,18 @@ def editText(text):
         fl.write(text.encode(ENCODING, "replace"))
         fl.close()
         editor = os.environ.get("EDITOR", "vi")
-        retcode = subprocess.call([editor, name])
-        if retcode != 0:
+        proc = subprocess.Popen([editor, name])
+        mtime = os.stat(name).st_mtime
+        while proc.returncode is None:
+            waitProcess(proc)
+            if proc.returncode is None and not onChanged is None:
+                newMtime = os.stat(name).st_mtime
+                if newMtime > mtime:
+                    mtime = newMtime
+                    onChanged(readFile(name))
+        if proc.returncode != 0:
             raise Exception()
-        return unicode(file(name).read(), ENCODING)
+        return readFile(name)
     finally:
         os.close(fd)
         os.unlink(name)

@@ -168,20 +168,22 @@ class TaskCmd(object):
     def do_t_describe(self, line):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
+        def updateDescription(description):
+            if self.cryptoMgr.isEncrypted(task.title):
+                task.description = self.cryptoMgr.encrypt(description)
+            else:
+                task.description = description
+
         task = self.getTaskFromId(line)
         try:
             if self.cryptoMgr.isEncrypted(task.title):
                 # As title is encrypted, we assume description will be encrypted as well
                 self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
 
-            description = tui.editText(self.cryptoMgr.decrypt(task.description))
+            description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription)
         except Exception, e:
             raise YokadiException(e)
-
-        if self.cryptoMgr.isEncrypted(task.title):
-            task.description = self.cryptoMgr.encrypt(description)
-        else:
-            task.description = description
+        updateDescription(description)
 
     complete_t_describe = taskIdCompleter
 
