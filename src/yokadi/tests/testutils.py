@@ -7,14 +7,17 @@ Utils for unit-test
 
 from yokadi.core import db
 
+
 def clearDatabase():
     """
     Clear all tables of the database. Should be called in the setUp() method of
     the testcase. Useful to ensure unit-tests start from a blank state.
     """
+    print "Cleaning database"
     for table in db.TABLE_LIST:
-        table.clearTable()
-    # Recreate default parameters
+        table.dropTable()
+    # Recreate database and default parameters
+    db.connectDatabase("", memoryDatabase=True)
     db.setDefaultConfig()
 
 
