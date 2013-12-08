@@ -111,10 +111,10 @@ class AgeFormater(object):
         self.asDate = asDate
 
     def __call__(self, task):
+        delta = self.today - task.creationDate
         if self.asDate:
-            return unicode(task.creationDate), None
+            return unicode(task.creationDate), colorizer(delta.days)
         else:
-            delta = self.today - task.creationDate
             return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
 
 class DueDateFormater(object):
