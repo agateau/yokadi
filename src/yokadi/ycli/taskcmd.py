@@ -626,7 +626,7 @@ class TaskCmd(object):
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
-        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr)
+        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=options.keyword)
     complete_n_list = projectAndKeywordCompleter

@@ -106,12 +106,16 @@ def statusFormater(task):
     return task.status[0].upper(), color
 
 class AgeFormater(object):
-    def __init__(self, today):
+    def __init__(self, today, asDate=False):
         self.today = today
+        self.asDate = asDate
 
     def __call__(self, task):
-        delta = self.today - task.creationDate
-        return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
+        if self.asDate:
+            return unicode(task.creationDate), None
+        else:
+            delta = self.today - task.creationDate
+            return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
 
 class DueDateFormater(object):
     def __init__(self, today, shortFormat):
@@ -137,11 +141,12 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth=None, cryptoMgr=None):
+    def __init__(self, out, termWidth=None, cryptoMgr=None, renderAsNotes=False):
         """
         @param out: output target
         @param termWidth: terminal width (int)
-        @param decrypt: wether to decrypt or not (bool)"""
+        @param decrypt: wether to decrypt or not (bool)
+        @param renderAsNotes: wether to display task as notes (with dates) instead of tasks (with age). (boot)"""
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
@@ -150,19 +155,30 @@ class TextListRenderer(object):
         self.firstHeader = True
         self.cryptoMgr = cryptoMgr
 
+        if self.termWidth < 100:
+            dueColumnWidth = 8
+            shortDateFormat = True
+        else:
+            dueColumnWidth = 26
+            shortDateFormat = False
+
+        if renderAsNotes:
+            ageColumnWidth = 19
+        else:
+            ageColumnWidth = 8
+
         # All fields set to None must be defined in end()
         self.columns = [
-            Column("ID"       , None        , idFormater),
-            Column("Title"    , None        , None),
-            Column("U"        , 3           , urgencyFormater),
-            Column("S"        , 1           , statusFormater),
-            Column("Age"      , 8           , AgeFormater(self.today)),
-            Column("Due date" , None        , None),
+            Column("ID"       , None           , idFormater),
+            Column("Title"    , None           , None),
+            Column("U"        , 3              , urgencyFormater),
+            Column("S"        , 1              , statusFormater),
+            Column("Age"      , ageColumnWidth , AgeFormater(self.today, renderAsNotes)),
+            Column("Due date" , dueColumnWidth , DueDateFormater(self.today, shortDateFormat)),
             ]
 
         self.idColumn = self.columns[0]
         self.titleColumn = self.columns[1]
-        self.dueColumn = self.columns[-1]
 
 
     def addTaskList(self, sectionName, taskList):
@@ -189,14 +205,6 @@ class TextListRenderer(object):
         # Adjust idColumn
         maxId = Task.select().max(Task.q.id)
         self.idColumn.width = max(2, len(str(maxId)))
-
-        # Adjust dueColumn
-        shortDateFormat = self.termWidth < 100
-        if shortDateFormat:
-            self.dueColumn.width = 8
-        else:
-            self.dueColumn.width = 26
-        self.dueColumn.formater = DueDateFormater(self.today, shortDateFormat)
 
         # Adjust titleColumn
         self.titleColumn.width = self.maxTitleWidth
