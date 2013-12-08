@@ -163,18 +163,20 @@ class TextListRenderer(object):
             shortDateFormat = False
 
         if renderAsNotes:
-            ageColumnWidth = 19
+            creationDateColumnWidth = 19
+            creationDateTitle = "Creation date"
         else:
-            ageColumnWidth = 8
+            creationDateColumnWidth = 8
+            creationDateTitle = "Age"
 
         # All fields set to None must be defined in end()
         self.columns = [
-            Column("ID"       , None           , idFormater),
-            Column("Title"    , None           , None),
-            Column("U"        , 3              , urgencyFormater),
-            Column("S"        , 1              , statusFormater),
-            Column("Age"      , ageColumnWidth , AgeFormater(self.today, renderAsNotes)),
-            Column("Due date" , dueColumnWidth , DueDateFormater(self.today, shortDateFormat)),
+            Column("ID"             , None           , idFormater),
+            Column("Title"          , None           , None),
+            Column("U"              , 3              , urgencyFormater),
+            Column("S"              , 1              , statusFormater),
+            Column(creationDateTitle, creationDateColumnWidth , AgeFormater(self.today, renderAsNotes)),
+            Column("Due date"       , dueColumnWidth , DueDateFormater(self.today, shortDateFormat)),
             ]
 
         self.idColumn = self.columns[0]
