@@ -177,16 +177,27 @@ def parseHumaneDateTime(line, hint=None, today=None):
 def formatTimeDelta(delta):
     """Friendly format a time delta:
         - Show only days if delta > 1 day
-        - Show only hours and minutes othewise
+        - Show only hours and minutes otherwise
     @param timeLeft: Remaining time
     @type timeLeft: timedelta (from datetime)
     @return: formated  str"""
     prefix = ""
+    value = ""
     if delta < timedelta(0):
         delta = -delta
         prefix = "-"
 
-    if delta.days > 7:
+    if delta.days >= 365:
+        value = "%dY" % (delta.days / 365)
+        days = delta.days % 365
+        if days > 30:
+            value = value + ", %dM" % (days / 30)
+    elif delta.days > 50:
+        value = "%dM" % (delta.days / 30)
+        days = delta.days % 30
+        if days > 0:
+            value = value + ", %dd" % days
+    elif delta.days >= 7:
         value = "%dw" % (delta.days / 7)
         days = delta.days % 7
         if days > 0:

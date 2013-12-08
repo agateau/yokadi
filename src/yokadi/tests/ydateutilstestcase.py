@@ -72,7 +72,12 @@ class YDateUtilsTestCase(unittest.TestCase):
         testData = [
             (timedelta(minutes=1), "1m"),
             (timedelta(days=2, hours=5), "2d"),
-            (timedelta(days=12 * 7), "12w"),
+            (timedelta(days=7), "1w"),
+            (timedelta(days=10), "1w, 3d"),
+            (timedelta(days=60), "2M"),
+            (timedelta(days=80), "2M, 20d"),
+            (timedelta(days=365), "1Y"),
+            (timedelta(days=400), "1Y, 1M"),
             ]
 
         for input, expected in testData:
