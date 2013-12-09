@@ -44,10 +44,8 @@ class Column(object):
         self.width = width
         self.formater = formater
 
-
     def createHeader(self):
         return self.title.ljust(self.width)
-
 
     def createCell(self, task):
         value, color = self.formater(task)
@@ -63,8 +61,10 @@ class Column(object):
 def idFormater(task):
     return str(task.id), None
 
+
 class TitleFormater(object):
     TITLE_WITH_KEYWORDS_TEMPLATE = "%s (%s)"
+
     def __init__(self, width, cryptoMgr):
         self.cryptoMgr = cryptoMgr
         self.width = width
@@ -98,12 +98,14 @@ class TitleFormater(object):
 def urgencyFormater(task):
     return str(task.urgency), colorizer(task.urgency)
 
+
 def statusFormater(task):
     if task.status == "started":
         color = C.BOLD
     else:
         color = None
     return task.status[0].upper(), color
+
 
 class AgeFormater(object):
     def __init__(self, today, asDate=False):
@@ -116,6 +118,7 @@ class AgeFormater(object):
             return unicode(task.creationDate), colorizer(delta.days)
         else:
             return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
+
 
 class DueDateFormater(object):
     def __init__(self, today, shortFormat):
@@ -145,8 +148,8 @@ class TextListRenderer(object):
         """
         @param out: output target
         @param termWidth: terminal width (int)
-        @param decrypt: wether to decrypt or not (bool)
-        @param renderAsNotes: wether to display task as notes (with dates) instead of tasks (with age). (boot)"""
+        @param decrypt: whether to decrypt or not (bool)
+        @param renderAsNotes: whether to display task as notes (with dates) instead of tasks (with age). (boot)"""
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
@@ -182,7 +185,6 @@ class TextListRenderer(object):
         self.idColumn = self.columns[0]
         self.titleColumn = self.columns[1]
 
-
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
         @param sectionName: name of the task groupement section
@@ -202,7 +204,6 @@ class TextListRenderer(object):
                 titleWidth += 1
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
-
     def end(self):
         # Adjust idColumn
         maxId = Task.select().max(Task.q.id)
@@ -221,7 +222,6 @@ class TextListRenderer(object):
             for task in taskList:
                 self._renderTaskListRow(task)
 
-
     def _renderTaskListHeader(self, sectionName):
         """
         @param sectionName: name used for list header
@@ -237,7 +237,6 @@ class TextListRenderer(object):
         print >> self.out, C.CYAN + sectionName.center(width) + C.RESET
         print >> self.out, C.BOLD + line + C.RESET
         print >> self.out, "-" * width
-
 
     def _renderTaskListRow(self, task):
         cells = [column.createCell(task) for column in self.columns]
