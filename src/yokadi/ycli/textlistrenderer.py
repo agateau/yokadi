@@ -130,7 +130,7 @@ class DueDateFormater(object):
         if self.shortFormat:
             value = ydateutils.formatTimeDelta(delta)
         else:
-            value = value + " (%s)" % ydateutils.formatTimeDelta(delta)
+            value += " (%s)" % ydateutils.formatTimeDelta(delta)
 
         color = colorizer(delta.days * 33, reverse=True)
         return value, color

@@ -5,7 +5,6 @@ Date utilities.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-import time
 import operator
 from datetime import date, datetime, timedelta
 
@@ -191,17 +190,17 @@ def formatTimeDelta(delta):
         value = "%dY" % (delta.days / 365)
         days = delta.days % 365
         if days > 30:
-            value = value + ", %dM" % (days / 30)
+            value += ", %dM" % (days / 30)
     elif delta.days > 50:
         value = "%dM" % (delta.days / 30)
         days = delta.days % 30
         if days > 0:
-            value = value + ", %dd" % days
+            value += ", %dd" % days
     elif delta.days >= 7:
         value = "%dw" % (delta.days / 7)
         days = delta.days % 7
         if days > 0:
-            value = value + ", %dd" % days
+            value += ", %dd" % days
     elif delta.days > 0:
         value = "%dd" % delta.days
     else:
@@ -212,7 +211,7 @@ def formatTimeDelta(delta):
             value = "%dh " % hours
         else:
             value = ""
-        value = value + "%dm" % minutes
+        value += "%dm" % minutes
 
     return prefix + value
 
