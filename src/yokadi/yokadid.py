@@ -139,12 +139,16 @@ def parseOptions():
                       dest="pidFile", default="/tmp/yokadid.pid",
                       help="File in which Yokadi daemon stores its process ID")
 
+    parser.add_option("--log",
+                      dest="logFile", default="/tmp/yokadid.log",
+                      help="File in which Yokadi daemon stores its log output")
+
     return parser.parse_args()
 
 
 class YokadiDaemon(Daemon):
     def __init__(self, options):
-        Daemon.__init__(self, options.pidFile)
+        Daemon.__init__(self, options.pidFile, stdout=options.logFile, stderr=options.logFile)
         self.options = options
 
     def run(self):
