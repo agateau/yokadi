@@ -131,6 +131,10 @@ def parseOptions():
                       dest="kill", default=False, action="store_true",
                       help="Kill the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
 
+    parser.add_option("--restart",
+                      dest="restart", default=False, action="store_true",
+                      help="Restart the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
+
     parser.add_option("-f", "--foreground",
                       dest="foreground", default=False, action="store_true",
                       help="Don't fork background. Useful for debug")
@@ -193,6 +197,10 @@ def main():
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)
+
+    if options.restart:
+        daemon = YokadiDaemon(options)
+        daemon.restart()
 
     daemon = YokadiDaemon(options)
     if options.foreground:
