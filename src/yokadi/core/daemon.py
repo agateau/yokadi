@@ -8,6 +8,9 @@ and is licensed as Public Domain (see comment in article)
 """
 
 import sys, os, time, atexit
+
+import errno
+
 from signal import SIGTERM
 
 class Daemon:
@@ -114,8 +117,8 @@ class Daemon:
                 os.kill(pid, SIGTERM)
                 time.sleep(0.1)
         except OSError, err:
-            err = str(err)
-            if err.find("No such process") > 0:
+            if err.errno == errno.ESRCH:
+                # No such process, meaning daemon has stopped
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
             else:
