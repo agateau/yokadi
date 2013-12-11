@@ -18,7 +18,7 @@ from commands import getoutput
 
 from sqlobject import AND
 
-from yokadi.core.daemonutils import doubleFork
+from yokadi.core.daemon import Daemon
 from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
@@ -100,24 +100,13 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
         #TODO: redirect stdout/stderr properly to Log (not so easy...)
         triggeredTasks[task.id] = (task.dueDate, datetime.now())
 
-def killYokadid(dbName):
+def killYokadid(pidFile):
     """Kill Yokadi daemon
-    @param dbName: only kill Yokadid running for this database
+    @param pidFile: file where the pid of the daemon is stored
     """
-    selfpid = os.getpid()
-    for line in getoutput("ps -ef|grep python | grep [y]okadid.py ").split("\n"):
-        pid = int(line.split()[1])
-        if pid == selfpid:
-            continue
-        if dbName is None:
-            print "Killing Yokadid with pid %s" % pid
-            os.kill(pid, SIGTERM)
-        else:
-            if dbName in line:
-                #BUG: quite buggy. Killing foo database will also kill foobar.
-                # As we can have space in database path, it is not so easy to parse line...
-                print "Killing Yokadid with database %s and pid %s" % (dbName, pid)
-                os.kill(pid, SIGTERM)
+    # reuse Daemon.stop() code
+    daemon = Daemon(pidFile)
+    daemon.stop()
 
 def parseOptions():
     parser = OptionParser()
@@ -140,13 +129,49 @@ def parseOptions():
 
     parser.add_option("-k", "--kill",
                       dest="kill", default=False, action="store_true",
-                      help="Kill Yokadi Daemon (you can specify database with -db if you run multiple Yokadid")
+                      help="Kill the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
 
     parser.add_option("-f", "--foreground",
                       dest="foreground", default=False, action="store_true",
                       help="Don't fork background. Useful for debug")
 
+    parser.add_option("--pid",
+                      dest="pidFile", default="/tmp/yokadid.pid",
+                      help="File in which Yokadi daemon stores its process ID")
+
     return parser.parse_args()
+
+
+class YokadiDaemon(Daemon):
+    def __init__(self, options):
+        Daemon.__init__(self, options.pidFile)
+        self.options = options
+
+    def run(self):
+        filename = self.options.filename
+        if not filename:
+            filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
+            print "Using default database (%s)" % filename
+
+        connectDatabase(filename, createIfNeeded=False)
+
+        # Basic tests :
+        if not (Task.tableExists() and Config.tableExists()):
+            print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
+            sys.exit(1)
+
+        # Start ical http handler
+        if self.options.icalserver:
+            yokadiIcalServer = YokadiIcalServer(self.options.tcpPort, self.options.tcpListen)
+            yokadiIcalServer.start()
+
+        # Start the main event Loop
+        try:
+            while event[1] != "SIGTERM":
+                eventLoop()
+                event[0] = True
+        except KeyboardInterrupt:
+            print "\nExiting..."
 
 
 def main():
@@ -159,39 +184,17 @@ def main():
     (options, args) = parseOptions()
 
     if options.kill:
-        killYokadid(options.filename)
+        killYokadid(options.pidFile)
         sys.exit(0)
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)
 
-
-    if not options.foreground:
-        doubleFork()
-
-    if not options.filename:
-        options.filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
-        print "Using default database (%s)" % options.filename
-
-    connectDatabase(options.filename, createIfNeeded=False)
-
-    # Basic tests :
-    if not (Task.tableExists() and Config.tableExists()):
-        print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
-        sys.exit(1)
-
-    # Start ical http handler
-    if options.icalserver:
-        yokadiIcalServer = YokadiIcalServer(options.tcpPort, options.tcpListen)
-        yokadiIcalServer.start()
-
-    # Start the main event Loop
-    try:
-        while event[1] != "SIGTERM":
-            eventLoop()
-            event[0] = True
-    except KeyboardInterrupt:
-        print "\nExiting..."
+    daemon = YokadiDaemon(options)
+    if options.foreground:
+        daemon.run()
+    else:
+        daemon.start()
 
 if __name__ == "__main__":
     main()
