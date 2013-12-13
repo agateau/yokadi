@@ -19,6 +19,7 @@ from commands import getoutput
 from sqlobject import AND
 
 from yokadi.core.daemon import Daemon
+from yokadi.core import basedirs
 from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
@@ -108,7 +109,7 @@ def killYokadid(pidFile):
     daemon = Daemon(pidFile)
     daemon.stop()
 
-def parseOptions():
+def parseOptions(defaultPidFile, defaultLogFile):
     parser = OptionParser()
 
     parser.add_option("-d", "--db", dest="filename",
@@ -140,14 +141,21 @@ def parseOptions():
                       help="Don't fork background. Useful for debug")
 
     parser.add_option("--pid",
-                      dest="pidFile", default="/tmp/yokadid.pid",
-                      help="File in which Yokadi daemon stores its process ID")
+                      dest="pidFile", default=defaultPidFile,
+                      help="File in which Yokadi daemon stores its process ID (default: %s)" % defaultPidFile)
 
     parser.add_option("--log",
-                      dest="logFile", default="/tmp/yokadid.log",
-                      help="File in which Yokadi daemon stores its log output")
+                      dest="logFile", default=defaultLogFile,
+                      help="File in which Yokadi daemon stores its log output (default: %s)" % defaultLogFile)
 
     return parser.parse_args()
+
+
+def createDirForFile(name):
+    dirname = os.path.dirname(name)
+    if os.path.exists(dirname):
+        return
+    os.makedirs(dirname, 0700)
 
 
 class YokadiDaemon(Daemon):
@@ -189,11 +197,19 @@ def main():
     # Make the event list global to allow communication with main event loop
     global event
 
-    (options, args) = parseOptions()
+    defaultPidFile = os.path.join(basedirs.getRuntimeDir(), "yokadid.pid")
+    defaultLogFile = os.path.join(basedirs.getLogDir(), "yokadid.log")
+    (options, args) = parseOptions(defaultPidFile, defaultLogFile)
 
     if options.kill:
         killYokadid(options.pidFile)
         sys.exit(0)
+
+    if options.pidFile == defaultPidFile:
+        createDirForFile(options.pidFile)
+
+    if options.logFile == defaultLogFile:
+        createDirForFile(options.logFile)
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)
