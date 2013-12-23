@@ -41,11 +41,12 @@ gRendererClassDict = dict(
 
 NOTE_KEYWORD = "_note"
 
+
 class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None  # Last id created, used
-        self.lastTaskIds = []   # Last list of ids selected with t_list
-        self.kFilters = [] # Permanent keyword filters (List of KeywordFilter)
+        self.lastTaskIds = []  # Last list of ids selected with t_list
+        self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
@@ -76,7 +77,7 @@ class TaskCmd(object):
         if options.crypt:
             # Obfuscate line in history
             length = readline.get_current_history_length()
-            if length > 0 : # Ensure history is positive to avoid crash with bad readline setup
+            if length > 0 :  # Ensure history is positive to avoid crash with bad readline setup
                 readline.replace_history_item(length - 1, "%s %s " % (cmd,
                                                                   line.replace(title, "<...encrypted...>")))
             # Encrypt title
@@ -178,7 +179,7 @@ class TaskCmd(object):
         try:
             if self.cryptoMgr.isEncrypted(task.title):
                 # As title is encrypted, we assume description will be encrypted as well
-                self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+                self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
 
             description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription)
         except Exception, e:
@@ -270,8 +271,8 @@ class TaskCmd(object):
         if len(tokens) < 2:
             raise BadUsageException("Give at least a task id and a command")
 
-        idScan = True # Indicate we are parsing ids
-        cmdTokens = []      # Command that we want to apply
+        idScan = True  # Indicate we are parsing ids
+        cmdTokens = []  # Command that we want to apply
         for token in tokens:
             if token == "":
                 continue
@@ -494,7 +495,7 @@ class TaskCmd(object):
                 groupKeyword = groupKeyword[1:]
             for keyword in Keyword.select(LIKE(Keyword.q.name, groupKeyword)):
                 if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
-                    #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
+                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
                     continue
                 taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
                                            *filters),
@@ -504,7 +505,7 @@ class TaskCmd(object):
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) > 0:
-                    self.lastTaskIds.extend([t.id for t in taskList]) # Keep selected id for further use
+                    self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
                     renderer.addTaskList(unicode(keyword), taskList)
             renderer.end()
         else:
@@ -519,7 +520,7 @@ class TaskCmd(object):
                 taskList = list(taskList)
 
                 if len(taskList) > 0:
-                    self.lastTaskIds.extend([t.id for t in taskList]) # Keep selected id for further use
+                    self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
                     renderer.addTaskList(unicode(project), taskList)
             renderer.end()
 
@@ -545,7 +546,7 @@ class TaskCmd(object):
         # Reset last tasks id list
         self.lastTaskIds = []
 
-        #BUG: completion based on parameter position is broken when parameter is given
+        # BUG: completion based on parameter position is broken when parameter is given
         options, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
@@ -625,7 +626,7 @@ class TaskCmd(object):
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
-        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr)
+        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=options.keyword)
     complete_n_list = projectAndKeywordCompleter
@@ -774,7 +775,7 @@ class TaskCmd(object):
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 
-        readline.set_completer(oldCompleter)   # Restore standard completer
+        readline.set_completer(oldCompleter)  # Restore standard completer
         return task
 
     def do_t_edit(self, line):
@@ -925,7 +926,7 @@ class TaskCmd(object):
                     byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
                     byhour, byminute = ydateutils.getHourAndMinute(tokens[4])
-                    bymonthday = None # Default to current day number - need to be blanked                    
+                    bymonthday = None  # Default to current day number - need to be blanked
                 else:
                     raise YokadiException("Unable to understand date. See help t_recurs for details")
         elif tokens[1] == "yearly":
@@ -952,7 +953,7 @@ class TaskCmd(object):
         Ex.:
             - t_filter @work (filter all task that have the "work" keyword)
             - t_filter none (remove filter)"""
-        #TODO: add completion
+        # TODO: add completion
 
         if not line:
             raise YokadiException("You must give keyword as argument or 'none' to reset filter")
