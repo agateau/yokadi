@@ -22,9 +22,9 @@ except ImportError:
     print "Or use 'easy_install dateutils'"
     sys.exit(1)
 
-from yokadiexception import YokadiException
-from yokadi.ycli import tui #TODO: try to remove dependancy on tui
-import utils
+from yokadi.core.yokadiexception import YokadiException
+from yokadi.ycli import tui  # TODO: try to remove dependancy on tui
+from yokadi.core import utils
 
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
@@ -34,6 +34,7 @@ DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
 FREQUENCY = { 0 : "Yearly", 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
+
 
 class Project(SQLObject):
     class sqlmeta:

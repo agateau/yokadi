@@ -9,7 +9,7 @@ import operator
 from datetime import date, datetime, timedelta
 
 from yokadi.ycli import parseutils
-from yokadiexception import YokadiException
+from yokadi.core.yokadiexception import YokadiException
 
 WEEKDAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
 SHORT_WEEKDAYS = {"mo": 0, "tu": 1, "we": 2, "th": 3, "fr": 4, "sa": 5, "su": 6}
@@ -215,6 +215,7 @@ def formatTimeDelta(delta):
 
     return prefix + value
 
+
 def getHourAndMinute(token):
     """Extract hour and minute from HH:MM token
     #TODO: move this in date utils
@@ -232,14 +233,15 @@ def getHourAndMinute(token):
         raise YokadiException("You must provide integer for hour/minute")
     return hour, minute
 
+
 def getWeekDayNumberFromDay(day):
     """Return week day number (0-6) from week day name (short or long)
     @param day: week day as a string in short or long format (in english)
     @type day: str
     @return: week day number (int)"""
-    if len(day) == 2 and SHORT_WEEKDAYS.has_key(day):
+    if len(day) == 2 and day in SHORT_WEEKDAYS:
         dayNumber = SHORT_WEEKDAYS[day]
-    elif WEEKDAYS.has_key(day):
+    elif day in WEEKDAYS:
         dayNumber = WEEKDAYS[day]
     else:
         raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
@@ -274,6 +276,7 @@ def parseDateLimit(line, today=None):
 
     limit = parseHumaneDateTime(line, today=today, hint=hint)
     return op, limit
+
 
 def parseMinDate(line):
     # Parse the line string and return a minimum date

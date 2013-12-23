@@ -12,7 +12,7 @@ from random import Random
 
 from yokadi.ycli import tui
 from yokadi.core import db
-from yokadiexception import YokadiException
+from yokadi.core.yokadiexception import YokadiException
 
 from sqlobject import SQLObjectNotFound
 
@@ -30,7 +30,8 @@ except ImportError:
     tui.warning("You can find pycrypto here http://www.pycrypto.org")
     CRYPT = False
 
-#TODO: add unit test
+# TODO: add unit test
+
 
 class YokadiCryptoManager(object):
     """Manager object for Yokadi cryptographic operation"""
@@ -46,7 +47,6 @@ class YokadiCryptoManager(object):
             # Ok, set it to None. It will be setup after user defined passphrase
             self.crypto_check = None
 
-
     def encrypt(self, data):
         """Encrypt user data.
         @return: encrypted data"""
@@ -55,7 +55,6 @@ class YokadiCryptoManager(object):
             return data
         self.askPassphrase()
         return self._encrypt(data)
-
 
     def _encrypt(self, data):
         """Low level encryption interface. For internal usage only"""
@@ -91,7 +90,7 @@ class YokadiCryptoManager(object):
 
     def _decrypt(self, data):
         """Low level decryption interface. For internal use only"""
-        data = data[len(CRYPTO_PREFIX):] # Remove crypto prefix
+        data = data[len(CRYPTO_PREFIX):]  # Remove crypto prefix
         data = base64.b64decode(data)
         cypher = Cypher.new(self.passphrase)
         return cypher.decrypt(data).rstrip()
@@ -107,7 +106,7 @@ class YokadiCryptoManager(object):
 
         if not self.isPassphraseValid() and cache:
             self.passphrase = None
-            self.force_decrypt = False # As passphrase is invalid, don't force decrypt for next time
+            self.force_decrypt = False  # As passphrase is invalid, don't force decrypt for next time
             raise YokadiException("Passphrase differ from previous one."
                         "If you really want to change passphrase, "
                         "you should blank the  CRYPTO_CHECK parameter "
@@ -136,14 +135,14 @@ class YokadiCryptoManager(object):
             except ValueError:
                 return False
         else:
-            # First time that user enter a passphrase. Store the crypto check 
+            # First time that user enter a passphrase. Store the crypto check
             # for next time usage
             # We use a long string composed of int that we encrypt
             check_word = str(Random().getrandbits(KEY_LENGTH * KEY_LENGTH))
             check_word = adjustString(check_word, 10 * KEY_LENGTH)
             self.crypto_check = self._encrypt(check_word)
 
-            # Save it to database config 
+            # Save it to database config
             db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
                       desc="Cryptographic check data of passphrase")
             return True
@@ -151,6 +150,6 @@ class YokadiCryptoManager(object):
 
 def adjustString(string, length):
     """Adjust string to meet cipher requirement length"""
-    string = string[:length] # Shrink if key is too large
-    string = string.ljust(length, " ") # Complete if too short
+    string = string[:length]  # Shrink if key is too large
+    string = string.ljust(length, " ")  # Complete if too short
     return string

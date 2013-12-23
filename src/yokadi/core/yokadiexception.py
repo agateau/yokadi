@@ -6,9 +6,11 @@ A simple exception class for Yokadi
 @license: GPL v3 or later
 """
 
+
 class YokadiException(Exception):
     """Yokadi Exceptions"""
     pass
+
 
 class BadUsageException(YokadiException):
     """Exception when user does not pass correct arguments to a command"""

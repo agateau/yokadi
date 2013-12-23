@@ -12,8 +12,8 @@ from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import SQLObjectNotFound
 
 from yokadi.ycli import tui
-from db import Keyword, Project, Task
-from yokadiexception import YokadiException
+from yokadi.core.db import Keyword, Project, Task
+from yokadi.core.yokadiexception import YokadiException
 
 
 def addTask(projectName, title, keywordDict=None, interactive=True):
@@ -45,6 +45,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         raise YokadiException("A task named %s already exists in this project. Please find another name" % title)
 
     return task
+
 
 def updateTask(task, projectName, title, keywordDict):
     """
@@ -87,7 +88,8 @@ def getTaskFromId(line, parameterName="id"):
         raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
     return task
 
-#TODO: factorize the two following functions and make a generic one
+
+# TODO: factorize the two following functions and make a generic one
 def getOrCreateKeyword(keywordName, interactive=True):
     """Get a keyword by its name. Create it if needed
     @param keywordName: keyword name as a string
@@ -138,6 +140,7 @@ def createMissingKeywords(lst, interactive=True):
         if not getOrCreateKeyword(keywordName, interactive=interactive):
             return False
     return True
+
 
 def getKeywordFromName(name):
     """Returns a keyword from its name, which may start with "@"
