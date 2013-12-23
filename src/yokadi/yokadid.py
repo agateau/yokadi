@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from optparse import OptionParser
-from commands import getoutput
 
 from sqlobject import AND
 
@@ -48,6 +47,7 @@ def sigTermHandler(signal, stack):
     event[0] = False
     event[1] = "SIGTERM"
 
+
 def sigHupHandler(signal, stack):
     """Handler when yokadid receive SIGHUP"""
     print "Receive SIGHUP. Reloading configuration"
@@ -78,6 +78,7 @@ def eventLoop():
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
         time.sleep(DELAY)
 
+
 def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
     """Process a list of tasks and trigger action if needed
     @param tasks: list of tasks
@@ -86,7 +87,7 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
     @param suspend: timedelta beetween to task trigger"""
     now = datetime.now()
     for task in tasks:
-        if triggeredTasks.has_key(task.id) and triggeredTasks[task.id][0] == task.dueDate:
+        if task.id in triggeredTasks and triggeredTasks[task.id][0] == task.dueDate:
             # This task with the same dueDate has already been triggered
             if now - triggeredTasks[task.id][1] < suspend:
                 # Task has been trigger recently, skip to next
@@ -98,8 +99,9 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
         cmd = cmd.replace("{DATE}", str(task.dueDate))
         process = Popen(cmd, shell=True)
         process.wait()
-        #TODO: redirect stdout/stderr properly to Log (not so easy...)
+        # TODO: redirect stdout/stderr properly to Log (not so easy...)
         triggeredTasks[task.id] = (task.dueDate, datetime.now())
+
 
 def killYokadid(pidFile):
     """Kill Yokadi daemon
@@ -108,6 +110,7 @@ def killYokadid(pidFile):
     # reuse Daemon.stop() code
     daemon = Daemon(pidFile)
     daemon.stop()
+
 
 def parseOptions(defaultPidFile, defaultLogFile):
     parser = OptionParser()
@@ -191,8 +194,8 @@ class YokadiDaemon(Daemon):
 
 
 def main():
-    #TODO: check that yokadid is not already running for this database ? Not very harmful...
-    #TODO: change unix process name to "yokadid"
+    # TODO: check that yokadid is not already running for this database ? Not very harmful...
+    # TODO: change unix process name to "yokadid"
 
     # Make the event list global to allow communication with main event loop
     global event

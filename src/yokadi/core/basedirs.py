@@ -15,6 +15,7 @@ import tempfile
 
 # FIXME: We probably want a Windows version of this
 
+
 def getRuntimeDir():
     value = os.environ.get("XDG_RUNTIME_DIR")
     if value:
@@ -24,6 +25,7 @@ def getRuntimeDir():
     # $tempdir/yokadi-$user
     tmpdir = tempfile.gettempdir()
     return os.path.join(tmpdir, "yokadi-" + getpass.getuser())
+
 
 def getLogDir():
     cacheHome = os.environ.get("XDG_CACHE_HOME")
