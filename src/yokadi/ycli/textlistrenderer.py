@@ -115,7 +115,7 @@ class AgeFormater(object):
     def __call__(self, task):
         delta = self.today - task.creationDate
         if self.asDate:
-            return unicode(task.creationDate), colorizer(delta.days)
+            return unicode(task.creationDate), None
         else:
             return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
 
