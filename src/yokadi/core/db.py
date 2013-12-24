@@ -23,7 +23,7 @@ except ImportError:
     sys.exit(1)
 
 from yokadiexception import YokadiException
-from yokadi.ycli import tui #TODO: try to remove dependancy on tui
+from yokadi.ycli import tui  # TODO: try to remove dependancy on tui
 import utils
 
 # Yokadi database version needed for this code
@@ -130,7 +130,6 @@ class Task(SQLObject):
         joinColumn="task_id",
         otherColumn="keyword_id")
     recurrence = ForeignKey("Recurrence", default=None)
-    uniqTaskTitlePerProject = DatabaseIndex(title, project, unique=True)
 
     def setKeywordDict(self, dct):
         """
