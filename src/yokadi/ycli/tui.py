@@ -22,6 +22,12 @@ import colors as C
 # Beware of circular import definition when add dependencies to this module
 ENCODING = locale.getpreferredencoding()
 
+# Number of seconds between checks for end of process
+PROC_POLL_INTERVAL = 0.5
+# Number of seconds between checks for file modification
+MTIME_POLL_INTERVAL = 10
+
+
 _answers = []
 
 class IOStream:
@@ -41,14 +47,11 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text, onChanged=None):
+def editText(text, onChanged=None, lockManager=None):
     """Edit text with external editor
+    @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
+    @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
     @return: newText"""
-    # Number of seconds between checks for end of process
-    PROC_POLL_INTERVAL = 0.5
-    # Number of seconds between checks for file modification
-    MTIME_POLL_INTERVAL  = 10
-
     def readFile(name):
         return unicode(file(name).read(), ENCODING)
 
@@ -64,6 +67,8 @@ def editText(text, onChanged=None):
     if text is None:
         text = ""
     try:
+        if lockManager:
+            lockManager("acquire")
         fl = file(name, "w")
         fl.write(text.encode(ENCODING, "replace"))
         fl.close()
@@ -72,7 +77,9 @@ def editText(text, onChanged=None):
         mtime = os.stat(name).st_mtime
         while proc.returncode is None:
             waitProcess(proc)
-            if proc.returncode is None and not onChanged is None:
+            if proc.returncode is None and lockManager is not None:
+                lockManager("update")
+            if proc.returncode is None and onChanged is not None:
                 newMtime = os.stat(name).st_mtime
                 if newMtime > mtime:
                     mtime = newMtime
@@ -83,6 +90,8 @@ def editText(text, onChanged=None):
     finally:
         os.close(fd)
         os.unlink(name)
+        if lockManager:
+            lockManager("release")
 
 
 def reinjectInRawInput(line):

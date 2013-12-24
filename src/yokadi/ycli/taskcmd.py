@@ -175,13 +175,36 @@ class TaskCmd(object):
             else:
                 task.description = description
 
+        def lockManager(action):
+            """Handle a lock to prevent concurent editing of the same task"""
+            try:
+                lock = TaskLock.select(TaskLock.q.task == task).getOne()
+            except SQLObjectNotFound:
+                lock = None
+            if action == "acquire":
+                if lock:
+                    if lock.updateDate < datetime.now() - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
+                        # Stale lock, removing
+                        TaskLock.delete(lock.id)
+                    else:
+                        raise YokadiException("Task %s is already locked by process %s" % (lock.task.id, lock.pid))
+                TaskLock(task=task, pid=os.getpid(), updateDate=datetime.now())
+            elif action == "update":
+                lock.updateDate = datetime.now()
+            elif action == "release":
+                # Only release our lock
+                if lock and lock.pid == os.getpid():
+                    TaskLock.delete(lock.id)
+            else:
+                print "huh, lock action unknown"
+
         task = self.getTaskFromId(line)
         try:
             if self.cryptoMgr.isEncrypted(task.title):
                 # As title is encrypted, we assume description will be encrypted as well
                 self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
 
-            description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription)
+            description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription, lockManager=lockManager)
         except Exception, e:
             raise YokadiException(e)
         updateDescription(description)
@@ -747,14 +770,14 @@ class TaskCmd(object):
         task = self.getTaskFromId(line)
 
         if self.cryptoMgr.isEncrypted(task.title):
-            self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+            self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
         title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
         taskLine = parseutils.createLine("", title, task.getKeywordDict())
 
-        oldCompleter = readline.get_completer() # Backup previous completer to restore it in the end
-        readline.set_completer(editComplete)    # Switch to specific completer
+        oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
+        readline.set_completer(editComplete)  # Switch to specific completer
 
         while True:
             # Edit
