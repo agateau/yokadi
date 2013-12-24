@@ -15,7 +15,7 @@ from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
 from sqlobject.sqlbuilder import LEFTJOINOn
 
 from yokadi.core.db import Config, Keyword, Project, Task, \
-                    TaskKeyword, Recurrence
+                    TaskKeyword, Recurrence, TaskLock
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import ydateutils

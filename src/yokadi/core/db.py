@@ -29,7 +29,7 @@ import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 5
+DB_VERSION = 6
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
@@ -200,6 +200,7 @@ class Recurrence(SQLObject):
     def __str__(self):
         return "%s (next: %s)" % (FREQUENCY[self.getRrule()._freq], self.getNext())
 
+
 class Config(SQLObject):
     """yokadi config"""
     class sqlmeta:
@@ -210,11 +211,19 @@ class Config(SQLObject):
     desc = UnicodeCol(default="", notNone=True)
 
 
+class TaskLock(SQLObject):
+    task = ForeignKey("Task")
+    pid = IntCol(default=None)
+    updateDate = DateTimeCol(default=None)
+    uniqTaskLock = DatabaseIndex(task, unique=True)
+
+
 def getConfigKey(name):
     return os.environ.get(name, Config.byName(name).value)
 
 
-TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence]
+TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence, TaskLock]
+
 
 def createTables():
     for table in TABLE_LIST:
@@ -275,6 +284,7 @@ def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
                 sharePath
         print "See %s/update/README.markdown for details" % sharePath
         sys.exit(1)
+
 
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""

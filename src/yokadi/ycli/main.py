@@ -21,7 +21,7 @@ except ImportError:
     sys.exit(1)
 
 readline.parse_and_bind("set show-all-if-ambiguous on")
-reload(sys)  ## So as to enable setdefaultencoding
+reload(sys)  # # So as to enable setdefaultencoding
 
 import traceback
 from cmd import Cmd
@@ -54,7 +54,7 @@ from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
 sys.setdefaultencoding(tui.ENCODING)
 
 
-#TODO: move YokadiCmd to a separate module in ycli package
+# TODO: move YokadiCmd to a separate module in ycli package
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)
@@ -72,7 +72,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
                 # Windows location
                 self.historyPath = os.path.join(os.path.expandvars("$APPDATA"), ".yokadi_history")
         self.loadHistory()
-        self.cryptoMgr = cryptutils.YokadiCryptoManager() # Load shared cryptographic manager
+        self.cryptoMgr = cryptutils.YokadiCryptoManager()  # Load shared cryptographic manager
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""
@@ -103,7 +103,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         print
         return True
 
-    #Some standard alias
+    # Some standard alias
     do_quit = do_EOF
     do_q = do_EOF
     do_exit = do_EOF
@@ -231,7 +231,7 @@ def main():
     if options.createOnly:
         return
 
-    db.setDefaultConfig() # Set default config parameters
+    db.setDefaultConfig()  # Set default config parameters
 
     cmd = YokadiCmd()
     try:
