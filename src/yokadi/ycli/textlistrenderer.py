@@ -6,7 +6,7 @@ Text rendering of t_list output
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import yokadi.ycli.colors as C
 from yokadi.core import ydateutils
@@ -144,7 +144,7 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth=None, cryptoMgr=None, renderAsNotes=False):
+    def __init__(self, out, termWidth=None, cryptoMgr=None, renderAsNotes=False, splitOnDate=False):
         """
         @param out: output target
         @param termWidth: terminal width (int)
@@ -157,6 +157,7 @@ class TextListRenderer(object):
         self.today = datetime.today().replace(microsecond=0)
         self.firstHeader = True
         self.cryptoMgr = cryptoMgr
+        self.splitOnDate = splitOnDate
 
         if self.termWidth < 100:
             dueColumnWidth = 8
@@ -166,6 +167,7 @@ class TextListRenderer(object):
             shortDateFormat = False
 
         if renderAsNotes:
+            self.splitOnDate = True
             creationDateColumnWidth = 19
             creationDateTitle = "Creation date"
         else:
@@ -205,6 +207,8 @@ class TextListRenderer(object):
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
     def end(self):
+        today = datetime.now().replace(hour=0, minute=0)
+        dateSplitters = [(1, "day"), (7, "week"), (30, "month"), (30 * 4, "quarter"), (365, "year")]
         # Adjust idColumn
         maxId = Task.select().max(Task.q.id)
         self.idColumn.width = max(2, len(str(maxId)))
@@ -217,9 +221,14 @@ class TextListRenderer(object):
         self.titleColumn.formater = TitleFormater(self.titleColumn.width, self.cryptoMgr)
 
         # Print table
+        splitterRange, splitterName = dateSplitters.pop()
         for sectionName, taskList in self.taskLists:
             self._renderTaskListHeader(sectionName)
             for task in taskList:
+                if self.splitOnDate and task.creationDate > today - timedelta(splitterRange):
+                    splitterText = "Last %s" % splitterName
+                    print >> self.out, C.CYAN + splitterText.center(totalWidth) + C.RESET
+                    splitterRange, splitterName = dateSplitters.pop()
                 self._renderTaskListRow(task)
 
     def _renderTaskListHeader(self, sectionName):
