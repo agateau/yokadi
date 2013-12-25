@@ -86,7 +86,7 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print "%s %s %s" % (project.name, project.getKeywordsAsString(), active)
+            print "%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(Task.select(Task.q.project == project).count()).rjust(4), active)
 
     def do_p_set_active(self, line):
         """Activate the given project"""
