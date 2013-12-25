@@ -22,7 +22,7 @@ import re
 
 from yokadi.core.db import Task, Project
 from yokadi.core import dbutils
-import icalutils
+from yokadi.yical import icalutils
 from yokadi.ycli import parseutils
 from yokadi.core.yokadiexception import YokadiException
 
@@ -63,6 +63,7 @@ def generateCal():
 
     return cal
 
+
 def createVTodoFromTask(task):
     """Create a VTodo object from a yokadi task
     @param task: yokadi task (db.Task object)
@@ -93,6 +94,7 @@ def createVTodoFromTask(task):
 
     return vTodo
 
+
 def updateTaskFromVTodo(task, vTodo):
     """Update a yokadi task with an ical VTODO object
     @param task: yokadi task (db.Task object)
@@ -109,7 +111,7 @@ def updateTaskFromVTodo(task, vTodo):
             if yokadiAttribute == "doneDate":
                 # A done date defined indicate that task is done
                 task.status = "done"
-                #BUG: Done date is UTC, we must compute local time for yokadi
+                # BUG: Done date is UTC, we must compute local time for yokadi
             if yokadiAttribute == "urgency":
                 if attr == icalutils.yokadiUrgencyToIcalPriority(task.urgency):
                     # Priority does not change - don't update it
@@ -136,9 +138,10 @@ def updateTaskFromVTodo(task, vTodo):
         dbutils.createMissingKeywords(newKwDict.keys(), interactive=False)
         task.setKeywordDict(newKwDict)
 
+
 class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
-    newTask = {} # Dict recording new task origin UID
+    newTask = {}  # Dict recording new task origin UID
 
     def do_GET(self):
         """Serve a GET request with complete todolist ignoring path"""
@@ -152,7 +155,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         length = int(self.headers.getheader('content-length'))
         cal = icalendar.Calendar.from_string(self.rfile.read(length))
         for vTodo in cal.walk():
-            if vTodo.has_key("UID"):
+            if "UID" in vTodo:
                 try:
                     self._processVTodo(vTodo)
                 except YokadiException, e:
@@ -161,7 +164,6 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         # Tell caller everything is ok
         self.send_response(200)
         self.end_headers()
-
 
     def _processVTodo(self, vTodo):
         if vTodo["UID"] in self.newTask:
@@ -192,7 +194,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             # Keep record of new task origin UID to avoid duplicate
             # if user update it right after creation without reloading the
             # yokadi UID
-            #TODO: add purge for old UID
+            # TODO: add purge for old UID
             self.newTask[vTodo["UID"]] = task.id
 
 
@@ -213,3 +215,4 @@ class YokadiIcalServer(Thread):
         icalServer.serve_forever()
         print "IcalServer crash. Oups !"
 
+# vi: ts=4 sw=4 et
