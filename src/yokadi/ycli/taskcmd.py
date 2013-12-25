@@ -701,6 +701,7 @@ class TaskCmd(object):
             fields = [
                 ("Project", task.project.name),
                 ("Title", title),
+                ("ID", task.id),
                 ("Created", task.creationDate),
                 ("Due", task.dueDate),
                 ("Status", task.status),
