@@ -19,16 +19,16 @@ from yokadi.core.db import Config, Keyword, Project, Task, \
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import ydateutils
-import parseutils
+from yokadi.ycli import parseutils
 from yokadi.ycli import tui
-from completers import ProjectCompleter, projectAndKeywordCompleter, \
+from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
-from textlistrenderer import TextListRenderer
-from xmllistrenderer import XmlListRenderer
-from csvlistrenderer import CsvListRenderer
-from htmllistrenderer import HtmlListRenderer
-from plainlistrenderer import PlainListRenderer
+from yokadi.ycli.textlistrenderer import TextListRenderer
+from yokadi.ycli.xmllistrenderer import XmlListRenderer
+from yokadi.ycli.csvlistrenderer import CsvListRenderer
+from yokadi.ycli.htmllistrenderer import HtmlListRenderer
+from yokadi.ycli.plainlistrenderer import PlainListRenderer
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 gRendererClassDict = dict(
@@ -61,7 +61,6 @@ class TaskCmd(object):
                           help="Encrypt title")
         return parser
 
-
     def _t_add(self, cmd, line):
         """Code shared by t_add, bug_add and n_add."""
         parser = self._parser_t_add(cmd)
@@ -77,7 +76,7 @@ class TaskCmd(object):
         if options.crypt:
             # Obfuscate line in history
             length = readline.get_current_history_length()
-            if length > 0 :  # Ensure history is positive to avoid crash with bad readline setup
+            if length > 0:  # Ensure history is positive to avoid crash with bad readline setup
                 readline.replace_history_item(length - 1, "%s %s " % (cmd,
                                                                   line.replace(title, "<...encrypted...>")))
             # Encrypt title
@@ -89,7 +88,6 @@ class TaskCmd(object):
             return None
         self.lastTaskId = task.id
         return task
-
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
@@ -644,8 +642,8 @@ class TaskCmd(object):
 
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status != 'done'),
-                               orderBy= -Task.q.urgency)
-        lines = [ "%d,%s" % (x.id, x.title) for x in taskList]
+                               orderBy=-Task.q.urgency)
+        lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
         ids = []
@@ -662,7 +660,6 @@ class TaskCmd(object):
             task.urgency = urgency
 
     complete_t_reorder = ProjectCompleter(1)
-
 
     def parser_t_show(self):
         parser = YokadiOptionParser()
@@ -747,14 +744,14 @@ class TaskCmd(object):
         task = self.getTaskFromId(line)
 
         if self.cryptoMgr.isEncrypted(task.title):
-            self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+            self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
         title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
         taskLine = parseutils.createLine("", title, task.getKeywordDict())
 
-        oldCompleter = readline.get_completer() # Backup previous completer to restore it in the end
-        readline.set_completer(editComplete)    # Switch to specific completer
+        oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
+        readline.set_completer(editComplete)  # Switch to specific completer
 
         while True:
             # Edit
@@ -788,7 +785,6 @@ class TaskCmd(object):
         """@deprecated: should be removed"""
         tui.warnDeprecated("t_set_project", "t_project")
         self.do_t_project(line)
-
 
     def do_t_project(self, line):
         """Set task's project.
@@ -921,7 +917,7 @@ class TaskCmd(object):
                 bymonthday = int(tokens[2])
                 byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
             except ValueError:
-                POSITION = { "first" : 1, "second" : 2, "third" : 3, "fourth" : 4, "last" :-1 }
+                POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
                 if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
                     byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
@@ -946,7 +942,6 @@ class TaskCmd(object):
         task.recurrence.setRrule(rr)
         task.dueDate = task.recurrence.getNext()
     complete_t_recurs = recurrenceCompleter
-
 
     def do_t_filter(self, line):
         """Define permanent keyword filter used by t_list

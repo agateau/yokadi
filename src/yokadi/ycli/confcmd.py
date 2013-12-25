@@ -9,8 +9,8 @@ Configuration management related commands.
 from yokadi.core.db import Config
 from sqlobject import AND, LIKE
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
-from completers import confCompleter
-import tui
+from yokadi.ycli.completers import confCompleter
+from yokadi.ycli import tui
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 

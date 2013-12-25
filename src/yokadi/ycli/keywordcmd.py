@@ -6,11 +6,11 @@ Keyword related commands.
 @license: GPL v3 or later
 """
 from yokadi.core import dbutils
-import tui
+from yokadi.ycli import tui
 
 from yokadi.core.db import Keyword
 from yokadi.core.yokadiexception import BadUsageException
-from completers import KeywordCompleter
+from yokadi.ycli.completers import KeywordCompleter
 from sqlobject.dberrors import DuplicateEntryError
 
 
@@ -93,6 +93,5 @@ class KeywordCmd(object):
             task.setKeywordDict(kwDict)
         keyword.destroySelf()
         print "Keyword %s has been merged with %s" % (oldName, newName)
-
 
     complete_k_edit = KeywordCompleter(1)

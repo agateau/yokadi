@@ -15,7 +15,7 @@ import time
 import locale
 from getpass import getpass
 
-import colors as C
+from yokadi.ycli import colors as C
 
 # Default user encoding. Used to decode all input strings
 # This is the central yokadi definition of encoding - this constant is imported from all other modules
@@ -23,6 +23,7 @@ import colors as C
 ENCODING = locale.getpreferredencoding()
 
 _answers = []
+
 
 class IOStream:
     def __init__(self, original_flow):
@@ -47,7 +48,7 @@ def editText(text, onChanged=None):
     # Number of seconds between checks for end of process
     PROC_POLL_INTERVAL = 0.5
     # Number of seconds between checks for file modification
-    MTIME_POLL_INTERVAL  = 10
+    MTIME_POLL_INTERVAL = 10
 
     def readFile(name):
         return unicode(file(name).read(), ENCODING)
@@ -186,6 +187,7 @@ def renderFields(fields):
     format = C.BOLD + "%" + str(maxWidth) + "s" + C.RESET + ": %s"
     for caption, value in fields:
         print >> stdout, format % (caption, value)
+
 
 def warnDeprecated(old, new):
     """Warn user that a command is now deprecated

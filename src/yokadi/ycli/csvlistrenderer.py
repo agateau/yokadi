@@ -12,10 +12,11 @@ from yokadi.ycli import tui
 
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
 
+
 class CsvListRenderer(object):
     def __init__(self, out, cryptoMgr=None):
         self.writer = csv.writer(out, dialect="excel")
-        self._writerow(TASK_FIELDS) # Header
+        self._writerow(TASK_FIELDS)  # Header
 
     def addTaskList(self, project, taskList):
         for task in taskList:

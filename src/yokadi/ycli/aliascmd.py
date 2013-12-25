@@ -7,8 +7,8 @@ Alias related commands.
 """
 from yokadi.core.db import Config
 from yokadi.core.yokadiexception import BadUsageException
-import tui
-import colors as C
+from yokadi.ycli import tui
+from yokadi.ycli import colors as C
 
 from sqlobject import SQLObjectNotFound
 
@@ -40,7 +40,7 @@ class AliasCmd(object):
             raise BadUsageException("You should provide an alias name and a command")
         name = tokens[0]
         command = " ".join(tokens[1:])
-        self.aliases.update({ name : command})
+        self.aliases.update({name: command})
         try:
             aliases = Config.selectBy(name="ALIASES")[0]
         except IndexError:
@@ -57,6 +57,7 @@ class AliasCmd(object):
             aliases.value = repr(self.aliases)
         else:
             tui.error("No alias with that name. Use a_list to display all aliases")
+
 
 def resolveAlias(line, aliasDict):
     """Look for alias in alias and replace it with rela command
