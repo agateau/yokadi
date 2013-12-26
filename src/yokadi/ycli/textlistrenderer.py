@@ -208,7 +208,6 @@ class TextListRenderer(object):
 
     def end(self):
         today = datetime.now().replace(hour=0, minute=0)
-        dateSplitters = [(1, "day"), (7, "week"), (30, "month"), (30 * 4, "quarter"), (365, "year")]
         # Adjust idColumn
         maxId = Task.select().max(Task.q.id)
         self.idColumn.width = max(2, len(str(maxId)))
@@ -221,8 +220,9 @@ class TextListRenderer(object):
         self.titleColumn.formater = TitleFormater(self.titleColumn.width, self.cryptoMgr)
 
         # Print table
-        splitterRange, splitterName = dateSplitters.pop()
         for sectionName, taskList in self.taskLists:
+            dateSplitters = [(1, "day"), (7, "week"), (30, "month"), (30 * 4, "quarter"), (365, "year")]
+            splitterRange, splitterName = dateSplitters.pop()
             self._renderTaskListHeader(sectionName)
             for task in taskList:
                 if self.splitOnDate and task.creationDate > today - timedelta(splitterRange):
