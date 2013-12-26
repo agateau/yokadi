@@ -61,7 +61,7 @@ def editText(text, onChanged=None):
                 return
             time.sleep(PROC_POLL_INTERVAL)
 
-    (fd, name) = tempfile.mkstemp(suffix=".txt", prefix="yokadi-")
+    (fd, name) = tempfile.mkstemp(suffix=".md", prefix="yokadi-")
     if text is None:
         text = ""
     try:
