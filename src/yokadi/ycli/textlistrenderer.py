@@ -227,7 +227,7 @@ class TextListRenderer(object):
             for task in taskList:
                 if self.splitOnDate and task.creationDate > today - timedelta(splitterRange):
                     splitterText = "Last %s" % splitterName
-                    print >> self.out, C.CYAN + splitterText.center(totalWidth) + C.RESET
+                    print >> self.out, C.GREEN + splitterText.center(totalWidth) + C.RESET
                     splitterRange, splitterName = dateSplitters.pop()
                 self._renderTaskListRow(task)
 
