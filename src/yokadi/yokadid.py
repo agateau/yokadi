@@ -14,11 +14,11 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from optparse import OptionParser
-from commands import getoutput
 
 from sqlobject import AND
 
-from yokadi.core.daemonutils import doubleFork
+from yokadi.core.daemon import Daemon
+from yokadi.core import basedirs
 from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
@@ -46,6 +46,7 @@ def sigTermHandler(signal, stack):
     print "End of yokadi Daemon"
     event[0] = False
     event[1] = "SIGTERM"
+
 
 def sigHupHandler(signal, stack):
     """Handler when yokadid receive SIGHUP"""
@@ -77,6 +78,7 @@ def eventLoop():
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
         time.sleep(DELAY)
 
+
 def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
     """Process a list of tasks and trigger action if needed
     @param tasks: list of tasks
@@ -85,7 +87,7 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
     @param suspend: timedelta beetween to task trigger"""
     now = datetime.now()
     for task in tasks:
-        if triggeredTasks.has_key(task.id) and triggeredTasks[task.id][0] == task.dueDate:
+        if task.id in triggeredTasks and triggeredTasks[task.id][0] == task.dueDate:
             # This task with the same dueDate has already been triggered
             if now - triggeredTasks[task.id][1] < suspend:
                 # Task has been trigger recently, skip to next
@@ -97,29 +99,20 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
         cmd = cmd.replace("{DATE}", str(task.dueDate))
         process = Popen(cmd, shell=True)
         process.wait()
-        #TODO: redirect stdout/stderr properly to Log (not so easy...)
+        # TODO: redirect stdout/stderr properly to Log (not so easy...)
         triggeredTasks[task.id] = (task.dueDate, datetime.now())
 
-def killYokadid(dbName):
-    """Kill Yokadi daemon
-    @param dbName: only kill Yokadid running for this database
-    """
-    selfpid = os.getpid()
-    for line in getoutput("ps -ef|grep python | grep [y]okadid.py ").split("\n"):
-        pid = int(line.split()[1])
-        if pid == selfpid:
-            continue
-        if dbName is None:
-            print "Killing Yokadid with pid %s" % pid
-            os.kill(pid, SIGTERM)
-        else:
-            if dbName in line:
-                #BUG: quite buggy. Killing foo database will also kill foobar.
-                # As we can have space in database path, it is not so easy to parse line...
-                print "Killing Yokadid with database %s and pid %s" % (dbName, pid)
-                os.kill(pid, SIGTERM)
 
-def parseOptions():
+def killYokadid(pidFile):
+    """Kill Yokadi daemon
+    @param pidFile: file where the pid of the daemon is stored
+    """
+    # reuse Daemon.stop() code
+    daemon = Daemon(pidFile)
+    daemon.stop()
+
+
+def parseOptions(defaultPidFile, defaultLogFile):
     parser = OptionParser()
 
     parser.add_option("-d", "--db", dest="filename",
@@ -140,58 +133,99 @@ def parseOptions():
 
     parser.add_option("-k", "--kill",
                       dest="kill", default=False, action="store_true",
-                      help="Kill Yokadi Daemon (you can specify database with -db if you run multiple Yokadid")
+                      help="Kill the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
+
+    parser.add_option("--restart",
+                      dest="restart", default=False, action="store_true",
+                      help="Restart the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
 
     parser.add_option("-f", "--foreground",
                       dest="foreground", default=False, action="store_true",
                       help="Don't fork background. Useful for debug")
 
+    parser.add_option("--pid",
+                      dest="pidFile", default=defaultPidFile,
+                      help="File in which Yokadi daemon stores its process ID (default: %s)" % defaultPidFile)
+
+    parser.add_option("--log",
+                      dest="logFile", default=defaultLogFile,
+                      help="File in which Yokadi daemon stores its log output (default: %s)" % defaultLogFile)
+
     return parser.parse_args()
 
 
+def createDirForFile(name):
+    dirname = os.path.dirname(name)
+    if os.path.exists(dirname):
+        return
+    os.makedirs(dirname, 0700)
+
+
+class YokadiDaemon(Daemon):
+    def __init__(self, options):
+        Daemon.__init__(self, options.pidFile, stdout=options.logFile, stderr=options.logFile)
+        self.options = options
+
+    def run(self):
+        filename = self.options.filename
+        if not filename:
+            filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
+            print "Using default database (%s)" % filename
+
+        connectDatabase(filename, createIfNeeded=False)
+
+        # Basic tests :
+        if not (Task.tableExists() and Config.tableExists()):
+            print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
+            sys.exit(1)
+
+        # Start ical http handler
+        if self.options.icalserver:
+            yokadiIcalServer = YokadiIcalServer(self.options.tcpPort, self.options.tcpListen)
+            yokadiIcalServer.start()
+
+        # Start the main event Loop
+        try:
+            while event[1] != "SIGTERM":
+                eventLoop()
+                event[0] = True
+        except KeyboardInterrupt:
+            print "\nExiting..."
+
+
 def main():
-    #TODO: check that yokadid is not already running for this database ? Not very harmful...
-    #TODO: change unix process name to "yokadid"
+    # TODO: check that yokadid is not already running for this database ? Not very harmful...
+    # TODO: change unix process name to "yokadid"
 
     # Make the event list global to allow communication with main event loop
     global event
 
-    (options, args) = parseOptions()
+    defaultPidFile = os.path.join(basedirs.getRuntimeDir(), "yokadid.pid")
+    defaultLogFile = os.path.join(basedirs.getLogDir(), "yokadid.log")
+    (options, args) = parseOptions(defaultPidFile, defaultLogFile)
 
     if options.kill:
-        killYokadid(options.filename)
+        killYokadid(options.pidFile)
         sys.exit(0)
+
+    if options.pidFile == defaultPidFile:
+        createDirForFile(options.pidFile)
+
+    if options.logFile == defaultLogFile:
+        createDirForFile(options.logFile)
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)
 
+    if options.restart:
+        daemon = YokadiDaemon(options)
+        daemon.restart()
 
-    if not options.foreground:
-        doubleFork()
-
-    if not options.filename:
-        options.filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
-        print "Using default database (%s)" % options.filename
-
-    connectDatabase(options.filename, createIfNeeded=False)
-
-    # Basic tests :
-    if not (Task.tableExists() and Config.tableExists()):
-        print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
-        sys.exit(1)
-
-    # Start ical http handler
-    if options.icalserver:
-        yokadiIcalServer = YokadiIcalServer(options.tcpPort, options.tcpListen)
-        yokadiIcalServer.start()
-
-    # Start the main event Loop
-    try:
-        while event[1] != "SIGTERM":
-            eventLoop()
-            event[0] = True
-    except KeyboardInterrupt:
-        print "\nExiting..."
+    daemon = YokadiDaemon(options)
+    if options.foreground:
+        daemon.run()
+    else:
+        daemon.start()
 
 if __name__ == "__main__":
     main()
