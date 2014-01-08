@@ -19,16 +19,16 @@ from yokadi.core.db import Config, Keyword, Project, Task, \
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import ydateutils
-import parseutils
+from yokadi.ycli import parseutils
 from yokadi.ycli import tui
-from completers import ProjectCompleter, projectAndKeywordCompleter, \
+from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
-from textlistrenderer import TextListRenderer
-from xmllistrenderer import XmlListRenderer
-from csvlistrenderer import CsvListRenderer
-from htmllistrenderer import HtmlListRenderer
-from plainlistrenderer import PlainListRenderer
+from yokadi.ycli.textlistrenderer import TextListRenderer
+from yokadi.ycli.xmllistrenderer import XmlListRenderer
+from yokadi.ycli.csvlistrenderer import CsvListRenderer
+from yokadi.ycli.htmllistrenderer import HtmlListRenderer
+from yokadi.ycli.plainlistrenderer import PlainListRenderer
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 gRendererClassDict = dict(
@@ -41,11 +41,12 @@ gRendererClassDict = dict(
 
 NOTE_KEYWORD = "_note"
 
+
 class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None  # Last id created, used
-        self.lastTaskIds = []   # Last list of ids selected with t_list
-        self.kFilters = [] # Permanent keyword filters (List of KeywordFilter)
+        self.lastTaskIds = []  # Last list of ids selected with t_list
+        self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
@@ -59,7 +60,6 @@ class TaskCmd(object):
         parser.add_option("-c", dest="crypt", default=False, action="store_true",
                           help="Encrypt title")
         return parser
-
 
     def _t_add(self, cmd, line):
         """Code shared by t_add, bug_add and n_add."""
@@ -76,7 +76,7 @@ class TaskCmd(object):
         if options.crypt:
             # Obfuscate line in history
             length = readline.get_current_history_length()
-            if length > 0 : # Ensure history is positive to avoid crash with bad readline setup
+            if length > 0:  # Ensure history is positive to avoid crash with bad readline setup
                 readline.replace_history_item(length - 1, "%s %s " % (cmd,
                                                                   line.replace(title, "<...encrypted...>")))
             # Encrypt title
@@ -88,7 +88,6 @@ class TaskCmd(object):
             return None
         self.lastTaskId = task.id
         return task
-
 
     def do_t_add(self, line):
         """Add new task. Will prompt to create keywords if they do not exist.
@@ -178,7 +177,7 @@ class TaskCmd(object):
         try:
             if self.cryptoMgr.isEncrypted(task.title):
                 # As title is encrypted, we assume description will be encrypted as well
-                self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+                self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
 
             description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription)
         except Exception, e:
@@ -270,8 +269,8 @@ class TaskCmd(object):
         if len(tokens) < 2:
             raise BadUsageException("Give at least a task id and a command")
 
-        idScan = True # Indicate we are parsing ids
-        cmdTokens = []      # Command that we want to apply
+        idScan = True  # Indicate we are parsing ids
+        cmdTokens = []  # Command that we want to apply
         for token in tokens:
             if token == "":
                 continue
@@ -494,7 +493,7 @@ class TaskCmd(object):
                 groupKeyword = groupKeyword[1:]
             for keyword in Keyword.select(LIKE(Keyword.q.name, groupKeyword)):
                 if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
-                    #BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
+                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
                     continue
                 taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
                                            *filters),
@@ -504,7 +503,7 @@ class TaskCmd(object):
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) > 0:
-                    self.lastTaskIds.extend([t.id for t in taskList]) # Keep selected id for further use
+                    self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
                     renderer.addTaskList(unicode(keyword), taskList)
             renderer.end()
         else:
@@ -519,7 +518,7 @@ class TaskCmd(object):
                 taskList = list(taskList)
 
                 if len(taskList) > 0:
-                    self.lastTaskIds.extend([t.id for t in taskList]) # Keep selected id for further use
+                    self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
                     renderer.addTaskList(unicode(project), taskList)
             renderer.end()
 
@@ -545,7 +544,7 @@ class TaskCmd(object):
         # Reset last tasks id list
         self.lastTaskIds = []
 
-        #BUG: completion based on parameter position is broken when parameter is given
+        # BUG: completion based on parameter position is broken when parameter is given
         options, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
@@ -625,7 +624,7 @@ class TaskCmd(object):
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
-        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr)
+        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=options.keyword)
     complete_n_list = projectAndKeywordCompleter
@@ -643,8 +642,8 @@ class TaskCmd(object):
 
         taskList = Task.select(AND(Task.q.projectID == project.id,
                                    Task.q.status != 'done'),
-                               orderBy= -Task.q.urgency)
-        lines = [ "%d,%s" % (x.id, x.title) for x in taskList]
+                               orderBy=-Task.q.urgency)
+        lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
         ids = []
@@ -661,7 +660,6 @@ class TaskCmd(object):
             task.urgency = urgency
 
     complete_t_reorder = ProjectCompleter(1)
-
 
     def parser_t_show(self):
         parser = YokadiOptionParser()
@@ -703,6 +701,7 @@ class TaskCmd(object):
             fields = [
                 ("Project", task.project.name),
                 ("Title", title),
+                ("ID", task.id),
                 ("Created", task.creationDate),
                 ("Due", task.dueDate),
                 ("Status", task.status),
@@ -746,14 +745,14 @@ class TaskCmd(object):
         task = self.getTaskFromId(line)
 
         if self.cryptoMgr.isEncrypted(task.title):
-            self.cryptoMgr.force_decrypt = True # Decryption must be turned on to edit
+            self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
         title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
         taskLine = parseutils.createLine("", title, task.getKeywordDict())
 
-        oldCompleter = readline.get_completer() # Backup previous completer to restore it in the end
-        readline.set_completer(editComplete)    # Switch to specific completer
+        oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
+        readline.set_completer(editComplete)  # Switch to specific completer
 
         while True:
             # Edit
@@ -774,7 +773,7 @@ class TaskCmd(object):
             if dbutils.updateTask(task, task.project.name, title, keywordDict):
                 break
 
-        readline.set_completer(oldCompleter)   # Restore standard completer
+        readline.set_completer(oldCompleter)  # Restore standard completer
         return task
 
     def do_t_edit(self, line):
@@ -787,7 +786,6 @@ class TaskCmd(object):
         """@deprecated: should be removed"""
         tui.warnDeprecated("t_set_project", "t_project")
         self.do_t_project(line)
-
 
     def do_t_project(self, line):
         """Set task's project.
@@ -920,12 +918,12 @@ class TaskCmd(object):
                 bymonthday = int(tokens[2])
                 byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
             except ValueError:
-                POSITION = { "first" : 1, "second" : 2, "third" : 3, "fourth" : 4, "last" :-1 }
+                POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
                 if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
                     byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
                     byhour, byminute = ydateutils.getHourAndMinute(tokens[4])
-                    bymonthday = None # Default to current day number - need to be blanked                    
+                    bymonthday = None  # Default to current day number - need to be blanked
                 else:
                     raise YokadiException("Unable to understand date. See help t_recurs for details")
         elif tokens[1] == "yearly":
@@ -946,13 +944,12 @@ class TaskCmd(object):
         task.dueDate = task.recurrence.getNext()
     complete_t_recurs = recurrenceCompleter
 
-
     def do_t_filter(self, line):
         """Define permanent keyword filter used by t_list
         Ex.:
             - t_filter @work (filter all task that have the "work" keyword)
             - t_filter none (remove filter)"""
-        #TODO: add completion
+        # TODO: add completion
 
         if not line:
             raise YokadiException("You must give keyword as argument or 'none' to reset filter")

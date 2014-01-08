@@ -10,8 +10,10 @@ import xml.sax.saxutils as saxutils
 
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "urgency", "status", "description", "keywords"]
 
+
 def escape(text):
     return saxutils.escape(unicode(text))
+
 
 def printRow(out, tag, lst):
     print >> out, "<tr>"
@@ -20,12 +22,13 @@ def printRow(out, tag, lst):
         print >> out, "<%s>%s</%s>" % (tag, text, tag)
     print >> out, "</tr>"
 
+
 class HtmlListRenderer(object):
     def __init__(self, out, cryptoMgr):
         self.out = out
         self.cryptoMgr = cryptoMgr
 
-        #TODO: make this fancier
+        # TODO: make this fancier
         print >> self.out, """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
                 <html>
                 <head>

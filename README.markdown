@@ -23,7 +23,7 @@ Here is an example of a short Yokadi session:
 
 Start Yokadi:
 
-    ./yokadi
+    ./src/bin/yokadi
     Using default database (/home/me/.yokadi.db)
     Creating database
     Added keyword 'severity'

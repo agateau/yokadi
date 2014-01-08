@@ -8,12 +8,12 @@ Project related commands.
 from sqlobject import SQLObjectNotFound
 from sqlobject.dberrors import DuplicateEntryError
 
-import tui
-from completers import ProjectCompleter
+from yokadi.ycli import tui
+from yokadi.ycli.completers import ProjectCompleter
+from yokadi.ycli import parseutils
 from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParser
-import parseutils
 from yokadi.core import dbutils
 
 
@@ -86,8 +86,7 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print "%s %s %s" % (project.name, project.getKeywordsAsString(), active)
-
+            print "%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(Task.select(Task.q.project == project).count()).rjust(4), active)
 
     def do_p_set_active(self, line):
         """Activate the given project"""

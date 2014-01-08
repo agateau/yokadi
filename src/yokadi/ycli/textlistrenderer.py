@@ -44,10 +44,8 @@ class Column(object):
         self.width = width
         self.formater = formater
 
-
     def createHeader(self):
         return self.title.ljust(self.width)
-
 
     def createCell(self, task):
         value, color = self.formater(task)
@@ -63,8 +61,10 @@ class Column(object):
 def idFormater(task):
     return str(task.id), None
 
+
 class TitleFormater(object):
     TITLE_WITH_KEYWORDS_TEMPLATE = "%s (%s)"
+
     def __init__(self, width, cryptoMgr):
         self.cryptoMgr = cryptoMgr
         self.width = width
@@ -98,6 +98,7 @@ class TitleFormater(object):
 def urgencyFormater(task):
     return str(task.urgency), colorizer(task.urgency)
 
+
 def statusFormater(task):
     if task.status == "started":
         color = C.BOLD
@@ -105,13 +106,19 @@ def statusFormater(task):
         color = None
     return task.status[0].upper(), color
 
+
 class AgeFormater(object):
-    def __init__(self, today):
+    def __init__(self, today, asDate=False):
         self.today = today
+        self.asDate = asDate
 
     def __call__(self, task):
         delta = self.today - task.creationDate
-        return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
+        if self.asDate:
+            return unicode(task.creationDate), None
+        else:
+            return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
+
 
 class DueDateFormater(object):
     def __init__(self, today, shortFormat):
@@ -137,11 +144,12 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth=None, cryptoMgr=None):
+    def __init__(self, out, termWidth=None, cryptoMgr=None, renderAsNotes=False):
         """
         @param out: output target
         @param termWidth: terminal width (int)
-        @param decrypt: wether to decrypt or not (bool)"""
+        @param decrypt: whether to decrypt or not (bool)
+        @param renderAsNotes: whether to display task as notes (with dates) instead of tasks (with age). (boot)"""
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
         self.taskLists = []
@@ -150,20 +158,32 @@ class TextListRenderer(object):
         self.firstHeader = True
         self.cryptoMgr = cryptoMgr
 
+        if self.termWidth < 100:
+            dueColumnWidth = 8
+            shortDateFormat = True
+        else:
+            dueColumnWidth = 26
+            shortDateFormat = False
+
+        if renderAsNotes:
+            creationDateColumnWidth = 19
+            creationDateTitle = "Creation date"
+        else:
+            creationDateColumnWidth = 8
+            creationDateTitle = "Age"
+
         # All fields set to None must be defined in end()
         self.columns = [
-            Column("ID"       , None        , idFormater),
-            Column("Title"    , None        , None),
-            Column("U"        , 3           , urgencyFormater),
-            Column("S"        , 1           , statusFormater),
-            Column("Age"      , 8           , AgeFormater(self.today)),
-            Column("Due date" , None        , None),
+            Column("ID"             , None           , idFormater),
+            Column("Title"          , None           , None),
+            Column("U"              , 3              , urgencyFormater),
+            Column("S"              , 1              , statusFormater),
+            Column(creationDateTitle, creationDateColumnWidth , AgeFormater(self.today, renderAsNotes)),
+            Column("Due date"       , dueColumnWidth , DueDateFormater(self.today, shortDateFormat)),
             ]
 
         self.idColumn = self.columns[0]
         self.titleColumn = self.columns[1]
-        self.dueColumn = self.columns[-1]
-
 
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
@@ -184,19 +204,10 @@ class TextListRenderer(object):
                 titleWidth += 1
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
-
     def end(self):
         # Adjust idColumn
         maxId = Task.select().max(Task.q.id)
         self.idColumn.width = max(2, len(str(maxId)))
-
-        # Adjust dueColumn
-        shortDateFormat = self.termWidth < 100
-        if shortDateFormat:
-            self.dueColumn.width = 8
-        else:
-            self.dueColumn.width = 26
-        self.dueColumn.formater = DueDateFormater(self.today, shortDateFormat)
 
         # Adjust titleColumn
         self.titleColumn.width = self.maxTitleWidth
@@ -210,7 +221,6 @@ class TextListRenderer(object):
             self._renderTaskListHeader(sectionName)
             for task in taskList:
                 self._renderTaskListRow(task)
-
 
     def _renderTaskListHeader(self, sectionName):
         """
@@ -227,7 +237,6 @@ class TextListRenderer(object):
         print >> self.out, C.CYAN + sectionName.center(width) + C.RESET
         print >> self.out, C.BOLD + line + C.RESET
         print >> self.out, "-" * width
-
 
     def _renderTaskListRow(self, task):
         cells = [column.createCell(task) for column in self.columns]

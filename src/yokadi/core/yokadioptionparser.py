@@ -9,13 +9,13 @@ instead of calling sys.exit() in case of error
 from optparse import OptionParser
 import sys
 
-from yokadiexception import YokadiException
+from yokadi.core.yokadiexception import YokadiException
 
-"""
-A dummy exception which makes it possible to have --help exit silently
-"""
+
 class YokadiOptionParserNormalExitException(YokadiException):
+    """A dummy exception which makes it possible to have --help exit silently"""
     pass
+
 
 class YokadiOptionParser(OptionParser):
     def __init__(self):
@@ -30,7 +30,6 @@ class YokadiOptionParser(OptionParser):
         # Unknown options will throw an error
         options, args = OptionParser.parse_args(self, argv)
         return options, args
-
 
     def exit(self, status=0, msg=None):
         if msg:

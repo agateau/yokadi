@@ -10,15 +10,18 @@ import re
 
 from sqlobject import AND, OR, LIKE
 from sqlobject.sqlbuilder import IN, NOTIN, Select
-import tui
+from yokadi.ycli import tui
 from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
-from yokadi.core.yokadiexception import YokadiException
+
 
 gSimplifySpaces = re.compile("  +")
+
+
 def simplifySpaces(line):
     line = gSimplifySpaces.subn(" ", line)[0]
     line = line.strip()
     return line
+
 
 def parseParameters(line):
     """Parse line of form -a -b -c some text
@@ -52,6 +55,7 @@ def parseLine(line):
 
     return project, line, keywordFiltersToDict(keywordFilters)
 
+
 def extractKeywords(line):
     """Extract keywords (@k1 @k2=n..) from line
     @param line: line from which keywords are extracted
@@ -65,6 +69,7 @@ def extractKeywords(line):
             remainingText.append(token)
 
     return (u" ".join(remainingText), keywordFilters)
+
 
 def createLine(projectName, title, keywordDict):
     tokens = []
@@ -80,12 +85,14 @@ def createLine(projectName, title, keywordDict):
     tokens.append(title)
     return u" ".join(tokens)
 
+
 def keywordFiltersToDict(keywordFilters):
     """Convert a list of KeywordFilter instnance to a simple keyword dictionary"""
     keywordDict = {}
     for keywordFilter in keywordFilters:
         keywordDict[keywordFilter.name] = keywordFilter.value
     return keywordDict
+
 
 def warnIfKeywordDoesNotExist(keywordFilters):
     """Warn user is keyword does not exist
@@ -97,12 +104,13 @@ def warnIfKeywordDoesNotExist(keywordFilters):
                 doesNotExist = True
     return doesNotExist
 
+
 class KeywordFilter(object):
     """Represent a filter on a keyword"""
     def __init__(self, filterLine=None):
-        self.name = ""            # Keyword name
-        self.value = ""           # Keyword value
-        self.negative = False     # Negative filter
+        self.name = ""  # Keyword name
+        self.value = ""  # Keyword value
+        self.negative = False  # Negative filter
         self.valueOperator = "="  # Operator to compare value
 
         if filterLine:
@@ -131,7 +139,7 @@ class KeywordFilter(object):
                 elif self.valueOperator == "!=":
                     taskValueFilter = (TaskKeyword.q.value != self.value)
                     projectValueFilter = (ProjectKeyword.q.value != self.value)
-                #TODO: handle also <, >, =< and >=
+                # TODO: handle also <, >, =< and >=
 
             taskKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
                                                    TaskKeyword.q.keywordID == Keyword.q.id,
@@ -162,8 +170,8 @@ class KeywordFilter(object):
         if not line.startswith("@"):
             tui.error("Keyword name must be be prefixed with a @")
             return
-        line = line[1:] # Squash @
-        line = line.replace("==", "=") # Tolerate == syntax
+        line = line[1:]  # Squash @
+        line = line.replace("==", "=")  # Tolerate == syntax
         for operator in operators:
             if operator in line:
                 self.name, self.value = line.split(operator, 1)
@@ -174,7 +182,7 @@ class KeywordFilter(object):
                     tui.error("Keyword value must be an integer (got %s)" %
                               (self.value, self.name))
                     return
-                break # Exit operator loop
+                break  # Exit operator loop
         else:
             # No operator found, only keyword name has been provided
             self.name, self.value = line, None

@@ -8,5 +8,11 @@
 @license:GPL v3 or later
  """
 
+import os
+
+fromsrc_py = os.path.join(os.path.dirname(__file__), "fromsrc.py")
+if os.path.exists(fromsrc_py):
+    import fromsrc
+
 from yokadi import yokadid
 yokadid.main()
