@@ -162,7 +162,7 @@ class TaskLockManager:
         self.task = task
 
     def _getLock(self):
-        """Retreive the task lock if it exists (else None)"""
+        """Retrieve the task lock if it exists (else None)"""
         try:
             return TaskLock.select(TaskLock.q.task == self.task).getOne()
         except SQLObjectNotFound:
@@ -180,7 +180,7 @@ class TaskLockManager:
         TaskLock(task=self.task, pid=os.getpid(), updateDate=datetime.now())
 
     def update(self):
-        """Update lock timetstamp to avoid it to expire"""
+        """Update lock timestamp to avoid it to expire"""
         lock = self._getLock()
         lock.updateDate = datetime.now()
 
