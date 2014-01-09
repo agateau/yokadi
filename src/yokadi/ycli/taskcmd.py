@@ -15,7 +15,7 @@ from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
 from sqlobject.sqlbuilder import LEFTJOINOn
 
 from yokadi.core.db import Config, Keyword, Project, Task, \
-                    TaskKeyword, Recurrence, TaskLock
+                    TaskKeyword, Recurrence
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import ydateutils
@@ -175,36 +175,13 @@ class TaskCmd(object):
             else:
                 task.description = description
 
-        def lockManager(action):
-            """Handle a lock to prevent concurent editing of the same task"""
-            try:
-                lock = TaskLock.select(TaskLock.q.task == task).getOne()
-            except SQLObjectNotFound:
-                lock = None
-            if action == "acquire":
-                if lock:
-                    if lock.updateDate < datetime.now() - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
-                        # Stale lock, removing
-                        TaskLock.delete(lock.id)
-                    else:
-                        raise YokadiException("Task %s is already locked by process %s" % (lock.task.id, lock.pid))
-                TaskLock(task=task, pid=os.getpid(), updateDate=datetime.now())
-            elif action == "update":
-                lock.updateDate = datetime.now()
-            elif action == "release":
-                # Only release our lock
-                if lock and lock.pid == os.getpid():
-                    TaskLock.delete(lock.id)
-            else:
-                print "huh, lock action unknown"
-
         task = self.getTaskFromId(line)
         try:
             if self.cryptoMgr.isEncrypted(task.title):
                 # As title is encrypted, we assume description will be encrypted as well
                 self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
 
-            description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription, lockManager=lockManager)
+            description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription, lockManager=dbutils.TaskLockManager(task))
         except Exception, e:
             raise YokadiException(e)
         updateDescription(description)

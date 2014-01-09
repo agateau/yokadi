@@ -68,7 +68,7 @@ def editText(text, onChanged=None, lockManager=None):
         text = ""
     try:
         if lockManager:
-            lockManager("acquire")
+            lockManager.acquire()
         fl = file(name, "w")
         fl.write(text.encode(ENCODING, "replace"))
         fl.close()
@@ -78,7 +78,7 @@ def editText(text, onChanged=None, lockManager=None):
         while proc.returncode is None:
             waitProcess(proc)
             if proc.returncode is None and lockManager is not None:
-                lockManager("update")
+                lockManager.update()
             if proc.returncode is None and onChanged is not None:
                 newMtime = os.stat(name).st_mtime
                 if newMtime > mtime:
@@ -91,7 +91,7 @@ def editText(text, onChanged=None, lockManager=None):
         os.close(fd)
         os.unlink(name)
         if lockManager:
-            lockManager("release")
+            lockManager.release()
 
 
 def reinjectInRawInput(line):
