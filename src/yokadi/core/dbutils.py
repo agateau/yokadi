@@ -156,7 +156,7 @@ def getKeywordFromName(name):
 
 
 class TaskLockManager:
-    """Handle a lock to prevent concurent editing of the same task"""
+    """Handle a lock to prevent concurrent editing of the same task"""
     def __init__(self, task):
         """@param task: a Task instance"""
         self.task = task
@@ -169,6 +169,7 @@ class TaskLockManager:
             return  None
 
     def acquire(self):
+        """Acquire a lock for that task and remove any previous stale lock"""
         lock = self._getLock()
         if lock:
             if lock.updateDate < datetime.now() - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
@@ -179,10 +180,12 @@ class TaskLockManager:
         TaskLock(task=self.task, pid=os.getpid(), updateDate=datetime.now())
 
     def update(self):
+        """Update lock timetstamp to avoid it to expire"""
         lock = self._getLock()
         lock.updateDate = datetime.now()
 
     def release(self):
+        """Release the lock for that task"""
         # Only release our lock
         lock = self._getLock()
         if lock and lock.pid == os.getpid():
