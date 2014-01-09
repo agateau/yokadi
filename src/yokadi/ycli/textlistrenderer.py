@@ -223,12 +223,17 @@ class TextListRenderer(object):
         for sectionName, taskList in self.taskLists:
             dateSplitters = [(1, "day"), (7, "week"), (30, "month"), (30 * 4, "quarter"), (365, "year")]
             splitterRange, splitterName = dateSplitters.pop()
+            splitterText = None
             self._renderTaskListHeader(sectionName)
             for task in taskList:
-                if self.splitOnDate and task.creationDate > today - timedelta(splitterRange):
+                while self.splitOnDate and len(dateSplitters) > 0 and task.creationDate > today - timedelta(splitterRange):
                     splitterText = "Last %s" % splitterName
-                    print >> self.out, C.GREEN + splitterText.center(totalWidth) + C.RESET
                     splitterRange, splitterName = dateSplitters.pop()
+
+                if splitterText:
+                    print >> self.out, C.GREEN + splitterText.center(totalWidth) + C.RESET
+                    splitterText = None
+
                 self._renderTaskListRow(task)
 
     def _renderTaskListHeader(self, sectionName):
