@@ -10,6 +10,7 @@ import unittest
 
 from yokadi.ycli import tui
 
+
 class TuiTestCase(unittest.TestCase):
     def testEditEmptyText(self):
         os.environ["EDITOR"] = "/bin/true"

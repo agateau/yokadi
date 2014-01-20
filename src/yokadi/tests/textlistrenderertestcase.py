@@ -27,7 +27,7 @@ class TextListRendererTestCase(unittest.TestCase):
         dbutils.getOrCreateKeyword("k1", interactive=False)
         dbutils.getOrCreateKeyword("k2", interactive=False)
         t1 = dbutils.addTask("x", "t1", {})
-        t2 = dbutils.addTask("x", "t2", {"k1":None, "k2":12})
+        t2 = dbutils.addTask("x", "t2", {"k1": None, "k2": 12})
         longerTask = dbutils.addTask("x", "A longer task name", {})
         longerTask.description = "And it has a description"
 

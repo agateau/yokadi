@@ -22,7 +22,7 @@ class CryptoTestCase(unittest.TestCase):
 
     def testEncrypt(self):
         mgr = YokadiCryptoManager()
-        mgr.force_decrypt = True # Simulate user ask for decryption
+        mgr.force_decrypt = True  # Simulate user ask for decryption
         tui.addInputAnswers("mySecretPassphrase")
         important_sentence = "Don't tell anyone"
         encrypted_sentence = mgr.encrypt(important_sentence)
@@ -34,7 +34,7 @@ class CryptoTestCase(unittest.TestCase):
 
     def testEncryptLongSentence(self):
         mgr = YokadiCryptoManager()
-        mgr.force_decrypt = True # Simulate user ask for decryption
+        mgr.force_decrypt = True  # Simulate user ask for decryption
         tui.addInputAnswers("mySecretPassphrase")
         important_sentence = '''This sentence is long long long long
                                 This sentence is long
@@ -47,19 +47,19 @@ class CryptoTestCase(unittest.TestCase):
 
     def testBadPassphrase(self):
         mgr = YokadiCryptoManager()
-        mgr.force_decrypt = True # Simulate user ask for decryption
+        mgr.force_decrypt = True  # Simulate user ask for decryption
         tui.addInputAnswers("mySecretPassphrase")
         important_sentence = "Don't tell anyone"
         encrypted_sentence = mgr.encrypt(important_sentence)
 
-        mgr = YokadiCryptoManager() # Define new manager with other passphrase
-        mgr.force_decrypt = True # Simulate user ask for decryption
+        mgr = YokadiCryptoManager()  # Define new manager with other passphrase
+        mgr.force_decrypt = True  # Simulate user ask for decryption
         tui.addInputAnswers("theWrongSecretPassphrase")
         self.assertRaises(YokadiException, mgr.decrypt, encrypted_sentence)
 
     def testIfEncrypted(self):
         mgr = YokadiCryptoManager()
-        mgr.force_decrypt = True # Simulate user ask for decryption
+        mgr.force_decrypt = True  # Simulate user ask for decryption
         tui.addInputAnswers("mySecretPassphrase")
         important_sentence = "Don't tell anyone"
         encrypted_sentence = mgr.encrypt(important_sentence)

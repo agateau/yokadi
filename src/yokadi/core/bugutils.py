@@ -30,6 +30,7 @@ LIKELIHOOD_LIST = [
     (5, "Will affect all users"),
     ]
 
+
 def computeUrgency(keywordDict):
     likelihood = keywordDict[LIKELIHOOD_PROPERTY_NAME]
     severity = keywordDict[SEVERITY_PROPERTY_NAME]

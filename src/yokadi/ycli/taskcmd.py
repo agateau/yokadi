@@ -579,7 +579,6 @@ class TaskCmd(object):
         if options.decrypt:
             self.cryptoMgr.force_decrypt = True
 
-
         # Define output
         if options.output:
             out = open(options.output, "w")

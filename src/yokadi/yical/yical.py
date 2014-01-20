@@ -37,12 +37,13 @@ PROJECT_UID = UID_PREFIX + "-project-%s"
 INBOX_PROJECT = "inbox"
 
 # Yokadi task <=> iCalendar VTODO attribute mapping
-YOKADI_ICAL_ATT_MAPPING = {"title" : "summary",
-                           "urgency" : "priority",
+YOKADI_ICAL_ATT_MAPPING = {"title": "summary",
+                           "urgency": "priority",
                            "creationDate": "dtstart",
-                           "dueDate" : "due",
-                           "doneDate" : "completed",
-                           "description" : "description" }
+                           "dueDate": "due",
+                           "doneDate": "completed",
+                           "description": "description"}
+
 
 def generateCal():
     """Generate an ical calendar from yokadi database

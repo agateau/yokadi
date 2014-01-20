@@ -38,6 +38,7 @@ from keywordtestcase import KeywordTestCase
 from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
 
+
 def main():
     db.connectDatabase("", memoryDatabase=True)
     db.setDefaultConfig()

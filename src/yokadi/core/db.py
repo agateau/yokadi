@@ -33,7 +33,7 @@ DB_VERSION = 5
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
-FREQUENCY = { 0 : "Yearly", 1 : "Monthly", 2 : "Weekly", 3 : "Daily" }
+FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
 
 class Project(SQLObject):
@@ -202,6 +202,7 @@ class Recurrence(SQLObject):
     def __str__(self):
         return "%s (next: %s)" % (FREQUENCY[self.getRrule()._freq], self.getNext())
 
+
 class Config(SQLObject):
     """yokadi config"""
     class sqlmeta:
@@ -217,6 +218,7 @@ def getConfigKey(name):
 
 
 TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence]
+
 
 def createTables():
     for table in TABLE_LIST:
@@ -278,6 +280,7 @@ def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
         print "See %s/update/README.markdown for details" % sharePath
         sys.exit(1)
 
+
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig = {
@@ -288,7 +291,7 @@ def setDefaultConfig():
         "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
         "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again"),
         "PURGE_DELAY"     : ("90", False, "Default delay (in days) for the t_purge command"),
-        "PASSPHRASE_CACHE" : ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
+        "PASSPHRASE_CACHE": ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
         }
 
     for name, value in defaultConfig.items():

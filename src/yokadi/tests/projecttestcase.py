@@ -14,12 +14,12 @@ from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli.projectcmd import ProjectCmd
 from yokadi.ycli import tui
 
+
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):
         testutils.clearDatabase()
         tui.clearInputAnswers()
         self.cmd = ProjectCmd()
-
 
     def testAdd(self):
         tui.addInputAnswers("y")

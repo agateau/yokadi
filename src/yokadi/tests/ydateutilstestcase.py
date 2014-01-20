@@ -27,7 +27,6 @@ class YDateUtilsTestCase(unittest.TestCase):
             output = ydateutils.parseDateTimeDelta(text)
             self.assertEquals(expected, output)
 
-
     def testParseHumaneDateTime(self):
         for date in ("+5M", "+1m", "+2H", "+3h", "+9D", "+14d", "+432W", "+0w",
                      "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
@@ -67,7 +66,6 @@ class YDateUtilsTestCase(unittest.TestCase):
             output = ydateutils.parseHumaneDateTime(text, hint=hint, today=today)
             self.assertEquals(expected, output)
 
-
     def testFormatTimeDelta(self):
         testData = [
             (timedelta(minutes=1), "1m"),
@@ -85,7 +83,6 @@ class YDateUtilsTestCase(unittest.TestCase):
             self.assertEquals(expected, output)
             output = ydateutils.formatTimeDelta(-input)
             self.assertEquals("-" + expected, output)
-
 
     def testParseDateLimit(self):
         # Fake today to a fixed date. This is a saturday (weekday=5).

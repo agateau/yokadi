@@ -20,14 +20,12 @@ class DbUtilsTestCase(unittest.TestCase):
         testutils.clearDatabase()
         tui.clearInputAnswers()
 
-
     def testGetTaskFromId(self):
         tui.addInputAnswers("y")
         t1 = dbutils.addTask("x", "t1", {})
 
         task = dbutils.getTaskFromId(str(t1.id))
         self.assertEquals(task, t1)
-
 
     def testGetOrCreateKeyword(self):
         # interactive
@@ -39,7 +37,6 @@ class DbUtilsTestCase(unittest.TestCase):
         dbutils.getOrCreateKeyword("k2", interactive=False)
         self._assertOneObject(Keyword.selectBy(name="k2"))
 
-
     def testGetOrCreateProject(self):
         # interactive
         tui.addInputAnswers("y")
@@ -50,10 +47,8 @@ class DbUtilsTestCase(unittest.TestCase):
         dbutils.getOrCreateProject("p2", interactive=False)
         self._assertOneObject(Project.selectBy(name="p2"))
 
-
     def _assertOneObject(self, result):
         self.assertEquals(len(list(result)), 1)
-
 
     def testGetKeywordFromName(self):
         tui.addInputAnswers("y")

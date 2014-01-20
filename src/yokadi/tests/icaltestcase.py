@@ -25,18 +25,18 @@ class IcalTestCase(unittest.TestCase):
         t1 = dbutils.addTask("x", "t1", {})
         v1 = yical.createVTodoFromTask(t1)
 
-        self.assertEquals(v1.get("priority"), None) # No priority
+        self.assertEquals(v1.get("priority"), None)  # No priority
 
         t1.urgency = 45
         v1 = yical.createVTodoFromTask(t1)
         self.assertEquals(v1.get("priority"), 2)
 
         yical.updateTaskFromVTodo(t1, v1)
-        self.assertEquals(t1.urgency, 45) # Ensure urgency does change
+        self.assertEquals(t1.urgency, 45)  # Ensure urgency does change
 
         v1.set("priority", 4)
         yical.updateTaskFromVTodo(t1, v1)
-        self.assertEquals(t1.urgency, 20) # Check urgency is updated
+        self.assertEquals(t1.urgency, 20)  # Check urgency is updated
 
     def testTitleMapping(self):
         tui.addInputAnswers("y")
@@ -74,7 +74,7 @@ class IcalTestCase(unittest.TestCase):
         tui.addInputAnswers("y")
         tui.addInputAnswers("y")
         tui.addInputAnswers("y")
-        t1 = dbutils.addTask("x", "t1", {"k1":None, "k2":123})
+        t1 = dbutils.addTask("x", "t1", {"k1": None, "k2": 123})
         v1 = yical.createVTodoFromTask(t1)
 
         # Check categories are created

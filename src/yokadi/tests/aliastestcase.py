@@ -18,7 +18,6 @@ class AliasTestCase(unittest.TestCase):
         testutils.clearDatabase()
         self.cmd = AliasCmd()
 
-
     def testAdd(self):
         self.cmd.do_a_add("l t_list")
         alias = Config.selectBy(name="ALIASES")[0]
