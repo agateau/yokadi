@@ -33,7 +33,7 @@ data_files.append(["share/yokadi/update",
                    ["update/%s" % f for f in os.listdir(join(root, "update"))]])
 
 # Scripts
-scripts=["src/bin/yokadi", "src/bin/yokadid", "src/bin/xyokadi"]
+scripts=["bin/yokadi", "bin/yokadid", "bin/xyokadi"]
 
 # Version
 try:
@@ -54,8 +54,13 @@ setup(name="yokadi",
       author="The Yokadi Team",
       author_email="ml-yokadi@sequanux.org",
       url="http://yokadi.github.com/",
-      package_dir={"yokadi" : "src/yokadi"},
-      packages=["yokadi", "yokadi.tests"],
+      packages=[
+        "yokadi",
+        "yokadi.core",
+        "yokadi.tests",
+        "yokadi.ycli",
+        "yokadi.yical",
+      ],
       install_requires=['sqlobject', 'dateutils'],
       scripts=scripts,
       data_files=data_files
