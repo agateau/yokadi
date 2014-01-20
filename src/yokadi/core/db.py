@@ -29,7 +29,7 @@ from yokadi.core import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 5
+DB_VERSION = 6
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
@@ -131,7 +131,6 @@ class Task(SQLObject):
         joinColumn="task_id",
         otherColumn="keyword_id")
     recurrence = ForeignKey("Recurrence", default=None)
-    uniqTaskTitlePerProject = DatabaseIndex(title, project, unique=True)
 
     def setKeywordDict(self, dct):
         """
@@ -213,11 +212,19 @@ class Config(SQLObject):
     desc = UnicodeCol(default="", notNone=True)
 
 
+class TaskLock(SQLObject):
+    task = ForeignKey("Task")
+    pid = IntCol(default=None)
+    updateDate = DateTimeCol(default=None)
+    uniqTaskLock = DatabaseIndex(task, unique=True)
+
+
 def getConfigKey(name):
     return os.environ.get(name, Config.byName(name).value)
 
 
-TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence]
+TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence, TaskLock]
+
 
 
 def createTables():

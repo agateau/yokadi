@@ -6,13 +6,14 @@ Database utilities.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-from datetime import datetime
+from datetime import datetime, timedelta
+import os
 
 from sqlobject.dberrors import DuplicateEntryError
 from sqlobject import SQLObjectNotFound
 
 from yokadi.ycli import tui
-from yokadi.core.db import Keyword, Project, Task
+from yokadi.core.db import Keyword, Project, Task, TaskLock
 from yokadi.core.yokadiexception import YokadiException
 
 
@@ -155,4 +156,42 @@ def getKeywordFromName(name):
     if len(lst) == 0:
         raise YokadiException("No keyword named '%s' found" % name)
     return lst[0]
+
+
+class TaskLockManager:
+    """Handle a lock to prevent concurrent editing of the same task"""
+    def __init__(self, task):
+        """@param task: a Task instance"""
+        self.task = task
+
+    def _getLock(self):
+        """Retrieve the task lock if it exists (else None)"""
+        try:
+            return TaskLock.select(TaskLock.q.task == self.task).getOne()
+        except SQLObjectNotFound:
+            return  None
+
+    def acquire(self):
+        """Acquire a lock for that task and remove any previous stale lock"""
+        lock = self._getLock()
+        if lock:
+            if lock.updateDate < datetime.now() - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
+                # Stale lock, removing
+                TaskLock.delete(lock.id)
+            else:
+                raise YokadiException("Task %s is already locked by process %s" % (lock.task.id, lock.pid))
+        TaskLock(task=self.task, pid=os.getpid(), updateDate=datetime.now())
+
+    def update(self):
+        """Update lock timestamp to avoid it to expire"""
+        lock = self._getLock()
+        lock.updateDate = datetime.now()
+
+    def release(self):
+        """Release the lock for that task"""
+        # Only release our lock
+        lock = self._getLock()
+        if lock and lock.pid == os.getpid():
+            TaskLock.delete(lock.id)
+
 # vi: ts=4 sw=4 et

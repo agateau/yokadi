@@ -36,9 +36,8 @@ class BugTestCase(unittest.TestCase):
         kwDict = Task.get(1).getKeywordDict()
         self.assertEqual(kwDict, dict(_severity=2, _likelihood=4, _bug=123))
 
-        for bad_input in ("", # No project
-                          "x", # No task name
-                          "x t1"): # Existing task
+        for bad_input in ("",  # No project
+                          "x"):  # No task name
             self.assertRaises(YokadiException, self.cmd.do_bug_add, bad_input)
 
 # vi: ts=4 sw=4 et

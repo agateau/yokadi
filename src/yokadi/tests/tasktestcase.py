@@ -42,18 +42,14 @@ class TaskTestCase(unittest.TestCase):
         kwDict = Task.get(2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
-        for bad_input in ("", # No project
-                          "x"): # No task name
+        for bad_input in ("",  # No project
+                          "x"):  # No task name
             self.assertRaises(BadUsageException, self.cmd.do_t_add, bad_input)
-
-        # Existing task
-        self.assertRaises(YokadiException, self.cmd.do_t_add, "x t1")
 
         # Crypto stuff
         tui.addInputAnswers("a Secret passphrase")
         self.cmd.do_t_add("-c x encrypted t1")
         self.assertTrue(Task.get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
-
 
     def testMark(self):
         tui.addInputAnswers("y")
@@ -76,13 +72,13 @@ class TaskTestCase(unittest.TestCase):
         kwDict = task.getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
-        for bad_input in ("", # No task
-                          "1", # No keyword
-                          "1 kw1"): # No @ before kw1
+        for bad_input in ("",  # No task
+                          "1",  # No keyword
+                          "1 kw1"):  # No @ before kw1
             self.assertRaises(YokadiException, self.cmd.do_t_add_keywords, bad_input)
 
     def testLastTaskId(self):
-        # Using "_" with no prior task activity should raise an exception   
+        # Using "_" with no prior task activity should raise an exception
         self.assertRaises(YokadiException, self.cmd.getTaskFromId, "_")
 
         tui.addInputAnswers("y")
@@ -118,17 +114,17 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_mark_done("1")
         self.assertEqual(task.status, "new")
 
-        for bad_input in ("", # No task
-                          "1", # No recurence
-                          "1 foo", # Unknown recurrence
-                          "1 daily", # No time
-                          "1 weekly", # No day
-                          "1 weekly monday", # No time
-                          "1 monthly", # No day
-                          "1 monthly 10", # No time
-                          "1 quarterly", # No day
-                          "1 quarterly 10", # No time
-                          "1 monthly foo 12:00", # Bad date
+        for bad_input in ("",  # No task
+                          "1",  # No recurence
+                          "1 foo",  # Unknown recurrence
+                          "1 daily",  # No time
+                          "1 weekly",  # No day
+                          "1 weekly monday",  # No time
+                          "1 monthly",  # No day
+                          "1 monthly 10",  # No time
+                          "1 quarterly",  # No day
+                          "1 quarterly 10",  # No time
+                          "1 monthly foo 12:00",  # Bad date
                           ):
             self.assertRaises(YokadiException, self.cmd.do_t_recurs, bad_input)
 

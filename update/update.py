@@ -18,8 +18,8 @@ from sqlobject import *
 
 import dump
 
-sys.path.append(join(dirname(__file__),"..", "src"))
-import yokadi.db
+sys.path.append(join(dirname(__file__), "..", "src"))
+from yokadi.core import db
 
 def getVersion(fileName):
     cx = connectionForURI('sqlite:' + fileName)
@@ -50,7 +50,7 @@ def createFinalDb(workFileName, finalFileName):
 
     print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
     sqlhub.processConnection = connectionForURI("sqlite:" + finalFileName)
-    yokadi.db.createTables()
+    db.createTables()
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
         raise Exception("Dump restoration failed")
@@ -65,7 +65,7 @@ def main():
     if len(args) != 2:
         parser.error("Wrong argument count")
 
-    dbFileName    = abspath(args[0])
+    dbFileName = abspath(args[0])
     newDbFileName = abspath(args[1])
     if not os.path.exists(dbFileName):
         parser.error("'%s' does not exist" % dbFileName)
@@ -76,7 +76,7 @@ def main():
     # Check version
     version = getVersion(dbFileName)
     print "Found version %d" % version
-    if version == yokadi.db.DB_VERSION:
+    if version == db.DB_VERSION:
         print "Nothing to do"
         return 0
 
@@ -85,14 +85,14 @@ def main():
 
     scriptDir = os.path.dirname(__file__) or "."
     oldVersion = getVersion(workDbFileName)
-    for version in range(oldVersion, yokadi.db.DB_VERSION):
+    for version in range(oldVersion, db.DB_VERSION):
         scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
         print "Running %s" % scriptFileName
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
             print "Update failed."
             return 2
-    setVersion(workDbFileName, yokadi.db.DB_VERSION)
+    setVersion(workDbFileName, db.DB_VERSION)
 
     createFinalDb(workDbFileName, newDbFileName)
 
