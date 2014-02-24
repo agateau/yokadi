@@ -26,9 +26,10 @@ Start Yokadi:
     ./bin/yokadi
     Using default database (/home/me/.yokadi.db)
     Creating database
-    Added keyword 'severity'
-    Added keyword 'likelihood'
-    Added keyword 'bug'
+    Added keyword '_severity'
+    Added keyword '_likelihood'
+    Added keyword '_bug'
+    Added keyword '_note'
 
 Create your first task:
 
