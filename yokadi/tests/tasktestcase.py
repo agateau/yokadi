@@ -93,6 +93,16 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_mark_started("1")
         self.assertEqual(self.cmd.getTaskFromId("_"), task1)
 
+    def testLastProjectName(self):
+        # Using "_" with no prior project used should raise an exception
+        self.assertRaises(YokadiException, self.cmd.do_t_add, "_ t1")
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        task1 = Task.get(1)
+        self.cmd.do_t_add("_ t2")
+        task2 = Task.get(2)
+        self.assertEqual(task1.project, task2.project)
+
     def testRecurs(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")

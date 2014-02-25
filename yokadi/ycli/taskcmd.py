@@ -45,6 +45,7 @@ NOTE_KEYWORD = "_note"
 class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None  # Last id created, used
+        self.lastProjectName = None  # Last project name used
         self.lastTaskIds = []  # Last list of ids selected with t_list
         self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
@@ -70,6 +71,12 @@ class TaskCmd(object):
         if not line:
             raise BadUsageException("Missing parameters")
         projectName, title, keywordDict = parseutils.parseLine(line)
+        if projectName == '_':
+            if self.lastProjectName is None:
+                raise YokadiException("No previous project used")
+            projectName = self.lastProjectName
+        else:
+            self.lastProjectName = projectName
         if not title:
             raise BadUsageException("Missing title")
 
@@ -448,9 +455,20 @@ class TaskCmd(object):
 
         if projectName.startswith("!"):
             projectName = projectName[1:]
+            if projectName == '_':
+                if self.lastProjectName is None:
+                    raise YokadiException("No previous project used")
+                projectName = self.lastProjectName
             projectList = Project.select(NOT(LIKE(Project.q.name, projectName)))
         else:
+            if projectName == '_':
+                if self.lastProjectName is None:
+                    raise YokadiException("No previous project used")
+                projectName = self.lastProjectName
             projectList = Project.select(LIKE(Project.q.name, projectName))
+
+        if projectName != '_':
+            self.lastProjectName = projectName
 
         if projectList.count() == 0:
             raise YokadiException("Found no project matching '%s'" % projectName)
