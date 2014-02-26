@@ -812,6 +812,12 @@ class TaskCmd(object):
             raise YokadiException("You should give two arguments: <task id> <project>")
         task = self.getTaskFromId(tokens[0])
         projectName = tokens[1]
+        if projectName == '_':
+            if self.lastProjectName is None:
+                raise YokadiException("No previous project used")
+            projectName = self.lastProjectName
+        else:
+            self.lastProjectName = projectName
 
         task.project = dbutils.getOrCreateProject(projectName)
         if task.project:

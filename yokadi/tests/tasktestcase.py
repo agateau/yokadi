@@ -85,6 +85,11 @@ class TaskTestCase(unittest.TestCase):
         task1 = Task.get(1)
         self.assertEqual(task1.project.name, "y")
 
+        self.cmd.do_t_add("x t2")
+        self.cmd.do_t_project("1 _")
+        task1 = Task.get(1)
+        self.assertEqual(task1.project.name, "x")
+
     def testLastTaskId(self):
         # Using "_" with no prior task activity should raise an exception
         self.assertRaises(YokadiException, self.cmd.getTaskFromId, "_")
