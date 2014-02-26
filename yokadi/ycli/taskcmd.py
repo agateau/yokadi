@@ -71,12 +71,7 @@ class TaskCmd(object):
         if not line:
             raise BadUsageException("Missing parameters")
         projectName, title, keywordDict = parseutils.parseLine(line)
-        if projectName == '_':
-            if self.lastProjectName is None:
-                raise YokadiException("No previous project used")
-            projectName = self.lastProjectName
-        else:
-            self.lastProjectName = projectName
+        projectName = self._realProjectName(projectName)
         if not title:
             raise BadUsageException("Missing title")
 
@@ -429,6 +424,14 @@ class TaskCmd(object):
 
         return parser
 
+    def _realProjectName(self, name):
+        if name == '_':
+            if self.lastProjectName is None:
+                raise YokadiException("No previous project used")
+        else:
+            self.lastProjectName = name
+        return self.lastProjectName
+
     def _parseListLine(self, parser, line):
         """
         Parse line with parser, returns a tuple of the form
@@ -454,21 +457,11 @@ class TaskCmd(object):
                 projectName = "%"
 
         if projectName.startswith("!"):
-            projectName = projectName[1:]
-            if projectName == '_':
-                if self.lastProjectName is None:
-                    raise YokadiException("No previous project used")
-                projectName = self.lastProjectName
+            projectName = self._realProjectName(projectName[1:])
             projectList = Project.select(NOT(LIKE(Project.q.name, projectName)))
         else:
-            if projectName == '_':
-                if self.lastProjectName is None:
-                    raise YokadiException("No previous project used")
-                projectName = self.lastProjectName
+            projectName = self._realProjectName(projectName)
             projectList = Project.select(LIKE(Project.q.name, projectName))
-
-        if projectName != '_':
-            self.lastProjectName = projectName
 
         if projectList.count() == 0:
             raise YokadiException("Found no project matching '%s'" % projectName)
@@ -812,12 +805,7 @@ class TaskCmd(object):
             raise YokadiException("You should give two arguments: <task id> <project>")
         task = self.getTaskFromId(tokens[0])
         projectName = tokens[1]
-        if projectName == '_':
-            if self.lastProjectName is None:
-                raise YokadiException("No previous project used")
-            projectName = self.lastProjectName
-        else:
-            self.lastProjectName = projectName
+        projectName = self._realProjectName(projectName)
 
         task.project = dbutils.getOrCreateProject(projectName)
         if task.project:
