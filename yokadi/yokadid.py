@@ -17,6 +17,14 @@ from optparse import OptionParser
 
 from sqlobject import AND
 
+try:
+    import setproctitle
+except ImportError:
+    print "You don't have the setproctitle package."
+    print "Get it on http://pypi.python.org/pypi/setproctitle‎/"
+    print "Or use 'easy_install setproctitle‎'"
+    sys.exit(1)
+
 from yokadi.core.daemon import Daemon
 from yokadi.core import basedirs
 from yokadi.ycli import tui
@@ -195,7 +203,8 @@ class YokadiDaemon(Daemon):
 
 def main():
     # TODO: check that yokadid is not already running for this database ? Not very harmful...
-    # TODO: change unix process name to "yokadid"
+    # Set process name to "yokadid"
+    setproctitle.setproctitle("yokadid")
 
     # Make the event list global to allow communication with main event loop
     global event
