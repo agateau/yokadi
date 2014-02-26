@@ -77,6 +77,14 @@ class TaskTestCase(unittest.TestCase):
                           "1 kw1"):  # No @ before kw1
             self.assertRaises(YokadiException, self.cmd.do_t_add_keywords, bad_input)
 
+    def testSetProject(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        tui.addInputAnswers("y")
+        self.cmd.do_t_project("1 y")
+        task1 = Task.get(1)
+        self.assertEqual(task1.project.name, "y")
+
     def testLastTaskId(self):
         # Using "_" with no prior task activity should raise an exception
         self.assertRaises(YokadiException, self.cmd.getTaskFromId, "_")
