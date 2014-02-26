@@ -15,6 +15,7 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
 - Python 2.4 or higher.
 - Sqlite module (included in Python since 2.5 release).
 - iCalendar module (optional, for Yokadi Daemon only)
+- setproctitle module (optional, for Yokadi Daemon only)
 - SQLObject 0.9 or higher.
 
 # Quickstart
