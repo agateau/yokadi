@@ -1,0 +1,12 @@
+language: python
+
+python:
+  - "2.7"
+  - "2.6"
+
+script:
+  - python yokadi/tests/tests.py
+
+notifications:
+  email: false
+  irc: "chat.freenode.net#yokadi"
