@@ -45,6 +45,7 @@ NOTE_KEYWORD = "_note"
 class TaskCmd(object):
     def __init__(self):
         self.lastTaskId = None  # Last id created, used
+        self.lastProjectName = None  # Last project name used
         self.lastTaskIds = []  # Last list of ids selected with t_list
         self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
@@ -70,6 +71,7 @@ class TaskCmd(object):
         if not line:
             raise BadUsageException("Missing parameters")
         projectName, title, keywordDict = parseutils.parseLine(line)
+        projectName = self._realProjectName(projectName)
         if not title:
             raise BadUsageException("Missing title")
 
@@ -422,6 +424,14 @@ class TaskCmd(object):
 
         return parser
 
+    def _realProjectName(self, name):
+        if name == '_':
+            if self.lastProjectName is None:
+                raise YokadiException("No previous project used")
+        else:
+            self.lastProjectName = name
+        return self.lastProjectName
+
     def _parseListLine(self, parser, line):
         """
         Parse line with parser, returns a tuple of the form
@@ -447,9 +457,10 @@ class TaskCmd(object):
                 projectName = "%"
 
         if projectName.startswith("!"):
-            projectName = projectName[1:]
+            projectName = self._realProjectName(projectName[1:])
             projectList = Project.select(NOT(LIKE(Project.q.name, projectName)))
         else:
+            projectName = self._realProjectName(projectName)
             projectList = Project.select(LIKE(Project.q.name, projectName))
 
         if projectList.count() == 0:
@@ -794,6 +805,7 @@ class TaskCmd(object):
             raise YokadiException("You should give two arguments: <task id> <project>")
         task = self.getTaskFromId(tokens[0])
         projectName = tokens[1]
+        projectName = self._realProjectName(projectName)
 
         task.project = dbutils.getOrCreateProject(projectName)
         if task.project:

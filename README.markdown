@@ -39,11 +39,11 @@ Create your first task:
     Added project 'birthday'
     Added task 'Buy food and drinks' (id=1)
 
-Add two other tasks:
+Add two other tasks, you can use _ to refer to last project used:
 
-    yokadi> t_add birthday Invite Bob
+    yokadi> t_add _ Invite Bob
     Added task 'Invite Bob' (id=2)
-    yokadi> t_add birthday Invite Wendy
+    yokadi> t_add _ Invite Wendy
     Added task 'Invite Wendy' (id=3)
 
 List tasks for project "birthday":
