@@ -66,6 +66,18 @@ class YDateUtilsTestCase(unittest.TestCase):
             output = ydateutils.parseHumaneDateTime(text, hint=hint, today=today)
             self.assertEquals(expected, output)
 
+    def testPastTime(self):
+        # Fake now to a fixed date and time
+        now = datetime(2009, 1, 3, 11, 0)
+        testData = [
+            ("1:00pm", now.replace(hour=13, minute=0)),
+            ("10:00am", now.replace(hour=10, minute=0) + timedelta(days=1)),
+            ]
+
+        for text, expected in testData:
+            output = ydateutils.parseHumaneDateTime(text, hint=None, today=now)
+            self.assertEquals(expected, output)
+
     def testFormatTimeDelta(self):
         testData = [
             (timedelta(minutes=1), "1m"),

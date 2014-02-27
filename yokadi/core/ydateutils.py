@@ -168,7 +168,11 @@ def parseHumaneDateTime(line, hint=None, today=None):
     # Only time?
     tTime = guessTime(line)
     if tTime is not None:
-        return datetime.combine(today.date(), tTime)
+        tDate = datetime.combine(today.date(), tTime)
+        if tTime > today.time():
+            return tDate
+        else:
+            return tDate + timedelta(days=1)
 
     raise YokadiException("Unable to understand date '%s'" % line)
 
