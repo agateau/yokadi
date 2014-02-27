@@ -119,7 +119,7 @@ def updateTaskFromVTodo(task, vTodo):
                     continue
                 else:
                     # Priority has changed, we need to update urgency
-                    attr = icalutils.icalPriorityToYokadiUrgency(attr)
+                    attr = icalutils.icalPriorityToYokadiUrgency(int(attr))
 
             # Update attribute
             setattr(task, yokadiAttribute, attr)
