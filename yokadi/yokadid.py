@@ -21,8 +21,8 @@ try:
     import setproctitle
 except ImportError:
     print "You don't have the setproctitle package."
-    print "Get it on http://pypi.python.org/pypi/setproctitle‎/"
-    print "Or use 'easy_install setproctitle‎'"
+    print "Get it on http://pypi.python.org/pypi/setproctitle/"
+    print "Or use 'easy_install setproctitle'"
     sys.exit(1)
 
 from yokadi.core.daemon import Daemon
