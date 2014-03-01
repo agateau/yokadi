@@ -56,18 +56,19 @@ class TaskCmd(object):
     def _parser_t_add(self, cmd):
         """Code shared by t_add, bug_add and n_add parsers."""
         parser = YokadiOptionParser()
-        parser.set_usage("%s [options] <projectName> [@<keyword1>] [@<keyword2>] <title>" % cmd)
-        parser.set_description("Add new %s. Will prompt to create keywords if they do not exist." % cmd)
-        parser.add_option("-c", dest="crypt", default=False, action="store_true",
+        parser.usage = "%s [options] <projectName> [@<keyword1>] [@<keyword2>] <title>" % cmd
+        parser.description = "Add new %s. Will prompt to create keywords if they do not exist." % cmd
+        parser.add_argument("-c", dest="crypt", default=False, action="store_true",
                           help="Encrypt title")
+        parser.add_argument('cmd', nargs='*')
         return parser
 
     def _t_add(self, cmd, line):
         """Code shared by t_add, bug_add and n_add."""
         parser = self._parser_t_add(cmd)
-        options, args = parser.parse_args(line)
+        args = parser.parse_args(line)
 
-        line = " ".join(args)
+        line = " ".join(args.cmd)
         if not line:
             raise BadUsageException("Missing parameters")
         projectName, title, keywordDict = parseutils.parseLine(line)
@@ -75,7 +76,7 @@ class TaskCmd(object):
         if not title:
             raise BadUsageException("Missing title")
 
-        if options.crypt:
+        if args.crypt:
             # Obfuscate line in history
             length = readline.get_current_history_length()
             if length > 0:  # Ensure history is positive to avoid crash with bad readline setup
@@ -155,14 +156,13 @@ class TaskCmd(object):
         task.urgency = bugutils.computeUrgency(keywordDict)
     complete_bug_edit = taskIdCompleter
 
-    def getTaskFromId(self, line):
-        line = line.strip()
-        if line == '_':
+    def getTaskFromId(self, tid):
+        if tid == '_':
             if self.lastTaskId is None:
                 raise YokadiException("No previous task defined")
-            line = str(self.lastTaskId)
-        task = dbutils.getTaskFromId(line)
-        if line != '_':
+            tid = self.lastTaskId
+        task = dbutils.getTaskFromId(tid)
+        if tid != '_':
             self.lastTaskId = task.id
         return task
 
@@ -301,17 +301,18 @@ class TaskCmd(object):
 
     def parser_t_remove(self):
         parser = YokadiOptionParser()
-        parser.set_usage("t_remove [options] <id>")
-        parser.set_description("Delete a task.")
-        parser.add_option("-f", dest="force", default=False, action="store_true",
+        parser.usage = "t_remove [options] <id>"
+        parser.description = "Delete a task."
+        parser.add_argument("-f", dest="force", default=False, action="store_true",
                           help="Skip confirmation prompt")
+        parser.add_argument("id")
         return parser
 
     def do_t_remove(self, line):
         parser = self.parser_t_remove()
-        options, args = parser.parse_args(line)
-        task = self.getTaskFromId(' '.join(args))
-        if not options.force:
+        args = parser.parse_args(line)
+        task = self.getTaskFromId(args.id)
+        if not args.force:
             if not tui.confirm("Remove task '%s'" % task.title):
                 return
         projectId = task.project.id
@@ -326,28 +327,28 @@ class TaskCmd(object):
 
     def parser_t_purge(self):
         parser = YokadiOptionParser()
-        parser.set_usage("t_purge [options]")
-        parser.set_description("Remove old done tasks from all projects.")
-        parser.add_option("-f", "--force", dest="force", default=False, action="store_true",
+        parser.usage = "t_purge [options]"
+        parser.description = "Remove old done tasks from all projects."
+        parser.add_argument("-f", "--force", dest="force", default=False, action="store_true",
                           help="Skip confirmation prompt")
         delay = int(Config.byName("PURGE_DELAY").value)
-        parser.add_option("-d", "--delay", dest="delay", default=delay,
-                          type="int", help="Delay (in days) after which done tasks are destroyed. Default is %d." % delay)
+        parser.add_argument("-d", "--delay", dest="delay", default=delay,
+                          type=int, help="Delay (in days) after which done tasks are destroyed. Default is %d." % delay)
         return parser
 
     def do_t_purge(self, line):
         parser = self.parser_t_purge()
-        options, args = parser.parse_args(line)
+        args = parser.parse_args(line)
         filters = []
         filters.append(Task.q.status == "done")
-        filters.append(Task.q.doneDate < (datetime.now() - timedelta(days=options.delay)))
+        filters.append(Task.q.doneDate < (datetime.now() - timedelta(days=args.delay)))
         tasks = Task.select(AND(*filters))
         if tasks.count() == 0:
             print "No tasks need to be purged"
             return
         print "The following tasks will be removed:"
         print "\n".join(["%s: %s" % (task.id, task.title) for task in tasks])
-        if options.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
+        if args.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
             Task.deleteMany(AND(*filters))
             print "Tasks deleted"
         else:
@@ -355,41 +356,40 @@ class TaskCmd(object):
 
     def parser_t_list(self):
         parser = YokadiOptionParser()
-        parser.set_usage("t_list [options] <project_or_keyword_filter>")
-        parser.set_description(
-            "List tasks filtered by project and/or keywords. "
-            "'%' can be used as a wildcard in the project name: "
-            "to list projects starting with 'foo', use 'foo%'. "
-            "Keyword filtering is achieved with '@'. Ex.: "
-            "t_list @home, t_list @_bug=2394")
+        parser.usage = "t_list [options] <project_or_keyword_filter>"
+        parser.description = "List tasks filtered by project and/or keywords. " \
+                             "'%' can be used as a wildcard in the project name: " \
+                             "to list projects starting with 'foo', use 'foo%'. " \
+                             "Keyword filtering is achieved with '@'. Ex.: " \
+                             "t_list @home, t_list @_bug=2394"
 
-        parser.add_option("-a", "--all", dest="status",
+        parser.add_argument("-a", "--all", dest="status",
                           action="store_const", const="all",
                           help="all tasks (done and to be done)")
 
-        parser.add_option("--started", dest="status",
+        parser.add_argument("--started", dest="status",
                           action="store_const", const="started",
                           help="only started tasks")
 
         rangeList = ["today", "thisweek", "thismonth", "all"]
-        parser.add_option("-d", "--done", dest="done",
+        parser.add_argument("-d", "--done", dest="done",
                           help="only done tasks. <range> must be either one of %s or a date using the same format as t_due" % ", ".join(rangeList),
                           metavar="<range>")
 
-        parser.add_option("-u", "--urgency", dest="urgency",
-                          type="int",
+        parser.add_argument("-u", "--urgency", dest="urgency",
+                          type=int,
                           help="tasks with urgency greater or equal than <urgency>",
                           metavar="<urgency>")
 
-        parser.add_option("-t", "--top-due", dest="topDue",
+        parser.add_argument("-t", "--top-due", dest="topDue",
                           default=False, action="store_true",
                           help="top 5 urgent tasks of each project based on due date")
 
-        parser.add_option("--overdue", dest="due",
+        parser.add_argument("--overdue", dest="due",
                           action="append_const", const="now",
                           help="all overdue tasks")
 
-        parser.add_option("--due", dest="due",
+        parser.add_argument("--due", dest="due",
                           action="append",
                           help="""only list tasks due before/after <limit>. <limit> is a
                           date optionaly prefixed with a comparison operator.
@@ -402,25 +402,27 @@ class TaskCmd(object):
                           """,
                           metavar="<limit>")
 
-        parser.add_option("-k", "--keyword", dest="keyword",
+        parser.add_argument("-k", "--keyword", dest="keyword",
                           help="Group tasks by given keyword instead of project. The % wildcard can be used.",
                           metavar="<keyword>")
 
-        parser.add_option("-s", "--search", dest="search",
+        parser.add_argument("-s", "--search", dest="search",
                           action="append",
                           help="only list tasks whose title or description match <value>. You can repeat this option to search on multiple words.",
                           metavar="<value>")
 
         formatList = ["auto"] + gRendererClassDict.keys()
-        parser.add_option("-f", "--format", dest="format",
-                          type="choice", default="auto", choices=formatList,
+        parser.add_argument("-f", "--format", dest="format",
+                          default="auto", choices=formatList,
                           help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
                           metavar="<format>")
-        parser.add_option("-o", "--output", dest="output",
+        parser.add_argument("-o", "--output", dest="output",
                           help="Output task list to <file>",
                           metavar="<file>")
-        parser.add_option("--decrypt", dest="decrypt", default=False, action="store_true",
+        parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
                           help="Decrypt task title and description")
+
+        parser.add_argument("filter", nargs="*", metavar="<project_or_keyword_filter>")
 
         return parser
 
@@ -437,9 +439,9 @@ class TaskCmd(object):
         Parse line with parser, returns a tuple of the form
         (options, projectList, filters)
         """
-        options, args = parser.parse_args(line)
-        if len(args) > 0:
-            projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args))
+        args = parser.parse_args(line)
+        if len(args.filter) > 0:
+            projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args.filter))
         else:
             projectName = ""
             keywordFilters = []
@@ -477,15 +479,15 @@ class TaskCmd(object):
             filters.append(keywordFilter.filter())
 
         # Search
-        if options.search:
-            for word in options.search:
+        if args.search:
+            for word in args.search:
                 if word.startswith("@"):
                     tui.warning("Maybe you want keyword search (without -s option) "
                                 "instead of plain text search?")
                 filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
                                   LIKE(Task.q.description, "%" + word + "%")))
 
-        return options, projectList, filters
+        return args, projectList, filters
 
     def _renderList(self, renderer, projectList, filters, order,
                     limit=None, groupKeyword=None):
@@ -539,14 +541,14 @@ class TaskCmd(object):
     def do_t_list(self, line):
 
         def selectRendererClass():
-            if options.format != "auto":
-                return gRendererClassDict[options.format]
+            if args.format != "auto":
+                return gRendererClassDict[args.format]
 
             defaultRendererClass = TextListRenderer
-            if not options.output:
+            if not args.output:
                 return defaultRendererClass
 
-            ext = os.path.splitext(options.output)[1]
+            ext = os.path.splitext(args.output)[1]
             if not ext:
                 return defaultRendererClass
 
@@ -556,7 +558,7 @@ class TaskCmd(object):
         self.lastTaskIds = []
 
         # BUG: completion based on parameter position is broken when parameter is given
-        options, projectList, filters = self._parseListLine(self.parser_t_list(), line)
+        args, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
         filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
@@ -564,35 +566,35 @@ class TaskCmd(object):
         # Handle t_list specific options
         order = -Task.q.urgency, Task.q.creationDate
         limit = None
-        if options.done:
+        if args.done:
             filters.append(Task.q.status == 'done')
-            if options.done != "all":
-                minDate = ydateutils.parseMinDate(options.done)
+            if args.done != "all":
+                minDate = ydateutils.parseMinDate(args.done)
                 filters.append(Task.q.doneDate >= minDate)
-        elif options.status == "all":
+        elif args.status == "all":
             pass
-        elif options.status == "started":
+        elif args.status == "started":
             filters.append(Task.q.status == 'started')
         else:
             filters.append(Task.q.status != 'done')
-        if options.urgency:
+        if args.urgency:
             order = -Task.q.urgency
-            filters.append(Task.q.urgency >= options.urgency)
-        if options.topDue:
+            filters.append(Task.q.urgency >= args.urgency)
+        if args.topDue:
             filters.append(Task.q.dueDate != None)
             order = Task.q.dueDate
             limit = 5
-        if options.due:
-            for due in options.due:
+        if args.due:
+            for due in args.due:
                 dueOperator, dueLimit = ydateutils.parseDateLimit(due)
                 filters.append(dueOperator(Task.q.dueDate, dueLimit))
             order = Task.q.dueDate
-        if options.decrypt:
+        if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
         # Define output
-        if options.output:
-            out = open(options.output, "w")
+        if args.output:
+            out = open(args.output, "w")
         else:
             out = tui.stdout
 
@@ -601,42 +603,42 @@ class TaskCmd(object):
         renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
 
         # Fill the renderer
-        self._renderList(renderer, projectList, filters, order, limit, options.keyword)
+        self._renderList(renderer, projectList, filters, order, limit, args.keyword)
     complete_t_list = projectAndKeywordCompleter
 
     def parser_n_list(self):
         parser = YokadiOptionParser()
-        parser.set_usage("n_list [options] <project_or_keyword_filter>")
-        parser.set_description(
-            "List notes filtered by project and/or keywords. "
-            "'%' can be used as a wildcard in the project name: "
-            "to list projects starting with 'foo', use 'foo%'. "
-            "Keyword filtering is achieved with '@'. Ex.: "
-            "n_list @home, n_list @_bug=2394")
+        parser.usage = "n_list [options] <project_or_keyword_filter>"
+        parser.description = "List notes filtered by project and/or keywords. " \
+                                 "'%' can be used as a wildcard in the project name: " \
+                                 "to list projects starting with 'foo', use 'foo%'. " \
+                                 "Keyword filtering is achieved with '@'. Ex.: " \
+                                 "n_list @home, n_list @_bug=2394"
 
-        parser.add_option("-s", "--search", dest="search",
+        parser.add_argument("-s", "--search", dest="search",
                           action="append",
                           help="only list notes whose title or description match <value>. You can repeat this option to search on multiple words.",
                           metavar="<value>")
 
-        parser.add_option("-k", "--keyword", dest="keyword",
+        parser.add_argument("-k", "--keyword", dest="keyword",
                           help="Group tasks by given keyword instead of project. The % wildcard can be used.",
                           metavar="<keyword>")
-        parser.add_option("--decrypt", dest="decrypt", default=False, action="store_true",
+        parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
                           help="Decrypt note title and description")
+        parser.add_argument("filter", nargs="*", metavar="<project_or_keyword_filter>")
 
         return parser
 
     def do_n_list(self, line):
-        options, projectList, filters = self._parseListLine(self.parser_n_list(), line)
-        if options.decrypt:
+        args, projectList, filters = self._parseListLine(self.parser_n_list(), line)
+        if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
         order = Task.q.creationDate
         renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
-                         groupKeyword=options.keyword)
+                         groupKeyword=args.keyword)
     complete_n_list = projectAndKeywordCompleter
 
     def do_t_reorder(self, line):
@@ -673,32 +675,32 @@ class TaskCmd(object):
 
     def parser_t_show(self):
         parser = YokadiOptionParser()
-        parser.set_usage("t_show [options] <id>")
-        parser.set_description("Display details of a task.")
+        parser.usage = "t_show [options] <id>"
+        parser.description = "Display details of a task."
         choices = ["all", "summary", "description"]
-        parser.add_option("--output", dest="output", type="choice",
+        parser.add_argument("--output", dest="output",
                           choices=choices,
                           default="all",
                           help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
                           metavar="<output>")
-        parser.add_option("--decrypt", dest="decrypt", default=False, action="store_true",
+        parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
                           help="Decrypt task title and description")
-
+        parser.add_argument("id")
         return parser
 
     def do_t_show(self, line):
         parser = self.parser_t_show()
-        options, args = parser.parse_args(line)
+        args = parser.parse_args(line)
 
-        if options.decrypt:
+        if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
-        task = self.getTaskFromId(' '.join(args))
+        task = self.getTaskFromId(args.id)
 
         title = self.cryptoMgr.decrypt(task.title)
         description = self.cryptoMgr.decrypt(task.description)
 
-        if options.output in ("all", "summary"):
+        if args.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
             keywordArray = []
             for name, value in keywordDict.items():
@@ -725,8 +727,8 @@ class TaskCmd(object):
 
             tui.renderFields(fields)
 
-        if options.output in ("all", "description") and task.description:
-            if options.output == "all":
+        if args.output in ("all", "description") and task.description:
+            if args.output == "all":
                 print
             print description
 

@@ -12,7 +12,7 @@ from os.path import abspath, dirname, join
 import subprocess
 import sys
 import shutil
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 from sqlobject import *
 
@@ -58,15 +58,15 @@ def createFinalDb(workFileName, finalFileName):
 
 def main():
     # Parse args
-    parser = OptionParser()
-
+    parser = ArgumentParser()
+    parser.add_argument('current', metavar='<path/to/current.db>')
+    parser.add_argument('updated', metavar='<path/to/updated.db>')
     parser.usage = "%prog <path/to/current.db> <path/to/updated.db>"
-    (options, args) = parser.parse_args()
-    if len(args) != 2:
-        parser.error("Wrong argument count")
 
-    dbFileName = abspath(args[0])
-    newDbFileName = abspath(args[1])
+    args = parser.parse_args()
+
+    dbFileName = abspath(args.current)
+    newDbFileName = abspath(args.updated)
     if not os.path.exists(dbFileName):
         parser.error("'%s' does not exist" % dbFileName)
 

@@ -100,17 +100,18 @@ class ProjectCmd(object):
 
     def parser_p_remove(self):
         parser = YokadiOptionParser()
-        parser.set_usage("p_remove [options] <project_name>")
-        parser.set_description("Remove a project and all its associated tasks.")
-        parser.add_option("-f", dest="force", default=False, action="store_true",
+        parser.usage = "p_remove [options] <project_name>"
+        parser.description = "Remove a project and all its associated tasks."
+        parser.add_argument("-f", dest="force", default=False, action="store_true",
                           help="Skip confirmation prompt")
+        parser.add_argument("project")
         return parser
 
     def do_p_remove(self, line):
         parser = self.parser_p_remove()
-        options, args = parser.parse_args(line)
-        project = getProjectFromName(' '.join(args))
-        if not options.force:
+        args = parser.parse_args(line)
+        project = getProjectFromName(args.project)
+        if not args.force:
             if not tui.confirm("Remove project '%s' and all its tasks" % project.name):
                 return
         taskList = Task.select(Task.q.projectID == project.id)

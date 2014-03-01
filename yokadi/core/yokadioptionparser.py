@@ -1,12 +1,12 @@
 # -*- coding: UTF-8 -*-
 """
-An OptionParser which accepts a single string as input and raise an exception
+An ArgumentParser which accepts a single string as input and raise an exception
 instead of calling sys.exit() in case of error
 
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-from optparse import OptionParser
+from argparse import ArgumentParser
 import sys
 
 from yokadi.core.yokadiexception import YokadiException
@@ -17,9 +17,9 @@ class YokadiOptionParserNormalExitException(YokadiException):
     pass
 
 
-class YokadiOptionParser(OptionParser):
+class YokadiOptionParser(ArgumentParser):
     def __init__(self):
-        OptionParser.__init__(self)
+        ArgumentParser.__init__(self)
 
     def parse_args(self, line):
         argv = line.split(u" ")
@@ -28,8 +28,8 @@ class YokadiOptionParser(OptionParser):
             argv = []
 
         # Unknown options will throw an error
-        options, args = OptionParser.parse_args(self, argv)
-        return options, args
+        args = ArgumentParser.parse_args(self, argv)
+        return args
 
     def exit(self, status=0, msg=None):
         if msg:

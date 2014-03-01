@@ -13,7 +13,7 @@ import time
 from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 from sqlobject import AND
 
@@ -121,41 +121,41 @@ def killYokadid(pidFile):
 
 
 def parseOptions(defaultPidFile, defaultLogFile):
-    parser = OptionParser()
+    parser = ArgumentParser()
 
-    parser.add_option("-d", "--db", dest="filename",
+    parser.add_argument("-d", "--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
-    parser.add_option("-i", "--icalserver",
+    parser.add_argument("-i", "--icalserver",
                       dest="icalserver", default=False, action="store_true",
                       help="Start the optional HTTP Ical Server")
 
-    parser.add_option("-p", "--port",
+    parser.add_argument("-p", "--port",
                       dest="tcpPort", default=DEFAULT_TCP_ICAL_PORT,
                       help="TCP port of ical server (default: %s)" % DEFAULT_TCP_ICAL_PORT,
                       metavar="PORT")
 
-    parser.add_option("-l", "--listen",
+    parser.add_argument("-l", "--listen",
                       dest="tcpListen", default=False, action="store_true",
                       help="Listen on all interface (not only localhost) for ical server")
 
-    parser.add_option("-k", "--kill",
+    parser.add_argument("-k", "--kill",
                       dest="kill", default=False, action="store_true",
                       help="Kill the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
 
-    parser.add_option("--restart",
+    parser.add_argument("--restart",
                       dest="restart", default=False, action="store_true",
                       help="Restart the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
 
-    parser.add_option("-f", "--foreground",
+    parser.add_argument("-f", "--foreground",
                       dest="foreground", default=False, action="store_true",
                       help="Don't fork background. Useful for debug")
 
-    parser.add_option("--pid",
+    parser.add_argument("--pid",
                       dest="pidFile", default=defaultPidFile,
                       help="File in which Yokadi daemon stores its process ID (default: %s)" % defaultPidFile)
 
-    parser.add_option("--log",
+    parser.add_argument("--log",
                       dest="logFile", default=defaultLogFile,
                       help="File in which Yokadi daemon stores its log output (default: %s)" % defaultLogFile)
 
@@ -211,27 +211,27 @@ def main():
 
     defaultPidFile = os.path.join(basedirs.getRuntimeDir(), "yokadid.pid")
     defaultLogFile = os.path.join(basedirs.getLogDir(), "yokadid.log")
-    (options, args) = parseOptions(defaultPidFile, defaultLogFile)
+    args = parseOptions(defaultPidFile, defaultLogFile)
 
-    if options.kill:
-        killYokadid(options.pidFile)
+    if args.kill:
+        killYokadid(args.pidFile)
         sys.exit(0)
 
-    if options.pidFile == defaultPidFile:
-        createDirForFile(options.pidFile)
+    if args.pidFile == defaultPidFile:
+        createDirForFile(args.pidFile)
 
-    if options.logFile == defaultLogFile:
-        createDirForFile(options.logFile)
+    if args.logFile == defaultLogFile:
+        createDirForFile(args.logFile)
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)
 
-    if options.restart:
-        daemon = YokadiDaemon(options)
+    if args.restart:
+        daemon = YokadiDaemon(args)
         daemon.restart()
 
-    daemon = YokadiDaemon(options)
-    if options.foreground:
+    daemon = YokadiDaemon(args)
+    if args.foreground:
         daemon.run()
     else:
         daemon.start()
