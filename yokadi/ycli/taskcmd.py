@@ -403,7 +403,7 @@ class TaskCmd(object):
                           metavar="<limit>")
 
         parser.add_argument("-k", "--keyword", dest="keyword",
-                          help="Group tasks by given keyword instead of project. The % wildcard can be used.",
+                          help="Group tasks by given keyword instead of project. The %% wildcard can be used.",
                           metavar="<keyword>")
 
         parser.add_argument("-s", "--search", dest="search",
