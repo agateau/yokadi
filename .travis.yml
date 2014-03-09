@@ -4,6 +4,10 @@ python:
   - "2.7"
   - "2.6"
 
+install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install argparse; fi
+  - pip install -r requirements.txt
+
 script:
   - python yokadi/tests/tests.py
 
