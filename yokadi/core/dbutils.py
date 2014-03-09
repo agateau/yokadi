@@ -69,7 +69,7 @@ def updateTask(task, projectName, title, keywordDict):
 def getTaskFromId(tid, parameterName="id"):
     """Returns a task given its id, or raise a YokadiException if it does not
     exist.
-    @param line: taskId string
+    @param tid: taskId string
     @param parameterName: name of the parameter to mention in exception
     @return: Task instance or None if existingTask is False"""
 

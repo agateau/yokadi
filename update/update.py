@@ -61,7 +61,6 @@ def main():
     parser = ArgumentParser()
     parser.add_argument('current', metavar='<path/to/current.db>')
     parser.add_argument('updated', metavar='<path/to/updated.db>')
-    parser.usage = "%prog <path/to/current.db> <path/to/updated.db>"
 
     args = parser.parse_args()
 

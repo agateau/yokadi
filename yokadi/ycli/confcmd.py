@@ -17,8 +17,7 @@ from yokadi.core.yokadioptionparser import YokadiOptionParser
 class ConfCmd(object):
 
     def parser_c_get(self):
-        parser = YokadiOptionParser()
-        parser.usage = "c_get [options] [<key>]"
+        parser = YokadiOptionParser(prog="c_get")
         parser.description = "Display the value of a configuration key. If no key is given, all keys are shown."
         parser.add_argument("-s", dest="system", default=False, action="store_true",
                           help="Display value of system keys instead of user ones")

@@ -18,8 +18,8 @@ class YokadiOptionParserNormalExitException(YokadiException):
 
 
 class YokadiOptionParser(ArgumentParser):
-    def __init__(self):
-        ArgumentParser.__init__(self)
+    def __init__(self, prog=None):
+        ArgumentParser.__init__(self, prog=prog)
 
     def parse_args(self, line):
         argv = line.split(u" ")
