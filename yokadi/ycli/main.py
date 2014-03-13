@@ -25,7 +25,7 @@ reload(sys)  # So as to enable setdefaultencoding
 
 import traceback
 from cmd import Cmd
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 try:
     from sqlobject import __doc__ as sqlobjectVersion
@@ -198,45 +198,48 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
 
 def main():
     locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
-    parser = OptionParser()
+    parser = ArgumentParser()
 
-    parser.add_option("-d", "--db", dest="filename",
+    parser.add_argument("-d", "--db", dest="filename",
                       help="TODO database", metavar="FILE")
 
-    parser.add_option("-c", "--create-only",
+    parser.add_argument("-c", "--create-only",
                       dest="createOnly", default=False, action="store_true",
                       help="Just create an empty database")
 
-    parser.add_option("-v", "--version",
+    parser.add_argument("-v", "--version",
                       dest="version", action="store_true",
                       help="Display Yokadi current version")
 
-    (options, args) = parser.parse_args()
+    parser.add_argument('cmd', nargs='*')
 
-    if options.version:
+    args = parser.parse_args()
+
+    if args.version:
         print "Yokadi - %s" % utils.currentVersion()
         return
 
-    if not options.filename:
+    if not args.filename:
         # Look if user define an env VAR for yokadi db
-        options.filename = os.getenv("YOKADI_DB")
-        if options.filename:
-            print "Using env defined database (%s)" % options.filename
+        args.filename = os.getenv("YOKADI_DB")
+        if args.filename:
+            print "Using env defined database (%s)" % args.filename
         else:
-            options.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
-            print "Using default database (%s)" % options.filename
+            args.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
+            print "Using default database (%s)" % args.filename
 
-    db.connectDatabase(options.filename)
+    db.connectDatabase(args.filename)
 
-    if options.createOnly:
+    if args.createOnly:
         return
 
     db.setDefaultConfig()  # Set default config parameters
 
     cmd = YokadiCmd()
     try:
-        if len(args) > 0:
-            cmd.onecmd(" ".join(args))
+        if len(args.cmd) > 0:
+            print " ".join(args.cmd)
+            cmd.onecmd(" ".join(args.cmd))
         else:
             cmd.cmdloop()
     except KeyboardInterrupt:

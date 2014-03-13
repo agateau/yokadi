@@ -17,20 +17,20 @@ from yokadi.core.yokadioptionparser import YokadiOptionParser
 class ConfCmd(object):
 
     def parser_c_get(self):
-        parser = YokadiOptionParser()
-        parser.set_usage("c_get [options] [<key>]")
-        parser.set_description("Display the value of a configuration key. If no key is given, all keys are shown.")
-        parser.add_option("-s", dest="system", default=False, action="store_true",
+        parser = YokadiOptionParser(prog="c_get")
+        parser.description = "Display the value of a configuration key. If no key is given, all keys are shown."
+        parser.add_argument("-s", dest="system", default=False, action="store_true",
                           help="Display value of system keys instead of user ones")
+        parser.add_argument("key", nargs='?')
         return parser
 
     def do_c_get(self, line):
         parser = self.parser_c_get()
-        options, args = parser.parse_args(line)
-        line = u" ".join(args)
-        if not line:
-            line = "%"
-        k = Config.select(AND(LIKE(Config.q.name, line), Config.q.system == options.system))
+        args = parser.parse_args(line)
+        key = args.key
+        if not key:
+            key = "%"
+        k = Config.select(AND(LIKE(Config.q.name, key), Config.q.system == args.system))
         fields = [(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
         if fields:
             tui.renderFields(fields)

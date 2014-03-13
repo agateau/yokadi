@@ -66,20 +66,16 @@ def updateTask(task, projectName, title, keywordDict):
     return True
 
 
-def getTaskFromId(line, parameterName="id"):
+def getTaskFromId(tid, parameterName="id"):
     """Returns a task given its id, or raise a YokadiException if it does not
     exist.
-    @param line: taskId string
+    @param tid: taskId string
     @param parameterName: name of the parameter to mention in exception
     @return: Task instance or None if existingTask is False"""
 
-    line = line.strip()
-    if len(line) == 0:
-        raise YokadiException("Missing <%s> parameter" % parameterName)
-
     # We do not use line.isdigit() because it returns True if line is '¹'!
     try:
-        taskId = int(line)
+        taskId = int(tid)
     except ValueError:
         raise YokadiException("<%s> should be a number" % parameterName)
 

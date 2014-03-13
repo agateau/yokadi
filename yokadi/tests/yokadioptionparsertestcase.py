@@ -12,26 +12,24 @@ from yokadi.core.yokadiexception import YokadiException
 
 
 class YokadiOptionParserTestCase(unittest.TestCase):
-    def testEmptyLine(self):
-        parser = YokadiOptionParser()
-        options, args = parser.parse_args(u'')
-        self.assertEqual(args, [])
 
     def testQuote(self):
         parser = YokadiOptionParser()
+        parser.add_argument("cmd", nargs='*')
         src = u"There's a quote here"
-        options, args = parser.parse_args(src)
+        args = parser.parse_args(src)
         # Recreate the line
-        line = " ".join(args)
+        line = " ".join(args.cmd)
         self.assertEqual(line, src)
 
     def testDash(self):
         parser = YokadiOptionParser()
+        parser.add_argument("cmd", nargs="*")
         srcs = ["foo-bar", "foo - bar"]
         for src in srcs:
-            options, args = parser.parse_args(src)
+            args = parser.parse_args(src)
             # Recreate the line
-            line = " ".join(args)
+            line = " ".join(args.cmd)
             self.assertEqual(line, src)
 
     def testUknownOption(self):

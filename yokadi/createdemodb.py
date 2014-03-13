@@ -9,27 +9,22 @@ Command line oriented, sqlite powered, todo list
 """
 import os
 import sys
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core import ydateutils
-
-USAGE = "%prog <db>"
 
 PROJECTS = ["birthday", "work", "home"]
 
 KEYWORDS = ["phone", "grocery", "_note"]
 
 def main():
-    parser = OptionParser(usage=USAGE)
+    parser = ArgumentParser()
+    parser.add_argument('db', metavar='<db>')
+    args = parser.parse_args()
 
-    (options, args) = parser.parse_args()
-
-    if len(args) == 0:
-        parser.error("Missing db name")
-
-    dbname = args[0]
+    dbname = args.db
     if os.path.exists(dbname):
         os.unlink(dbname)
 

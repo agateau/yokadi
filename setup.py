@@ -47,7 +47,11 @@ except Exception, e:
 if "win" in " ".join(sys.argv[1:]):
     scripts.append("w32_postinst.py")
 
-#Go for setup 
+requirements = ['sqlobject', 'dateutils']
+if sys.version_info < (2, 7):
+    requirements.append('argparse')
+
+#Go for setup
 setup(name="yokadi",
       version=version,
       description="Command line oriented todo list system",
@@ -61,7 +65,7 @@ setup(name="yokadi",
         "yokadi.ycli",
         "yokadi.yical",
       ],
-      install_requires=['sqlobject', 'dateutils'],
+      install_requires=requirements,
       scripts=scripts,
       data_files=data_files
       )
