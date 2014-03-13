@@ -52,11 +52,11 @@ List tasks for project "birthday":
 
     yokadi> t_list birthday
                                              birthday
-    ID |Title                                                       |U  |S|Creation date   |Time left
+    ID |Title                                                       |U  |S|Age    |Due date
     --------------------------------------------------------------------------------------------------
-    1  |Buy food and drinks                                         |0  |N|2009-01-09 08:57|
-    2  |Invite Bob                                                  |0  |N|2009-01-09 08:58|
-    3  |Invite Wendy                                                |0  |N|2009-01-09 08:58|
+    1  |Buy food and drinks                                         |0  |N|1m     |
+    2  |Invite Bob                                                  |0  |N|0m     |
+    3  |Invite Wendy                                                |0  |N|0m     |
 
 Once you have called Bob, you can mark task 2 as done:
 
@@ -65,29 +65,29 @@ Once you have called Bob, you can mark task 2 as done:
 
     yokadi> t_list birthday
                                              birthday
-    ID |Title                                                       |U  |S|Creation date   |Time left
+    ID |Title                                                       |U  |S|Age    |Due date
     --------------------------------------------------------------------------------------------------
-    1  |Buy food and drinks                                         |0  |N|2009-01-09 08:57|
-    3  |Invite Wendy                                                |0  |N|2009-01-09 08:58|
+    1  |Buy food and drinks                                         |0  |N|2m     |
+    3  |Invite Wendy                                                |0  |N|1m     |
 
 Task 2 has not disappeared, but `t_list` skips done tasks by default. To list
 all tasks use:
 
     yokadi> t_list birthday --all
                                              birthday
-    ID |Title                                                       |U  |S|Creation date   |Time left
+    ID |Title                                                       |U  |S|Age    |Due date
     --------------------------------------------------------------------------------------------------
-    1  |Buy food and drinks                                         |0  |N|2009-01-09 08:57|
-    2  |Invite Bob                                                  |0  |D|2009-01-09 08:58|
-    3  |Invite Wendy                                                |0  |N|2009-01-09 08:58|
+    1  |Buy food and drinks                                         |0  |N|2m     |
+    2  |Invite Bob                                                  |0  |D|1m     |
+    3  |Invite Wendy                                                |0  |N|1m     |
 
 To list only tasks marked as done today:
 
     yokadi> t_list birthday --done today
                                              birthday
-    ID |Title                                                       |U  |S|Creation date   |Time left
+    ID |Title                                                       |U  |S|Age    |Due date
     --------------------------------------------------------------------------------------------------
-    2  |Invite Bob                                                  |0  |D|2009-01-09 08:58|
+    2  |Invite Bob                                                  |0  |D|1m     |
 
 You may want to attach your grocery list to task 1. This can be done with
 `t_describe`.
@@ -102,10 +102,12 @@ You can now display details of task 1:
     yokadi> t_show 1
      Project: birthday
        Title: Buy food and drinks
+          ID: 1
      Created: 2009-01-09 08:57:33
          Due: None
       Status: new
      Urgency: 0
+  Recurrence: None
     Keywords:
 
     - Orange juice
@@ -121,10 +123,10 @@ details.
 
     yokadi> t_list birthday
                                              birthday
-    ID |Title                                                       |U  |S|Creation date   |Time left
+    ID |Title                                                       |U  |S|Age    |Due date
     --------------------------------------------------------------------------------------------------
-    1  |Buy food and drinks                                        *|0  |N|2009-01-09 08:57|
-    3  |Invite Wendy                                                |0  |N|2009-01-09 08:58|
+    1  |Buy food and drinks                                        *|0  |N|3m     |
+    3  |Invite Wendy                                                |0  |N|2m     |
 
 There is much more, we only scratched the surface, but this should get you
 started. You can get a list of all commands by typing `help` and get the
