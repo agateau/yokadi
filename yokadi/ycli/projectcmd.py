@@ -110,11 +110,11 @@ class ProjectCmd(object):
         parser = self.parser_p_remove()
         options, args = parser.parse_args(line)
         project = getProjectFromName(' '.join(args))
-        if not options.force:
-            if not tui.confirm("Remove project '%s' and all its tasks" % project.name):
-                return
         taskList = Task.select(Task.q.projectID == project.id)
         taskList = list(taskList)
+        if not options.force:
+            if not tui.confirm("Remove project '%s' and its %d tasks" % (project.name, len(taskList))):
+                return
         print "Removing project tasks:"
         for task in taskList:
             task.delete(task.id)
