@@ -60,6 +60,8 @@ class TaskCmd(object):
         parser.description = "Add new %s. Will prompt to create keywords if they do not exist." % cmd
         parser.add_argument("-c", dest="crypt", default=False, action="store_true",
                           help="Encrypt title")
+        parser.add_argument("-d", "--describe", dest="describe", default=False, action="store_true",
+                          help="Directly open editor to describe task")
         parser.add_argument('cmd', nargs='*')
         return parser
 
@@ -90,6 +92,10 @@ class TaskCmd(object):
             tui.reinjectInRawInput(u"%s %s" % (cmd, line))
             return None
         self.lastTaskId = task.id
+
+        if args.describe:
+            self.do_t_describe(self.lastTaskId)
+
         return task
 
     def do_t_add(self, line):
