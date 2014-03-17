@@ -13,6 +13,7 @@ import sys
 import tempfile
 import time
 import locale
+import unicodedata
 from getpass import getpass
 
 from yokadi.ycli import colors as C
@@ -48,10 +49,11 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text, onChanged=None, lockManager=None):
+def editText(text, onChanged=None, lockManager=None, prefix=u"yokadi-"):
     """Edit text with external editor
     @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
     @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
+    @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
         return unicode(file(name).read(), ENCODING)
@@ -64,7 +66,8 @@ def editText(text, onChanged=None, lockManager=None):
                 return
             time.sleep(PROC_POLL_INTERVAL)
 
-    (fd, name) = tempfile.mkstemp(suffix=".md", prefix="yokadi-")
+    prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore').replace(" ", "_")
+    (fd, name) = tempfile.mkstemp(suffix=".md", prefix=prefix)
     if text is None:
         text = ""
     try:
