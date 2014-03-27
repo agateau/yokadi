@@ -14,6 +14,7 @@ import tempfile
 import time
 import locale
 import unicodedata
+import re
 from getpass import getpass
 
 from yokadi.ycli import colors as C
@@ -28,6 +29,9 @@ PROC_POLL_INTERVAL = 0.5
 # Number of seconds between checks for file modification
 MTIME_POLL_INTERVAL = 10
 
+# Filter out bad characters for filenames
+NON_SIMPLE_ASCII = re.compile("[^a-zA-Z0-9]+")
+MULTIPLE_DASH = re.compile("-+")
 
 _answers = []
 
@@ -65,8 +69,9 @@ def editText(text, onChanged=None, lockManager=None, prefix=u"yokadi-"):
             if not proc.returncode is None:
                 return
             time.sleep(PROC_POLL_INTERVAL)
-
-    prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore').replace(" ", "_")
+    prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore')
+    prefix = NON_SIMPLE_ASCII.sub("-", prefix)
+    prefix = MULTIPLE_DASH.sub("-", prefix)
     (fd, name) = tempfile.mkstemp(suffix=".md", prefix=prefix)
     if text is None:
         text = ""
