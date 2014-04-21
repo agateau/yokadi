@@ -55,13 +55,14 @@ sys.setdefaultencoding(tui.ENCODING)
 
 # TODO: move YokadiCmd to a separate module in ycli package
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
-    def __init__(self):
+    def __init__(self, session):
         Cmd.__init__(self)
-        TaskCmd.__init__(self)
-        ProjectCmd.__init__(self)
-        KeywordCmd.__init__(self)
-        AliasCmd.__init__(self)
-        ConfCmd.__init__(self)
+        TaskCmd.__init__(self, session)
+        ProjectCmd.__init__(self, session)
+        KeywordCmd.__init__(self, session)
+        AliasCmd.__init__(self, session)
+        ConfCmd.__init__(self, session)
+        self.session = session
         self.prompt = "yokadi> "
         self.historyPath = os.getenv("YOKADI_HISTORY")
         if not self.historyPath:
@@ -71,7 +72,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
                 # Windows location
                 self.historyPath = os.path.join(os.path.expandvars("$APPDATA"), ".yokadi_history")
         self.loadHistory()
-        self.cryptoMgr = cryptutils.YokadiCryptoManager()  # Load shared cryptographic manager
+        self.cryptoMgr = cryptutils.YokadiCryptoManager(session)  # Load shared cryptographic manager
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""
@@ -141,7 +142,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             traceback.print_exc()
             print "--"
             print "Python: %s" % sys.version.replace("\n", " ")
-            print "SQLObject: %s" % sqlobjectVersion.replace("\n", " ")
+            print "SQL Alchemy: %s" % sqlalchemy.__version__
             print "OS: %s (%s)" % os.uname()[0:3:2]
             print "Yokadi: %s" % utils.currentVersion()
             print cut
@@ -227,14 +228,14 @@ def main():
             args.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
             print "Using default database (%s)" % args.filename
 
-    db.connectDatabase(args.filename)
+    database = db.Database(args.filename)
 
     if args.createOnly:
         return
 
-    db.setDefaultConfig()  # Set default config parameters
+    db.setDefaultConfig(database.session)  # Set default config parameters
 
-    cmd = YokadiCmd()
+    cmd = YokadiCmd(database.session)
     try:
         if len(args.cmd) > 0:
             print " ".join(args.cmd)

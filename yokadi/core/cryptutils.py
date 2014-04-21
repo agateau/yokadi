@@ -14,7 +14,7 @@ from yokadi.ycli import tui
 from yokadi.core import db
 from yokadi.core.yokadiexception import YokadiException
 
-from sqlobject import SQLObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
 
 # Prefix used to recognise encrypted message
 CRYPTO_PREFIX = "---YOKADI-ENCRYPTED-MESSAGE---"
@@ -35,15 +35,16 @@ except ImportError:
 
 class YokadiCryptoManager(object):
     """Manager object for Yokadi cryptographic operation"""
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         # Cache encryption passphrase
         self.passphrase = None
         # Force decryption (and ask passphrase) instead of decrypting only when passphrase was
         # previously provided
         self.force_decrypt = False
         try:
-            self.crypto_check = db.Config.byName("CRYPTO_CHECK").value
-        except SQLObjectNotFound:
+            self.crypto_check = db.getConfigKey("CRYPTO_CHECK", self.session)
+        except NoResultFound:
             # Ok, set it to None. It will be setup after user defined passphrase
             self.crypto_check = None
 

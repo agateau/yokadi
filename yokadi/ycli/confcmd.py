@@ -7,7 +7,6 @@ Configuration management related commands.
 """
 
 from yokadi.core.db import Config
-from sqlobject import AND, LIKE
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.ycli.completers import confCompleter
 from yokadi.ycli import tui
@@ -15,6 +14,8 @@ from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 
 class ConfCmd(object):
+    def __init__(self, session):
+        self.session = session
 
     def parser_c_get(self):
         parser = YokadiOptionParser(prog="c_get")

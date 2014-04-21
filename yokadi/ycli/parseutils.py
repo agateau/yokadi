@@ -8,8 +8,6 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 
-from sqlobject import AND, OR, LIKE
-from sqlobject.sqlbuilder import IN, NOTIN, Select
 from yokadi.ycli import tui
 from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 

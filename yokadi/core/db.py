@@ -224,8 +224,11 @@ class TaskLock(Base):
     updateDate = Column("update_date", DateTime, default=None)
 
 
-def getConfigKey(name, session):
-    return os.environ.get(name, session.query(Config).filter_by(name=name).one().value)
+def getConfigKey(name, session, environ=True):
+    if environ:
+        return os.environ.get(name, session.query(Config).filter_by(name=name).one().value)
+    else:
+        return session.query(Config).filter_by(name=name).one().value
 
 
 class Database:

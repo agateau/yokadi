@@ -5,7 +5,7 @@ Implementation of completers for various Yokadi objects.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-from sqlobject import LIKE
+
 from dateutil import rrule
 
 from yokadi.ycli import parseutils

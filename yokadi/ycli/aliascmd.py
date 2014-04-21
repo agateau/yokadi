@@ -5,19 +5,20 @@ Alias related commands.
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-from yokadi.core.db import Config
+from yokadi.core import db
 from yokadi.core.yokadiexception import BadUsageException
 from yokadi.ycli import tui
 from yokadi.ycli import colors as C
 
-from sqlobject import SQLObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
 
 
 class AliasCmd(object):
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         try:
-            self.aliases = eval(Config.byName("ALIASES").value)
-        except SQLObjectNotFound:
+            self.aliases = eval(db.getConfigKey("ALIASES", self.session, environ=False).value)
+        except NoResultFound:
             self.aliases = {}
         except Exception:
             tui.error("Aliases syntax error. Ignored")

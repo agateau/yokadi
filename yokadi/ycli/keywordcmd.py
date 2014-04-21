@@ -11,10 +11,12 @@ from yokadi.ycli import tui
 from yokadi.core.db import Keyword
 from yokadi.core.yokadiexception import BadUsageException
 from yokadi.ycli.completers import KeywordCompleter
-from sqlobject.dberrors import DuplicateEntryError
 
 
 class KeywordCmd(object):
+    def __init__(self, session):
+        self.session = session
+
     def do_k_list(self, line):
         """List all keywords."""
         for keyword in Keyword.select():

@@ -11,8 +11,6 @@ import readline
 import re
 from datetime import datetime, timedelta
 from dateutil import rrule
-from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
-from sqlobject.sqlbuilder import LEFTJOINOn
 
 from yokadi.core.db import Config, Keyword, Project, Task, \
                     TaskKeyword, Recurrence
@@ -43,15 +41,16 @@ NOTE_KEYWORD = "_note"
 
 
 class TaskCmd(object):
-    def __init__(self):
+    def __init__(self, session):
+        self.session = session
         self.lastTaskId = None  # Last id created, used
         self.lastProjectName = None  # Last project name used
         self.lastTaskIds = []  # Last list of ids selected with t_list
         self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
         for name in bugutils.PROPERTY_NAMES:
-            dbutils.getOrCreateKeyword(name, interactive=False)
-        dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
+            dbutils.getOrCreateKeyword(name, session, interactive=False)
+        dbutils.getOrCreateKeyword(NOTE_KEYWORD, session, interactive=False)
 
     def _parser_t_add(self, cmd):
         """Code shared by t_add, bug_add and n_add parsers."""

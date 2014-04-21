@@ -5,8 +5,6 @@ Project related commands.
 @author: Aurélien Gâteau <aurelien.gateau@free.fr>
 @license: GPL v3 or later
 """
-from sqlobject import SQLObjectNotFound
-from sqlobject.dberrors import DuplicateEntryError
 
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter
@@ -33,6 +31,9 @@ def getProjectFromName(name, parameterName="project_name"):
 
 
 class ProjectCmd(object):
+    def __init__(self, session):
+        self.session = session
+
     def do_p_add(self, line):
         """Add new project. Will prompt to create keywords if they do not exist.
         p_add <projectName> [@<keyword1>] [@<keyword2>]"""

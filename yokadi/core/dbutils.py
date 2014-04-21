@@ -9,8 +9,7 @@ Database utilities.
 from datetime import datetime, timedelta
 import os
 
-from sqlobject.dberrors import DuplicateEntryError
-from sqlobject import SQLObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from yokadi.ycli import tui
 from yokadi.core.db import Keyword, Project, Task, TaskLock
@@ -87,25 +86,25 @@ def getTaskFromId(tid, parameterName="id"):
 
 
 # TODO: factorize the two following functions and make a generic one
-def getOrCreateKeyword(keywordName, interactive=True):
+def getOrCreateKeyword(keywordName, session, interactive=True):
     """Get a keyword by its name. Create it if needed
     @param keywordName: keyword name as a string
     @param interactive: Ask user before creating keyword (this is the default)
     @type interactive: Bool
     @return: Keyword instance or None if user cancel creation"""
-    result = Keyword.selectBy(name=keywordName)
-    result = list(result)
-    if len(result):
-        return result[0]
+    try:
+        return session.query(Keyword).filter_by(name=keywordName).one()
+    except (NoResultFound, MultipleResultsFound):
+        if interactive and not tui.confirm("Keyword '%s' does not exist, create it" % keywordName):
+            return None
+        keyword = Keyword(name=keywordName)
+        session.add(keyword)
+        session.commit()  # TODO: is it the right place to commit ?
+        print "Added keyword '%s'" % keywordName
+        return keyword
 
-    if interactive and not tui.confirm("Keyword '%s' does not exist, create it" % keywordName):
-        return None
-    keyword = Keyword(name=keywordName)
-    print "Added keyword '%s'" % keywordName
-    return keyword
 
-
-def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
+def getOrCreateProject(projectName, session, interactive=True, createIfNeeded=True):
     """Get a project by its name. Create it if needed
     @param projectName: project name as a string
     @param interactive: Ask user before creating project (this is the default)
