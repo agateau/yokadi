@@ -97,11 +97,6 @@ class Keyword(Base):
     __tablename__ = "keyword"
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
-#     tasks = RelatedJoin("Task",
-#         createRelatedTable=False,
-#         intermediateTable="task_keyword",
-#         joinColumn="keyword_id",
-#         otherColumn="task_id")
 
     def __repr__(self):
         return self.name
@@ -113,7 +108,7 @@ class TaskKeyword(Base):
     task_id = Column(Integer, ForeignKey("task.id"))
     keyword_id = Column(Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
-    keyword = relationship("Keyword")
+    keyword = relationship("Keyword", backref="tasks")
 
 
 class ProjectKeyword(Base):
@@ -122,7 +117,7 @@ class ProjectKeyword(Base):
     project_id = Column(Integer, ForeignKey("project.id"))
     keyword_id = Column(Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
-    keyword = relationship("Keyword")
+    keyword = relationship("Keyword", backref="projects")
 
 
 class Task(Base):
