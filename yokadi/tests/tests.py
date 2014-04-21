@@ -40,9 +40,7 @@ from tuitestcase import TuiTestCase
 
 
 def main():
-    db.connectDatabase("", memoryDatabase=True)
-    db.setDefaultConfig()
-
+    db.DBHandler.createDatabase("", memoryDatabase=True)
     unittest.main()
 
 if __name__ == "__main__":
