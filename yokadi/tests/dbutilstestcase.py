@@ -17,6 +17,7 @@ from yokadi.core.yokadiexception import YokadiException
 
 class DbUtilsTestCase(unittest.TestCase):
     def setUp(self):
+        db.DBHandler.createDatabase("", memoryDatabase=True)
         self.session = db.DBHandler.getSession()
         tui.clearInputAnswers()
 

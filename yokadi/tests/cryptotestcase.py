@@ -5,7 +5,6 @@ Crypto functions test cases
 @license: GPL v3 or later
 """
 
-
 import unittest
 
 import testutils
@@ -13,11 +12,13 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.core.db import DBHandler
 
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        DBHandler.createDatabase("", memoryDatabase=True)
+        self.session = DBHandler.getSession()
         tui.clearInputAnswers()
 
     def testEncrypt(self):

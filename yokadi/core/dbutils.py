@@ -133,9 +133,8 @@ def createMissingKeywords(lst, interactive=True):
     """Create all keywords from lst which does not exist
     @param lst: list of keyword
     @return: True, if ok, False if user canceled"""
-    session = DBHandler.getSession()
     for keywordName in lst:
-        if not getOrCreateKeyword(keywordName, session, interactive=interactive):
+        if not getOrCreateKeyword(keywordName, interactive=interactive):
             return False
     return True
 

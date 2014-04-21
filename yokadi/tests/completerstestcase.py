@@ -9,14 +9,14 @@ import unittest
 
 import testutils
 
-from yokadi.core.db import Project
+from yokadi.core.db import Project, DBHandler
 from yokadi.ycli import completers
 
 
 class CompletersTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
-
+        DBHandler.createDatabase("", memoryDatabase=True)
+        self.session = DBHandler.getSession()
 
     def testProjectCompleter(self):
         Project(name=u"foo")
@@ -27,7 +27,6 @@ class CompletersTestCase(unittest.TestCase):
         completer = completers.ProjectCompleter(1)
         result = completer("f", "t_add f", 6, 8)
         self.assertEqual(result, expected)
-
 
     def testCompleteParameterPosition(self):
         data = [

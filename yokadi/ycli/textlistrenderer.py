@@ -7,10 +7,11 @@ Text rendering of t_list output
 @license: GPL v3 or later
 """
 from datetime import datetime, timedelta
+from sqlalchemy.sql import func
 
 import yokadi.ycli.colors as C
 from yokadi.core import ydateutils
-from yokadi.core.db import Task
+from yokadi.core.db import Task, DBHandler
 from yokadi.ycli import tui
 
 
@@ -113,7 +114,7 @@ class AgeFormater(object):
         self.asDate = asDate
 
     def __call__(self, task):
-        delta = self.today - task.creationDate
+        delta = self.today - task.creationDate.replace(microsecond=0)
         if self.asDate:
             return unicode(task.creationDate), None
         else:
@@ -189,7 +190,7 @@ class TextListRenderer(object):
 
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
-        @param sectionName: name of the task groupement section
+        @param sectionName: name of the task groupment section
         @type sectionName: unicode
         @param taskList: list of tasks to display
         @type taskList: list of db.Task instances
@@ -209,7 +210,7 @@ class TextListRenderer(object):
     def end(self):
         today = datetime.now().replace(hour=0, minute=0)
         # Adjust idColumn
-        maxId = Task.select().max(Task.q.id)
+        maxId = DBHandler.getSession().query(func.max(Task.id)).one()[0]
         self.idColumn.width = max(2, len(str(maxId)))
 
         # Adjust titleColumn

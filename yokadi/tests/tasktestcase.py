@@ -14,13 +14,14 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
-from yokadi.core.db import Task
+from yokadi.core.db import Task, DBHandler
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        DBHandler.createDatabase("", memoryDatabase=True)
+        self.session = DBHandler.getSession()
         tui.clearInputAnswers()
         self.cmd = YokadiCmd()
 

@@ -35,6 +35,7 @@ class AliasCmd(object):
         """Add an alias on a command
         Ex. create an alias 'la' for 't_list -a':
         a_add la t_list -a"""
+        session = db.DBHandler.getSession()
         tokens = line.split()
         if len(tokens) < 2:
             raise BadUsageException("You should provide an alias name and a command")
@@ -42,19 +43,25 @@ class AliasCmd(object):
         command = " ".join(tokens[1:])
         self.aliases.update({name: command})
         try:
-            aliases = Config.selectBy(name="ALIASES")[0]
-        except IndexError:
+            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
+        except NoResultFound:
             # Config entry does not exist. Create it.
-            aliases = Config(name="ALIASES", value="{}", system=True, desc="User command aliases")
+            aliases = db.Config(name="ALIASES", value="{}", system=True, desc="User command aliases")
+            session.add(aliases)
 
         aliases.value = repr(self.aliases)
+        session.merge(aliases)
+        session.commit()
 
     def do_a_remove(self, line):
         """Remove an alias"""
         if line in self.aliases:
+            session = db.DBHandler.getSession()
             del self.aliases[line]
-            aliases = Config.selectBy(name="ALIASES")[0]
+            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
             aliases.value = repr(self.aliases)
+            session.merge(aliases)
+            session.commit()
         else:
             tui.error("No alias with that name. Use a_list to display all aliases")
 

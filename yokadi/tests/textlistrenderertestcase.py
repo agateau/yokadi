@@ -15,11 +15,13 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.ycli.textlistrenderer import TextListRenderer
 from yokadi.core.cryptutils import YokadiCryptoManager
+from yokadi.core import db
 
 
 class TextListRendererTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        db.DBHandler.createDatabase("", memoryDatabase=True)
+        self.session = db.DBHandler.getSession()
         tui.clearInputAnswers()
 
     def testTitleFormater(self):

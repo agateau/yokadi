@@ -12,11 +12,13 @@ from yokadi.core import dbutils
 from yokadi.ycli import tui
 from yokadi.ycli.keywordcmd import KeywordCmd
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.core.db import DBHandler
 
 
 class KeywordTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        DBHandler.createDatabase("", memoryDatabase=True)
+        self.session = DBHandler.getSession()
         tui.clearInputAnswers()
         self.cmd = KeywordCmd()
 
