@@ -6,10 +6,12 @@ Project related commands.
 @license: GPL v3 or later
 """
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter
 from yokadi.ycli import parseutils
-from yokadi.core.db import Project, Task
+from yokadi.core.db import Project, Task, DBHandler
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.core import dbutils
@@ -25,8 +27,9 @@ def getProjectFromName(name, parameterName="project_name"):
         raise BadUsageException("Missing <%s> parameter" % parameterName)
 
     try:
-        return Project.byName(name)
-    except SQLObjectNotFound:
+        session = DBHandler.getSession()
+        return session.query(Project).filter_by(name=name).one()
+    except NoResultFound:
         raise YokadiException("Project '%s' not found. Use p_list to see all projects." % name)
 
 
@@ -79,7 +82,8 @@ class ProjectCmd(object):
 
     def do_p_list(self, line):
         """List all projects."""
-        for project in Project.select():
+        session = DBHandler.getSession()
+        for project in session.query(Project).all():
             if project.active:
                 active = ""
             else:
