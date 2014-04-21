@@ -50,47 +50,46 @@ class Project(Base):
     keywords = relationship("ProjectKeyword", backref="project")
 
     def __repr__(self):
-        return self.name
-#         keywords = self.getKeywordsAsString()
-#         if keywords:
-#             return "%s (%s)" % (self.name, keywords)
-#         else:
-#             return self.name
-#
-#     def setKeywordDict(self, dct):
-#         """
-#         Defines keywords of a project.
-#         Dict is of the form: keywordName => value
-#         """
-#         for projectKeyword in ProjectKeyword.selectBy(project=self):
-#             projectKeyword.destroySelf()
-#
-#         for name, value in dct.items():
-#             keyword = Keyword.selectBy(name=name)[0]
-#             ProjectKeyword(project=self, keyword=keyword, value=value)
-#
-#     def getKeywordDict(self):
-#         """
-#         Returns all keywords of a project as a dict of the form:
-#         keywordName => value
-#         """
-#         dct = {}
-#         for keyword in ProjectKeyword.selectBy(project=self):
-#             dct[keyword.keyword.name] = keyword.value
-#         return dct
-#
-#     def getKeywordsAsString(self):
-#         """
-#         Returns all keywords as a string like "key1=value1, key2=value2..."
-#         Value is not displayed if none
-#         """
-#         result = []
-#         for key, value in self.getKeywordDict().items():
-#             if value:
-#                 result.append("%s=%s" % (key, value))
-#             else:
-#                 result.append(key)
-#         return ", ".join(result)
+        keywords = self.getKeywordsAsString()
+        if keywords:
+            return "%s (%s)" % (self.name, keywords)
+        else:
+            return self.name
+
+    def setKeywordDict(self, dct, session):
+        """
+        Defines keywords of a project.
+        Dict is of the form: keywordName => value
+        """
+        session.query(ProjectKeyword).filter_by(project=self).delete()
+
+        for name, value in dct.items():
+            keyword = session.query(Keyword).filter_by(name=name).one()
+            session.add(ProjectKeyword(project=self, keyword=keyword, value=value))
+        session.commit()  # TODO: is it really the right place to do that ?
+
+    def getKeywordDict(self):
+        """
+        Returns all keywords of a project as a dict of the form:
+        keywordName => value
+        """
+        dct = {}
+        for keyword in self.keywords:
+            dct[keyword.keyword.name] = keyword.value
+        return dct
+
+    def getKeywordsAsString(self):
+        """
+        Returns all keywords as a string like "key1=value1, key2=value2..."
+        Value is not displayed if none
+        """
+        result = []
+        for key, value in self.getKeywordDict().items():
+            if value:
+                result.append("%s=%s" % (key, value))
+            else:
+                result.append(key)
+        return ", ".join(result)
 
 
 class Keyword(Base):
@@ -135,45 +134,45 @@ class Task(Base):
     keywords = relationship("TaskKeyword", backref="task")
     recurrence = ForeignKey("Recurrence", default=None)
 
-#     def setKeywordDict(self, dct):
-#         """
-#         Defines keywords of a task.
-#         Dict is of the form: keywordName => value
-#         """
-#         for taskKeyword in TaskKeyword.selectBy(task=self):
-#             taskKeyword.destroySelf()
-#
-#         for name, value in dct.items():
-#             keyword = Keyword.selectBy(name=name)[0]
-#             TaskKeyword(task=self, keyword=keyword, value=value)
-#
-#     def getKeywordDict(self):
-#         """
-#         Returns all keywords of a task as a dict of the form:
-#         keywordName => value
-#         """
-#         dct = {}
-#         for keyword in TaskKeyword.selectBy(task=self):
-#             dct[keyword.keyword.name] = keyword.value
-#         return dct
-#
-#     def getKeywordsAsString(self):
-#         """
-#         Returns all keywords as a string like "key1=value1, key2=value2..."
-#         """
-#         return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
-#
-#     def getUserKeywordsNameAsString(self):
-#         """
-#         Returns all keywords keys as a string like "key1, key2, key3...".
-#         Internal keywords (starting with _) are ignored.
-#         """
-#         keywords = [k for k in self.getKeywordDict().keys() if not k.startswith("_")]
-#         keywords.sort()
-#         if keywords:
-#             return ", ".join(keywords)
-#         else:
-#             return ""
+    def setKeywordDict(self, dct, session):
+        """
+        Defines keywords of a task.
+        Dict is of the form: keywordName => value
+        """
+        session.query(TaskKeyword).filter_by(task=self).delete()
+
+        for name, value in dct.items():
+            keyword = session.query(Keyword).filter_by(name=name).one()
+            session.add(TaskKeyword(task=self, keyword=keyword, value=value))
+        session.commit()  # TODO: is it really the right place to do that ?
+
+    def getKeywordDict(self):
+        """
+        Returns all keywords of a task as a dict of the form:
+        keywordName => value
+        """
+        dct = {}
+        for keyword in self.keywords:
+            dct[keyword.keyword.name] = keyword.value
+        return dct
+
+    def getKeywordsAsString(self):
+        """
+        Returns all keywords as a string like "key1=value1, key2=value2..."
+        """
+        return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
+
+    def getUserKeywordsNameAsString(self):
+        """
+        Returns all keywords keys as a string like "key1, key2, key3...".
+        Internal keywords (starting with _) are ignored.
+        """
+        keywords = [k for k in self.getKeywordDict().keys() if not k.startswith("_")]
+        keywords.sort()
+        if keywords:
+            return ", ".join(keywords)
+        else:
+            return ""
 
 
 class Recurrence(Base):
