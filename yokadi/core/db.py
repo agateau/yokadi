@@ -1,8 +1,8 @@
 # -*- coding: UTF-8 -*-
 """
-Database access layer using sqlobject
+Database access layer using SQL Alchemy
 
-@author: Aurélien Gâteau <aurelien@.gateau@free.fr>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
 
@@ -10,8 +10,12 @@ import os
 import sys
 from pickle import loads, dumps
 from datetime import datetime
-from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, EnumCol, ForeignKey, IntCol, \
-     RelatedJoin, sqlhub, SQLObject, SQLObjectNotFound, UnicodeCol, StringCol
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy import Column, Integer, Boolean, Unicode, String, DateTime, Enum, ForeignKey
+
 
 try:
     from dateutil import rrule
@@ -35,36 +39,34 @@ DB_VERSION_KEY = "DB_VERSION"
 # Task frequency
 FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
+Base = declarative_base()
 
-class Project(SQLObject):
-    class sqlmeta:
-        defaultOrder = "name"
-    name = UnicodeCol(alternateID=True, notNone=True)
-    active = BoolCol(default=True)
-    keywords = RelatedJoin("Keyword",
-        createRelatedTable=False,
-        intermediateTable="project_keyword",
-        joinColumn="project_id",
-        otherColumn="keyword_id")
 
-    def __unicode__(self):
+class Project(Base):
+    __tablename__ = "project"
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode, unique=True)
+    active = Column(Boolean, default=True)
+    keywords = relationship("ProjectKeyword", backref="project")
+
+    def __repr__(self):
         keywords = self.getKeywordsAsString()
         if keywords:
             return "%s (%s)" % (self.name, keywords)
         else:
             return self.name
 
-    def setKeywordDict(self, dct):
+    def setKeywordDict(self, dct, session):
         """
         Defines keywords of a project.
         Dict is of the form: keywordName => value
         """
-        for projectKeyword in ProjectKeyword.selectBy(project=self):
-            projectKeyword.destroySelf()
+        session.query(ProjectKeyword).filter_by(project=self).delete()
 
         for name, value in dct.items():
-            keyword = Keyword.selectBy(name=name)[0]
-            ProjectKeyword(project=self, keyword=keyword, value=value)
+            keyword = session.query(Keyword).filter_by(name=name).one()
+            session.add(ProjectKeyword(project=self, keyword=keyword, value=value))
+        session.commit()  # TODO: is it really the right place to do that ?
 
     def getKeywordDict(self):
         """
@@ -72,7 +74,7 @@ class Project(SQLObject):
         keywordName => value
         """
         dct = {}
-        for keyword in ProjectKeyword.selectBy(project=self):
+        for keyword in self.keywords:
             dct[keyword.keyword.name] = keyword.value
         return dct
 
@@ -90,59 +92,59 @@ class Project(SQLObject):
         return ", ".join(result)
 
 
-class Keyword(SQLObject):
-    class sqlmeta:
-        defaultOrder = "name"
-    name = UnicodeCol(alternateID=True, notNone=True)
-    tasks = RelatedJoin("Task",
-        createRelatedTable=False,
-        intermediateTable="task_keyword",
-        joinColumn="keyword_id",
-        otherColumn="task_id")
+class Keyword(Base):
+    __tablename__ = "keyword"
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode, unique=True)
 
-    def __unicode__(self):
+    def __repr__(self):
         return self.name
 
 
-class TaskKeyword(SQLObject):
-    task = ForeignKey("Task")
-    keyword = ForeignKey("Keyword")
-    value = IntCol(default=None)
+class TaskKeyword(Base):
+    __tablename__ = "task_keyword"
+    id = Column(Integer, primary_key=True)
+    task_id = Column(Integer, ForeignKey("task.id"))
+    keyword_id = Column(Integer, ForeignKey("keyword.id"))
+    value = Column(Integer, default=None)
+    keyword = relationship("Keyword", backref="tasks")
 
 
-class ProjectKeyword(SQLObject):
-    project = ForeignKey("Project")
-    keyword = ForeignKey("Keyword")
-    value = IntCol(default=None)
+class ProjectKeyword(Base):
+    __tablename__ = "project_keyword"
+    id = Column(Integer, primary_key=True)
+    project_id = Column(Integer, ForeignKey("project.id"))
+    keyword_id = Column(Integer, ForeignKey("keyword.id"))
+    value = Column(Integer, default=None)
+    keyword = relationship("Keyword", backref="projects")
 
 
-class Task(SQLObject):
-    title = UnicodeCol()
-    creationDate = DateTimeCol(notNone=True)
-    dueDate = DateTimeCol(default=None)
-    doneDate = DateTimeCol(default=None)
-    description = UnicodeCol(default="", notNone=True)
-    urgency = IntCol(default=0, notNone=True)
-    status = EnumCol(enumValues=['new', 'started', 'done'])
-    project = ForeignKey("Project")
-    keywords = RelatedJoin("Keyword",
-        createRelatedTable=False,
-        intermediateTable="task_keyword",
-        joinColumn="task_id",
-        otherColumn="keyword_id")
+class Task(Base):
+    __tablename__ = "task"
+    id = Column(Integer, primary_key=True)
+    title = Column(Unicode)
+    creationDate = Column("creation_date", DateTime, nullable=False)
+    dueDate = Column("due_date", DateTime, default=None)
+    doneDate = Column("done_date", DateTime, default=None)
+    description = Column(Unicode, default=u"", nullable=False)
+    urgency = Column(Integer, default=0, nullable=False)
+    status = Column(Enum([u"new", u"started", u"done"]), default=u"new")
+    project_id = Column(Integer, ForeignKey("project.id"))
+    project = relationship("Project")
+    keywords = relationship("TaskKeyword", backref="task")
     recurrence = ForeignKey("Recurrence", default=None)
 
-    def setKeywordDict(self, dct):
+    def setKeywordDict(self, dct, session):
         """
         Defines keywords of a task.
         Dict is of the form: keywordName => value
         """
-        for taskKeyword in TaskKeyword.selectBy(task=self):
-            taskKeyword.destroySelf()
+        session.query(TaskKeyword).filter_by(task=self).delete()
 
         for name, value in dct.items():
-            keyword = Keyword.selectBy(name=name)[0]
-            TaskKeyword(task=self, keyword=keyword, value=value)
+            keyword = session.query(Keyword).filter_by(name=name).one()
+            session.add(TaskKeyword(task=self, keyword=keyword, value=value))
+        session.commit()  # TODO: is it really the right place to do that ?
 
     def getKeywordDict(self):
         """
@@ -150,7 +152,7 @@ class Task(SQLObject):
         keywordName => value
         """
         dct = {}
-        for keyword in TaskKeyword.selectBy(task=self):
+        for keyword in self.keywords:
             dct[keyword.keyword.name] = keyword.value
         return dct
 
@@ -173,10 +175,11 @@ class Task(SQLObject):
             return ""
 
 
-class Recurrence(SQLObject):
-    """Task reccurrence definition"""
-
-    rule = StringCol(default="", notNone=True)
+class Recurrence(Base):
+    """Task recurrence definition"""
+    __tablename__ = "recurrence"
+    id = Column(Integer, primary_key=True)
+    rule = Column(String, default="")
 
     def getRrule(self):
         """Create rrule object from its Recurrence representation
@@ -202,93 +205,93 @@ class Recurrence(SQLObject):
         return "%s (next: %s)" % (FREQUENCY[self.getRrule()._freq], self.getNext())
 
 
-class Config(SQLObject):
+class Config(Base):
     """yokadi config"""
-    class sqlmeta:
-        defaultOrder = "name"
-    name = UnicodeCol(alternateID=True, notNone=True)
-    value = UnicodeCol(default="", notNone=True)
-    system = BoolCol(default=False, notNone=True)
-    desc = UnicodeCol(default="", notNone=True)
+    __tablename__ = "config"
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode, unique=True)
+    value = Column(Unicode)
+    system = Column(Boolean)
+    desc = Column(Unicode)
 
 
-class TaskLock(SQLObject):
-    task = ForeignKey("Task")
-    pid = IntCol(default=None)
-    updateDate = DateTimeCol(default=None)
-    uniqTaskLock = DatabaseIndex(task, unique=True)
+class TaskLock(Base):
+    __tablename__ = "task_lock"
+    id = Column(Integer, primary_key=True)
+    task_id = Column(Integer, ForeignKey("task.id"), unique=True)
+    task = relationship("Task")
+    pid = Column(Integer, default=None)
+    updateDate = Column("update_date", DateTime, default=None)
 
 
-def getConfigKey(name):
-    return os.environ.get(name, Config.byName(name).value)
+def getConfigKey(name, session):
+    return os.environ.get(name, session.query(Config).filter_by(name=name).one().value)
 
 
-TABLE_LIST = [Project, Keyword, Task, TaskKeyword, ProjectKeyword, Config, Recurrence, TaskLock]
+class Database:
+    def __init__(self, dbFileName, createIfNeeded=True, memoryDatabase=False):
+        """Connect to database and create it if needed
+        @param dbFileName: path to database file
+        @type dbFileName: str
+        @param createIfNeeded: Indicate if database must be created if it does not exists (default True)
+        @type createIfNeeded: bool
+        @param memoryDatabase: create db in memory. Only usefull for unit test. Default is false.
+        @type memoryDatabase: bool
+        """
 
+        dbFileName = os.path.abspath(dbFileName)
 
-
-def createTables():
-    for table in TABLE_LIST:
-        table.createTable()
-
-
-def getVersion():
-    if not Config.tableExists():
-        # There was no Config table in v1
-        return 1
-
-    try:
-        return int(Config.byName(DB_VERSION_KEY).value)
-    except SQLObjectNotFound:
-        raise YokadiException("Configuration key '%s' does not exist. This should not happen!" % DB_VERSION_KEY)
-
-
-def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
-    """Connect to database and create it if needed
-    @param dbFileName: path to database file
-    @type dbFileName: str
-    @param createIfNeeded: Indicate if database must be created if it does not exists (default True)
-    @type createIfNeeded: bool
-    @param memoryDatabase: create db in memory. Only usefull for unit test. Default is false.
-    @type memoryDatabase: bool
-    """
-
-    dbFileName = os.path.abspath(dbFileName)
-
-    if sys.platform == 'win32':
-        connectionString = 'sqlite:/' + dbFileName[0] + '|' + dbFileName[2:]
-    else:
-        connectionString = 'sqlite:' + dbFileName
-
-    if memoryDatabase:
-        connectionString = "sqlite:/:memory:"
-
-    connection = connectionForURI(connectionString)
-    sqlhub.processConnection = connection
-
-    if not os.path.exists(dbFileName) or memoryDatabase:
-        if createIfNeeded:
-            print "Creating database"
-            createTables()
-            # Set database version according to current yokadi release
-            Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number")
+        if sys.platform == 'win32':
+            connectionString = 'sqlite://' + dbFileName[0] + '|' + dbFileName[2:]
         else:
-            print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
+            connectionString = 'sqlite:///' + dbFileName
+
+        if memoryDatabase:
+            connectionString = "sqlite:///:memory:"
+
+        self.engine = create_engine(connectionString)
+        Session = sessionmaker(bind=self.engine)
+        self.session = Session()
+
+        if not os.path.exists(dbFileName) or memoryDatabase:
+            if createIfNeeded:
+                print "Creating database"
+                self.createTables()
+                # Set database version according to current yokadi release
+                self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
+                self.session.commit()
+            else:
+                print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
+                sys.exit(1)
+
+    def createTables(self):
+        """Create all defined tables"""
+        Base.metadata.create_all(self.engine)
+
+    def getVersion(self):
+        if not "config" in Base.metadata.tables:
+            # There was no Config table in v1
+            return 1
+
+        try:
+            return int(self.session.query(Config).filter_by(name=DB_VERSION_KEY).one().value)
+        except NoResultFound:
+            raise YokadiException("Configuration key '%s' does not exist. This should not happen!" % DB_VERSION_KEY)
+
+    def checkVersion(self):
+        """Check version and exit if it is not suitable"""
+        version = self.getVersion()
+        if version != DB_VERSION:
+            sharePath = os.path.abspath(utils.shareDirPath())
+            tui.error("Your database version is %d but Yokadi wants version %d." \
+                % (version, DB_VERSION))
+            print "Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
+                    sharePath
+            print "See %s/update/README.markdown for details" % sharePath
             sys.exit(1)
 
-    # Check version
-    version = getVersion()
-    if version != DB_VERSION:
-        sharePath = os.path.abspath(utils.shareDirPath())
-        tui.error("Your database version is %d but Yokadi wants version %d." \
-            % (version, DB_VERSION))
-        print "Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
-                sharePath
-        print "See %s/update/README.markdown for details" % sharePath
-        sys.exit(1)
 
-
-def setDefaultConfig():
+def setDefaultConfig(session):
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig = {
         "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
@@ -302,7 +305,8 @@ def setDefaultConfig():
         }
 
     for name, value in defaultConfig.items():
-        if Config.select(Config.q.name == name).count() == 0:
-            Config(name=name, value=value[0], system=value[1], desc=value[2])
+        if session.query(Config).filter_by(name=name).count() == 0:
+            session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))
+    session.commit()
 
 # vi: ts=4 sw=4 et
