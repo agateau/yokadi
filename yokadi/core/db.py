@@ -23,7 +23,7 @@ except ImportError:
     print "You must install dateutils to use Yokadi"
     print "This library is used for task recurrence"
     print "Get it on Gustavo Niemeyer website"
-    print "Or use 'easy_install dateutils'"
+    print "Or use 'pip install dateutils'"
     sys.exit(1)
 
 from yokadi.core.yokadiexception import YokadiException

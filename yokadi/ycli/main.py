@@ -17,7 +17,7 @@ except ImportError:
     print "You don't have a working readline library."
     print "Windows users must install Pyreadline."
     print "Get it on https://launchpad.net/pyreadline/+download"
-    print "Or use 'easy_install pyreadline'"
+    print "Or use 'pip install pyreadline'"
     sys.exit(1)
 
 readline.parse_and_bind("set show-all-if-ambiguous on")
@@ -28,12 +28,11 @@ from cmd import Cmd
 from argparse import ArgumentParser
 
 try:
-    from sqlobject import __doc__ as sqlobjectVersion
-
+    import sqlalchemy
 except ImportError:
-    print "You must install SQLObject to use Yokadi"
-    print "Get it on http://www.sqlobject.org/"
-    print "Or use 'easy_install sqlobject'"
+    print "You must install SQL Alchemy to use Yokadi"
+    print "Get it on http://www.sqlalchemy.org/"
+    print "Or use 'pip install sqlalchemy'"
     sys.exit(1)
 
 from yokadi.core import db
