@@ -55,14 +55,13 @@ sys.setdefaultencoding(tui.ENCODING)
 
 # TODO: move YokadiCmd to a separate module in ycli package
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
-    def __init__(self, session):
+    def __init__(self):
         Cmd.__init__(self)
-        TaskCmd.__init__(self, session)
-        ProjectCmd.__init__(self, session)
-        KeywordCmd.__init__(self, session)
-        AliasCmd.__init__(self, session)
-        ConfCmd.__init__(self, session)
-        self.session = session
+        TaskCmd.__init__(self)
+        ProjectCmd.__init__(self)
+        KeywordCmd.__init__(self)
+        AliasCmd.__init__(self)
+        ConfCmd.__init__(self)
         self.prompt = "yokadi> "
         self.historyPath = os.getenv("YOKADI_HISTORY")
         if not self.historyPath:
@@ -72,7 +71,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
                 # Windows location
                 self.historyPath = os.path.join(os.path.expandvars("$APPDATA"), ".yokadi_history")
         self.loadHistory()
-        self.cryptoMgr = cryptutils.YokadiCryptoManager(session)  # Load shared cryptographic manager
+        self.cryptoMgr = cryptutils.YokadiCryptoManager()  # Load shared cryptographic manager
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""
@@ -228,14 +227,14 @@ def main():
             args.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
             print "Using default database (%s)" % args.filename
 
-    database = db.Database(args.filename)
+    db.DBHandler.createDatabase(args.filename)
 
     if args.createOnly:
         return
 
-    db.setDefaultConfig(database.session)  # Set default config parameters
+    db.setDefaultConfig()  # Set default config parameters
 
-    cmd = YokadiCmd(database.session)
+    cmd = YokadiCmd()
     try:
         if len(args.cmd) > 0:
             print " ".join(args.cmd)

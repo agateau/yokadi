@@ -14,9 +14,6 @@ from yokadi.core.yokadioptionparser import YokadiOptionParser
 
 
 class ConfCmd(object):
-    def __init__(self, session):
-        self.session = session
-
     def parser_c_get(self):
         parser = YokadiOptionParser(prog="c_get")
         parser.description = "Display the value of a configuration key. If no key is given, all keys are shown."

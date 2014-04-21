@@ -31,9 +31,6 @@ def getProjectFromName(name, parameterName="project_name"):
 
 
 class ProjectCmd(object):
-    def __init__(self, session):
-        self.session = session
-
     def do_p_add(self, line):
         """Add new project. Will prompt to create keywords if they do not exist.
         p_add <projectName> [@<keyword1>] [@<keyword2>]"""

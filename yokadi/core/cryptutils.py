@@ -35,15 +35,14 @@ except ImportError:
 
 class YokadiCryptoManager(object):
     """Manager object for Yokadi cryptographic operation"""
-    def __init__(self, session):
-        self.session = session
+    def __init__(self):
         # Cache encryption passphrase
         self.passphrase = None
         # Force decryption (and ask passphrase) instead of decrypting only when passphrase was
         # previously provided
         self.force_decrypt = False
         try:
-            self.crypto_check = db.getConfigKey("CRYPTO_CHECK", self.session)
+            self.crypto_check = db.getConfigKey("CRYPTO_CHECK")
         except NoResultFound:
             # Ok, set it to None. It will be setup after user defined passphrase
             self.crypto_check = None

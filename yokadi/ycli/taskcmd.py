@@ -16,6 +16,7 @@ from yokadi.core.db import Config, Keyword, Project, Task, \
                     TaskKeyword, Recurrence
 from yokadi.core import bugutils
 from yokadi.core import dbutils
+from yokadi.core import db
 from yokadi.core import ydateutils
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
@@ -37,20 +38,20 @@ gRendererClassDict = dict(
     plain=PlainListRenderer,
     )
 
-NOTE_KEYWORD = "_note"
+NOTE_KEYWORD = u"_note"
 
 
 class TaskCmd(object):
-    def __init__(self, session):
-        self.session = session
+    def __init__(self):
         self.lastTaskId = None  # Last id created, used
         self.lastProjectName = None  # Last project name used
         self.lastTaskIds = []  # Last list of ids selected with t_list
         self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
+        self.session = db.DBHandler.getSession()
         for name in bugutils.PROPERTY_NAMES:
-            dbutils.getOrCreateKeyword(name, session, interactive=False)
-        dbutils.getOrCreateKeyword(NOTE_KEYWORD, session, interactive=False)
+            dbutils.getOrCreateKeyword(name, interactive=False)
+        dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
 
     def _parser_t_add(self, cmd):
         """Code shared by t_add, bug_add and n_add parsers."""
@@ -468,12 +469,12 @@ class TaskCmd(object):
 
         if projectName.startswith("!"):
             projectName = self._realProjectName(projectName[1:])
-            projectList = Project.select(NOT(LIKE(Project.q.name, projectName)))
+            projectList = self.session.query(Project).filter(Project.name.notlike(projectName)).all()
         else:
             projectName = self._realProjectName(projectName)
-            projectList = Project.select(LIKE(Project.q.name, projectName))
+            projectList = self.session.query(Project).filter(Project.name.like(projectName)).all()
 
-        if projectList.count() == 0:
+        if len(projectList) == 0:
             raise YokadiException("Found no project matching '%s'" % projectName)
 
         # Check keywords exist

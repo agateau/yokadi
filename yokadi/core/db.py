@@ -56,11 +56,12 @@ class Project(Base):
         else:
             return self.name
 
-    def setKeywordDict(self, dct, session):
+    def setKeywordDict(self, dct):
         """
         Defines keywords of a project.
         Dict is of the form: keywordName => value
         """
+        session = DBHandler.getSession()
         session.query(ProjectKeyword).filter_by(project=self).delete()
 
         for name, value in dct.items():
@@ -128,17 +129,18 @@ class Task(Base):
     doneDate = Column("done_date", DateTime, default=None)
     description = Column(Unicode, default=u"", nullable=False)
     urgency = Column(Integer, default=0, nullable=False)
-    status = Column(Enum([u"new", u"started", u"done"]), default=u"new")
+    status = Column(Enum(u"new", u"started", u"done"), default=u"new")
     project_id = Column(Integer, ForeignKey("project.id"))
     project = relationship("Project")
     keywords = relationship("TaskKeyword", backref="task")
     recurrence = ForeignKey("Recurrence", default=None)
 
-    def setKeywordDict(self, dct, session):
+    def setKeywordDict(self, dct):
         """
         Defines keywords of a task.
         Dict is of the form: keywordName => value
         """
+        session = DBHandler.getSession()
         session.query(TaskKeyword).filter_by(task=self).delete()
 
         for name, value in dct.items():
@@ -224,14 +226,30 @@ class TaskLock(Base):
     updateDate = Column("update_date", DateTime, default=None)
 
 
-def getConfigKey(name, session, environ=True):
+def getConfigKey(name, environ=True):
+    session = DBHandler.getSession()
     if environ:
         return os.environ.get(name, session.query(Config).filter_by(name=name).one().value)
     else:
         return session.query(Config).filter_by(name=name).one().value
 
 
-class Database:
+class DBHandler(object):
+    """Connexion handler to database"""
+    database = None
+
+    @classmethod
+    def getSession(cls):
+        if not cls.database:
+            raise YokadiException("Cannot get session. Not connected to database")
+        return cls.database.session
+
+    @classmethod
+    def createDatabase(cls, dbFileName, createIfNeeded=True, memoryDatabase=False):
+        cls.database = Database(dbFileName, createIfNeeded, memoryDatabase)
+
+
+class Database(object):
     def __init__(self, dbFileName, createIfNeeded=True, memoryDatabase=False):
         """Connect to database and create it if needed
         @param dbFileName: path to database file
@@ -294,7 +312,7 @@ class Database:
             sys.exit(1)
 
 
-def setDefaultConfig(session):
+def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig = {
         "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
@@ -306,7 +324,7 @@ def setDefaultConfig(session):
         "PURGE_DELAY"     : ("90", False, "Default delay (in days) for the t_purge command"),
         "PASSPHRASE_CACHE": ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
         }
-
+    session = DBHandler.getSession()
     for name, value in defaultConfig.items():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))

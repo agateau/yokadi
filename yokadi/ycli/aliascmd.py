@@ -14,10 +14,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class AliasCmd(object):
-    def __init__(self, session):
-        self.session = session
+    def __init__(self):
         try:
-            self.aliases = eval(db.getConfigKey("ALIASES", self.session, environ=False).value)
+            self.aliases = eval(db.getConfigKey("ALIASES", environ=False))
         except NoResultFound:
             self.aliases = {}
         except Exception:

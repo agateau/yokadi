@@ -14,9 +14,6 @@ from yokadi.ycli.completers import KeywordCompleter
 
 
 class KeywordCmd(object):
-    def __init__(self, session):
-        self.session = session
-
     def do_k_list(self, line):
         """List all keywords."""
         for keyword in Keyword.select():
