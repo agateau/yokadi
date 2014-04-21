@@ -187,7 +187,10 @@ class TaskCmd(object):
                 # As title is encrypted, we assume description will be encrypted as well
                 self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
 
-            description = tui.editText(self.cryptoMgr.decrypt(task.description), onChanged=updateDescription, lockManager=dbutils.TaskLockManager(task))
+            description = tui.editText(self.cryptoMgr.decrypt(task.description),
+                                       onChanged=updateDescription,
+                                       lockManager=dbutils.TaskLockManager(task),
+                                       prefix=u"yokadi-%s-%s-" % (task.project, task.title))
         except Exception, e:
             raise YokadiException(e)
         updateDescription(description)

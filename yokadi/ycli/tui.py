@@ -13,6 +13,8 @@ import sys
 import tempfile
 import time
 import locale
+import unicodedata
+import re
 from getpass import getpass
 
 from yokadi.ycli import colors as C
@@ -27,6 +29,9 @@ PROC_POLL_INTERVAL = 0.5
 # Number of seconds between checks for file modification
 MTIME_POLL_INTERVAL = 10
 
+# Filter out bad characters for filenames
+NON_SIMPLE_ASCII = re.compile("[^a-zA-Z0-9]+")
+MULTIPLE_DASH = re.compile("-+")
 
 _answers = []
 
@@ -48,10 +53,11 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text, onChanged=None, lockManager=None):
+def editText(text, onChanged=None, lockManager=None, prefix=u"yokadi-"):
     """Edit text with external editor
     @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
     @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
+    @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
         return unicode(file(name).read(), ENCODING)
@@ -63,8 +69,10 @@ def editText(text, onChanged=None, lockManager=None):
             if not proc.returncode is None:
                 return
             time.sleep(PROC_POLL_INTERVAL)
-
-    (fd, name) = tempfile.mkstemp(suffix=".md", prefix="yokadi-")
+    prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore')
+    prefix = NON_SIMPLE_ASCII.sub("-", prefix)
+    prefix = MULTIPLE_DASH.sub("-", prefix)
+    (fd, name) = tempfile.mkstemp(suffix=".md", prefix=prefix)
     if text is None:
         text = ""
     try:
