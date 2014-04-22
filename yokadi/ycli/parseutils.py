@@ -7,9 +7,10 @@ Parse utilities. Used to manipulate command line text.
 @license: GPL v3 or later
 """
 import re
+from sqlalchemy import and_, or_
 
 from yokadi.ycli import tui
-from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
+from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project, DBHandler
 
 
 gSimplifySpaces = re.compile("  +")
@@ -110,6 +111,7 @@ class KeywordFilter(object):
         self.value = ""  # Keyword value
         self.negative = False  # Negative filter
         self.valueOperator = "="  # Operator to compare value
+        self.session = DBHandler.getSession()
 
         if filterLine:
             self.parse(filterLine)
@@ -126,35 +128,35 @@ class KeywordFilter(object):
             return prefix + self.name
 
     def filter(self):
-        """Return a filter in SQlObject format"""
+        """Return a filter in SQL Alchemy format"""
         taskValueFilter = (1 == 1)
         projectValueFilter = (1 == 1)
         if self.name:
             if self.value:
                 if self.valueOperator == "=":
-                    taskValueFilter = (TaskKeyword.q.value == self.value)
-                    projectValueFilter = (ProjectKeyword.q.value == self.value)
+                    taskValueFilter = (TaskKeyword.value == self.value)
+                    projectValueFilter = (ProjectKeyword.value == self.value)
                 elif self.valueOperator == "!=":
-                    taskValueFilter = (TaskKeyword.q.value != self.value)
-                    projectValueFilter = (ProjectKeyword.q.value != self.value)
+                    taskValueFilter = (TaskKeyword.value != self.value)
+                    projectValueFilter = (ProjectKeyword.value != self.value)
                 # TODO: handle also <, >, =< and >=
 
-            taskKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
-                                                   TaskKeyword.q.keywordID == Keyword.q.id,
-                                                   TaskKeyword.q.taskID == Task.q.id,
-                                                   taskValueFilter)))
-            projectKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
-                                                      ProjectKeyword.q.keywordID == Keyword.q.id,
-                                                      ProjectKeyword.q.projectID == Project.q.id,
-                                                      Project.q.id == Task.q.project,
-                                                      projectValueFilter)))
+            taskKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
+                                                                 TaskKeyword.keyword_id == Keyword.id,
+                                                                 TaskKeyword.task_id == Task.id,
+                                                                 taskValueFilter).values(Task.id)
+            projectKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
+                                                                    ProjectKeyword.keyword_id == Keyword.id,
+                                                                    ProjectKeyword.project_id == Project.id,
+                                                                    Project.id == Task.project,
+                                                                    projectValueFilter).values(Task.id)
 
             if self.negative:
-                return AND(NOTIN(Task.q.id, taskKeywordTaskIDs),
-                           NOTIN(Task.q.id, projectKeywordTaskIDs))
+                return and_(~(Task.id.in_(taskKeywordTaskIDs)),
+                            ~ (Task.id.in_(projectKeywordTaskIDs)))
             else:
-                return OR(IN(Task.q.id, taskKeywordTaskIDs),
-                          IN(Task.q.id, projectKeywordTaskIDs))
+                return or_(Task.id.in_(taskKeywordTaskIDs),
+                           Task.id.in_(projectKeywordTaskIDs))
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""
