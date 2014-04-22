@@ -34,7 +34,7 @@ from yokadi.core import utils
 # If database config key DB_VERSION differs from this one a database migration
 # is required
 DB_VERSION = 6
-DB_VERSION_KEY = "DB_VERSION"
+DB_VERSION_KEY = u"DB_VERSION"
 
 # Task frequency
 FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
@@ -181,7 +181,7 @@ class Recurrence(Base):
     """Task recurrence definition"""
     __tablename__ = "recurrence"
     id = Column(Integer, primary_key=True)
-    rule = Column(String, default="")
+    rule = Column(Unicode, default=u"")
 
     def getRrule(self):
         """Create rrule object from its Recurrence representation
@@ -279,7 +279,7 @@ class Database(object):
                 print "Creating database"
                 self.createTables()
                 # Set database version according to current yokadi release
-                self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
+                self.session.add(Config(name=DB_VERSION_KEY, value=unicode(DB_VERSION), system=True, desc=u"Database schema release number"))
                 self.session.commit()
             else:
                 print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
