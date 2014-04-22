@@ -7,6 +7,7 @@ Project related commands.
 """
 
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError
 
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter
@@ -41,20 +42,27 @@ class ProjectCmd(object):
             print "Give at least a project name !"
             return
         projectName, garbage, keywordDict = parseutils.parseLine(line)
+        session = DBHandler.getSession()
         if garbage:
             raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
         try:
             project = Project(name=projectName)
-        except DuplicateEntryError:
+            session.add(project)
+            session.commit()
+        except IntegrityError:
+            session.rollback()
             raise YokadiException("A project named %s already exists. Please find another name" % projectName)
         print "Added project '%s'" % projectName
         if not dbutils.createMissingKeywords(keywordDict.keys()):
             return None
         project.setKeywordDict(keywordDict)
+        session.merge(project)
+        session.commit()
 
     def do_p_edit(self, line):
         """Edit a project.
         p_edit <project name>"""
+        session = DBHandler.getSession()
         project = dbutils.getOrCreateProject(line, createIfNeeded=False)
 
         if not project:
@@ -74,9 +82,12 @@ class ProjectCmd(object):
             return
         try:
             project.name = projectName
-        except DuplicateEntryError:
+            project.setKeywordDict(keywordDict)
+            session.merge(project)
+            session.commit()
+        except IntegrityError:
+            session.rollback()
             raise YokadiException("A project named %s already exists. Please find another name" % projectName)
-        project.setKeywordDict(keywordDict)
 
     complete_p_edit = ProjectCompleter(1)
 
@@ -88,16 +99,24 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print "%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(Task.select(Task.q.project == project).count()).rjust(4), active)
+            print "%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active)
 
     def do_p_set_active(self, line):
         """Activate the given project"""
-        getProjectFromName(line).active = True
+        session = DBHandler.getSession()
+        project = getProjectFromName(line)
+        project.active = True
+        session.merge(project)
+        session.commit()
     complete_p_set_active = ProjectCompleter(1)
 
     def do_p_set_inactive(self, line):
         """Desactivate the given project"""
-        getProjectFromName(line).active = False
+        session = DBHandler.getSession()
+        project = getProjectFromName(line)
+        project.active = False
+        session.merge(project)
+        session.commit()
     complete_p_set_inactive = ProjectCompleter(1)
 
     def parser_p_remove(self):
@@ -110,19 +129,19 @@ class ProjectCmd(object):
         return parser
 
     def do_p_remove(self, line):
+        session = DBHandler.getSession()
         parser = self.parser_p_remove()
         args = parser.parse_args(line)
         project = getProjectFromName(args.project)
         if not args.force:
             if not tui.confirm("Remove project '%s' and all its tasks" % project.name):
                 return
-        taskList = Task.select(Task.q.projectID == project.id)
-        taskList = list(taskList)
         print "Removing project tasks:"
-        for task in taskList:
-            task.delete(task.id)
+        for task in project.tasks:
+            session.delete(task)
             print "- task %(id)-3s: %(title)-30s" % dict(id=str(task.id), title=str(task.title))
-        project.delete(project.id)
+        session.delete(project)
+        session.commit()
         print "Project removed"
     complete_p_remove = ProjectCompleter(1)
 

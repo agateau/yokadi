@@ -131,7 +131,7 @@ class Task(Base):
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum(u"new", u"started", u"done"), default=u"new")
     project_id = Column(Integer, ForeignKey("project.id"))
-    project = relationship("Project")
+    project = relationship("Project", backref="tasks")
     keywords = relationship("TaskKeyword", backref="task")
     recurrence = ForeignKey("Recurrence", default=None)
 
@@ -315,14 +315,14 @@ class Database(object):
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig = {
-        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
-                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''', False,
-                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
-        "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again"),
-        "PURGE_DELAY"     : ("90", False, "Default delay (in days) for the t_purge command"),
-        "PASSPHRASE_CACHE": ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
+        u"ALARM_DELAY_CMD" : (u'''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
+                             u"Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        u"ALARM_DUE_CMD"   : (u'''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''', False,
+                             u"Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        u"ALARM_DELAY"     : (u"8", False, u"Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
+        u"ALARM_SUSPEND"   : (u"1", False, u"Delay (in hours) before an alarm trigger again"),
+        u"PURGE_DELAY"     : (u"90", False, u"Default delay (in days) for the t_purge command"),
+        u"PASSPHRASE_CACHE": (u"1", False, u"Keep passphrase in memory till Yokadi is started (0 is false else true"),
         }
     session = DBHandler.getSession()
     for name, value in defaultConfig.items():
