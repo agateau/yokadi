@@ -81,7 +81,7 @@ class KeywordCmd(object):
 
         # Check we can merge
         conflictingTasks = []
-        for task in keyword.getTasks():
+        for task in keyword.tasks:
             kwDict = task.getKeywordDict()
             if oldName in kwDict and newName in kwDict and kwDict[oldName] != kwDict[newName]:
                 conflictingTasks.append(task)
@@ -95,7 +95,7 @@ class KeywordCmd(object):
             return
 
         # Merge
-        for task in keyword.getTasks():
+        for task in keyword.tasks:
             kwDict = task.getKeywordDict()
             if not newName in kwDict:
                 kwDict[newName] = kwDict[oldName]

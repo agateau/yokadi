@@ -12,6 +12,7 @@ from pickle import loads, dumps
 from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import Column, Integer, Boolean, Unicode, String, DateTime, Enum, ForeignKey
@@ -97,6 +98,7 @@ class Keyword(Base):
     __tablename__ = "keyword"
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
+    tasks = association_proxy("taskKeywords", "task")
 
     def __repr__(self):
         return self.name
