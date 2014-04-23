@@ -47,7 +47,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
-    keywords = relationship("ProjectKeyword", backref="project")
+    projectKeywords = relationship("ProjectKeyword", backref="project")
 
     def __repr__(self):
         keywords = self.getKeywordsAsString()
@@ -75,8 +75,8 @@ class Project(Base):
         keywordName => value
         """
         dct = {}
-        for keyword in self.keywords:
-            dct[keyword.keyword.name] = keyword.value
+        for projectKeyword in self.projectKeywords:
+            dct[projectKeyword.keyword.name] = projectKeyword.value
         return dct
 
     def getKeywordsAsString(self):
@@ -101,6 +101,9 @@ class Keyword(Base):
     def __repr__(self):
         return self.name
 
+    def getTasks(self):
+        return [taskKeyword.task for taskKeyword in self.taskKeywords]
+
 
 class TaskKeyword(Base):
     __tablename__ = "task_keyword"
@@ -108,7 +111,7 @@ class TaskKeyword(Base):
     task_id = Column(Integer, ForeignKey("task.id"))
     keyword_id = Column(Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
-    keyword = relationship("Keyword", backref="tasks")
+    keyword = relationship("Keyword", backref="taskKeywords")
 
 
 class ProjectKeyword(Base):
@@ -117,7 +120,7 @@ class ProjectKeyword(Base):
     project_id = Column(Integer, ForeignKey("project.id"))
     keyword_id = Column(Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
-    keyword = relationship("Keyword", backref="projects")
+    keyword = relationship("Keyword", backref="projectKeywords")
 
 
 class Task(Base):
@@ -132,7 +135,7 @@ class Task(Base):
     status = Column(Enum(u"new", u"started", u"done"), default=u"new")
     project_id = Column(Integer, ForeignKey("project.id"))
     project = relationship("Project", backref="tasks")
-    keywords = relationship("TaskKeyword", backref="task")
+    taskKeywords = relationship("TaskKeyword", backref="task")
     recurrence = ForeignKey("Recurrence", default=None)
 
     def setKeywordDict(self, dct):
@@ -154,8 +157,8 @@ class Task(Base):
         keywordName => value
         """
         dct = {}
-        for keyword in self.keywords:
-            dct[keyword.keyword.name] = keyword.value
+        for taskKeyword in self.taskKeywords:
+            dct[taskKeyword.keyword.name] = taskKeyword.value
         return dct
 
     def getKeywordsAsString(self):
