@@ -40,8 +40,9 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
 
     # Create task
     task = Task(creationDate=datetime.now(), project=project, title=title, description="", status="new")
-    task.setKeywordDict(keywordDict)
     session.add(task)
+    task.setKeywordDict(keywordDict)
+    session.merge(task)
 
     return task
 
