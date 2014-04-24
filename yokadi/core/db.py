@@ -69,7 +69,6 @@ class Project(Base):
         for name, value in dct.items():
             keyword = session.query(Keyword).filter_by(name=name).one()
             session.add(ProjectKeyword(project=self, keyword=keyword, value=value))
-        session.commit()  # TODO: is it really the right place to do that ?
 
     def getKeywordDict(self):
         """
@@ -153,7 +152,6 @@ class Task(Base):
         for name, value in dct.items():
             keyword = session.query(Keyword).filter_by(name=name).one()
             session.add(TaskKeyword(task=self, keyword=keyword, value=value))
-        session.commit()  # TODO: is it really the right place to do that ?
 
     def getKeywordDict(self):
         """
@@ -335,6 +333,5 @@ def setDefaultConfig():
     for name, value in defaultConfig.items():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))
-    session.commit()
 
 # vi: ts=4 sw=4 et

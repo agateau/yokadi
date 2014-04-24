@@ -42,7 +42,6 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
     task = Task(creationDate=datetime.now(), project=project, title=title, description="", status="new")
     task.setKeywordDict(keywordDict)
     session.add(task)
-    session.commit()
 
     return task
 
@@ -98,7 +97,6 @@ def getOrCreateKeyword(keywordName, interactive=True):
             return None
         keyword = Keyword(name=keywordName)
         session.add(keyword)
-        session.commit()  # TODO: is it the right place to commit ?
         print "Added keyword '%s'" % keywordName
         return keyword
 
@@ -124,7 +122,6 @@ def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
 
     project = Project(name=projectName)
     session.add(project)
-    session.commit()
     print "Added project '%s'" % projectName
     return project
 
