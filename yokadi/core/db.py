@@ -63,7 +63,8 @@ class Project(Base):
         Dict is of the form: keywordName => value
         """
         session = DBHandler.getSession()
-        session.query(ProjectKeyword).filter_by(project=self).delete()
+        for projectKeyword in self.projectKeywords:
+            session.delete(projectKeyword)
 
         for name, value in dct.items():
             keyword = session.query(Keyword).filter_by(name=name).one()
@@ -146,7 +147,8 @@ class Task(Base):
         Dict is of the form: keywordName => value
         """
         session = DBHandler.getSession()
-        session.query(TaskKeyword).filter_by(task=self).delete()
+        for taskKeyword in self.taskKeywords:
+            session.delete(taskKeyword)
 
         for name, value in dct.items():
             keyword = session.query(Keyword).filter_by(name=name).one()
