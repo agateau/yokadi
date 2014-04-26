@@ -11,13 +11,15 @@ import testutils
 
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
-from yokadi.core.db import Task
+from yokadi.core.db import Task, DBHandler, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException
 
 
 class BugTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        DBHandler.createDatabase("", memoryDatabase=True)
+        self.session = DBHandler.getSession()
+        setDefaultConfig()
         tui.clearInputAnswers()
         self.cmd = YokadiCmd()
 
@@ -28,12 +30,12 @@ class BugTestCase(unittest.TestCase):
         tui.addInputAnswers("n")
         self.cmd.do_bug_add("notExistingProject newBug")
 
-        tasks = list(Task.select())
+        tasks = self.session.query(Task).all()
         result = [x.title for x in tasks]
         expected = [u"t1"]
         self.assertEqual(result, expected)
 
-        kwDict = Task.get(1).getKeywordDict()
+        kwDict = self.session.query(Task).get(1).getKeywordDict()
         self.assertEqual(kwDict, dict(_severity=2, _likelihood=4, _bug=123))
 
         for bad_input in ("",  # No project

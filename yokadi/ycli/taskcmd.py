@@ -11,6 +11,7 @@ import readline
 import re
 from datetime import datetime, timedelta
 from dateutil import rrule
+from sqlalchemy import or_, and_, desc
 
 from yokadi.core.db import Config, Keyword, Project, Task, \
                     TaskKeyword, Recurrence
@@ -324,14 +325,14 @@ class TaskCmd(object):
         if not args.force:
             if not tui.confirm("Remove task '%s'" % task.title):
                 return
-        projectId = task.project.id
-        task.destroySelf()
+        project = task.project
+        self.session.delete(task)
         print "Task '%s' removed" % (task.title)
 
         # Delete project with no associated tasks
-        if Task.select(Task.q.projectID == projectId).count() == 0:
-            Project.delete(projectId)
-
+        if self.session.query(task).filter_by(project=project).count() == 0:
+            self.session.delete(project)
+        self.session.commit()
     complete_t_remove = taskIdCompleter
 
     def parser_t_purge(self):
@@ -340,7 +341,7 @@ class TaskCmd(object):
         parser.description = "Remove old done tasks from all projects."
         parser.add_argument("-f", "--force", dest="force", default=False, action="store_true",
                           help="Skip confirmation prompt")
-        delay = int(Config.byName("PURGE_DELAY").value)
+        delay = int(db.getConfigKey("PURGE_DELAY", environ=False))
         parser.add_argument("-d", "--delay", dest="delay", default=delay,
                           type=int, help="Delay (in days) after which done tasks are destroyed. Default is %d." % delay)
         return parser
@@ -349,16 +350,16 @@ class TaskCmd(object):
         parser = self.parser_t_purge()
         args = parser.parse_args(line)
         filters = []
-        filters.append(Task.q.status == "done")
-        filters.append(Task.q.doneDate < (datetime.now() - timedelta(days=args.delay)))
-        tasks = Task.select(AND(*filters))
+        filters.append(Task.status == "done")
+        filters.append(Task.doneDate < (datetime.now() - timedelta(days=args.delay)))
+        tasks = self.session.query(Task).filter(*filters)
         if tasks.count() == 0:
             print "No tasks need to be purged"
             return
         print "The following tasks will be removed:"
         print "\n".join(["%s: %s" % (task.id, task.title) for task in tasks])
         if args.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
-            Task.deleteMany(AND(*filters))
+            self.session.delete(tasks)
             print "Tasks deleted"
         else:
             print "Purge canceled"
@@ -493,8 +494,8 @@ class TaskCmd(object):
                 if word.startswith("@"):
                     tui.warning("Maybe you want keyword search (without -s option) "
                                 "instead of plain text search?")
-                filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
-                                  LIKE(Task.q.description, "%" + word + "%")))
+                filters.append(or_(Task.title.like("%" + word + "%"),
+                                   Task.description.like("%" + word + "%")))
 
         return args, projectList, filters
 
@@ -505,22 +506,21 @@ class TaskCmd(object):
         other parameters
         @param renderer: renderer class (for example: TextListRenderer)
         @param projectList: list of project name (as unicode string)
-        @param filters: filters in sqlobject format (example: Task.q.status == 'done')
-        @param order: ordering in sqlobject format (example: -Task.q.urgency)
+        @param filters: filters in sqlobject format (example: Task.status == 'done')
+        @param order: ordering in sqlobject format (example: -Task.urgency)
         @param limit: limit number tasks (int) or None for no limit
         @param groupKeyword: keyword used for grouping (as unicode string) or None
         """
         if groupKeyword:
             if groupKeyword.startswith("@"):
                 groupKeyword = groupKeyword[1:]
-            for keyword in Keyword.select(LIKE(Keyword.q.name, groupKeyword)):
+            for keyword in self.session.query(Keyword).filter(Keyword.name.like(groupKeyword)):
                 if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
-                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
+                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _
                     continue
-                taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
-                                           *filters),
-                                       orderBy=order, limit=limit, distinct=True,
-                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
+                taskList = self.session.query(Task).filter(TaskKeyword.keyword_id == keyword.id).filter(and_(*filters))
+                taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
+                taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
@@ -534,11 +534,10 @@ class TaskCmd(object):
                 if not project.active:
                     hiddenProjectNames.append(project.name)
                     continue
-                taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
-                                       orderBy=order, limit=limit, distinct=True,
-                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
+                taskList = self.session.query(Task).filter(Task.project == project).filter(and_(*filters))
+                taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
+                taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
-
                 if len(taskList) > 0:
                     self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
                     renderer.addTaskList(unicode(project), taskList)
@@ -573,31 +572,31 @@ class TaskCmd(object):
         filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
 
         # Handle t_list specific options
-        order = -Task.q.urgency, Task.q.creationDate
+        order = [desc(Task.urgency), Task.creationDate]
         limit = None
         if args.done:
-            filters.append(Task.q.status == 'done')
+            filters.append(Task.status == u'done')
             if args.done != "all":
                 minDate = ydateutils.parseMinDate(args.done)
-                filters.append(Task.q.doneDate >= minDate)
+                filters.append(Task.doneDate >= minDate)
         elif args.status == "all":
             pass
-        elif args.status == "started":
-            filters.append(Task.q.status == 'started')
+        elif args.status == u"started":
+            filters.append(Task.status == u"starte")
         else:
-            filters.append(Task.q.status != 'done')
+            filters.append(Task.status != u"done")
         if args.urgency:
-            order = -Task.q.urgency
-            filters.append(Task.q.urgency >= args.urgency)
+            order = [desc(Task.urgency), ]
+            filters.append(Task.urgency >= args.urgency)
         if args.topDue:
-            filters.append(Task.q.dueDate != None)
-            order = Task.q.dueDate
+            filters.append(Task.dueDate != None)
+            order = [Task.dueDate, ]
             limit = 5
         if args.due:
             for due in args.due:
                 dueOperator, dueLimit = ydateutils.parseDateLimit(due)
-                filters.append(dueOperator(Task.q.dueDate, dueLimit))
-            order = Task.q.dueDate
+                filters.append(dueOperator(Task.dueDate, dueLimit))
+            order = [Task.dueDate, ]
         if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
@@ -644,7 +643,7 @@ class TaskCmd(object):
             self.cryptoMgr.force_decrypt = True
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
-        order = Task.q.creationDate
+        order = Task.creationDate
         renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=args.keyword)
@@ -661,9 +660,9 @@ class TaskCmd(object):
         except SQLObjectNotFound:
             raise BadUsageException("You must provide a valid project name")
 
-        taskList = Task.select(AND(Task.q.projectID == project.id,
-                                   Task.q.status != 'done'),
-                               orderBy=-Task.q.urgency)
+        taskList = Task.select(AND(Task.projectID == project.id,
+                                   Task.status != 'done'),
+                               orderBy=-Task.urgency)
         lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
@@ -913,7 +912,7 @@ class TaskCmd(object):
 
         if tokens[1] == "none":
             if task.recurrence:
-                task.recurrence.destroySelf()
+                self.session.delete(task.recurrence)
                 task.recurrence = None
             return
         elif tokens[1] == "daily":

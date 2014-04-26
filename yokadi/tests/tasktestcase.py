@@ -14,13 +14,14 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
-from yokadi.core.db import Task, DBHandler
+from yokadi.core.db import Task, DBHandler, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
         DBHandler.createDatabase("", memoryDatabase=True)
+        setDefaultConfig()
         self.session = DBHandler.getSession()
         tui.clearInputAnswers()
         self.cmd = YokadiCmd()
@@ -35,12 +36,12 @@ class TaskTestCase(unittest.TestCase):
         tui.addInputAnswers("n")
         self.cmd.do_t_add("notExistingProject newTask")
 
-        tasks = list(Task.select())
+        tasks = self.session.query(Task).all()
         result = [x.title for x in tasks]
         expected = [u"t1", u"t2"]
         self.assertEqual(result, expected)
 
-        kwDict = Task.get(2).getKeywordDict()
+        kwDict = self.session.query(Task).get(2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
         for bad_input in ("",  # No project
@@ -50,12 +51,12 @@ class TaskTestCase(unittest.TestCase):
         # Crypto stuff
         tui.addInputAnswers("a Secret passphrase")
         self.cmd.do_t_add("-c x encrypted t1")
-        self.assertTrue(Task.get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
+        self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
 
     def testMark(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task = Task.get(1)
+        task = self.session.query(Task).get(1)
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_started("1")
         self.assertEqual(task.status, "started")
@@ -65,7 +66,7 @@ class TaskTestCase(unittest.TestCase):
     def testAddKeywords(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task = Task.get(1)
+        task = self.session.query(Task).get(1)
 
         tui.addInputAnswers("y", "y")
         self.cmd.do_t_add_keywords("1 @kw1 @kw2=12")
@@ -83,12 +84,12 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_add("x t1")
         tui.addInputAnswers("y")
         self.cmd.do_t_project("1 y")
-        task1 = Task.get(1)
+        task1 = self.session.query(Task).get(1)
         self.assertEqual(task1.project.name, "y")
 
         self.cmd.do_t_add("x t2")
         self.cmd.do_t_project("1 _")
-        task1 = Task.get(1)
+        task1 = self.session.query(Task).get(1)
         self.assertEqual(task1.project.name, "x")
 
     def testLastTaskId(self):
@@ -97,11 +98,11 @@ class TaskTestCase(unittest.TestCase):
 
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task1 = Task.get(1)
+        task1 = self.session.query(Task).get(1)
         self.assertEqual(self.cmd.getTaskFromId("_"), task1)
 
         self.cmd.do_t_add("x t2")
-        task2 = Task.get(2)
+        task2 = self.session.query(Task).get(2)
         self.assertEqual(self.cmd.getTaskFromId("_"), task2)
 
         self.cmd.do_t_mark_started("1")
@@ -112,15 +113,15 @@ class TaskTestCase(unittest.TestCase):
         self.assertRaises(YokadiException, self.cmd.do_t_add, "_ t1")
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task1 = Task.get(1)
+        task1 = self.session.query(Task).get(1)
         self.cmd.do_t_add("_ t2")
-        task2 = Task.get(2)
+        task2 = self.session.query(Task).get(2)
         self.assertEqual(task1.project, task2.project)
 
     def testRecurs(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task = Task.get(1)
+        task = self.session.query(Task).get(1)
         self.cmd.do_t_recurs("1 daily 10:00")
         desc = str(task.recurrence)
         self.cmd.do_t_recurs("1 weekly FR 23:00")
@@ -210,7 +211,7 @@ class TaskTestCase(unittest.TestCase):
         ids = [1, 2, 4, 5, 6, 9]
         self.cmd.do_t_apply("1 2,4-6 9 t_add_keywords @lala")
         for taskId in range(1, 10):
-            kwDict = Task.get(taskId).getKeywordDict()
+            kwDict = self.session.query(Task).get(taskId).getKeywordDict()
             if taskId in ids:
                 self.assertEqual(kwDict, dict(lala=None))
             else:
@@ -222,7 +223,7 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_list("@lala")
         self.cmd.do_t_apply("__ t_add_keywords @toto")
         for taskId in range(1, 10):
-            kwDict = Task.get(taskId).getKeywordDict()
+            kwDict = self.session.query(Task).get(taskId).getKeywordDict()
             if taskId in ids:
                 self.assertEqual(kwDict, dict(lala=None, toto=None))
             else:

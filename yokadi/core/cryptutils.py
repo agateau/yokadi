@@ -42,7 +42,7 @@ class YokadiCryptoManager(object):
         # previously provided
         self.force_decrypt = False
         try:
-            self.crypto_check = db.getConfigKey("CRYPTO_CHECK")
+            self.crypto_check = db.getConfigKey("CRYPTO_CHECK", environ=False)
         except NoResultFound:
             # Ok, set it to None. It will be setup after user defined passphrase
             self.crypto_check = None
@@ -97,8 +97,7 @@ class YokadiCryptoManager(object):
 
     def askPassphrase(self):
         """Ask user for passphrase if needed"""
-        delay = int(db.Config.byName("PURGE_DELAY").value)
-        cache = bool(int(db.Config.byName("PASSPHRASE_CACHE").value))
+        cache = bool(int(db.getConfigKey("PASSPHRASE_CACHE", environ=False)))
         if self.passphrase and cache:
             return
         self.passphrase = tui.editLine("", prompt="passphrase> ", echo=False)

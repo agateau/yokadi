@@ -96,9 +96,10 @@ def keywordFiltersToDict(keywordFilters):
 def warnIfKeywordDoesNotExist(keywordFilters):
     """Warn user is keyword does not exist
     @return: True if at least one keyword does not exist, else False"""
+    session = DBHandler.getSession()
     doesNotExist = False
     for keyword in [k.name for k in keywordFilters]:
-            if Keyword.select(LIKE(Keyword.q.name, keyword)).count() == 0:
+            if session.query(Keyword).filter(Keyword.name.like(keyword)).count() == 0:
                 tui.error("Keyword %s is unknown." % keyword)
                 doesNotExist = True
     return doesNotExist
@@ -152,11 +153,11 @@ class KeywordFilter(object):
                                                                     projectValueFilter).values(Task.id)
 
             if self.negative:
-                return and_(~(Task.id.in_(taskKeywordTaskIDs)),
-                            ~ (Task.id.in_(projectKeywordTaskIDs)))
+                return and_(~(Task.id.in_([i[0] for i in taskKeywordTaskIDs])),
+                            ~ (Task.id.in_([i[0] for i in projectKeywordTaskIDs])))
             else:
-                return or_(Task.id.in_(taskKeywordTaskIDs),
-                           Task.id.in_(projectKeywordTaskIDs))
+                return or_(Task.id.in_([i[0] for i in taskKeywordTaskIDs]),
+                           Task.id.in_([i[0] for i in projectKeywordTaskIDs]))
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""

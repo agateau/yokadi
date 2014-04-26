@@ -9,13 +9,14 @@ import unittest
 
 import testutils
 
-from yokadi.core.db import Project, DBHandler
+from yokadi.core.db import Project, DBHandler, setDefaultConfig
 from yokadi.ycli import completers
 
 
 class CompletersTestCase(unittest.TestCase):
     def setUp(self):
         DBHandler.createDatabase("", memoryDatabase=True)
+        setDefaultConfig()
         self.session = DBHandler.getSession()
 
     def testProjectCompleter(self):

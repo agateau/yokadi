@@ -12,12 +12,13 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.core.db import DBHandler
+from yokadi.core.db import DBHandler, setDefaultConfig
 
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
         DBHandler.createDatabase("", memoryDatabase=True)
+        setDefaultConfig()
         self.session = DBHandler.getSession()
         tui.clearInputAnswers()
 

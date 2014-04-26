@@ -9,7 +9,7 @@ Implementation of completers for various Yokadi objects.
 from dateutil import rrule
 
 from yokadi.ycli import parseutils
-from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY
+from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY, DBHandler
 from yokadi.core import ydateutils
 
 
@@ -24,7 +24,8 @@ def getItemPropertiesStartingWith(item, field, text):
     @param field: the item's field lookup : Project.q.name, Task.q.title, Keyword.q.name. Don't forget the magic q
     @param text: The begining of the text as a str
     @return: list of matching strings"""
-    return [x.name for x in item.select(LIKE(field, text + "%"))]
+    session = DBHandler.getSession()
+    return [x.name for x in session.query(item).filter(field.like(text + "%"))]
 
 
 class ProjectCompleter(object):
@@ -33,7 +34,7 @@ class ProjectCompleter(object):
 
     def __call__(self, text, line, begidx, endidx):
         if computeCompleteParameterPosition(text, line, begidx, endidx) == self.position:
-            return ["%s " % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
+            return ["%s " % x for x in getItemPropertiesStartingWith(Project, Project.name, text)]
         else:
             return []
 
@@ -44,7 +45,7 @@ class KeywordCompleter(object):
 
     def __call__(self, text, line, begidx, endidx):
         if computeCompleteParameterPosition(text, line, begidx, endidx) == self.position:
-            return getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)
+            return getItemPropertiesStartingWith(Keyword, Keyword.name, text)
         else:
             return []
 
@@ -55,19 +56,20 @@ def projectAndKeywordCompleter(cmd, text, line, begidx, endidx, shift=0):
     position -= len(parseutils.parseParameters(line)[0])  # remove arguments from position count
     position += shift  # Apply argument shift
     if   position == 1:  # Projects
-        return ["%s" % x for x in getItemPropertiesStartingWith(Project, Project.q.name, text)]
+        return ["%s" % x for x in getItemPropertiesStartingWith(Project, Project.name, text)]
     elif position >= 2 and line[-1] != " " and line.split()[-1][0] == "@":  # Keywords (we ensure that it starts with @
-        return ["%s" % x for x in getItemPropertiesStartingWith(Keyword, Keyword.q.name, text)]
+        return ["%s" % x for x in getItemPropertiesStartingWith(Keyword, Keyword.name, text)]
 
 
 def confCompleter(cmd, text, line, begidx, endidx):
-    return getItemPropertiesStartingWith(Config, Config.q.name, text)
+    return getItemPropertiesStartingWith(Config, Config.name, text)
 
 
 def taskIdCompleter(cmd, text, line, begidx, endidx):
     # TODO: filter on parameter position
     # TODO: potential performance issue with lots of tasks, find a better way to do it
-    tasks = [x for x in Task.select(Task.q.status != 'done') if str(x.id).startswith(text)]
+    session = DBHandler.getSession()
+    tasks = [x for x in session.query(Task).filter(Task.status != 'done') if str(x.id).startswith(text)]
     print
     for task in tasks:
         # Move that in a renderer class ?
