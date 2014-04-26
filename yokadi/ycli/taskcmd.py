@@ -643,7 +643,7 @@ class TaskCmd(object):
             self.cryptoMgr.force_decrypt = True
 
         filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
-        order = Task.creationDate
+        order = [Task.creationDate, ]
         renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=args.keyword)
