@@ -20,9 +20,9 @@ class CompletersTestCase(unittest.TestCase):
         self.session = DBHandler.getSession()
 
     def testProjectCompleter(self):
-        Project(name=u"foo")
-        Project(name=u"foo2")
-        Project(name=u"bar")
+        self.session.add_all([Project(name=u"foo"),
+                             Project(name=u"foo2"),
+                             Project(name=u"bar")])
 
         expected = [u"foo ", u"foo2 "]
         completer = completers.ProjectCompleter(1)
