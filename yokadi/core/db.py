@@ -138,7 +138,8 @@ class Task(Base):
     project_id = Column(Integer, ForeignKey("project.id"))
     project = relationship("Project", backref="tasks")
     taskKeywords = relationship("TaskKeyword", backref="task")
-    recurrence = ForeignKey("Recurrence", default=None)
+    recurrence_id = Column(Integer, ForeignKey("recurrence.id"), default=None)
+    recurrence = relationship("Recurrence")
 
     def setKeywordDict(self, dct):
         """
