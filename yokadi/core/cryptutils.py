@@ -102,7 +102,6 @@ class YokadiCryptoManager(object):
             return
         self.passphrase = tui.editLine("", prompt="passphrase> ", echo=False)
         self.passphrase = adjustString(self.passphrase, KEY_LENGTH)
-
         if not self.isPassphraseValid() and cache:
             self.passphrase = None
             self.force_decrypt = False  # As passphrase is invalid, don't force decrypt for next time
@@ -142,8 +141,8 @@ class YokadiCryptoManager(object):
             self.crypto_check = self._encrypt(check_word)
 
             # Save it to database config
-            db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
-                      desc="Cryptographic check data of passphrase")
+            db.DBHandler.getSession().add(db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
+                      desc="Cryptographic check data of passphrase"))
             return True
 
 
