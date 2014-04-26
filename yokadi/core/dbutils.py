@@ -160,12 +160,13 @@ class TaskLockManager:
         @param task: a Task instance
         @param session: sqlalchemy session"""
         self.task = task
+        self.session = DBHandler.getSession()
 
     def _getLock(self):
         """Retrieve the task lock if it exists (else None)"""
         try:
-            return TaskLock.select(TaskLock.q.task == self.task).getOne()
-        except SQLObjectNotFound:
+            return DBHandler.getSession().query(TaskLock).filter(TaskLock.task == self.task).one()
+        except NoResultFound:
             return  None
 
     def acquire(self):
@@ -174,21 +175,25 @@ class TaskLockManager:
         if lock:
             if lock.updateDate < datetime.now() - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
                 # Stale lock, removing
-                TaskLock.delete(lock.id)
+                self.session.delete(lock)
             else:
                 raise YokadiException("Task %s is already locked by process %s" % (lock.task.id, lock.pid))
-        TaskLock(task=self.task, pid=os.getpid(), updateDate=datetime.now())
+        self.session.add(TaskLock(task=self.task, pid=os.getpid(), updateDate=datetime.now()))
+        self.session.commit()
 
     def update(self):
         """Update lock timestamp to avoid it to expire"""
         lock = self._getLock()
         lock.updateDate = datetime.now()
+        self.session.merge(lock)
+        self.session.commit()
 
     def release(self):
         """Release the lock for that task"""
         # Only release our lock
         lock = self._getLock()
         if lock and lock.pid == os.getpid():
-            TaskLock.delete(lock.id)
+            self.session.delete(lock)
+            self.session.commit()
 
 # vi: ts=4 sw=4 et

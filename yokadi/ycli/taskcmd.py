@@ -195,6 +195,7 @@ class TaskCmd(object):
         except Exception, e:
             raise YokadiException(e)
         updateDescription(description)
+        self.session.commit()
 
     complete_t_describe = taskIdCompleter
 
