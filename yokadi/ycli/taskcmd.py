@@ -96,7 +96,6 @@ class TaskCmd(object):
 
         if args.describe:
             self.do_t_describe(self.lastTaskId)
-
         return task
 
     def do_t_add(self, line):
@@ -108,7 +107,10 @@ class TaskCmd(object):
                 title = "<... encrypted data...>"
             else:
                 title = task.title
+            self.session.add(task)
+            self.session.commit()
             print "Added task '%s' (id=%d)" % (title, task.id)
+
     complete_t_add = projectAndKeywordCompleter
 
     def do_bug_add(self, line):
@@ -129,6 +131,8 @@ class TaskCmd(object):
         else:
             title = task.title
 
+        self.session.add(task)
+        self.session.commit()
         print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
 
     complete_bug_add = ProjectCompleter(1)
@@ -140,6 +144,7 @@ class TaskCmd(object):
         task = self._t_add("n_add", line)
         if not task:
             return
+        self.session.add(task)
         keywordDict = task.getKeywordDict()
         keywordDict[NOTE_KEYWORD] = None
         task.setKeywordDict(keywordDict)
@@ -147,6 +152,7 @@ class TaskCmd(object):
             title = "<... encrypted data...>"
         else:
             title = task.title
+        self.session.commit()
         print "Added note '%s' (id=%d)" % (title, task.id)
     complete_n_add = projectAndKeywordCompleter
 
@@ -161,6 +167,8 @@ class TaskCmd(object):
         bugutils.editBugKeywords(keywordDict)
         task.setKeywordDict(keywordDict)
         task.urgency = bugutils.computeUrgency(keywordDict)
+        self.session.merge(task)
+        self.session.commit()
     complete_bug_edit = taskIdCompleter
 
     def getTaskFromId(self, tid):
@@ -195,6 +203,7 @@ class TaskCmd(object):
         except Exception, e:
             raise YokadiException(e)
         updateDescription(description)
+        self.session.merge(task)
         self.session.commit()
 
     complete_t_describe = taskIdCompleter
@@ -227,6 +236,8 @@ class TaskCmd(object):
             urgency = -99
 
         task.urgency = urgency
+        self.session.merge(task)
+        self.session.commit()
 
     complete_t_set_urgency = taskIdCompleter
     complete_t_urgency = taskIdCompleter
@@ -265,6 +276,8 @@ class TaskCmd(object):
             else:
                 task.doneDate = None
             print "Task '%s' marked as %s" % (task.title, status)
+        self.session.merge(task)
+        self.session.commit()
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
@@ -361,6 +374,7 @@ class TaskCmd(object):
         print "\n".join(["%s: %s" % (task.id, task.title) for task in tasks])
         if args.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
             self.session.delete(tasks)
+            self.session.commit()
             print "Tasks deleted"
         else:
             print "Purge canceled"
@@ -662,7 +676,7 @@ class TaskCmd(object):
             raise BadUsageException("You must provide a valid project name")
 
         taskList = self.session.query(Task).filter(Task.project_id == project.id,
-                                                   Task.status != 'done').order_by("desc(Task.urgency)")
+                                                   Task.status != 'done').order_by(desc(Task.urgency))
         lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
@@ -677,7 +691,8 @@ class TaskCmd(object):
         for urgency, taskId in enumerate(ids):
             task = self.session.query(Task).get(taskId)
             task.urgency = urgency
-
+            self.session.merge(task)
+        self.session.commit()
     complete_t_reorder = ProjectCompleter(1)
 
     def parser_t_show(self):
@@ -793,12 +808,14 @@ class TaskCmd(object):
                 break
 
         readline.set_completer(oldCompleter)  # Restore standard completer
+        self.session.merge(task)
         return task
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
         self._t_edit(line)
+        self.session.commit()
     complete_t_edit = taskIdCompleter
 
     def do_t_set_project(self, line):
@@ -817,6 +834,8 @@ class TaskCmd(object):
         projectName = self._realProjectName(projectName)
 
         task.project = dbutils.getOrCreateProject(projectName)
+        self.session.merge(task)
+        self.session.commit()
         if task.project:
             print "Moved task '%s' to project '%s'" % (task.title, projectName)
 
@@ -863,7 +882,8 @@ class TaskCmd(object):
         else:
             task.dueDate = ydateutils.parseHumaneDateTime(line)
             print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
-
+        self.session.merge(task)
+        self.commit()
     complete_t_set_due = dueDateCompleter
     complete_t_due = dueDateCompleter
 
@@ -888,6 +908,8 @@ class TaskCmd(object):
         kwDict = task.getKeywordDict()
         kwDict.update(newKwDict)
         task.setKeywordDict(kwDict)
+        self.session.merge(task)
+        self.session.commit()
 
     def do_t_recurs(self, line):
         """Make a task recurs
@@ -962,6 +984,8 @@ class TaskCmd(object):
                          bymonthday=bymonthday, bymonth=bymonth)
         task.recurrence.setRrule(rr)
         task.dueDate = task.recurrence.getNext()
+        self.session.merge(task)
+        self.session.commit()
     complete_t_recurs = recurrenceCompleter
 
     def do_t_filter(self, line):
