@@ -12,9 +12,9 @@ import re
 from datetime import datetime, timedelta
 from dateutil import rrule
 from sqlalchemy import or_, and_, desc
+from sqlalchemy.orm.exc import MultipleResultsFound
 
-from yokadi.core.db import Config, Keyword, Project, Task, \
-                    TaskKeyword, Recurrence
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
@@ -302,8 +302,8 @@ class TaskCmd(object):
         if not cmdTokens:
             raise BadUsageException("Give a command to apply")
         cmd = cmdTokens.pop(0)
-        for id in ids:
-            line = " ".join([cmd, str(id), " ".join(cmdTokens)])
+        for taskId in ids:
+            line = " ".join([cmd, str(taskId), " ".join(cmdTokens)])
             print "Executing: %s" % line
             self.onecmd(line.strip())
 
@@ -656,13 +656,12 @@ class TaskCmd(object):
         updated to match the order.
         t_reorder <project_name>"""
         try:
-            project = Project.byName(line)
-        except SQLObjectNotFound:
+            project = self.session.query(Project).filter_by(name=line).one()
+        except MultipleResultsFound:
             raise BadUsageException("You must provide a valid project name")
 
-        taskList = Task.select(AND(Task.projectID == project.id,
-                                   Task.status != 'done'),
-                               orderBy=-Task.urgency)
+        taskList = self.session.query(Task).filter(Task.project_id == project.id,
+                                                   Task.status != 'done').order_by("desc(Task.urgency)")
         lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
@@ -671,12 +670,11 @@ class TaskCmd(object):
             line = line.strip()
             if not "," in line:
                 continue
-            id = int(line.split(",")[0])
-            ids.append(id)
+            ids.append(int(line.split(",")[0]))
 
         ids.reverse()
-        for urgency, id in enumerate(ids):
-            task = Task.get(id)
+        for urgency, taskId in enumerate(ids):
+            task = self.session.query(Task).get(taskId)
             task.urgency = urgency
 
     complete_t_reorder = ProjectCompleter(1)
