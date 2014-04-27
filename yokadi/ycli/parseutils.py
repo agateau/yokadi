@@ -131,8 +131,8 @@ class KeywordFilter(object):
 
     def filter(self):
         """Return a filter in SQL Alchemy format"""
-        taskValueFilter = (1 == 1)
-        projectValueFilter = (1 == 1)
+        taskValueFilter = text("1 = 1")
+        projectValueFilter = text("1 = 1")
         if self.name:
             if self.value:
                 if self.valueOperator == "=":
