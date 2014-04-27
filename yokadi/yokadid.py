@@ -183,7 +183,7 @@ class YokadiDaemon(Daemon):
         DBHandler.connectDatabase(filename, createIfNeeded=False)
 
         # Basic tests :
-        if not (Task.tableExists() and Config.tableExists()):
+        if not (DBHandler.database.engine.has_table("Task") and DBHandler.database.engine.has_table("Config")):
             print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
             sys.exit(1)
 
