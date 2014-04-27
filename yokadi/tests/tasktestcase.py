@@ -229,4 +229,7 @@ class TaskTestCase(unittest.TestCase):
             else:
                 self.assertNotEqual(kwDict, dict(lala=None, toto=None))
 
+    def testReorder(self):
+        self.assertRaises(BadUsageException, self.cmd.do_t_reorder, "unknown_project")
+        self.assertRaises(BadUsageException, self.cmd.do_t_reorder, "too much args")
 # vi: ts=4 sw=4 et

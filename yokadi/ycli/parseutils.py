@@ -74,9 +74,9 @@ def createLine(projectName, title, keywordDict):
     tokens = []
     for keywordName, value in keywordDict.items():
         if value:
-            tokens.append("@" + keywordName + "=" + str(value))
+            tokens.append(u"@" + keywordName + "=" + str(value))
         else:
-            tokens.append("@" + keywordName)
+            tokens.append(u"@" + keywordName)
 
     if projectName:
         tokens.insert(0, projectName)

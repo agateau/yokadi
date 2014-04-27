@@ -25,7 +25,7 @@ def getItemPropertiesStartingWith(item, field, text):
     @param text: The begining of the text as a str
     @return: list of matching strings"""
     session = DBHandler.getSession()
-    return [x.name for x in session.query(item).filter(field.like(text + "%"))]
+    return [x.name for x in session.query(item).filter(field.like(unicode(text) + u"%"))]
 
 
 class ProjectCompleter(object):

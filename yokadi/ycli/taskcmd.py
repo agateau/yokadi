@@ -12,7 +12,7 @@ import re
 from datetime import datetime, timedelta
 from dateutil import rrule
 from sqlalchemy import or_, and_, desc
-from sqlalchemy.orm.exc import MultipleResultsFound
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence
 from yokadi.core import bugutils
@@ -673,7 +673,7 @@ class TaskCmd(object):
         t_reorder <project_name>"""
         try:
             project = self.session.query(Project).filter_by(name=line).one()
-        except MultipleResultsFound:
+        except (MultipleResultsFound, NoResultFound):
             raise BadUsageException("You must provide a valid project name")
 
         taskList = self.session.query(Task).filter(Task.project_id == project.id,
