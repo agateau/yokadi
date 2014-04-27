@@ -884,7 +884,7 @@ class TaskCmd(object):
             task.dueDate = ydateutils.parseHumaneDateTime(line)
             print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
         self.session.merge(task)
-        self.commit()
+        self.session.commit()
     complete_t_set_due = dueDateCompleter
     complete_t_due = dueDateCompleter
 

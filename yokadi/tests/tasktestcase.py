@@ -232,4 +232,13 @@ class TaskTestCase(unittest.TestCase):
     def testReorder(self):
         self.assertRaises(BadUsageException, self.cmd.do_t_reorder, "unknown_project")
         self.assertRaises(BadUsageException, self.cmd.do_t_reorder, "too much args")
+
+    def testDue(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        for valid_input in ("+1d", "+1m"):
+            self.cmd.do_t_due("1 %s" % valid_input)
+        for bad_input in ("coucou", "+1s"):
+            self.assertRaises(YokadiException, self.cmd.do_t_due, "1 %s" % bad_input)
+
 # vi: ts=4 sw=4 et
