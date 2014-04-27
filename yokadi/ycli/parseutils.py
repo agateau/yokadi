@@ -8,6 +8,7 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 from sqlalchemy import and_, or_
+from sqlalchemy.sql import text
 
 from yokadi.ycli import tui
 from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project, DBHandler
@@ -152,12 +153,20 @@ class KeywordFilter(object):
                                                                     Project.id == Task.project,
                                                                     projectValueFilter).values(Task.id)
 
-            if self.negative:
-                return and_(~(Task.id.in_([i[0] for i in taskKeywordTaskIDs])),
-                            ~ (Task.id.in_([i[0] for i in projectKeywordTaskIDs])))
+            taskKeywordTaskIDs = list(taskKeywordTaskIDs)
+            projectKeywordTaskIDs = list(projectKeywordTaskIDs)
+            if len(taskKeywordTaskIDs) == 0:
+                taskInKeywords = text("1 <> 1")  # Use subtitue condition as SQLA protest again IN clause with empty list
             else:
-                return or_(Task.id.in_([i[0] for i in taskKeywordTaskIDs]),
-                           Task.id.in_([i[0] for i in projectKeywordTaskIDs]))
+                taskInKeywords = Task.id.in_([i[0] for i in taskKeywordTaskIDs])
+            if len(projectKeywordTaskIDs) == 0:
+                projectInKeywords = text("1 <> 1")  # See above comment
+            else:
+                projectInKeywords = Task.id.in_([i[0] for i in projectKeywordTaskIDs])
+            if self.negative:
+                return and_(~taskInKeywords, ~projectInKeywords)
+            else:
+                return or_(taskInKeywords, projectInKeywords)
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""
