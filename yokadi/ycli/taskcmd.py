@@ -53,6 +53,7 @@ class TaskCmd(object):
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
         dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
+        self.session.commit()
 
     def _parser_t_add(self, cmd):
         """Code shared by t_add, bug_add and n_add parsers."""
