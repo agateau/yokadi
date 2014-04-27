@@ -17,7 +17,7 @@ from yokadi.core.db import DBHandler
 
 class KeywordTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.createDatabase("", memoryDatabase=True)
+        DBHandler.connectDatabase("", memoryDatabase=True)
         self.session = DBHandler.getSession()
         tui.clearInputAnswers()
         self.cmd = KeywordCmd()

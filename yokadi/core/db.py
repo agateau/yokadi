@@ -15,7 +15,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import Column, Integer, Boolean, Unicode, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey
 
 
 try:
@@ -251,7 +251,7 @@ class DBHandler(object):
         return cls.database.session
 
     @classmethod
-    def createDatabase(cls, dbFileName, createIfNeeded=True, memoryDatabase=False):
+    def connectDatabase(cls, dbFileName, createIfNeeded=True, memoryDatabase=False):
         cls.database = Database(dbFileName, createIfNeeded, memoryDatabase)
 
 

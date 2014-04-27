@@ -20,7 +20,7 @@ from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.createDatabase("", memoryDatabase=True)
+        DBHandler.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = DBHandler.getSession()
         tui.clearInputAnswers()

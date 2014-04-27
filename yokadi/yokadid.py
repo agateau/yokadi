@@ -14,8 +14,7 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from argparse import ArgumentParser
-
-from sqlobject import AND
+from sqlalchemy import and_
 
 try:
     import setproctitle
@@ -35,7 +34,7 @@ reload(sys)
 sys.setdefaultencoding(tui.ENCODING)
 
 
-from yokadi.core.db import Config, Project, Task, connectDatabase, getConfigKey
+from yokadi.core.db import Config, Project, Task, getConfigKey, DBHandler
 
 
 # Daemon polling delay (in seconds)
@@ -65,23 +64,24 @@ def sigHupHandler(signal, stack):
 
 def eventLoop():
     """Main event loop"""
-    delta = timedelta(hours=float(getConfigKey("ALARM_DELAY")))
-    suspend = timedelta(hours=float(getConfigKey("ALARM_SUSPEND")))
-    cmdDelayTemplate = getConfigKey("ALARM_DELAY_CMD")
-    cmdDueTemplate = getConfigKey("ALARM_DUE_CMD")
+    delta = timedelta(hours=float(getConfigKey(u"ALARM_DELAY")))
+    suspend = timedelta(hours=float(getConfigKey(u"ALARM_SUSPEND")))
+    cmdDelayTemplate = getConfigKey(u"ALARM_DELAY_CMD")
+    cmdDueTemplate = getConfigKey(u"ALARM_DUE_CMD")
+    session = DBHandler.getSession()
     # For the two following dict, task id is key, and value is (duedate, triggerdate)
     triggeredDelayTasks = {}
     triggeredDueTasks = {}
-    activeTaskFilter = [Task.q.status != "done",
-                      Task.q.projectID == Project.q.id,
-                      Project.q.active == True]
+    activeTaskFilter = [Task.status != "done",
+                      Task.project_id == Project.id,
+                      Project.active == True]
     while event[0]:
         now = datetime.today().replace(microsecond=0)
-        delayTasks = Task.select(AND(Task.q.dueDate < now + delta,
-                                   Task.q.dueDate > now,
-                                   *activeTaskFilter))
-        dueTasks = Task.select(AND(Task.q.dueDate < now,
-                                 *activeTaskFilter))
+        delayTasks = session.query(Task).filter(Task.dueDate < now + delta,
+                                                Task.dueDate > now,
+                                                *activeTaskFilter)
+        dueTasks = session.query(Task).filter(Task.dueDate < now,
+                                              *activeTaskFilter)
         processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate, suspend)
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
         time.sleep(DELAY)
@@ -180,7 +180,7 @@ class YokadiDaemon(Daemon):
             filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
             print "Using default database (%s)" % filename
 
-        connectDatabase(filename, createIfNeeded=False)
+        DBHandler.connectDatabase(filename, createIfNeeded=False)
 
         # Basic tests :
         if not (Task.tableExists() and Config.tableExists()):

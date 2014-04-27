@@ -17,7 +17,7 @@ from yokadi.ycli import tui
 
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.createDatabase("", memoryDatabase=True)
+        DBHandler.connectDatabase("", memoryDatabase=True)
         self.session = DBHandler.getSession()
         tui.clearInputAnswers()
         self.cmd = ProjectCmd()

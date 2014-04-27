@@ -15,7 +15,7 @@ from yokadi.ycli import completers
 
 class CompletersTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.createDatabase("", memoryDatabase=True)
+        DBHandler.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = DBHandler.getSession()
 

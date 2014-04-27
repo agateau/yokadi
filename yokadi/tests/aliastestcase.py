@@ -15,7 +15,7 @@ from yokadi.ycli.aliascmd import AliasCmd
 
 class AliasTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.createDatabase("", memoryDatabase=True)
+        DBHandler.connectDatabase("", memoryDatabase=True)
         self.session = DBHandler.getSession()
         self.cmd = AliasCmd()
 

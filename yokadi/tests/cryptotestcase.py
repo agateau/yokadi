@@ -17,7 +17,7 @@ from yokadi.core.db import DBHandler, setDefaultConfig
 
 class CryptoTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.createDatabase("", memoryDatabase=True)
+        DBHandler.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = DBHandler.getSession()
         tui.clearInputAnswers()

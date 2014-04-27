@@ -20,7 +20,7 @@ from yokadi.core import db
 
 class TextListRendererTestCase(unittest.TestCase):
     def setUp(self):
-        db.DBHandler.createDatabase("", memoryDatabase=True)
+        db.DBHandler.connectDatabase("", memoryDatabase=True)
         self.session = db.DBHandler.getSession()
         tui.clearInputAnswers()
 
