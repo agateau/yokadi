@@ -345,7 +345,7 @@ class TaskCmd(object):
         print "Task '%s' removed" % (task.title)
 
         # Delete project with no associated tasks
-        if self.session.query(task).filter_by(project=project).count() == 0:
+        if self.session.query(Task).filter_by(project=project).count() == 0:
             self.session.delete(project)
         self.session.commit()
     complete_t_remove = taskIdCompleter
