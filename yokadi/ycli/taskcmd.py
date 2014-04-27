@@ -469,7 +469,7 @@ class TaskCmd(object):
         if len(args.filter) > 0:
             projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args.filter))
         else:
-            projectName = ""
+            projectName = u""
             keywordFilters = []
 
         if self.kFilters:
@@ -482,7 +482,7 @@ class TaskCmd(object):
                 projectName = self.pFilter
             else:
                 # Take all project if none provided
-                projectName = "%"
+                projectName = u"%"
 
         if projectName.startswith("!"):
             projectName = self._realProjectName(projectName[1:])
@@ -581,11 +581,11 @@ class TaskCmd(object):
         # Reset last tasks id list
         self.lastTaskIds = []
 
-        # BUG: completion based on parameter position is broken when parameter is given
+        # BUG: completion based on parameter position is broken when parameter is given"
         args, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
-        filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
+        filters.append(parseutils.KeywordFilter(u"!@" + NOTE_KEYWORD).filter())
 
         # Handle t_list specific options
         order = [desc(Task.urgency), Task.creationDate]
@@ -598,7 +598,7 @@ class TaskCmd(object):
         elif args.status == "all":
             pass
         elif args.status == u"started":
-            filters.append(Task.status == u"starte")
+            filters.append(Task.status == u"started")
         else:
             filters.append(Task.status != u"done")
         if args.urgency:
