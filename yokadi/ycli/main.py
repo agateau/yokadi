@@ -231,10 +231,10 @@ def main():
 
     if args.createOnly:
         return
-
     db.setDefaultConfig()  # Set default config parameters
 
     cmd = YokadiCmd()
+
     try:
         if len(args.cmd) > 0:
             print " ".join(args.cmd)
