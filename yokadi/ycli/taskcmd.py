@@ -522,8 +522,8 @@ class TaskCmd(object):
         other parameters
         @param renderer: renderer class (for example: TextListRenderer)
         @param projectList: list of project name (as unicode string)
-        @param filters: filters in sqlobject format (example: Task.status == 'done')
-        @param order: ordering in sqlobject format (example: -Task.urgency)
+        @param filters: filters in sql alchemy format (example: Task.status == 'done')
+        @param order: ordering in sqlalchemy format (example: desc(Task.urgency))
         @param limit: limit number tasks (int) or None for no limit
         @param groupKeyword: keyword used for grouping (as unicode string) or None
         """
@@ -532,7 +532,7 @@ class TaskCmd(object):
                 groupKeyword = groupKeyword[1:]
             for keyword in self.session.query(Keyword).filter(Keyword.name.like(groupKeyword)):
                 if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
-                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _
+                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
                     continue
                 taskList = self.session.query(Task).filter(TaskKeyword.keyword_id == keyword.id).filter(and_(*filters))
                 taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)

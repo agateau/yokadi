@@ -104,7 +104,7 @@ def updateTaskFromVTodo(task, vTodo):
     for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
         attr = vTodo.get(icalAttribute)
         if attr:
-            # Convert ical type (vDates, vInt..) to sqlobjectunderstandable type (datetime, int...)
+            # Convert ical type (vDates, vInt..) to sql alchemy understandable type (datetime, int...)
             attr = icalutils.convertIcalType(attr)
             if yokadiAttribute == "title":
                 # Remove (id)
