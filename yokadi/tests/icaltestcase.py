@@ -13,7 +13,7 @@ import datetime
 from yokadi.ycli import tui
 from yokadi.yical import yical
 from yokadi.core import dbutils
-from yokadi.core.db import DBHandler
+from yokadi.core.db import DBHandler, Task
 
 
 class IcalTestCase(unittest.TestCase):
@@ -87,6 +87,7 @@ class IcalTestCase(unittest.TestCase):
         # Check keywords are still here
         yical.updateTaskFromVTodo(t1, v1)
         keywords = t1.getKeywordDict().keys()
+        self.session.commit()
         keywords.sort()
         self.assertEqual(keywords, [u"k1", u"k2"])
         self.assertEqual(t1.getKeywordDict()["k2"], 123)
@@ -94,11 +95,13 @@ class IcalTestCase(unittest.TestCase):
         # Remove k2 category
         v1["categories"] = ["k1"]
         yical.updateTaskFromVTodo(t1, v1)
+        self.session.commit()
         self.assertEqual(t1.getKeywordDict().keys(), [u"k1", ])
 
         # Set k1 value
         v1["categories"] = ["k1=456", ]
         yical.updateTaskFromVTodo(t1, v1)
+        self.session.commit()
         self.assertEqual(t1.getKeywordDict()["k1"], 456)
 
         # Create a category
