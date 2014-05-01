@@ -10,7 +10,7 @@
 from distutils.core import setup
 import sys
 import os
-from os.path import abspath, dirname, join
+from os.path import abspath, isdir, dirname, join
 
 # yokadi root path
 root=abspath(dirname(__file__))
@@ -32,8 +32,17 @@ data_files.append(["share/man/man1",
 data_files.append(["share/yokadi/update",
                    ["update/%s" % f for f in os.listdir(join(root, "update"))]])
 
+# Icon
+for size in os.listdir("icon"):
+    if not isdir(join("icon", size)):
+        continue
+    data_files.append(["share/icons/hicolor/%s/apps" % size,
+        ["icon/%s/yokadi.png" % size]])
+
+data_files.append(["share/applications", ["icon/yokadi.desktop"]])
+
 # Scripts
-scripts=["bin/yokadi", "bin/yokadid", "bin/xyokadi"]
+scripts=["bin/yokadi", "bin/yokadid"]
 
 # Version
 try:

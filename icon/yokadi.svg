@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="yokadi.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient4178">
+      <stop
+         style="stop-color:#008000;stop-opacity:1;"
+         offset="0"
+         id="stop4180" />
+      <stop
+         id="stop4188"
+         offset="0.5"
+         style="stop-color:#008000;stop-opacity:1;" />
+      <stop
+         id="stop4186"
+         offset="0.5"
+         style="stop-color:#00a800;stop-opacity:1" />
+      <stop
+         style="stop-color:#009e00;stop-opacity:1"
+         offset="1"
+         id="stop4182" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4178"
+       id="linearGradient4184"
+       x1="71"
+       y1="190.36218"
+       x2="71"
+       y2="192.36218"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="repeat"
+       gradientTransform="matrix(0.92307693,0,0,0.92307693,4.9615379,16.604781)" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="8"
+     inkscape:cx="159.31834"
+     inkscape:cy="834.38704"
+     inkscape:document-units="px"
+     inkscape:current-layer="g4316"
+     showgrid="true"
+     inkscape:window-width="1600"
+     inkscape:window-height="852"
+     inkscape:window-x="0"
+     inkscape:window-y="22"
+     inkscape:window-maximized="1"
+     showguides="true"
+     inkscape:guide-bbox="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2985"
+       empspacing="16"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+    <sodipodi:guide
+       orientation="-0.70710678,0.70710678"
+       position="69,839"
+       id="guide4306" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid4333"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true"
+       spacingx="0.5px"
+       spacingy="0.5px"
+       color="#5454ab"
+       opacity="0.1254902"
+       dotted="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="bg"
+     sodipodi:insensitive="true"
+     style="display:none">
+    <rect
+       style="color:#000000;fill:#999999;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3840"
+       width="487.39859"
+       height="171.22086"
+       x="5.5558391"
+       y="8.3695345"
+       ry="16" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="selection"
+     style="display:none">
+    <rect
+       style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3853"
+       width="128"
+       height="128"
+       x="16"
+       y="12.362183"
+       ry="0"
+       inkscape:export-filename="yokadi.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+  </g>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g3347">
+      <rect
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         ry="14.163265"
+         y="28.362183"
+         x="32"
+         height="96"
+         width="96"
+         id="rect2987"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <path
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         sodipodi:nodetypes="cccccccc"
+         inkscape:connector-curvature="0"
+         id="path3757"
+         d="m 42,61.362183 13,0 19,23 c 19.114729,-26.159916 35.13883,-46.334573 55,-71 C 90.797346,76.335099 66.053469,110.08622 75,139.36218 l -21,0 c 0.130051,-13.67467 4.497823,-27.48722 13,-41.999997 z"
+         style="fill:#00a6c4;fill-opacity:1;stroke:none" />
+      <rect
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         ry="0"
+         y="97.362183"
+         x="56"
+         height="7"
+         width="36"
+         id="rect3759"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:4;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    </g>
+    <rect
+       style="color:#000000;fill:#b3b3b3;fill-opacity:0.53846154000000002;fill-rule:nonzero;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3345"
+       width="16"
+       height="16"
+       x="32"
+       y="188.36218"
+       ry="0" />
+    <rect
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+       ry="1.917942"
+       y="189.86218"
+       x="32.5"
+       height="13"
+       width="13"
+       id="rect3354"
+       style="color:#000000;fill:#2ba8f8;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.99999988;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+       sodipodi:nodetypes="ccccccc"
+       inkscape:connector-curvature="0"
+       id="path3356"
+       d="m 34,197.36218 2,-2 2,2 8.000001,-8 2,2 -10.000001,10 z"
+       style="fill:#000000;fill-opacity:1;stroke:none" />
+    <rect
+       ry="0"
+       y="188.36218"
+       x="64"
+       height="16"
+       width="16"
+       id="rect4172"
+       style="color:#000000;fill:#b3b3b3;fill-opacity:0.53846154;fill-rule:nonzero;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <rect
+       style="color:#000000;fill:url(#linearGradient4184);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.99999982;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect4174"
+       width="12"
+       height="12"
+       x="64.5"
+       y="191.86218"
+       ry="1.770408"
+       inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:none"
+       d="m 66,197.36218 2,-2 2,2 8.000001,-8 2,2 -10.000001,10 z"
+       id="path4176"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccccc"
+       inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <rect
+       ry="0"
+       y="220.36218"
+       x="32"
+       height="16"
+       width="16"
+       id="rect4192"
+       style="color:#000000;fill:#b3b3b3;fill-opacity:0.53846154;fill-rule:nonzero;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <rect
+       style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.99999982;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect4194"
+       width="12"
+       height="12"
+       x="32.5"
+       y="222.86218"
+       ry="1.770408"
+       inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <path
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+       sodipodi:nodetypes="ccccccc"
+       inkscape:connector-curvature="0"
+       id="path3356-4"
+       d="m 34,229.36218 2,-2 2,2 8.000001,-8 2,2 -10.000001,10 z"
+       style="fill:#008000;fill-opacity:1;stroke:none" />
+    <g
+       id="icon-smooth"
+       transform="translate(0,12)">
+      <rect
+         style="color:#000000;fill:#ececec;fill-opacity:1;fill-rule:nonzero;stroke:#ececec;stroke-width:0.99999976;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect4218"
+         width="15"
+         height="15"
+         x="64.5"
+         y="208.86218"
+         ry="0"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/22-yokadi.png"
+         inkscape:export-xdpi="123.75"
+         inkscape:export-ydpi="123.75" />
+      <rect
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         ry="0"
+         y="209.36218"
+         x="65"
+         height="14"
+         width="14"
+         id="rect4222"
+         style="color:#000000;fill:#333333;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999976;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <g
+         id="g4240"
+         style="fill:#b3b3b3">
+        <rect
+           y="214.36218"
+           x="70"
+           height="1"
+           width="3"
+           id="rect4238"
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <path
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 67,210.375 -0.71875,0.6875 1.78125,1.79968 -1.78125,1.79407 0.71875,0.6875 2.5,-2.48157 z"
+           id="rect4275"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="ccccccc" />
+      </g>
+      <path
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         sodipodi:nodetypes="ccccccc"
+         inkscape:connector-curvature="0"
+         id="path4220"
+         d="m 66,219.36218 2,-2 2,2 7.000001,-7 2,2 -9.000001,9 z"
+         style="fill:#00a6c4;fill-opacity:1;stroke:none" />
+    </g>
+    <g
+       id="icon-px"
+       transform="translate(32,12)">
+      <rect
+         inkscape:export-ydpi="123.75"
+         inkscape:export-xdpi="123.75"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/22-yokadi.png"
+         ry="0"
+         y="208.86218"
+         x="64.5"
+         height="15"
+         width="15"
+         id="rect4284"
+         style="color:#000000;fill:#ececec;fill-opacity:1;fill-rule:nonzero;stroke:#ececec;stroke-width:0.99999976;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <rect
+         style="color:#000000;fill:#333333;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999976;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect4286"
+         width="14"
+         height="14"
+         x="65"
+         y="209.36218"
+         ry="0"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
+      <g
+         id="g4288"
+         style="fill:#b3b3b3;fill-opacity:1">
+        <rect
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="rect4290"
+           width="3"
+           height="1"
+           x="70"
+           y="214.36218" />
+        <rect
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="rect4292"
+           width="1"
+           height="1"
+           x="66"
+           y="210.36218" />
+        <rect
+           y="211.36218"
+           x="67"
+           height="1"
+           width="1"
+           id="rect4294"
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <rect
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="rect4296"
+           width="1"
+           height="1"
+           x="68"
+           y="212.36218" />
+        <rect
+           y="213.36218"
+           x="67"
+           height="1"
+           width="1"
+           id="rect4298"
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <rect
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           id="rect4300"
+           width="1"
+           height="1"
+           x="66"
+           y="214.36218" />
+      </g>
+      <path
+         style="fill:#00a6c4;fill-opacity:1;stroke:none"
+         d="m 66,219.36218 2,-2 2,2 7.000001,-7 2,2 -9.000001,9 z"
+         id="path4304"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccccc"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         inkscape:export-xdpi="90"
+         inkscape:export-ydpi="90" />
+    </g>
+    <g
+       transform="translate(64,12)"
+       id="icon-y">
+      <rect
+         style="color:#000000;fill:#ececec;fill-opacity:1;fill-rule:nonzero;stroke:#ececec;stroke-width:0.99999976;stroke-miterlimit:4;stroke-dasharray:none;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         id="rect4312"
+         width="15"
+         height="15"
+         x="64.5"
+         y="208.86218"
+         ry="0"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/22-yokadi.png"
+         inkscape:export-xdpi="123.75"
+         inkscape:export-ydpi="123.75" />
+      <rect
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         ry="0"
+         y="209.36218"
+         x="65"
+         height="14"
+         width="14"
+         id="rect4314"
+         style="color:#000000;fill:#333333;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.99999976;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <g
+         style="fill:#b3b3b3;fill-opacity:1"
+         id="g4316">
+        <rect
+           y="214.36218"
+           x="70"
+           height="1"
+           width="3"
+           id="rect4318"
+           style="color:#000000;fill:#b3b3b3;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <path
+           style="color:#000000;fill:#b3b3b3;fill-rule:nonzero;stroke:none;stroke-width:1px;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 66,210.36218 1,0 0,2 1,5e-5 0.03051,-1.98485 0.969489,-0.0152 10e-7,4 c 0,0.5 -0.5,1 -1,1 l -2.000001,0 0,-1 2,0 0,-1 -0.999999,0 c -0.5,0 -1,-0.5 -1,-1 z"
+           id="rect4320"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="ccccccccccccccc" />
+      </g>
+      <path
+         inkscape:export-ydpi="90"
+         inkscape:export-xdpi="90"
+         inkscape:export-filename="/home/aurelien/src/yokadi/icon/yokadi.png"
+         sodipodi:nodetypes="ccccccc"
+         inkscape:connector-curvature="0"
+         id="path4330"
+         d="m 66,219.36218 2,-2 2,2 7.000001,-7 2,2 -9.000001,9 z"
+         style="fill:#00a6c4;fill-opacity:1;stroke:none" />
+    </g>
+  </g>
+</svg>
