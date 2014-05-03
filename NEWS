@@ -1,4 +1,51 @@
-v0.13 2011/04/9
+v0.14 2014/05/03
+- Command changes:
+    - t_add, n_add:
+        - Allow creating two tasks with the same title (useful for recurrent tasks, like "buy bread".
+        - Allow using _ to select last project, making it possible to do multiple t_add on the same project with `t_add _ <task description>`.
+        - Add --describe option to start describing the task right after adding it.
+    - t_describe, n_describe:
+        - Safer task description editing: task is updated each time the editor saves, a lock manager now prevents multiple edits.
+        - Use .md suffix instead of .txt for the temporary filename to allow some smart things with editors that understand Markdown.
+        - Use project and task name for the temporary filename. Useful when using graphical editors or when your terminal title shows the current running command.
+    - t_due:
+        - When called with a time argument which is before current time, set due date to the day after.
+    - t_show:
+        - Show the task ID.
+    - t_list:
+        - Use month and year for the task age if the task is older than 12 months.
+        - Add support for arbitrary minimum date for --done.
+        - Fixed broken help.
+    - n_list:
+        - Display creation date instead of age.
+        - Notes are now grouped by date.
+    - p_list:
+        - Show task count per project.
+    - p_remove:
+        - Show the number of associated tasks in the prompt.
+    - p_edit:
+        - Handle case where user tries to rename a project using the name of an existing project.
+    - yokadid:
+        - Add --restart option.
+        - Add --log option.
+        - Set process name with setproctitle if available.
+        - Configuration keys can now be overridden using environment variables.
+
+- Misc:
+    - Date/time commands now support %d/%m/%y date format
+    - Replaced xyokadi with a desktop file
+    - Updated README to match real output
+
+- Developer specific changes:
+    - Command parser has been ported from optparse to argparse
+    - Code is now PEP 8 compliant, with the exception of camelCase usage
+    - All imports have been changed to absolute imports (ie `import yokadi.<something>`)
+    - Code has been reorganized into different sub directories
+    - The scripts in bin/ are now smart enough to run the source tree version instead of the installed version if possible
+    - We now use Travis to track code quality
+    - A requirements.txt file has been added
+
+v0.13 2011/04/09
 - cryptographic support to encrypt tasks title and description
 - t_apply now accept id range (x-y)
 - Special keyword __ can used in t_apply to affect all tasks previously select by t_list
@@ -6,7 +53,6 @@ v0.13 2011/04/9
 v0.12 2010/07/06
 - Negative keyword support. Ex.: t_list !@home
 - Permanent filters on keyword or project. 't_filter @foo' will filter any further call to t_list on @foo keyword.
-
 
 v0.11.1 2009/11/02
 - yokadi symlink (useful to run yokadi without installing it) was broken
