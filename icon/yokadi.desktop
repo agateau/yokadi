@@ -7,3 +7,4 @@ Terminal=true
 Icon=yokadi
 Type=Application
 Categories=Office;ProjectManagement;ConsoleOnly;
+Keywords=todo;projectmanagement;commandline;
