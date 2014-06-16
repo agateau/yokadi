@@ -39,7 +39,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         return None
 
     # Create task
-    task = Task(creationDate=datetime.now(), project=project, title=title, description=u"", status=u"new")
+    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title, description=u"", status=u"new")
     session.add(task)
     task.setKeywordDict(keywordDict)
     session.merge(task)

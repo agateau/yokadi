@@ -116,7 +116,7 @@ class AgeFormater(object):
     def __call__(self, task):
         delta = self.today - task.creationDate.replace(microsecond=0)
         if self.asDate:
-            return unicode(task.creationDate), None
+            return task.creationDate.strftime("%x %H:%M"), None
         else:
             return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
 
@@ -169,7 +169,7 @@ class TextListRenderer(object):
 
         if renderAsNotes:
             self.splitOnDate = True
-            creationDateColumnWidth = 19
+            creationDateColumnWidth = 16
             creationDateTitle = "Creation date"
         else:
             creationDateColumnWidth = 8
@@ -208,7 +208,7 @@ class TextListRenderer(object):
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
     def end(self):
-        today = datetime.now().replace(hour=0, minute=0)
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         # Adjust idColumn
         maxId = DBHandler.getSession().query(func.max(Task.id)).one()[0]
         self.idColumn.width = max(2, len(str(maxId)))

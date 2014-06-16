@@ -273,7 +273,7 @@ class TaskCmd(object):
         else:
             task.status = status
             if status == "done":
-                task.doneDate = datetime.now()
+                task.doneDate = datetime.now().replace(second=0, microsecond=0)
             else:
                 task.doneDate = None
             print "Task '%s' marked as %s" % (task.title, status)

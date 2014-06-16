@@ -206,7 +206,7 @@ class Recurrence(Base):
         @return: next occurence (datetime)"""
         rr = self.getRrule()
         if refDate is None:
-            refDate = datetime.now()
+            refDate = datetime.now().replace(second=0, microsecond=0)
         return rr.after(refDate)
 
     def __str__(self):
