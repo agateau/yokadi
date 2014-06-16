@@ -27,7 +27,7 @@ from yokadi.ycli import parseutils
 from yokadi.core.yokadiexception import YokadiException
 
 # UID pattern
-UID_PREFIX = "yokadi" 
+UID_PREFIX = "yokadi"
 TASK_UID = UID_PREFIX + "-task-%s"
 TASK_RE = re.compile(TASK_UID.replace("%s", "(\d+)"))
 PROJECT_UID = UID_PREFIX + "-project-%s"
