@@ -10,7 +10,6 @@ import sys
 
 try:
     import icalendar
-    import uuid
 except ImportError:
     print "You don't have the icalendar package."
     print "Get it on http://pypi.python.org/pypi/icalendar/"
@@ -29,9 +28,9 @@ from yokadi.core.yokadiexception import YokadiException
 
 # UID pattern
 UID_PREFIX = "yokadi" 
-TASK_UID = UID_PREFIX + "-task-%s-" + str(uuid.uuid4())
+TASK_UID = UID_PREFIX + "-task-%s"
 TASK_RE = re.compile(TASK_UID.replace("%s", "(\d+)"))
-PROJECT_UID = UID_PREFIX + "-project-%s-" + str(uuid.uuid4())
+PROJECT_UID = UID_PREFIX + "-project-%s"
 
 # Default project where new task are added
 # TODO: make this a configurable items via c_set
