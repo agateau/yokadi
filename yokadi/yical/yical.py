@@ -154,6 +154,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.wfile.write(cal.as_string())
         else:
             self.wfile.write(cal.to_ical())
+
     def do_PUT(self):
         """Receive a todolist for updating"""
         length = int(self.headers.getheader('content-length'))
