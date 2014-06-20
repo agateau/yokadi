@@ -149,12 +149,19 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         cal = generateCal()
-        self.wfile.write(cal.to_ical())
-
+        if not hasattr(icalendar.Calendar, "to_ical"):
+            print("Your version of icalendar is outdated: consider updating to icalendar > 3.0.")
+            self.wfile.write(cal.as_string())
+        else:
+            self.wfile.write(cal.to_ical())
     def do_PUT(self):
         """Receive a todolist for updating"""
         length = int(self.headers.getheader('content-length'))
-        cal = icalendar.Calendar.from_ical(self.rfile.read(length))
+        if not hasattr(icalendar.Calendar, "from_ical"):
+            print("Your version of icalendar is outdated: consider updating to icalendar > 3.0.")
+            cal = icalendar.Calendar.from_string(self.rfile.read(length))
+        else:
+            cal = icalendar.Calendar.from_ical(self.rfile.read(length))
         for vTodo in cal.walk():
             if "UID" in vTodo:
                 try:
