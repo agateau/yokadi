@@ -534,7 +534,7 @@ class TaskCmd(object):
                 if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
                     # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
                     continue
-                taskList = self.session.query(Task).filter(TaskKeyword.keyword_id == keyword.id).filter(and_(*filters))
+                taskList = self.session.query(Task).filter(TaskKeyword.keywordId == keyword.id).filter(and_(*filters))
                 taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
                 taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
@@ -676,7 +676,7 @@ class TaskCmd(object):
         except (MultipleResultsFound, NoResultFound):
             raise BadUsageException("You must provide a valid project name")
 
-        taskList = self.session.query(Task).filter(Task.project_id == project.id,
+        taskList = self.session.query(Task).filter(Task.projectId == project.id,
                                                    Task.status != 'done').order_by(desc(Task.urgency))
         lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))

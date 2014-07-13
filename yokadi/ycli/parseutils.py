@@ -144,12 +144,12 @@ class KeywordFilter(object):
                 # TODO: handle also <, >, =< and >=
 
             taskKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
-                                                                 TaskKeyword.keyword_id == Keyword.id,
-                                                                 TaskKeyword.task_id == Task.id,
+                                                                 TaskKeyword.keywordId == Keyword.id,
+                                                                 TaskKeyword.taskId == Task.id,
                                                                  taskValueFilter).values(Task.id)
             projectKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
-                                                                    ProjectKeyword.keyword_id == Keyword.id,
-                                                                    ProjectKeyword.project_id == Project.id,
+                                                                    ProjectKeyword.keywordId == Keyword.id,
+                                                                    ProjectKeyword.projectId == Project.id,
                                                                     Project.id == Task.project,
                                                                     projectValueFilter).values(Task.id)
 

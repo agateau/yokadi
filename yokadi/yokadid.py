@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from argparse import ArgumentParser
-from sqlalchemy import and_
 
 try:
     import setproctitle
@@ -73,8 +72,8 @@ def eventLoop():
     triggeredDelayTasks = {}
     triggeredDueTasks = {}
     activeTaskFilter = [Task.status != "done",
-                      Task.project_id == Project.id,
-                      Project.active == True]
+                        Task.projectId == Project.id,
+                        Project.active == True]
     while event[0]:
         now = datetime.today().replace(microsecond=0)
         delayTasks = session.query(Task).filter(Task.dueDate < now + delta,

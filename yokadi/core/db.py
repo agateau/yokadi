@@ -110,8 +110,8 @@ class Keyword(Base):
 class TaskKeyword(Base):
     __tablename__ = "task_keyword"
     id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey("task.id"))
-    keyword_id = Column(Integer, ForeignKey("keyword.id"))
+    taskId = Column("task_id", Integer, ForeignKey("task.id"))
+    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
     keyword = relationship("Keyword", backref="taskKeywords")
 
@@ -119,8 +119,8 @@ class TaskKeyword(Base):
 class ProjectKeyword(Base):
     __tablename__ = "project_keyword"
     id = Column(Integer, primary_key=True)
-    project_id = Column(Integer, ForeignKey("project.id"))
-    keyword_id = Column(Integer, ForeignKey("keyword.id"))
+    projectId = Column("project_id", Integer, ForeignKey("project.id"))
+    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
     keyword = relationship("Keyword", backref="projectKeywords")
 
@@ -135,10 +135,10 @@ class Task(Base):
     description = Column(Unicode, default=u"", nullable=False)
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum(u"new", u"started", u"done"), default=u"new")
-    project_id = Column(Integer, ForeignKey("project.id"))
+    projectId = Column("project_id", Integer, ForeignKey("project.id"))
     project = relationship("Project", backref="tasks")
     taskKeywords = relationship("TaskKeyword", backref="task")
-    recurrence_id = Column(Integer, ForeignKey("recurrence.id"), default=None)
+    recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
     recurrence = relationship("Recurrence")
 
     def setKeywordDict(self, dct):
@@ -226,7 +226,7 @@ class Config(Base):
 class TaskLock(Base):
     __tablename__ = "task_lock"
     id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey("task.id"), unique=True)
+    taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True)
     task = relationship("Task")
     pid = Column(Integer, default=None)
     updateDate = Column("update_date", DateTime, default=None)
