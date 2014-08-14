@@ -16,10 +16,9 @@ from sqlobject import BoolCol, connectionForURI, DatabaseIndex, DateTimeCol, Enu
 try:
     from dateutil import rrule
 except ImportError:
-    print "You must install dateutils to use Yokadi"
+    print "You must install python-dateutil to use Yokadi"
     print "This library is used for task recurrence"
-    print "Get it on Gustavo Niemeyer website"
-    print "Or use 'easy_install dateutils'"
+    print "Use 'pip install python-dateutil'"
     sys.exit(1)
 
 from yokadi.core.yokadiexception import YokadiException
