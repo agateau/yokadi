@@ -12,11 +12,8 @@ import os
 import re
 import subprocess
 import sys
-try:
-    # Seems to be the Python 2.6 way to get sqlite
-    from sqlite3 import dbapi2 as sqlite
-except ImportError:
-    from pysqlite2 import dbapi2 as sqlite
+
+from sqlite3 import dbapi2 as sqlite
 
 
 def getTableList(cx):

@@ -14,8 +14,7 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
 
 - Unix or Linux system. Mac OS X and Windows should work but have not been
   tested yet.
-- Python 2.4 or higher.
-- Sqlite module (included in Python since 2.5 release).
+- Python 2.7.
 - iCalendar module (optional, for Yokadi Daemon only)
 - setproctitle module (optional, for Yokadi Daemon only)
 - SQLObject 0.9 or higher.
@@ -300,8 +299,9 @@ You can also find some of us on #yokadi, on the Freenode IRC network.
 
 Yokadi has been brought to you by:
 
-- Aurélien Gâteau <aurelien.gateau@free.fr>: Developer, founder
+- Aurélien Gâteau <mail@agateau.com>: Developer, founder
 - Sébastien Renard <sebastien.renard@digitalfox.org>: Developer
+- Benjamin Port <benjamin.port@brobase.fr>: Developer
 
 Other people contributed to Yokadi:
 

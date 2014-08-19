@@ -1,2 +1,3 @@
 #!/bin/sh
-epydoc --name="Yokadi" --html --graph=all -o doc *py
+cd ../"$(dirname "$0")"
+epydoc --name="Yokadi" --html --graph=all -o doc yokadi/

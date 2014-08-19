@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+SUFFIX=y
+
+for size in 16 22 32 48 64 128 ; do
+    dir=${size}x${size}
+    mkdir -p $dir
+    inkscape --export-png $dir/yokadi.png \
+        --export-id=icon-$SUFFIX --export-width=$size --export-height=$size \
+        yokadi.svg
+done

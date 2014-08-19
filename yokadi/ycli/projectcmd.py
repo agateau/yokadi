@@ -133,8 +133,9 @@ class ProjectCmd(object):
         parser = self.parser_p_remove()
         args = parser.parse_args(line)
         project = getProjectFromName(args.project)
+        nbTasks = len(project.tasks)
         if not args.force:
-            if not tui.confirm("Remove project '%s' and all its tasks" % project.name):
+            if not tui.confirm("Remove project '%s' and its %d tasks" % (project.name, nbTasks)):
                 return
         print "Removing project tasks:"
         for task in project.tasks:

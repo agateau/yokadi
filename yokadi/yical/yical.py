@@ -16,6 +16,10 @@ except ImportError:
     print "Or use 'easy_install icalendar'"
     sys.exit(1)
 
+if not hasattr(icalendar.Calendar, "from_ical"):
+    print("Your version of icalendar is outdated: you need icalendar > 3.0.")
+    sys.exit(1)
+
 import BaseHTTPServer
 from threading import Thread
 import re
@@ -148,12 +152,12 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         cal = generateCal()
-        self.wfile.write(cal.as_string())
+        self.wfile.write(cal.to_ical())
 
     def do_PUT(self):
         """Receive a todolist for updating"""
         length = int(self.headers.getheader('content-length'))
-        cal = icalendar.Calendar.from_string(self.rfile.read(length))
+        cal = icalendar.Calendar.from_ical(self.rfile.read(length))
         for vTodo in cal.walk():
             if "UID" in vTodo:
                 try:

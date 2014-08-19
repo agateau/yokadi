@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Yokadi
+GenericName=TODO list manager
+Comment=Command-line oriented TODO list manager
+Exec=yokadi
+Terminal=true
+Icon=yokadi
+Type=Application
+Categories=Office;ProjectManagement;ConsoleOnly;
+Keywords=todo;projectmanagement;commandline;
