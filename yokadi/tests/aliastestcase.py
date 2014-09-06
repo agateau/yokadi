@@ -22,7 +22,7 @@ class AliasTestCase(unittest.TestCase):
     def testAdd(self):
         self.cmd.do_a_add("l t_list")
         self.cmd.do_a_add("la t_list -a")
-        alias = self.session.query(Config).filter_by(name="ALIASES")[0]
+        alias = self.session.query(Config).filter_by(name=u"ALIASES")[0]
         self.assertEqual(eval(alias.value)["l"], "t_list")
         self.cmd.do_a_remove("l")
         self.cmd.do_a_remove("la")

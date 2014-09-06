@@ -43,14 +43,13 @@ class AliasCmd(object):
         command = " ".join(tokens[1:])
         self.aliases.update({name: command})
         try:
-            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
+            aliases = session.query(db.Config).filter_by(name=u"ALIASES").one()
         except NoResultFound:
             # Config entry does not exist. Create it.
-            aliases = db.Config(name="ALIASES", value="{}", system=True, desc="User command aliases")
-            session.add(aliases)
+            aliases = db.Config(name=u"ALIASES", value=u"{}", system=True, desc=u"User command aliases")
 
-        aliases.value = repr(self.aliases)
-        session.merge(aliases)
+        aliases.value = unicode(repr(self.aliases))
+        session.add(aliases)
         session.commit()
 
     def do_a_remove(self, line):
@@ -58,9 +57,9 @@ class AliasCmd(object):
         if line in self.aliases:
             session = db.DBHandler.getSession()
             del self.aliases[line]
-            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
-            aliases.value = repr(self.aliases)
-            session.merge(aliases)
+            aliases = session.query(db.Config).filter_by(name=u"ALIASES").one()
+            aliases.value = unicode(repr(self.aliases))
+            session.add(aliases)
             session.commit()
         else:
             tui.error("No alias with that name. Use a_list to display all aliases")
