@@ -14,25 +14,19 @@ import sys
 import shutil
 from argparse import ArgumentParser
 
-from sqlobject import *
-
 import dump
 
-sys.path.append(join(dirname(__file__), "..", "src"))
+sys.path.append(join(dirname(__file__), ".."))
 from yokadi.core import db
 
 def getVersion(fileName):
-    cx = connectionForURI('sqlite:' + fileName)
-    if not cx.tableExists("config"):
-        return 1
-    row = cx.queryOne("select value from config where name='DB_VERSION'")
-    return int(row[0])
+    database = db.Database(fileName, False, updateMode=True)
+    return database.getVersion()
 
 
 def setVersion(fileName, version):
-    cx = connectionForURI('sqlite:' + fileName)
-    assert cx.tableExists("config")
-    cx.query("update config set value=%d where name='DB_VERSION'" % version)
+    database = db.Database(fileName, False, updateMode=True)
+    database.setVersion(version)
 
 
 def createWorkDb(fileName):
@@ -49,8 +43,7 @@ def createFinalDb(workFileName, finalFileName):
     dumpFile.close()
 
     print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
-    sqlhub.processConnection = connectionForURI("sqlite:" + finalFileName)
-    db.createTables()
+    database = db.Database(finalFileName, True, updateMode=True)
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
         raise Exception("Dump restoration failed")
@@ -75,6 +68,11 @@ def main():
     # Check version
     version = getVersion(dbFileName)
     print "Found version %d" % version
+    if version < 6:
+        print "You can't update directly from database version {} to this database version." \
+              " You need to use yokadi 0.14 to migrate to version 6 and then you can migrate to the current version".format(version)
+        return 2
+
     if version == db.DB_VERSION:
         print "Nothing to do"
         return 0
@@ -91,8 +89,8 @@ def main():
         if err != 0:
             print "Update failed."
             return 2
-    setVersion(workDbFileName, db.DB_VERSION)
 
+    setVersion(workDbFileName, db.DB_VERSION)
     createFinalDb(workDbFileName, newDbFileName)
 
     return 0
