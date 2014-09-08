@@ -29,12 +29,8 @@ from yokadi.core import basedirs
 from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
-# Force default encoding to prefered encoding
-imp.reload(sys)
-sys.setdefaultencoding(tui.ENCODING)
-
 from yokadi.core import db
-from yokadi.core.db import Config, Project, Task, getConfigKey
+from yokadi.core.db import Config, Project, Task, getConfigKey, DBHandler
 
 
 # Daemon polling delay (in seconds)
@@ -64,19 +60,11 @@ def sigHupHandler(signal, stack):
 
 def eventLoop():
     """Main event loop"""
-<<<<<<< HEAD
-    delta = timedelta(hours=float(getConfigKey(u"ALARM_DELAY")))
-    suspend = timedelta(hours=float(getConfigKey(u"ALARM_SUSPEND")))
-    cmdDelayTemplate = getConfigKey(u"ALARM_DELAY_CMD")
-    cmdDueTemplate = getConfigKey(u"ALARM_DUE_CMD")
-    session = db.getSession()
-=======
     delta = timedelta(hours=float(getConfigKey("ALARM_DELAY")))
     suspend = timedelta(hours=float(getConfigKey("ALARM_SUSPEND")))
     cmdDelayTemplate = getConfigKey("ALARM_DELAY_CMD")
     cmdDueTemplate = getConfigKey("ALARM_DUE_CMD")
-    session = DBHandler.getSession()
->>>>>>> Ran 2to3
+    session = db.getSession()
     # For the two following dict, task id is key, and value is (duedate, triggerdate)
     triggeredDelayTasks = {}
     triggeredDueTasks = {}

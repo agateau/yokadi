@@ -58,6 +58,5 @@ class XmlListRenderer(object):
                 keywordElement.setAttribute("value", str(value))
 
     def end(self):
-        # FIXME: Shouldn't we use utf-8 only for xml output?
-        self.out.write(self.doc.toprettyxml(indent="    ", encoding=tui.ENCODING))
+        self.out.write(self.doc.toprettyxml(indent="    "))
 # vi: ts=4 sw=4 et

@@ -27,11 +27,11 @@ class PlainListRenderer(object):
             print(file=self.out)
         else:
             self.first = False
-        print(sectionName.encode(tui.ENCODING), file=self.out)
+        print(sectionName, file=self.out)
 
         for task in taskList:
             title = self.cryptoMgr.decrypt(task.title)
-            print(("- " + title).encode(tui.ENCODING), file=self.out)
+            print(("- " + title), file=self.out)
 
     def end(self):
         pass

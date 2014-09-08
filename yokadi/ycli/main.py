@@ -11,7 +11,7 @@ Command line oriented, sqlite powered, todo list
 import locale
 import os
 import sys
-import imp
+
 try:
     import readline
 except ImportError:
@@ -22,7 +22,6 @@ except ImportError:
     sys.exit(1)
 
 readline.parse_and_bind("set show-all-if-ambiguous on")
-imp.reload(sys)  # So as to enable setdefaultencoding
 
 import traceback
 from cmd import Cmd
@@ -48,10 +47,6 @@ from yokadi.ycli.projectcmd import ProjectCmd
 from yokadi.ycli.taskcmd import TaskCmd
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
-
-# Force default encoding to prefered encoding
-# This is mandatory when yokadi output is piped in another command
-sys.setdefaultencoding(tui.ENCODING)
 
 
 # TODO: move YokadiCmd to a separate module in ycli package
@@ -113,7 +108,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         able to encapsulate it with a try/except bloc"""
         try:
             # Decode user input
-            line = line.decode(tui.ENCODING)
+            line = line
             return Cmd.onecmd(self, line)
         except YokadiOptionParserNormalExitException:
             pass

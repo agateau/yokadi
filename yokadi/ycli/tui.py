@@ -12,7 +12,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import locale
 import unicodedata
 import re
 from getpass import getpass
@@ -22,7 +21,6 @@ from yokadi.ycli import colors as C
 # Default user encoding. Used to decode all input strings
 # This is the central yokadi definition of encoding - this constant is imported from all other modules
 # Beware of circular import definition when add dependencies to this module
-ENCODING = locale.getpreferredencoding()
 
 # Number of seconds between checks for end of process
 PROC_POLL_INTERVAL = 0.5
@@ -60,7 +58,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
-        return str(file(name).read(), ENCODING)
+        return str(open(name).read())
 
     def waitProcess(proc):
         start = time.time()
@@ -69,17 +67,18 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
             if not proc.returncode is None:
                 return
             time.sleep(PROC_POLL_INTERVAL)
-    prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore')
     prefix = NON_SIMPLE_ASCII.sub("-", prefix)
     prefix = MULTIPLE_DASH.sub("-", prefix)
+    prefix = unicodedata.normalize('NFKD', prefix)
+
     (fd, name) = tempfile.mkstemp(suffix=".md", prefix=prefix)
     if text is None:
         text = ""
     try:
         if lockManager:
             lockManager.acquire()
-        fl = file(name, "w")
-        fl.write(text.encode(ENCODING, "replace"))
+        fl = open(name, "w")
+        fl.write(text)
         fl.close()
         editor = os.environ.get("EDITOR", "vi")
         proc = subprocess.Popen([editor, name])
@@ -111,7 +110,7 @@ def reinjectInRawInput(line):
     # Set readline.pre_input_hook to feed it with our line
     # (Code copied from yagtd)
     def pre_input_hook():
-        readline.insert_text(line.encode(ENCODING))
+        readline.insert_text(line)
         readline.redisplay()
 
         # Unset the hook again
@@ -148,7 +147,7 @@ def editLine(line, prompt="edit> ", echo=True):
         if length > 0:
             readline.remove_history_item(length - 1)
 
-    return line.decode(ENCODING)
+    return line
 
 
 def selectFromList(prompt, lst, default):

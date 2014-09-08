@@ -81,6 +81,8 @@ class YDateUtilsTestCase(unittest.TestCase):
     def testFormatTimeDelta(self):
         testData = [
             (timedelta(minutes=1), "1m"),
+            (timedelta(hours=1), "1h 0m"),
+            (timedelta(hours=1, minutes=1), "1h 1m"),
             (timedelta(days=2, hours=5), "2d"),
             (timedelta(days=7), "1w"),
             (timedelta(days=10), "1w, 3d"),

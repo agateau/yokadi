@@ -59,10 +59,10 @@ class YokadiCryptoManager(object):
     def _encrypt(self, data):
         """Low level encryption interface. For internal usage only"""
         # Complete data with blanck
-        data_length = (1 + (len(data) / KEY_LENGTH)) * KEY_LENGTH
+        data_length = int(1 + (len(data) / KEY_LENGTH)) * KEY_LENGTH
         data = adjustString(data, data_length)
         cypher = Cypher.new(self.passphrase)
-        return CRYPTO_PREFIX + base64.b64encode(cypher.encrypt(data))
+        return CRYPTO_PREFIX + base64.b64encode(cypher.encrypt(data)).decode(encoding='utf8')
 
     def decrypt(self, data):
         """Decrypt user data.
@@ -93,7 +93,7 @@ class YokadiCryptoManager(object):
         data = data[len(CRYPTO_PREFIX):]  # Remove crypto prefix
         data = base64.b64decode(data)
         cypher = Cypher.new(self.passphrase)
-        return cypher.decrypt(data).rstrip()
+        return cypher.decrypt(data).rstrip().decode(encoding='utf-8')
 
     def askPassphrase(self):
         """Ask user for passphrase if needed"""
