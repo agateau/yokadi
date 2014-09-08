@@ -25,7 +25,7 @@ class YDateUtilsTestCase(unittest.TestCase):
 
         for text, expected in testData:
             output = ydateutils.parseDateTimeDelta(text)
-            self.assertEquals(expected, output)
+            self.assertEqual(expected, output)
 
     def testParseHumaneDateTime(self):
         for date in ("+5M", "+1m", "+2H", "+3h", "+9D", "+14d", "+432W", "+0w",
@@ -64,7 +64,7 @@ class YDateUtilsTestCase(unittest.TestCase):
 
         for text, hint, expected in testData:
             output = ydateutils.parseHumaneDateTime(text, hint=hint, today=today)
-            self.assertEquals(expected, output)
+            self.assertEqual(expected, output)
 
     def testPastTime(self):
         # Fake now to a fixed date and time
@@ -76,7 +76,7 @@ class YDateUtilsTestCase(unittest.TestCase):
 
         for text, expected in testData:
             output = ydateutils.parseHumaneDateTime(text, hint=None, today=now)
-            self.assertEquals(expected, output)
+            self.assertEqual(expected, output)
 
     def testFormatTimeDelta(self):
         testData = [
@@ -92,9 +92,9 @@ class YDateUtilsTestCase(unittest.TestCase):
 
         for input, expected in testData:
             output = ydateutils.formatTimeDelta(input)
-            self.assertEquals(expected, output)
+            self.assertEqual(expected, output)
             output = ydateutils.formatTimeDelta(-input)
-            self.assertEquals("-" + expected, output)
+            self.assertEqual("-" + expected, output)
 
     def testParseDateLimit(self):
         # Fake today to a fixed date. This is a saturday (weekday=5).
@@ -118,7 +118,7 @@ class YDateUtilsTestCase(unittest.TestCase):
         for text, expectedOp, expectedDate in testData:
             output = ydateutils.parseDateLimit(text, today=today)
             output = ydateutils.parseDateLimit(text, today=today)
-            self.assertEquals(expectedOp, output[0])
-            self.assertEquals(expectedDate, output[1])
+            self.assertEqual(expectedOp, output[0])
+            self.assertEqual(expectedDate, output[1])
 
 # vi: ts=4 sw=4 et

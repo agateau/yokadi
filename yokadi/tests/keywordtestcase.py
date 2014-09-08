@@ -27,7 +27,7 @@ class KeywordTestCase(unittest.TestCase):
         tui.addInputAnswers("newk1")
         self.cmd.do_k_edit("k1")
         kwDict = t1.getKeywordDict()
-        self.assert_("k1" not in kwDict)
+        self.assertTrue("k1" not in kwDict)
         self.assertEqual(kwDict.get("newk1"), 12)
         self.assertRaises(YokadiException, dbutils.getKeywordFromName, "k1")
 
@@ -38,12 +38,12 @@ class KeywordTestCase(unittest.TestCase):
         self.cmd.do_k_edit("k1")
 
         kwDict = t1.getKeywordDict()
-        self.assert_("k1" not in kwDict)
-        self.assert_("k2" in kwDict)
+        self.assertTrue("k1" not in kwDict)
+        self.assertTrue("k2" in kwDict)
 
         kwDict = t2.getKeywordDict()
-        self.assert_("k1" not in kwDict)
-        self.assert_("k2" in kwDict)
+        self.assertTrue("k1" not in kwDict)
+        self.assertTrue("k2" in kwDict)
 
         self.assertRaises(YokadiException, dbutils.getKeywordFromName, "k1")
 
@@ -55,8 +55,8 @@ class KeywordTestCase(unittest.TestCase):
         tui.addInputAnswers("k2", "y")
         self.cmd.do_k_edit("k1")
         kwDict = t1.getKeywordDict()
-        self.assert_("k1" in kwDict)
-        self.assert_("k2" in kwDict)
+        self.assertTrue("k1" in kwDict)
+        self.assertTrue("k2" in kwDict)
 
         dbutils.getKeywordFromName("k1")
 # vi: ts=4 sw=4 et

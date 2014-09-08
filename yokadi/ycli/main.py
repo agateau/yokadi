@@ -11,17 +11,18 @@ Command line oriented, sqlite powered, todo list
 import locale
 import os
 import sys
+import imp
 try:
     import readline
 except ImportError:
-    print "You don't have a working readline library."
-    print "Windows users must install Pyreadline."
-    print "Get it on https://launchpad.net/pyreadline/+download"
-    print "Or use 'pip install pyreadline'"
+    print("You don't have a working readline library.")
+    print("Windows users must install Pyreadline.")
+    print("Get it on https://launchpad.net/pyreadline/+download")
+    print("Or use 'pip install pyreadline'")
     sys.exit(1)
 
 readline.parse_and_bind("set show-all-if-ambiguous on")
-reload(sys)  # So as to enable setdefaultencoding
+imp.reload(sys)  # So as to enable setdefaultencoding
 
 import traceback
 from cmd import Cmd
@@ -30,9 +31,9 @@ from argparse import ArgumentParser
 try:
     import sqlalchemy
 except ImportError:
-    print "You must install SQL Alchemy to use Yokadi"
-    print "Get it on http://www.sqlalchemy.org/"
-    print "Or use 'pip install sqlalchemy'"
+    print("You must install SQL Alchemy to use Yokadi")
+    print("Get it on http://www.sqlalchemy.org/")
+    print("Or use 'pip install sqlalchemy'")
     sys.exit(1)
 
 from yokadi.core import db
@@ -99,7 +100,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
 
     def do_EOF(self, line):
         """Quit."""
-        print
+        print()
         return True
 
     # Some standard alias
@@ -116,36 +117,36 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             return Cmd.onecmd(self, line)
         except YokadiOptionParserNormalExitException:
             pass
-        except UnicodeDecodeError, e:
+        except UnicodeDecodeError as e:
             tui.error("Unicode decoding error. Please check you locale and terminal settings (%s)." % e)
-        except UnicodeEncodeError, e:
+        except UnicodeEncodeError as e:
             tui.error("Unicode encoding error. Please check you locale and terminal settings (%s)." % e)
-        except BadUsageException, e:
+        except BadUsageException as e:
             tui.error("*** Bad usage ***\n\t%s" % e)
             cmd = line.split(' ')[0]
             self.do_help(cmd)
-        except YokadiException, e:
+        except YokadiException as e:
             tui.error("*** Yokadi error ***\n\t%s" % e)
-        except IOError, e:
+        except IOError as e:
             # We can get I/O errors when yokadi is piped onto another shell commands
             # that breaks.
-            print >> sys.stderr, "*** I/O error ***\n\t%s" % e
+            print("*** I/O error ***\n\t%s" % e, file=sys.stderr)
         except KeyboardInterrupt:
-            print "*** Break ***"
-        except Exception, e:
+            print("*** Break ***")
+        except Exception as e:
             tui.error("Unhandled exception (oups)\n\t%s" % e)
-            print "This is a bug of Yokadi, sorry."
-            print "Send the above message by email to Yokadi developers (ml-yokadi@sequanux.org) to help them make Yokadi better."
+            print("This is a bug of Yokadi, sorry.")
+            print("Send the above message by email to Yokadi developers (ml-yokadi@sequanux.org) to help them make Yokadi better.")
             cut = "---------------------8<----------------------------------------------"
-            print cut
+            print(cut)
             traceback.print_exc()
-            print "--"
-            print "Python: %s" % sys.version.replace("\n", " ")
-            print "SQL Alchemy: %s" % sqlalchemy.__version__
-            print "OS: %s (%s)" % os.uname()[0:3:2]
-            print "Yokadi: %s" % utils.currentVersion()
-            print cut
-            print
+            print("--")
+            print("Python: %s" % sys.version.replace("\n", " "))
+            print("SQL Alchemy: %s" % sqlalchemy.__version__)
+            print("OS: %s (%s)" % os.uname()[0:3:2])
+            print("Yokadi: %s" % utils.currentVersion())
+            print(cut)
+            print()
 
     def loadHistory(self):
         """Tries to load previous history list from disk"""
@@ -163,7 +164,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             historyFile.close()
             readline.set_history_length(1000)
             readline.write_history_file(self.historyPath)
-        except Exception, e:
+        except Exception as e:
             tui.warning("Fail to save history to %s. Error was:\n\t%s"
                         % (self.historyPath, e))
 
@@ -183,7 +184,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             parserMethod = getattr(self, "parser_" + arg)
             parserMethod().print_help(sys.stderr)
         else:
-            print "Usage: ",
+            print("Usage: ", end=' ')
             Cmd.do_help(self, arg)
 
     def completenames(self, text, *ignored):
@@ -191,7 +192,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         for command aliases. Code kindly borrowed to Pysql"""
         dotext = 'do_' + text
         names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
-        names.extend([a for a in self.aliases.keys() if a.startswith(text)])
+        names.extend([a for a in list(self.aliases.keys()) if a.startswith(text)])
         return names
 
 
@@ -215,17 +216,17 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print "Yokadi - %s" % utils.currentVersion()
+        print("Yokadi - %s" % utils.currentVersion())
         return
 
     if not args.filename:
         # Look if user define an env VAR for yokadi db
         args.filename = os.getenv("YOKADI_DB")
         if args.filename:
-            print "Using env defined database (%s)" % args.filename
+            print("Using env defined database (%s)" % args.filename)
         else:
             args.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
-            print "Using default database (%s)" % args.filename
+            print("Using default database (%s)" % args.filename)
 
     db.connectDatabase(args.filename)
 
@@ -237,12 +238,12 @@ def main():
 
     try:
         if len(args.cmd) > 0:
-            print " ".join(args.cmd)
+            print(" ".join(args.cmd))
             cmd.onecmd(" ".join(args.cmd))
         else:
             cmd.cmdloop()
     except KeyboardInterrupt:
-        print "\n\tBreak ! (the nice way to quit is 'quit' or 'EOF' (ctrl-d)"
+        print("\n\tBreak ! (the nice way to quit is 'quit' or 'EOF' (ctrl-d)")
         sys.exit(1)
     # Save history
     cmd.writeHistory()

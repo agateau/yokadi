@@ -6,7 +6,7 @@ TextListRenderer test cases
 """
 
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 import yokadi.ycli.colors as C
 from yokadi.core import dbutils
@@ -36,9 +36,9 @@ class TextListRendererTestCase(unittest.TestCase):
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
         renderer.addTaskList("Foo", [t1])
-        self.assertEquals(renderer.maxTitleWidth, 5)
+        self.assertEqual(renderer.maxTitleWidth, 5)
         renderer.end()
-        expected = unicode(\
+        expected = str(\
               "%(CYAN)s              Foo               %(RESET)s\n" \
             + "%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s\n" \
             + "--------------------------------\n" \
@@ -49,9 +49,9 @@ class TextListRendererTestCase(unittest.TestCase):
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
         renderer.addTaskList("Foo", [t1, t2])
-        self.assertEquals(renderer.maxTitleWidth, 11)
+        self.assertEqual(renderer.maxTitleWidth, 11)
         renderer.end()
-        expected = unicode(\
+        expected = str(\
               "%(CYAN)s                 Foo                  %(RESET)s\n" \
             + "%(BOLD)sID|Title      |U  |S|Age     |Due date%(RESET)s\n" \
             + "--------------------------------------\n" \
@@ -63,9 +63,9 @@ class TextListRendererTestCase(unittest.TestCase):
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
         renderer.addTaskList("Foo", [t2, longerTask])
-        self.assertEquals(renderer.maxTitleWidth, len(longerTask.title) + 1)
+        self.assertEqual(renderer.maxTitleWidth, len(longerTask.title) + 1)
         renderer.end()
-        expected = unicode(\
+        expected = str(\
               "%(CYAN)s                     Foo                      %(RESET)s\n" \
             + "%(BOLD)sID|Title              |U  |S|Age     |Due date%(RESET)s\n" \
             + "----------------------------------------------\n" \

@@ -27,9 +27,9 @@ def shareDirPath():
                 if os.path.exists(os.path.join(path, "version")):
                     sharePath = path
                     break
-    except Exception, e:
-        print "Unable to find Yokadi share path"
-        print e
+    except Exception as e:
+        print("Unable to find Yokadi share path")
+        print(e)
         return ""
     return sharePath
 
@@ -38,7 +38,7 @@ def currentVersion():
     """@return: current yokadi version according to 'version' file"""
     try:
         return file(os.path.join(shareDirPath(), "version")).readline().strip("\n")
-    except Exception, e:
-        print "Unable to read 'version' file. Do you remove or change it ?"
-        print e
+    except Exception as e:
+        print("Unable to read 'version' file. Do you remove or change it ?")
+        print(e)
         return ""

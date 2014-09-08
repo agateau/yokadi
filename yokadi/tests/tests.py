@@ -20,7 +20,7 @@ try:
     hasIcalendar = True
 except ImportError:
     hasIcalendar = False
-    print "icalendar is not installed, some tests won't be run"
+    print("icalendar is not installed, some tests won't be run")
 
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase

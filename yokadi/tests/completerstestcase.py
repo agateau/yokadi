@@ -21,11 +21,11 @@ class CompletersTestCase(unittest.TestCase):
         self.session = db.getSession()
 
     def testProjectCompleter(self):
-        self.session.add_all([Project(name=u"foo"),
-                             Project(name=u"foo2"),
-                             Project(name=u"bar")])
+        self.session.add_all([Project(name="foo"),
+                             Project(name="foo2"),
+                             Project(name="bar")])
 
-        expected = [u"foo ", u"foo2 "]
+        expected = ["foo ", "foo2 "]
         completer = completers.ProjectCompleter(1)
         result = completer("f", "t_add f", 6, 8)
         self.assertEqual(result, expected)

@@ -33,7 +33,7 @@ class BugTestCase(unittest.TestCase):
 
         tasks = self.session.query(Task).all()
         result = [x.title for x in tasks]
-        expected = [u"t1"]
+        expected = ["t1"]
         self.assertEqual(result, expected)
 
         kwDict = self.session.query(Task).get(1).getKeywordDict()

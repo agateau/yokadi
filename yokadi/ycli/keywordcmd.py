@@ -22,7 +22,7 @@ class KeywordCmd(object):
         """List all keywords."""
         for keyword in db.getSession().query(Keyword).all():
             tasks = ", ".join(str(task.id) for task in keyword.tasks)
-            print "%s (tasks: %s)" % (keyword.name, tasks)
+            print("%s (tasks: %s)" % (keyword.name, tasks))
 
     def do_k_add(self, line):
         """Add a keyword
@@ -34,10 +34,10 @@ class KeywordCmd(object):
             try:
                 session.add(Keyword(name=keyword))
                 session.commit()
-                print "Keyword %s has been created" % keyword
+                print("Keyword %s has been created" % keyword)
             except IntegrityError:
                 session.rollback()
-                print "Keyword %s already exist" % keyword
+                print("Keyword %s already exist" % keyword)
 
     def do_k_remove(self, line):
         """Remove a keyword
@@ -46,12 +46,12 @@ class KeywordCmd(object):
         keyword = dbutils.getKeywordFromName(line)
 
         if keyword.tasks:
-            print "The keyword %s is used by the following tasks: %s" % (keyword.name,
-                                                                         ", ".join(str(task.id) for task in keyword.tasks))
+            print("The keyword %s is used by the following tasks: %s" % (keyword.name,
+                                                                         ", ".join(str(task.id) for task in keyword.tasks)))
             if tui.confirm("Do you really want to remove this keyword"):
                 session.delete(keyword)
                 session.commit()
-                print "Keyword %s has been removed" % keyword.name
+                print("Keyword %s has been removed" % keyword.name)
 
     complete_k_remove = KeywordCompleter(1)
 
@@ -63,7 +63,7 @@ class KeywordCmd(object):
         oldName = keyword.name
         newName = tui.editLine(oldName)
         if newName == "":
-            print "Cancelled"
+            print("Cancelled")
             return
 
         lst = session.query(Keyword).filter_by(name=newName).all()
@@ -72,11 +72,11 @@ class KeywordCmd(object):
             keyword.name = newName
             session.merge(keyword)
             session.commit()
-            print "Keyword %s has been renamed to %s" % (oldName, newName)
+            print("Keyword %s has been renamed to %s" % (oldName, newName))
             return
 
         # We already have a keyword with this name, we need to merge
-        print "Keyword %s already exists" % newName
+        print("Keyword %s already exists" % newName)
         if not tui.confirm("Do you want to merge %s and %s" % (oldName, newName)):
             return
 
@@ -91,8 +91,8 @@ class KeywordCmd(object):
             # We cannot merge
             tui.error("Cannot merge keywords %s and %s because they are both used with different values in these tasks:" % (oldName, newName))
             for task in conflictingTasks:
-                print "- %d, %s" % (task.id, task.title)
-            print "Edit these tasks and try again"
+                print("- %d, %s" % (task.id, task.title))
+            print("Edit these tasks and try again")
             return
 
         # Merge
@@ -104,6 +104,6 @@ class KeywordCmd(object):
             task.setKeywordDict(kwDict)
         session.delete(keyword)
         session.commit()
-        print "Keyword %s has been merged with %s" % (oldName, newName)
+        print("Keyword %s has been merged with %s" % (oldName, newName))
 
     complete_k_edit = KeywordCompleter(1)

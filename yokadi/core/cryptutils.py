@@ -42,7 +42,7 @@ class YokadiCryptoManager(object):
         # previously provided
         self.force_decrypt = False
         try:
-            self.crypto_check = db.getConfigKey(u"CRYPTO_CHECK", environ=False)
+            self.crypto_check = db.getConfigKey("CRYPTO_CHECK", environ=False)
         except NoResultFound:
             # Ok, set it to None. It will be setup after user defined passphrase
             self.crypto_check = None

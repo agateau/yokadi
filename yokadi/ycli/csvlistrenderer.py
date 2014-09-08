@@ -28,5 +28,5 @@ class CsvListRenderer(object):
         pass
 
     def _writerow(self, row):
-        self.writer.writerow([unicode(x).encode(tui.ENCODING) for x in row])
+        self.writer.writerow([str(x).encode(tui.ENCODING) for x in row])
 # vi: ts=4 sw=4 et

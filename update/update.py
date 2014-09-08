@@ -37,7 +37,7 @@ def createWorkDb(fileName):
 
 def createFinalDb(workFileName, finalFileName):
     dumpFileName = "dump.sql"
-    print "Dumping into %s" % dumpFileName
+    print("Dumping into %s" % dumpFileName)
     dumpFile = file(dumpFileName, "w")
     dump.dumpDatabase(workFileName, dumpFile)
     dumpFile.close()
@@ -67,10 +67,10 @@ def main():
 
     # Check version
     version = getVersion(dbFileName)
-    print "Found version %d" % version
+    print("Found version %d" % version)
 
     if version == db.DB_VERSION:
-        print "Nothing to do"
+        print("Nothing to do")
         return 0
 
     # Start import
@@ -80,10 +80,10 @@ def main():
     oldVersion = getVersion(workDbFileName)
     for version in range(oldVersion, db.DB_VERSION):
         scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
-        print "Running %s" % scriptFileName
+        print("Running %s" % scriptFileName)
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
-            print "Update failed."
+            print("Update failed.")
             return 2
 
     setVersion(workDbFileName, db.DB_VERSION)

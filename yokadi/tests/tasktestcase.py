@@ -7,7 +7,7 @@ Task test cases
 """
 import sys
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 import testutils
 
@@ -39,7 +39,7 @@ class TaskTestCase(unittest.TestCase):
 
         tasks = self.session.query(Task).all()
         result = [x.title for x in tasks]
-        expected = [u"t1", u"t2"]
+        expected = ["t1", "t2"]
         self.assertEqual(result, expected)
 
         kwDict = self.session.query(Task).get(2).getKeywordDict()

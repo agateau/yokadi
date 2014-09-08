@@ -19,7 +19,7 @@ def convertIcalType(attr):
         return int(attr)
     else:
         # Default to unicode string
-        return unicode(attr)
+        return str(attr)
 
 
 def icalPriorityToYokadiUrgency(priority):

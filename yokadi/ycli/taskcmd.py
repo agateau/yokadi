@@ -39,7 +39,7 @@ gRendererClassDict = dict(
     plain=PlainListRenderer,
     )
 
-NOTE_KEYWORD = u"_note"
+NOTE_KEYWORD = "_note"
 
 
 class TaskCmd(object):
@@ -91,7 +91,7 @@ class TaskCmd(object):
 
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
-            tui.reinjectInRawInput(u"%s %s" % (cmd, line))
+            tui.reinjectInRawInput("%s %s" % (cmd, line))
             return None
         self.lastTaskId = task.id
 
@@ -110,7 +110,7 @@ class TaskCmd(object):
                 title = task.title
             self.session.add(task)
             self.session.commit()
-            print "Added task '%s' (id=%d)" % (title, task.id)
+            print("Added task '%s' (id=%d)" % (title, task.id))
 
     complete_t_add = projectAndKeywordCompleter
 
@@ -134,7 +134,7 @@ class TaskCmd(object):
 
         self.session.add(task)
         self.session.commit()
-        print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
+        print("Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency))
 
     complete_bug_add = ProjectCompleter(1)
 
@@ -154,7 +154,7 @@ class TaskCmd(object):
         else:
             title = task.title
         self.session.commit()
-        print "Added note '%s' (id=%d)" % (title, task.id)
+        print("Added note '%s' (id=%d)" % (title, task.id))
     complete_n_add = projectAndKeywordCompleter
 
     def do_bug_edit(self, line):
@@ -200,8 +200,8 @@ class TaskCmd(object):
             description = tui.editText(self.cryptoMgr.decrypt(task.description),
                                        onChanged=updateDescription,
                                        lockManager=dbutils.TaskLockManager(task),
-                                       prefix=u"yokadi-%s-%s-" % (task.project, task.title))
-        except Exception, e:
+                                       prefix="yokadi-%s-%s-" % (task.project, task.title))
+        except Exception as e:
             raise YokadiException(e)
         updateDescription(description)
         self.session.merge(task)
@@ -268,15 +268,15 @@ class TaskCmd(object):
         task = self.getTaskFromId(line)
         if task.recurrence and status == "done":
             task.dueDate = task.recurrence.getNext(task.dueDate)
-            print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
-            print "To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id
+            print("Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate))
+            print("To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id)
         else:
             task.status = status
             if status == "done":
                 task.doneDate = datetime.now().replace(second=0, microsecond=0)
             else:
                 task.doneDate = None
-            print "Task '%s' marked as %s" % (task.title, status)
+            print("Task '%s' marked as %s" % (task.title, status))
         self.session.merge(task)
         self.session.commit()
 
@@ -304,7 +304,7 @@ class TaskCmd(object):
             if idScan:
                 result = rangeId.match(token)
                 if result:
-                    ids.extend(range(int(result.group(1)), int(result.group(2)) + 1))
+                    ids.extend(list(range(int(result.group(1)), int(result.group(2)) + 1)))
                 elif token.isdigit():
                     ids.append(int(token))
                 else:
@@ -319,7 +319,7 @@ class TaskCmd(object):
         cmd = cmdTokens.pop(0)
         for taskId in ids:
             line = " ".join([cmd, str(taskId), " ".join(cmdTokens)])
-            print "Executing: %s" % line
+            print("Executing: %s" % line)
             self.onecmd(line.strip())
 
     complete_t_apply = taskIdCompleter
@@ -342,7 +342,7 @@ class TaskCmd(object):
                 return
         project = task.project
         self.session.delete(task)
-        print "Task '%s' removed" % (task.title)
+        print("Task '%s' removed" % (task.title))
 
         # Delete project with no associated tasks
         if self.session.query(Task).filter_by(project=project).count() == 0:
@@ -369,16 +369,16 @@ class TaskCmd(object):
         filters.append(Task.doneDate < (datetime.now() - timedelta(days=args.delay)))
         tasks = self.session.query(Task).filter(*filters)
         if tasks.count() == 0:
-            print "No tasks need to be purged"
+            print("No tasks need to be purged")
             return
-        print "The following tasks will be removed:"
-        print "\n".join(["%s: %s" % (task.id, task.title) for task in tasks])
+        print("The following tasks will be removed:")
+        print("\n".join(["%s: %s" % (task.id, task.title) for task in tasks]))
         if args.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
             self.session.delete(tasks)
             self.session.commit()
-            print "Tasks deleted"
+            print("Tasks deleted")
         else:
-            print "Purge canceled"
+            print("Purge canceled")
 
     def parser_t_list(self):
         parser = YokadiOptionParser()
@@ -437,7 +437,7 @@ class TaskCmd(object):
                           help="only list tasks whose title or description match <value>. You can repeat this option to search on multiple words.",
                           metavar="<value>")
 
-        formatList = ["auto"] + gRendererClassDict.keys()
+        formatList = ["auto"] + list(gRendererClassDict.keys())
         parser.add_argument("-f", "--format", dest="format",
                           default="auto", choices=formatList,
                           help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
@@ -467,9 +467,9 @@ class TaskCmd(object):
         """
         args = parser.parse_args(line)
         if len(args.filter) > 0:
-            projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args.filter))
+            projectName, keywordFilters = parseutils.extractKeywords(" ".join(args.filter))
         else:
-            projectName = u""
+            projectName = ""
             keywordFilters = []
 
         if self.kFilters:
@@ -482,7 +482,7 @@ class TaskCmd(object):
                 projectName = self.pFilter
             else:
                 # Take all project if none provided
-                projectName = u"%"
+                projectName = "%"
 
         if projectName.startswith("!"):
             projectName = self._realProjectName(projectName[1:])
@@ -531,7 +531,7 @@ class TaskCmd(object):
             if groupKeyword.startswith("@"):
                 groupKeyword = groupKeyword[1:]
             for keyword in self.session.query(Keyword).filter(Keyword.name.like(groupKeyword)):
-                if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
+                if str(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
                     # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
                     continue
                 taskList = self.session.query(Task).filter(TaskKeyword.keywordId == keyword.id).filter(and_(*filters))
@@ -542,7 +542,7 @@ class TaskCmd(object):
                     taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) > 0:
                     self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
-                    renderer.addTaskList(unicode(keyword), taskList)
+                    renderer.addTaskList(str(keyword), taskList)
             renderer.end()
         else:
             hiddenProjectNames = []
@@ -556,7 +556,7 @@ class TaskCmd(object):
                 taskList = list(taskList)
                 if len(taskList) > 0:
                     self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
-                    renderer.addTaskList(unicode(project), taskList)
+                    renderer.addTaskList(str(project), taskList)
             renderer.end()
 
             if len(hiddenProjectNames) > 0:
@@ -585,22 +585,22 @@ class TaskCmd(object):
         args, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
-        filters.append(parseutils.KeywordFilter(u"!@" + NOTE_KEYWORD).filter())
+        filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
 
         # Handle t_list specific options
         order = [desc(Task.urgency), Task.creationDate]
         limit = None
         if args.done:
-            filters.append(Task.status == u'done')
+            filters.append(Task.status == 'done')
             if args.done != "all":
                 minDate = ydateutils.parseMinDate(args.done)
                 filters.append(Task.doneDate >= minDate)
         elif args.status == "all":
             pass
-        elif args.status == u"started":
-            filters.append(Task.status == u"started")
+        elif args.status == "started":
+            filters.append(Task.status == "started")
         else:
-            filters.append(Task.status != u"done")
+            filters.append(Task.status != "done")
         if args.urgency:
             order = [desc(Task.urgency), ]
             filters.append(Task.urgency >= args.urgency)
@@ -726,7 +726,7 @@ class TaskCmd(object):
         if args.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
             keywordArray = []
-            for name, value in keywordDict.items():
+            for name, value in list(keywordDict.items()):
                 txt = name
                 if value:
                     txt += "=" + str(value)
@@ -752,8 +752,8 @@ class TaskCmd(object):
 
         if args.output in ("all", "description") and task.description:
             if args.output == "all":
-                print
-            print description
+                print()
+            print(description)
 
     complete_t_show = taskIdCompleter
 
@@ -791,15 +791,15 @@ class TaskCmd(object):
 
         while True:
             # Edit
-            print "(Press Ctrl+C to cancel)"
+            print("(Press Ctrl+C to cancel)")
             try:
                 line = tui.editLine(taskLine)
                 if not line.strip():
                     tui.warning("Missing title")
                     continue
             except KeyboardInterrupt:
-                print
-                print "Cancelled"
+                print()
+                print("Cancelled")
                 task = None
                 break
             foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
@@ -838,7 +838,7 @@ class TaskCmd(object):
         self.session.merge(task)
         self.session.commit()
         if task.project:
-            print "Moved task '%s' to project '%s'" % (task.title, projectName)
+            print("Moved task '%s' to project '%s'" % (task.title, projectName))
 
     complete_t_set_project = ProjectCompleter(2)
     complete_t_project = ProjectCompleter(2)
@@ -879,10 +879,10 @@ class TaskCmd(object):
 
         if line.lower() == "none":
             task.dueDate = None
-            print "Due date for task '%s' reset" % task.title
+            print("Due date for task '%s' reset" % task.title)
         else:
             task.dueDate = ydateutils.parseHumaneDateTime(line)
-            print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
+            print("Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime()))
         self.session.merge(task)
         self.session.commit()
     complete_t_set_due = dueDateCompleter
@@ -902,7 +902,7 @@ class TaskCmd(object):
             raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
                                    % garbage)
 
-        if not dbutils.createMissingKeywords(newKwDict.keys()):
+        if not dbutils.createMissingKeywords(list(newKwDict.keys())):
             # User cancel keyword creation
             return
 
@@ -962,7 +962,7 @@ class TaskCmd(object):
                 byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
             except ValueError:
                 POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
-                if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
+                if tokens[2].lower() in list(POSITION.keys()) and len(tokens) == 5:
                     byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
                     byhour, byminute = ydateutils.getHourAndMinute(tokens[4])

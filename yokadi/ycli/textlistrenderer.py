@@ -236,7 +236,7 @@ class TextListRenderer(object):
                         self.splitOnDate = False
 
                 if splitterText:
-                    print >> self.out, C.GREEN + splitterText.center(totalWidth) + C.RESET
+                    print(C.GREEN + splitterText.center(totalWidth) + C.RESET, file=self.out)
                     splitterText = None
 
                 self._renderTaskListRow(task)
@@ -252,12 +252,12 @@ class TextListRenderer(object):
         if self.firstHeader:
             self.firstHeader = False
         else:
-            print >> self.out
-        print >> self.out, C.CYAN + sectionName.center(width) + C.RESET
-        print >> self.out, C.BOLD + line + C.RESET
-        print >> self.out, "-" * width
+            print(file=self.out)
+        print(C.CYAN + sectionName.center(width) + C.RESET, file=self.out)
+        print(C.BOLD + line + C.RESET, file=self.out)
+        print("-" * width, file=self.out)
 
     def _renderTaskListRow(self, task):
         cells = [column.createCell(task) for column in self.columns]
-        print >> self.out, "|".join(cells)
+        print("|".join(cells), file=self.out)
 # vi: ts=4 sw=4 et

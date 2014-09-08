@@ -53,14 +53,14 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text, onChanged=None, lockManager=None, prefix=u"yokadi-"):
+def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     """Edit text with external editor
     @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
     @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
     @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
-        return unicode(file(name).read(), ENCODING)
+        return str(file(name).read(), ENCODING)
 
     def waitProcess(proc):
         start = time.time()
@@ -134,7 +134,7 @@ def editLine(line, prompt="edit> ", echo=True):
     else:
         try:
             if echo:
-                line = raw_input(prompt)
+                line = input(prompt)
             else:
                 line = getpass(prompt)
         except EOFError:
@@ -153,7 +153,7 @@ def editLine(line, prompt="edit> ", echo=True):
 
 def selectFromList(prompt, lst, default):
     for score, caption in lst:
-        print "%d: %s" % (score, caption)
+        print("%d: %s" % (score, caption))
     minStr = str(lst[0][0])
     maxStr = str(lst[-1][0])
     if default is None:
@@ -203,7 +203,7 @@ def renderFields(fields):
     maxWidth = max([len(x) for x, y in fields])
     format = C.BOLD + "%" + str(maxWidth) + "s" + C.RESET + ": %s"
     for caption, value in fields:
-        print >> stdout, format % (caption, value)
+        print(format % (caption, value), file=stdout)
 
 
 def warnDeprecated(old, new):
@@ -216,15 +216,15 @@ def warnDeprecated(old, new):
 
 
 def error(message):
-    print >> stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
+    print(C.BOLD + C.RED + "Error: %s" % message + C.RESET, file=stderr)
 
 
 def warning(message):
-    print >> stderr, C.RED + "Warning: " + C.RESET + message
+    print(C.RED + "Warning: " + C.RESET + message, file=stderr)
 
 
 def info(message):
-    print >> stderr, C.CYAN + "Info: " + C.RESET + message
+    print(C.CYAN + "Info: " + C.RESET + message, file=stderr)
 
 
 def addInputAnswers(*answers):

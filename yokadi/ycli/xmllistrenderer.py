@@ -36,7 +36,7 @@ class XmlListRenderer(object):
             taskElement = self.doc.createElement("task")
             sectionElement.appendChild(taskElement)
 
-            taskElement.setAttribute("id", unicode(task.id))
+            taskElement.setAttribute("id", str(task.id))
 
             for field in TASK_FIELDS:
                 if field == "keywords":
@@ -47,15 +47,15 @@ class XmlListRenderer(object):
                         taskElement.appendChild(descriptionElement)
                         descriptionElement.appendChild(self.doc.createTextNode(task.description))
                 else:
-                    taskElement.setAttribute(field, unicode(task.__getattribute__(field)))
+                    taskElement.setAttribute(field, str(task.__getattribute__(field)))
 
     def _exportKeywords(self, taskElement, keywordDict):
-        for key, value in keywordDict.items():
+        for key, value in list(keywordDict.items()):
             keywordElement = self.doc.createElement("keyword")
             taskElement.appendChild(keywordElement)
-            keywordElement.setAttribute("name", unicode(key))
+            keywordElement.setAttribute("name", str(key))
             if value:
-                keywordElement.setAttribute("value", unicode(value))
+                keywordElement.setAttribute("value", str(value))
 
     def end(self):
         # FIXME: Shouldn't we use utf-8 only for xml output?
