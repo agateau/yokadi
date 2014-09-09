@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/agateau/yokadi.png?branch=master)](https://travis-ci.org/agateau/yokadi)
+[![Coverage Status](https://coveralls.io/repos/agateau/yokadi/badge.png)](https://coveralls.io/r/agateau/yokadi)
 
 # What is it?
 
