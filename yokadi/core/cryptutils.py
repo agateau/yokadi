@@ -141,7 +141,7 @@ class YokadiCryptoManager(object):
             self.crypto_check = self._encrypt(check_word)
 
             # Save it to database config
-            db.DBHandler.getSession().add(db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
+            db.getSession().add(db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
                       desc="Cryptographic check data of passphrase"))
             return True
 

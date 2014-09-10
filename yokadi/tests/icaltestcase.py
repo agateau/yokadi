@@ -13,13 +13,14 @@ import datetime
 from yokadi.ycli import tui
 from yokadi.yical import yical
 from yokadi.core import dbutils
-from yokadi.core.db import DBHandler, Task
+from yokadi.core import db
+from yokadi.core.db import Task
 
 
 class IcalTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.connectDatabase("", memoryDatabase=True)
-        self.session = DBHandler.getSession()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         tui.clearInputAnswers()
 
     def testUrgencyMapping(self):

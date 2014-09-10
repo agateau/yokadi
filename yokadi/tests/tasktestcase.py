@@ -14,15 +14,16 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
-from yokadi.core.db import Task, DBHandler, setDefaultConfig
+from yokadi.core import db
+from yokadi.core.db import Task, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
 class TaskTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.connectDatabase("", memoryDatabase=True)
+        db.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
-        self.session = DBHandler.getSession()
+        self.session = db.getSession()
         tui.clearInputAnswers()
         self.cmd = YokadiCmd()
 

@@ -12,7 +12,8 @@ import os
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from yokadi.ycli import tui
-from yokadi.core.db import Keyword, Project, Task, TaskLock, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Keyword, Project, Task, TaskLock
 from yokadi.core.yokadiexception import YokadiException
 
 
@@ -24,7 +25,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
     @param interactive: Ask user before creating project (this is the default)
     @type interactive: Bool
     @returns : Task instance on success, None if cancelled."""
-    session = DBHandler.getSession(
+    session = db.getSession(
                                    )
     if keywordDict is None:
         keywordDict = {}
@@ -70,7 +71,7 @@ def getTaskFromId(tid):
     exist.
     @param tid: taskId string
     @return: Task instance or None if existingTask is False"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     # We do not use line.isdigit() because it returns True if line is '¹'!
     try:
         taskId = int(tid)
@@ -90,7 +91,7 @@ def getOrCreateKeyword(keywordName, interactive=True):
     @param interactive: Ask user before creating keyword (this is the default)
     @type interactive: Bool
     @return: Keyword instance or None if user cancel creation"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     try:
         return session.query(Keyword).filter_by(name=keywordName).one()
     except (NoResultFound, MultipleResultsFound):
@@ -110,7 +111,7 @@ def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
     @param createIfNeeded: create project if it does not exist (this is the default)
     @type createIfNeeded: Bool
     @return: Project instance or None if user cancel creation or createIfNeeded is False"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     result = session.query(Project).filter_by(name=projectName).all()
     if len(result):
         return result[0]
@@ -142,7 +143,7 @@ def getKeywordFromName(name):
     raises a YokadiException if not found
     @param name: the keyword name
     @return: The keyword"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     if not name:
         raise YokadiException("No keyword supplied")
     if name.startswith("@"):
@@ -160,12 +161,12 @@ class TaskLockManager:
         @param task: a Task instance
         @param session: sqlalchemy session"""
         self.task = task
-        self.session = DBHandler.getSession()
+        self.session = db.getSession()
 
     def _getLock(self):
         """Retrieve the task lock if it exists (else None)"""
         try:
-            return DBHandler.getSession().query(TaskLock).filter(TaskLock.task == self.task).one()
+            return db.getSession().query(TaskLock).filter(TaskLock.task == self.task).one()
         except NoResultFound:
             return  None
 

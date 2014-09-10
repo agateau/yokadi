@@ -24,7 +24,8 @@ import BaseHTTPServer
 from threading import Thread
 import re
 
-from yokadi.core.db import Task, Project, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Task, Project
 from yokadi.core import dbutils
 from yokadi.yical import icalutils
 from yokadi.ycli import parseutils
@@ -52,7 +53,7 @@ YOKADI_ICAL_ATT_MAPPING = {u"title": u"summary",
 def generateCal():
     """Generate an ical calendar from yokadi database
     @return: icalendar.Calendar object"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     cal = icalendar.Calendar()
     cal.add("prodid", '-//Yokadi calendar //yokadi.github.com//')
     cal.add("version", "2.0")
@@ -170,7 +171,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.end_headers()
 
     def _processVTodo(self, vTodo):
-        session = DBHandler.getSession()
+        session = db.getSession()
         if vTodo["UID"] in self.newTask:
             # This is a recent new task but remote ical calendar tool is not
             # aware of new Yokadi UID. Update it here to avoid duplicate new tasks

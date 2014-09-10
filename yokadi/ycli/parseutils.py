@@ -11,7 +11,8 @@ from sqlalchemy import and_, or_
 from sqlalchemy.sql import text
 
 from yokadi.ycli import tui
-from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project, DBHandler
+from yokadi.core import db
+from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 
 
 gSimplifySpaces = re.compile("  +")
@@ -97,7 +98,7 @@ def keywordFiltersToDict(keywordFilters):
 def warnIfKeywordDoesNotExist(keywordFilters):
     """Warn user is keyword does not exist
     @return: True if at least one keyword does not exist, else False"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     doesNotExist = False
     for keyword in [k.name for k in keywordFilters]:
             if session.query(Keyword).filter(Keyword.name.like(keyword)).count() == 0:
@@ -113,7 +114,7 @@ class KeywordFilter(object):
         self.value = ""  # Keyword value
         self.negative = False  # Negative filter
         self.valueOperator = "="  # Operator to compare value
-        self.session = DBHandler.getSession()
+        self.session = db.getSession()
 
         if filterLine:
             self.parse(filterLine)

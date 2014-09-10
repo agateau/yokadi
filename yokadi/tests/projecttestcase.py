@@ -9,7 +9,8 @@ import unittest
 
 import testutils
 
-from yokadi.core.db import Project, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Project
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli.projectcmd import ProjectCmd
 from yokadi.ycli import tui
@@ -17,8 +18,8 @@ from yokadi.ycli import tui
 
 class ProjectTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.connectDatabase("", memoryDatabase=True)
-        self.session = DBHandler.getSession()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         tui.clearInputAnswers()
         self.cmd = ProjectCmd()
 

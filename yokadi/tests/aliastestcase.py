@@ -9,14 +9,15 @@ import unittest
 
 import testutils
 
-from yokadi.core.db import Config, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Config
 from yokadi.ycli.aliascmd import AliasCmd
 
 
 class AliasTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.connectDatabase("", memoryDatabase=True)
-        self.session = DBHandler.getSession()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         self.cmd = AliasCmd()
 
     def testAdd(self):

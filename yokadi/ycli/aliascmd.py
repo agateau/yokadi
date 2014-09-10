@@ -35,7 +35,7 @@ class AliasCmd(object):
         """Add an alias on a command
         Ex. create an alias 'la' for 't_list -a':
         a_add la t_list -a"""
-        session = db.DBHandler.getSession()
+        session = db.getSession()
         tokens = line.split()
         if len(tokens) < 2:
             raise BadUsageException("You should provide an alias name and a command")
@@ -55,7 +55,7 @@ class AliasCmd(object):
     def do_a_remove(self, line):
         """Remove an alias"""
         if line in self.aliases:
-            session = db.DBHandler.getSession()
+            session = db.getSession()
             del self.aliases[line]
             aliases = session.query(db.Config).filter_by(name=u"ALIASES").one()
             aliases.value = unicode(repr(self.aliases))

@@ -49,7 +49,7 @@ class TaskCmd(object):
         self.lastTaskIds = []  # Last list of ids selected with t_list
         self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
-        self.session = db.DBHandler.getSession()
+        self.session = db.getSession()
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
         dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)

@@ -9,7 +9,8 @@ Implementation of completers for various Yokadi objects.
 from dateutil import rrule
 
 from yokadi.ycli import parseutils
-from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY
 from yokadi.core import ydateutils
 
 
@@ -24,7 +25,7 @@ def getItemPropertiesStartingWith(item, field, text):
     @param field: the item's field lookup : Project.q.name, Task.q.title, Keyword.q.name. Don't forget the magic q
     @param text: The begining of the text as a str
     @return: list of matching strings"""
-    session = DBHandler.getSession()
+    session = db.getSession()
     return [x.name for x in session.query(item).filter(field.like(unicode(text) + u"%"))]
 
 
@@ -68,7 +69,7 @@ def confCompleter(cmd, text, line, begidx, endidx):
 def taskIdCompleter(cmd, text, line, begidx, endidx):
     # TODO: filter on parameter position
     # TODO: potential performance issue with lots of tasks, find a better way to do it
-    session = DBHandler.getSession()
+    session = db.getSession()
     tasks = [x for x in session.query(Task).filter(Task.status != 'done') if str(x.id).startswith(text)]
     print
     for task in tasks:
