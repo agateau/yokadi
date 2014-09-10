@@ -11,7 +11,8 @@ from sqlalchemy.sql import func
 
 import yokadi.ycli.colors as C
 from yokadi.core import ydateutils
-from yokadi.core.db import Task, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Task
 from yokadi.ycli import tui
 
 
@@ -210,7 +211,7 @@ class TextListRenderer(object):
     def end(self):
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         # Adjust idColumn
-        maxId = DBHandler.getSession().query(func.max(Task.id)).one()[0]
+        maxId = db.getSession().query(func.max(Task.id)).one()[0]
         self.idColumn.width = max(2, len(str(maxId)))
 
         # Adjust titleColumn

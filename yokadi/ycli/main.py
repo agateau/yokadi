@@ -227,7 +227,7 @@ def main():
             args.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
             print "Using default database (%s)" % args.filename
 
-    db.DBHandler.connectDatabase(args.filename)
+    db.connectDatabase(args.filename)
 
     if args.createOnly:
         return

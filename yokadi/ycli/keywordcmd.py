@@ -11,7 +11,8 @@ from sqlalchemy.exc import IntegrityError
 from yokadi.core import dbutils
 from yokadi.ycli import tui
 
-from yokadi.core.db import Keyword, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Keyword
 from yokadi.core.yokadiexception import BadUsageException
 from yokadi.ycli.completers import KeywordCompleter
 
@@ -19,14 +20,14 @@ from yokadi.ycli.completers import KeywordCompleter
 class KeywordCmd(object):
     def do_k_list(self, line):
         """List all keywords."""
-        for keyword in DBHandler.getSession().query(Keyword).all():
+        for keyword in db.getSession().query(Keyword).all():
             tasks = ", ".join(str(task.id) for task in keyword.tasks)
             print "%s (tasks: %s)" % (keyword.name, tasks)
 
     def do_k_add(self, line):
         """Add a keyword
         k_add @<keyword1> [@<keyword2>...]"""
-        session = DBHandler.getSession()
+        session = db.getSession()
         if not line:
             raise BadUsageException("You must provide at least one keyword name")
         for keyword in line.split():
@@ -41,7 +42,7 @@ class KeywordCmd(object):
     def do_k_remove(self, line):
         """Remove a keyword
         k_remove @<keyword>"""
-        session = DBHandler.getSession()
+        session = db.getSession()
         keyword = dbutils.getKeywordFromName(line)
 
         if keyword.tasks:
@@ -57,7 +58,7 @@ class KeywordCmd(object):
     def do_k_edit(self, line):
         """Edit a keyword
         k_edit @<keyword>"""
-        session = DBHandler.getSession()
+        session = db.getSession()
         keyword = dbutils.getKeywordFromName(line)
         oldName = keyword.name
         newName = tui.editLine(oldName)

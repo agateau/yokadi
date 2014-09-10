@@ -17,8 +17,8 @@ from yokadi.core.yokadiexception import YokadiException
 
 class DbUtilsTestCase(unittest.TestCase):
     def setUp(self):
-        db.DBHandler.connectDatabase("", memoryDatabase=True)
-        self.session = db.DBHandler.getSession()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         tui.clearInputAnswers()
 
     def testGetTaskFromId(self):

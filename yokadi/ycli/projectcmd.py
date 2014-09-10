@@ -12,7 +12,8 @@ from sqlalchemy.exc import IntegrityError
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter
 from yokadi.ycli import parseutils
-from yokadi.core.db import Project, Task, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.core import dbutils
@@ -28,7 +29,7 @@ def getProjectFromName(name, parameterName="project_name"):
         raise BadUsageException("Missing <%s> parameter" % parameterName)
 
     try:
-        session = DBHandler.getSession()
+        session = db.getSession()
         return session.query(Project).filter_by(name=name).one()
     except NoResultFound:
         raise YokadiException("Project '%s' not found. Use p_list to see all projects." % name)
@@ -42,7 +43,7 @@ class ProjectCmd(object):
             print "Give at least a project name !"
             return
         projectName, garbage, keywordDict = parseutils.parseLine(line)
-        session = DBHandler.getSession()
+        session = db.getSession()
         if garbage:
             raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
         try:
@@ -62,7 +63,7 @@ class ProjectCmd(object):
     def do_p_edit(self, line):
         """Edit a project.
         p_edit <project name>"""
-        session = DBHandler.getSession()
+        session = db.getSession()
         project = dbutils.getOrCreateProject(line, createIfNeeded=False)
 
         if not project:
@@ -93,7 +94,7 @@ class ProjectCmd(object):
 
     def do_p_list(self, line):
         """List all projects."""
-        session = DBHandler.getSession()
+        session = db.getSession()
         for project in session.query(Project).all():
             if project.active:
                 active = ""
@@ -103,7 +104,7 @@ class ProjectCmd(object):
 
     def do_p_set_active(self, line):
         """Activate the given project"""
-        session = DBHandler.getSession()
+        session = db.getSession()
         project = getProjectFromName(line)
         project.active = True
         session.merge(project)
@@ -112,7 +113,7 @@ class ProjectCmd(object):
 
     def do_p_set_inactive(self, line):
         """Desactivate the given project"""
-        session = DBHandler.getSession()
+        session = db.getSession()
         project = getProjectFromName(line)
         project.active = False
         session.merge(project)
@@ -129,7 +130,7 @@ class ProjectCmd(object):
         return parser
 
     def do_p_remove(self, line):
-        session = DBHandler.getSession()
+        session = db.getSession()
         parser = self.parser_p_remove()
         args = parser.parse_args(line)
         project = getProjectFromName(args.project)

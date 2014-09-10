@@ -32,8 +32,8 @@ from yokadi.yical.yical import YokadiIcalServer
 reload(sys)
 sys.setdefaultencoding(tui.ENCODING)
 
-
-from yokadi.core.db import Config, Project, Task, getConfigKey, DBHandler
+from yokadi.core import db
+from yokadi.core.db import Config, Project, Task, getConfigKey
 
 
 # Daemon polling delay (in seconds)
@@ -67,7 +67,7 @@ def eventLoop():
     suspend = timedelta(hours=float(getConfigKey(u"ALARM_SUSPEND")))
     cmdDelayTemplate = getConfigKey(u"ALARM_DELAY_CMD")
     cmdDueTemplate = getConfigKey(u"ALARM_DUE_CMD")
-    session = DBHandler.getSession()
+    session = db.getSession()
     # For the two following dict, task id is key, and value is (duedate, triggerdate)
     triggeredDelayTasks = {}
     triggeredDueTasks = {}
@@ -179,10 +179,10 @@ class YokadiDaemon(Daemon):
             filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
             print "Using default database (%s)" % filename
 
-        DBHandler.connectDatabase(filename, createIfNeeded=False)
+        db.connectDatabase(filename, createIfNeeded=False)
 
         # Basic tests :
-        if not (DBHandler.database.engine.has_table("Task") and DBHandler.database.engine.has_table("Config")):
+        if not (db.database.engine.has_table("Task") and db.database.engine.has_table("Config")):
             print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
             sys.exit(1)
 

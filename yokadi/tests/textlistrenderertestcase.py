@@ -20,8 +20,8 @@ from yokadi.core import db
 
 class TextListRendererTestCase(unittest.TestCase):
     def setUp(self):
-        db.DBHandler.connectDatabase("", memoryDatabase=True)
-        self.session = db.DBHandler.getSession()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         tui.clearInputAnswers()
 
     def testTitleFormater(self):

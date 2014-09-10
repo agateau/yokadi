@@ -61,7 +61,7 @@ class Project(Base):
         Defines keywords of a project.
         Dict is of the form: keywordName => value
         """
-        session = DBHandler.getSession()
+        session = getSession()
         for projectKeyword in self.projectKeywords:
             session.delete(projectKeyword)
 
@@ -145,7 +145,7 @@ class Task(Base):
         Defines keywords of a task.
         Dict is of the form: keywordName => value
         """
-        session = DBHandler.getSession()
+        session = getSession()
         for taskKeyword in self.taskKeywords:
             session.delete(taskKeyword)
 
@@ -232,26 +232,24 @@ class TaskLock(Base):
 
 
 def getConfigKey(name, environ=True):
-    session = DBHandler.getSession()
+    session = getSession()
     if environ:
         return os.environ.get(name, session.query(Config).filter_by(name=name).one().value)
     else:
         return session.query(Config).filter_by(name=name).one().value
 
 
-class DBHandler(object):
-    """Connexion handler to database"""
-    database = None
+_database = None
 
-    @classmethod
-    def getSession(cls):
-        if not cls.database:
-            raise YokadiException("Cannot get session. Not connected to database")
-        return cls.database.session
+def getSession():
+    global _database
+    if not _database:
+        raise YokadiException("Cannot get session. Not connected to database")
+    return _database.session
 
-    @classmethod
-    def connectDatabase(cls, dbFileName, createIfNeeded=True, memoryDatabase=False):
-        cls.database = Database(dbFileName, createIfNeeded, memoryDatabase)
+def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
+    global _database
+    _database = Database(dbFileName, createIfNeeded, memoryDatabase)
 
 
 class Database(object):
@@ -329,7 +327,7 @@ def setDefaultConfig():
         u"PURGE_DELAY"     : (u"90", False, u"Default delay (in days) for the t_purge command"),
         u"PASSPHRASE_CACHE": (u"1", False, u"Keep passphrase in memory till Yokadi is started (0 is false else true"),
         }
-    session = DBHandler.getSession()
+    session = getSession()
     for name, value in defaultConfig.items():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))

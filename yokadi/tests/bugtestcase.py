@@ -11,14 +11,15 @@ import testutils
 
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
-from yokadi.core.db import Task, DBHandler, setDefaultConfig
+from yokadi.core import db
+from yokadi.core.db import Task, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException
 
 
 class BugTestCase(unittest.TestCase):
     def setUp(self):
-        DBHandler.connectDatabase("", memoryDatabase=True)
-        self.session = DBHandler.getSession()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         setDefaultConfig()
         tui.clearInputAnswers()
         self.cmd = YokadiCmd()
