@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 """
 Update from version 1 to version 2 of Yokadi DB
@@ -11,7 +11,7 @@ import sys
 try:
     from sqlobject import connectionForURI, BoolCol, DateTimeCol, sqlhub, SQLObject, UnicodeCol
 except ImportError:
-    print "To run this update you need sqlobject"
+    print("To run this update you need sqlobject")
 
 """ This is the v2 table """
 class Config(SQLObject):

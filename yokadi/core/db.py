@@ -285,7 +285,7 @@ class Database(object):
                 self.createTables()
                 # Set database version according to current yokadi release
                 if not updateMode: # Update script add it from dump
-                    self.session.add(Config(name=DB_VERSION_KEY, value=unicode(DB_VERSION), system=True, desc="Database schema release number"))
+                    self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
                 self.session.commit()
             else:
                 print("Database file (%s) does not exist or is not readable. Exiting" % dbFileName)
@@ -311,7 +311,7 @@ class Database(object):
     def setVersion(self, version):
         assert self.engine.has_table("config")
         instance = self.session.query(Config).filter_by(name=DB_VERSION_KEY).one()
-        instance.value = unicode(version)
+        instance.value = str(version)
         self.session.add(instance)
         self.session.commit()
 

@@ -35,13 +35,13 @@ def dumpTable(cx, dbFileName, table, fl):
     newText = "insert into %s(%s) values" % (table, ",".join(columnList))
 
     child = subprocess.Popen(["sqlite3", dbFileName], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    child.stdin.write(".mode insert %s\nselect * from %s;\n" % (table, table))
+    child.stdin.write(bytes(".mode insert %s\nselect * from %s;\n" % (table, table), 'utf-8'))
     child.stdin.close()
 
     for line in child.stdout.readlines():
-        line = str(line, "utf-8")
+        line = line.decode('utf-8')
         line = rx.sub(newText, line)
-        fl.write(line.encode("utf-8"))
+        fl.write(line)
 
 
 def dumpDatabase(dbFileName, dumpFile):
@@ -53,7 +53,7 @@ def dumpDatabase(dbFileName, dumpFile):
 def main():
     dbFileName = sys.argv[1]
     dumpFileName = sys.argv[2]
-    dumpFile = file(dumpFileName, "w")
+    dumpFile = open(dumpFileName, "w", encoding='utf-8')
     dumpDatabase(dbFileName, dumpFile)
 
 

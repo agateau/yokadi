@@ -38,11 +38,11 @@ def createWorkDb(fileName):
 def createFinalDb(workFileName, finalFileName):
     dumpFileName = "dump.sql"
     print("Dumping into %s" % dumpFileName)
-    dumpFile = file(dumpFileName, "w")
+    dumpFile = open(dumpFileName, "w", encoding='utf-8')
     dump.dumpDatabase(workFileName, dumpFile)
     dumpFile.close()
 
-    print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
+    print("Restoring dump from %s into %s" % (dumpFileName, finalFileName))
     database = db.Database(finalFileName, True, updateMode=True)
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:

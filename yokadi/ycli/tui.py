@@ -58,7 +58,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
-        return str(open(name).read())
+        return str(open(name, encoding='utf-8').read())
 
     def waitProcess(proc):
         start = time.time()
@@ -77,7 +77,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     try:
         if lockManager:
             lockManager.acquire()
-        fl = open(name, "w")
+        fl = open(name, "w", encoding='utf-8')
         fl.write(text)
         fl.close()
         editor = os.environ.get("EDITOR", "vi")

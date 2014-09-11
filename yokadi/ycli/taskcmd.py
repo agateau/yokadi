@@ -618,7 +618,7 @@ class TaskCmd(object):
 
         # Define output
         if args.output:
-            out = open(args.output, "w")
+            out = open(args.output, "w", encoding='utf-8')
         else:
             out = tui.stdout
 
