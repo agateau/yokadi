@@ -13,10 +13,10 @@ import os
 from os.path import abspath, isdir, dirname, join
 
 # yokadi root path
-root=abspath(dirname(__file__))
+root = abspath(dirname(__file__))
 
 # Additional files
-data_files=[]
+data_files = []
 data_files.append(["share/yokadi",
                    ["version", "README.markdown", "NEWS", "LICENSE"]])
 
@@ -42,25 +42,25 @@ for size in os.listdir("icon"):
 data_files.append(["share/applications", ["icon/yokadi.desktop"]])
 
 # Scripts
-scripts=["bin/yokadi", "bin/yokadid"]
+scripts = ["bin/yokadi", "bin/yokadid"]
 
 # Version
 try:
-    version=file(join(root, "version")).readline().rstrip().rstrip("\n")
+    version = file(join(root, "version")).readline().rstrip().rstrip("\n")
 except Exception, e:
     print "Warning, cannot read version file (%s)" % e
     print "Defaulting to 'snapshot'"
-    version="snaphot"
+    version = "snaphot"
 
 # Windows post install script
 if "win" in " ".join(sys.argv[1:]):
     scripts.append("w32_postinst.py")
 
-requirements = ['sqlobject', 'dateutils']
+requirements = ['sqlalchemy', 'dateutils']
 if sys.version_info < (2, 7):
     requirements.append('argparse')
 
-#Go for setup
+# Go for setup
 setup(name="yokadi",
       version=version,
       description="Command line oriented todo list system",

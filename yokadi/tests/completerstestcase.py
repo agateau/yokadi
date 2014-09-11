@@ -9,25 +9,26 @@ import unittest
 
 import testutils
 
-from yokadi.core.db import Project
+from yokadi.core import db
+from yokadi.core.db import Project, setDefaultConfig
 from yokadi.ycli import completers
 
 
 class CompletersTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
-
+        db.connectDatabase("", memoryDatabase=True)
+        setDefaultConfig()
+        self.session = db.getSession()
 
     def testProjectCompleter(self):
-        Project(name=u"foo")
-        Project(name=u"foo2")
-        Project(name=u"bar")
+        self.session.add_all([Project(name=u"foo"),
+                             Project(name=u"foo2"),
+                             Project(name=u"bar")])
 
         expected = [u"foo ", u"foo2 "]
         completer = completers.ProjectCompleter(1)
         result = completer("f", "t_add f", 6, 8)
         self.assertEqual(result, expected)
-
 
     def testCompleteParameterPosition(self):
         data = [

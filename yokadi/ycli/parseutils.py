@@ -7,10 +7,11 @@ Parse utilities. Used to manipulate command line text.
 @license: GPL v3 or later
 """
 import re
+from sqlalchemy import and_, or_
+from sqlalchemy.sql import text
 
-from sqlobject import AND, OR, LIKE
-from sqlobject.sqlbuilder import IN, NOTIN, Select
 from yokadi.ycli import tui
+from yokadi.core import db
 from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
 
 
@@ -75,9 +76,9 @@ def createLine(projectName, title, keywordDict):
     tokens = []
     for keywordName, value in keywordDict.items():
         if value:
-            tokens.append("@" + keywordName + "=" + str(value))
+            tokens.append(u"@" + keywordName + "=" + str(value))
         else:
-            tokens.append("@" + keywordName)
+            tokens.append(u"@" + keywordName)
 
     if projectName:
         tokens.insert(0, projectName)
@@ -97,9 +98,10 @@ def keywordFiltersToDict(keywordFilters):
 def warnIfKeywordDoesNotExist(keywordFilters):
     """Warn user is keyword does not exist
     @return: True if at least one keyword does not exist, else False"""
+    session = db.getSession()
     doesNotExist = False
     for keyword in [k.name for k in keywordFilters]:
-            if Keyword.select(LIKE(Keyword.q.name, keyword)).count() == 0:
+            if session.query(Keyword).filter(Keyword.name.like(keyword)).count() == 0:
                 tui.error("Keyword %s is unknown." % keyword)
                 doesNotExist = True
     return doesNotExist
@@ -112,6 +114,7 @@ class KeywordFilter(object):
         self.value = ""  # Keyword value
         self.negative = False  # Negative filter
         self.valueOperator = "="  # Operator to compare value
+        self.session = db.getSession()
 
         if filterLine:
             self.parse(filterLine)
@@ -128,35 +131,43 @@ class KeywordFilter(object):
             return prefix + self.name
 
     def filter(self):
-        """Return a filter in SQlObject format"""
-        taskValueFilter = (1 == 1)
-        projectValueFilter = (1 == 1)
+        """Return a filter in SQL Alchemy format"""
+        taskValueFilter = text("1 = 1")
+        projectValueFilter = text("1 = 1")
         if self.name:
             if self.value:
                 if self.valueOperator == "=":
-                    taskValueFilter = (TaskKeyword.q.value == self.value)
-                    projectValueFilter = (ProjectKeyword.q.value == self.value)
+                    taskValueFilter = (TaskKeyword.value == self.value)
+                    projectValueFilter = (ProjectKeyword.value == self.value)
                 elif self.valueOperator == "!=":
-                    taskValueFilter = (TaskKeyword.q.value != self.value)
-                    projectValueFilter = (ProjectKeyword.q.value != self.value)
+                    taskValueFilter = (TaskKeyword.value != self.value)
+                    projectValueFilter = (ProjectKeyword.value != self.value)
                 # TODO: handle also <, >, =< and >=
 
-            taskKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
-                                                   TaskKeyword.q.keywordID == Keyword.q.id,
-                                                   TaskKeyword.q.taskID == Task.q.id,
-                                                   taskValueFilter)))
-            projectKeywordTaskIDs = Select(Task.q.id, where=(AND(LIKE(Keyword.q.name, self.name),
-                                                      ProjectKeyword.q.keywordID == Keyword.q.id,
-                                                      ProjectKeyword.q.projectID == Project.q.id,
-                                                      Project.q.id == Task.q.project,
-                                                      projectValueFilter)))
+            taskKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
+                                                                 TaskKeyword.keywordId == Keyword.id,
+                                                                 TaskKeyword.taskId == Task.id,
+                                                                 taskValueFilter).values(Task.id)
+            projectKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
+                                                                    ProjectKeyword.keywordId == Keyword.id,
+                                                                    ProjectKeyword.projectId == Project.id,
+                                                                    Project.id == Task.project,
+                                                                    projectValueFilter).values(Task.id)
 
-            if self.negative:
-                return AND(NOTIN(Task.q.id, taskKeywordTaskIDs),
-                           NOTIN(Task.q.id, projectKeywordTaskIDs))
+            taskKeywordTaskIDs = list(taskKeywordTaskIDs)
+            projectKeywordTaskIDs = list(projectKeywordTaskIDs)
+            if len(taskKeywordTaskIDs) == 0:
+                taskInKeywords = text("1 <> 1")  # Use subtitue condition as SQLA protest again IN clause with empty list
             else:
-                return OR(IN(Task.q.id, taskKeywordTaskIDs),
-                          IN(Task.q.id, projectKeywordTaskIDs))
+                taskInKeywords = Task.id.in_([i[0] for i in taskKeywordTaskIDs])
+            if len(projectKeywordTaskIDs) == 0:
+                projectInKeywords = text("1 <> 1")  # See above comment
+            else:
+                projectInKeywords = Task.id.in_([i[0] for i in projectKeywordTaskIDs])
+            if self.negative:
+                return and_(~taskInKeywords, ~projectInKeywords)
+            else:
+                return or_(taskInKeywords, projectInKeywords)
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""
