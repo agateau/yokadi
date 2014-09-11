@@ -12,7 +12,7 @@ import testutils
 from yokadi.core import db, dbutils
 from yokadi.core.db import Project, Keyword, Task
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.ycli.projectcmd import ProjectCmd
+from yokadi.ycli.main import YokadiCmd
 from yokadi.ycli import tui
 
 
@@ -21,7 +21,7 @@ class ProjectTestCase(unittest.TestCase):
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         tui.clearInputAnswers()
-        self.cmd = ProjectCmd()
+        self.cmd = YokadiCmd()
 
     def testAdd(self):
         tui.addInputAnswers("y")
@@ -76,5 +76,17 @@ class ProjectTestCase(unittest.TestCase):
         self.assertEqual(keyword.projects, [])
 
         self.assertEqual(list(self.session.query(Task).filter_by(id=taskId)), [])
+
+    def testStatus(self):
+        # Create project p1 and test set active and set inactive method
+        self.cmd.do_p_add("p1")
+        project = self.session.query(Project).filter_by(id=1).one()
+        self.assertEqual(project.name, "p1")
+
+        self.assertEqual(project.active, True)
+        self.cmd.do_p_set_inactive("p1")
+        self.assertEqual(project.active, False)
+        self.cmd.do_p_set_active("p1")
+        self.assertEqual(project.active, True)
 
 # vi: ts=4 sw=4 et
