@@ -20,12 +20,12 @@ sys.path.append(join(dirname(__file__), ".."))
 from yokadi.core import db
 
 def getVersion(fileName):
-    database = db.Database(fileName, False, updateMode=True)
+    database = db.Database(fileName, createIfNeeded=False, updateMode=True)
     return database.getVersion()
 
 
 def setVersion(fileName, version):
-    database = db.Database(fileName, False, updateMode=True)
+    database = db.Database(fileName, createIfNeeded=False, updateMode=True)
     database.setVersion(version)
 
 

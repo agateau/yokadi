@@ -12,7 +12,7 @@ from os.path import dirname, join
 try:
     from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, StringCol
 except ImportError:
-    print "To run this migration you need sqlobject"
+    print "To run this update you need sqlobject"
 
 
 """ This is the v4 table """
