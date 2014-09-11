@@ -5,6 +5,7 @@ Configuration management related commands.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
+from yokadi.core import db
 
 from yokadi.core.db import Config
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
@@ -28,7 +29,8 @@ class ConfCmd(object):
         key = args.key
         if not key:
             key = "%"
-        k = Config.select(AND(LIKE(Config.q.name, key), Config.q.system == args.system))
+        session = db.getSession()
+        k = session.query(Config).filter(Config.name.like(key)).filter_by(system=args.system).all()
         fields = [(x.name, "%s (%s)" % (x.value, x.desc)) for x in k]
         if fields:
             tui.renderFields(fields)
@@ -44,15 +46,16 @@ class ConfCmd(object):
             raise BadUsageException("You should provide two arguments : the parameter key and the value")
         name = line[0]
         value = " ".join(line[1:])
-        p = Config.select(AND(Config.q.name == name, Config.q.system == False))
+        session = db.getSession()
+        p = session.query(Config).filter_by(name=name, system=False)
         if p.count() == 0:
-            tui.error("Sorry, no parameter match")
+            raise YokadiException("Sorry, no parameter match")
         else:
             if self.checkParameterValue(name, value):
                 p[0].value = value
                 tui.info("Parameter updated")
             else:
-                tui.error("Parameter value is incorrect")
+                raise YokadiException("Parameter value is incorrect")
 
     complete_c_set = confCompleter
 
