@@ -58,7 +58,8 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
-        return str(open(name, encoding='utf-8').read())
+        with open(name, encoding='utf-8') as data:
+            return str(data.read())
 
     def waitProcess(proc):
         start = time.time()
