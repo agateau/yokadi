@@ -301,7 +301,7 @@ class Database(object):
         Base.metadata.create_all(self.engine)
 
     def getVersion(self):
-        if not "config" in Base.metadata.tables:
+        if not self.engine.has_table("config"):
             # There was no Config table in v1
             return 1
 
@@ -311,7 +311,7 @@ class Database(object):
             raise YokadiException("Configuration key '%s' does not exist. This should not happen!" % DB_VERSION_KEY)
 
     def setVersion(self, version):
-        assert "config" in Base.metadata.tables
+        assert self.engine.has_table("config")
         instance = self.session.query(Config).filter_by(name=DB_VERSION_KEY).one()
         instance.value = unicode(version)
         self.session.add(instance)
