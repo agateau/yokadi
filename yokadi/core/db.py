@@ -33,7 +33,7 @@ from yokadi.core import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 6
+DB_VERSION = 7
 DB_VERSION_KEY = u"DB_VERSION"
 
 # Task frequency
@@ -253,7 +253,7 @@ def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
 
 
 class Database(object):
-    def __init__(self, dbFileName, createIfNeeded=True, memoryDatabase=False):
+    def __init__(self, dbFileName, createIfNeeded=True, memoryDatabase=False, updateMode=False):
         """Connect to database and create it if needed
         @param dbFileName: path to database file
         @type dbFileName: str
@@ -261,6 +261,8 @@ class Database(object):
         @type createIfNeeded: bool
         @param memoryDatabase: create db in memory. Only usefull for unit test. Default is false.
         @type memoryDatabase: bool
+        @param updateMode: allow to use it without checking version. Default is false.
+        @type updateMode: bool
         """
 
         dbFileName = os.path.abspath(dbFileName)
@@ -282,18 +284,22 @@ class Database(object):
                 print "Creating database"
                 self.createTables()
                 # Set database version according to current yokadi release
-                self.session.add(Config(name=DB_VERSION_KEY, value=unicode(DB_VERSION), system=True, desc=u"Database schema release number"))
+                if not updateMode: # Update script add it from dump
+                    self.session.add(Config(name=DB_VERSION_KEY, value=unicode(DB_VERSION), system=True, desc=u"Database schema release number"))
                 self.session.commit()
             else:
                 print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
                 sys.exit(1)
+
+        if not updateMode:
+            self.checkVersion()
 
     def createTables(self):
         """Create all defined tables"""
         Base.metadata.create_all(self.engine)
 
     def getVersion(self):
-        if not "config" in Base.metadata.tables:
+        if not self.engine.has_table("config"):
             # There was no Config table in v1
             return 1
 
@@ -301,6 +307,13 @@ class Database(object):
             return int(self.session.query(Config).filter_by(name=DB_VERSION_KEY).one().value)
         except NoResultFound:
             raise YokadiException("Configuration key '%s' does not exist. This should not happen!" % DB_VERSION_KEY)
+
+    def setVersion(self, version):
+        assert self.engine.has_table("config")
+        instance = self.session.query(Config).filter_by(name=DB_VERSION_KEY).one()
+        instance.value = unicode(version)
+        self.session.add(instance)
+        self.session.commit()
 
     def checkVersion(self):
         """Check version and exit if it is not suitable"""

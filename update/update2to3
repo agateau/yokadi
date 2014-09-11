@@ -9,7 +9,10 @@ Update from version 2 to version 3 of Yokadi DB
 import sys
 from os.path import dirname, join
 
-from sqlobject import connectionForURI, RelatedJoin, sqlhub, SQLObject
+try:
+    from sqlobject import connectionForURI, RelatedJoin, sqlhub, SQLObject
+except ImportError:
+    print "To run this update you need sqlobject"
 
 """ This is a fake table (we only need table name) """
 class Project(SQLObject):
