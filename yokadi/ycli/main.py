@@ -155,7 +155,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         """Writes shell history to disk"""
         try:
             # Open r/w and close file to create one if needed
-            historyFile = file(self.historyPath, "w")
+            historyFile = open(self.historyPath, "w", encoding='utf-8')
             historyFile.close()
             readline.set_history_length(1000)
             readline.write_history_file(self.historyPath)

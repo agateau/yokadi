@@ -37,7 +37,7 @@ def shareDirPath():
 def currentVersion():
     """@return: current yokadi version according to 'version' file"""
     try:
-        return file(os.path.join(shareDirPath(), "version")).readline().strip("\n")
+        return open(os.path.join(shareDirPath(), "version"), encoding='utf-8').readline().strip("\n")
     except Exception as e:
         print("Unable to read 'version' file. Do you remove or change it ?")
         print(e)
