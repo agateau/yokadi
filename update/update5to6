@@ -7,7 +7,11 @@ Update from version 5 to version 6 of Yokadi DB
 @license: GPL v3 or newer
 """
 import sys
-from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, IntCol, DateTimeCol
+
+try:
+    from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, IntCol, DateTimeCol
+except ImportError:
+    print "To run this migration you need sqlobject"
 
 
 class TaskLock(SQLObject):

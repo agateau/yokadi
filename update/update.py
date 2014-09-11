@@ -68,10 +68,6 @@ def main():
     # Check version
     version = getVersion(dbFileName)
     print "Found version %d" % version
-    if version < 6:
-        print "You can't update directly from database version {} to this database version." \
-              " You need to use yokadi 0.14 to migrate to version 6 and then you can migrate to the current version".format(version)
-        return 2
 
     if version == db.DB_VERSION:
         print "Nothing to do"

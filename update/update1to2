@@ -8,7 +8,10 @@ Update from version 1 to version 2 of Yokadi DB
 """
 import sys
 
-from sqlobject import connectionForURI, BoolCol, DateTimeCol, sqlhub, SQLObject, UnicodeCol
+try:
+    from sqlobject import connectionForURI, BoolCol, DateTimeCol, sqlhub, SQLObject, UnicodeCol
+except ImportError:
+    print "To run this migration you need sqlobject"
 
 """ This is the v2 table """
 class Config(SQLObject):
