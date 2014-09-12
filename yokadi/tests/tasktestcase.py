@@ -92,6 +92,8 @@ class TaskTestCase(unittest.TestCase):
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_started("1")
         self.assertEqual(task.status, "started")
+        self.cmd.do_t_mark_new("1")
+        self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_done("1")
         self.assertEqual(task.status, "done")
 
@@ -272,5 +274,13 @@ class TaskTestCase(unittest.TestCase):
             self.cmd.do_t_due("1 %s" % valid_input)
         for bad_input in ("coucou", "+1s"):
             self.assertRaises(YokadiException, self.cmd.do_t_due, "1 %s" % bad_input)
+
+    def testRemove(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+        self.assertEqual(self.session.query(Task).count(), 1)
+        tui.addInputAnswers("y")
+        self.cmd.do_t_remove("1")
+        self.assertEqual(self.session.query(Task).count(), 0)
 
 # vi: ts=4 sw=4 et
