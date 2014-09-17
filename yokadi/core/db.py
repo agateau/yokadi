@@ -133,6 +133,22 @@ class Task(Base):
         else:
             return ""
 
+    def setStatus(self, status):
+        """
+        Defines the status of the task, taking care of updating the done date
+        and doing the right thing for recurrent tasks
+        """
+        if self.recurrence and status == "done":
+            self.dueDate = self.recurrence.getNext(self.dueDate)
+        else:
+            self.status = status
+            if status == "done":
+                self.doneDate = datetime.now().replace(second=0, microsecond=0)
+            else:
+                self.doneDate = None
+        session = getSession()
+        session.merge(self)
+
 
 class Recurrence(Base):
     """Task recurrence definition"""

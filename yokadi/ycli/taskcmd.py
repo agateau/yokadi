@@ -267,19 +267,13 @@ class TaskCmd(object):
 
     def _t_set_status(self, line, status):
         task = self.getTaskFromId(line)
+        task.setStatus(status)
+        self.session.commit()
         if task.recurrence and status == "done":
-            task.dueDate = task.recurrence.getNext(task.dueDate)
             print("Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate))
             print("To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id)
         else:
-            task.status = status
-            if status == "done":
-                task.doneDate = datetime.now().replace(second=0, microsecond=0)
-            else:
-                task.doneDate = None
             print("Task '%s' marked as %s" % (task.title, status))
-        self.session.merge(task)
-        self.session.commit()
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
