@@ -138,10 +138,6 @@ class ProjectCmd(object):
         if not args.force:
             if not tui.confirm("Remove project '%s' and its %d tasks" % (project.name, nbTasks)):
                 return
-        print "Removing project tasks:"
-        for task in project.tasks:
-            session.delete(task)
-            print "- task %(id)-3s: %(title)-30s" % dict(id=str(task.id), title=str(task.title))
         session.delete(project)
         session.commit()
         print "Project removed"

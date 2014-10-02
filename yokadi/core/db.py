@@ -48,6 +48,7 @@ class Project(Base):
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
     projectKeywords = relationship("ProjectKeyword", cascade="all", backref="project")
+    tasks = relationship("Task", cascade="all", backref="project")
 
     def __repr__(self):
         keywords = self.getKeywordsAsString()
@@ -136,7 +137,6 @@ class Task(Base):
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum(u"new", u"started", u"done"), default=u"new")
     projectId = Column("project_id", Integer, ForeignKey("project.id"))
-    project = relationship("Project", backref="tasks")
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
     recurrence = relationship("Recurrence")
