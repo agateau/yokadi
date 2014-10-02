@@ -136,7 +136,7 @@ class Task(Base):
     status = Column(Enum(u"new", u"started", u"done"), default=u"new")
     projectId = Column("project_id", Integer, ForeignKey("project.id"))
     project = relationship("Project", backref="tasks")
-    taskKeywords = relationship("TaskKeyword", backref="task")
+    taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
     recurrence = relationship("Recurrence")
 

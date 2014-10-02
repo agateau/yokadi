@@ -15,7 +15,7 @@ from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
-from yokadi.core.db import Task, setDefaultConfig
+from yokadi.core.db import Task, Keyword, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -53,6 +53,19 @@ class TaskTestCase(unittest.TestCase):
         tui.addInputAnswers("a Secret passphrase")
         self.cmd.do_t_add("-c x encrypted t1")
         self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
+
+    def testRemove(self):
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_t_add("x @kw bla")
+        task = self.session.query(Task).one()
+
+        keyword = self.session.query(Keyword).filter_by(name="kw").one()
+        self.assertEqual(keyword.tasks, [task])
+
+        tui.addInputAnswers("y")
+        self.cmd.do_t_remove(str(task.id))
+
+        self.assertEqual(keyword.tasks, [])
 
     def testMark(self):
         tui.addInputAnswers("y")
