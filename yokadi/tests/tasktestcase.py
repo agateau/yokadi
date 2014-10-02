@@ -15,7 +15,7 @@ from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
-from yokadi.core.db import Task, Keyword, setDefaultConfig
+from yokadi.core.db import Task, Keyword, Recurrence, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -55,17 +55,24 @@ class TaskTestCase(unittest.TestCase):
         self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
 
     def testRemove(self):
+        # Create a recurrent task with one keyword
         tui.addInputAnswers("y", "y")
         self.cmd.do_t_add("x @kw bla")
         task = self.session.query(Task).one()
+        self.cmd.do_t_recurs("1 daily 10:00")
 
         keyword = self.session.query(Keyword).filter_by(name="kw").one()
         self.assertEqual(keyword.tasks, [task])
 
+        recurrence = self.session.query(Recurrence).one()
+
+        # Remove it, the keyword should no longer be associated with any task
+        # and the recurrence should be gone
         tui.addInputAnswers("y")
         self.cmd.do_t_remove(str(task.id))
 
         self.assertEqual(keyword.tasks, [])
+        self.assertEqual(list(self.session.query(Recurrence)), [])
 
     def testMark(self):
         tui.addInputAnswers("y")

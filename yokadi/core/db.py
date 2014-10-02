@@ -139,7 +139,7 @@ class Task(Base):
     projectId = Column("project_id", Integer, ForeignKey("project.id"))
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
-    recurrence = relationship("Recurrence")
+    recurrence = relationship("Recurrence", cascade="all", backref="task")
 
     def setKeywordDict(self, dct):
         """
@@ -227,7 +227,6 @@ class TaskLock(Base):
     __tablename__ = "task_lock"
     id = Column(Integer, primary_key=True)
     taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True)
-    task = relationship("Task")
     pid = Column(Integer, default=None)
     updateDate = Column("update_date", DateTime, default=None)
 
