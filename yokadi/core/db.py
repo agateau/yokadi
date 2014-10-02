@@ -47,7 +47,7 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
-    projectKeywords = relationship("ProjectKeyword", backref="project")
+    projectKeywords = relationship("ProjectKeyword", cascade="all", backref="project")
 
     def __repr__(self):
         keywords = self.getKeywordsAsString()
@@ -98,6 +98,7 @@ class Keyword(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     tasks = association_proxy("taskKeywords", "task")
+    projects = association_proxy("projectKeywords", "project")
 
     def __repr__(self):
         return self.name

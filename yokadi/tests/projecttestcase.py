@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 from yokadi.core import db
-from yokadi.core.db import Project
+from yokadi.core.db import Project, Keyword
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli.projectcmd import ProjectCmd
 from yokadi.ycli import tui
@@ -56,5 +56,18 @@ class ProjectTestCase(unittest.TestCase):
         tui.addInputAnswers(u"p2")
         self.assertRaises(YokadiException, self.cmd.do_p_edit, u"p3")
         self.assertEqual(project.name, u"p3")
+
+    def testRemove(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_p_add("p1 @kw")
+        project = self.session.query(Project).one()
+
+        keyword = self.session.query(Keyword).filter_by(name="kw").one()
+        self.assertEqual(keyword.projects, [project])
+
+        tui.addInputAnswers("y")
+        self.cmd.do_p_remove("p1")
+
+        self.assertEqual(keyword.projects, [])
 
 # vi: ts=4 sw=4 et
