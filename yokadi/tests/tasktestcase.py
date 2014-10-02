@@ -15,7 +15,8 @@ from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
-from yokadi.core.db import Task, Keyword, Recurrence, setDefaultConfig
+from yokadi.core import dbutils
+from yokadi.core.db import Task, TaskLock, Keyword, Recurrence, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -66,13 +67,23 @@ class TaskTestCase(unittest.TestCase):
 
         recurrence = self.session.query(Recurrence).one()
 
-        # Remove it, the keyword should no longer be associated with any task
-        # and the recurrence should be gone
+        # Pretend we edit the task description so that we have a TaskLock for
+        # this task
+        taskLockManager = dbutils.TaskLockManager(task)
+        taskLockManager.acquire()
+        lock = self.session.query(TaskLock).one()
+
+        # Remove it, the keyword should no longer be associated with any task,
+        # the recurrence and the lock should be gone
         tui.addInputAnswers("y")
         self.cmd.do_t_remove(str(task.id))
 
         self.assertEqual(keyword.tasks, [])
         self.assertEqual(list(self.session.query(Recurrence)), [])
+        self.assertEqual(list(self.session.query(TaskLock)), [])
+
+        # Should not crash
+        taskLockManager.release()
 
     def testMark(self):
         tui.addInputAnswers("y")

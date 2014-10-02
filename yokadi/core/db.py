@@ -140,6 +140,7 @@ class Task(Base):
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
     recurrence = relationship("Recurrence", cascade="all", backref="task")
+    lock = relationship("TaskLock", cascade="all", backref="task")
 
     def setKeywordDict(self, dct):
         """
