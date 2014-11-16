@@ -18,7 +18,7 @@ from sqlite3 import dbapi2 as sqlite
 
 def getTableList(cx):
     cursor = cx.cursor()
-    cursor.execute("select name from sqlite_master where type='table'")
+    cursor.execute("select name from sqlite_master where type='table' and name!='sqlite_sequence'")
     return [x[0] for x in cursor.fetchall()]
 
 
