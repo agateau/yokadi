@@ -34,7 +34,7 @@ from yokadi.core import utils
 # If database config key DB_VERSION differs from this one a database migration
 # is required
 DB_VERSION = 7
-DB_VERSION_KEY = u"DB_VERSION"
+DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
 FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
