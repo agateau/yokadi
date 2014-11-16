@@ -14,13 +14,10 @@ import tempfile
 import time
 import unicodedata
 import re
+import locale
 from getpass import getpass
 
 from yokadi.ycli import colors as C
-
-# Default user encoding. Used to decode all input strings
-# This is the central yokadi definition of encoding - this constant is imported from all other modules
-# Beware of circular import definition when add dependencies to this module
 
 # Number of seconds between checks for end of process
 PROC_POLL_INTERVAL = 0.5
@@ -57,8 +54,9 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
     @param prefix: temporary file prefix.
     @return: newText"""
+    encoding = locale.getpreferredencoding()
     def readFile(name):
-        with open(name, encoding='utf-8') as data:
+        with open(name, encoding=encoding) as data:
             return str(data.read())
 
     def waitProcess(proc):
@@ -78,7 +76,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     try:
         if lockManager:
             lockManager.acquire()
-        fl = open(name, "w", encoding='utf-8')
+        fl = open(name, "w", encoding=encoding)
         fl.write(text)
         fl.close()
         editor = os.environ.get("EDITOR", "vi")
