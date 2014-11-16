@@ -65,7 +65,7 @@ class Project(Base):
         for projectKeyword in self.projectKeywords:
             session.delete(projectKeyword)
 
-        for name, value in list(dct.items()):
+        for name, value in dct.items():
             keyword = session.query(Keyword).filter_by(name=name).one()
             session.add(ProjectKeyword(project=self, keyword=keyword, value=value))
 

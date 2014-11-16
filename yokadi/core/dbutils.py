@@ -31,7 +31,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         keywordDict = {}
 
     # Create missing keywords
-    if not createMissingKeywords(list(keywordDict.keys()), interactive=interactive):
+    if not createMissingKeywords(keywordDict.keys(), interactive=interactive):
         return None
 
     # Create missing project
