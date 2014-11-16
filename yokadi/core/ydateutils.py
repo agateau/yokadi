@@ -63,12 +63,14 @@ def guessTime(text):
     afternoon = False
     # We do not use the "%p" format to handle AM/PM because its behavior is
     # locale-dependent
-
-    suffix = text[-2:]
-    if suffix == "am":
-        text = text[:-2].strip()
-    elif suffix == "pm":
-        afternoon = True
+    if text[-1] == "m":
+        suffix = text[-2:]
+        if suffix == "am":
+            pass
+        elif suffix == "pm":
+            afternoon = True
+        else:
+            raise ValueError
         text = text[:-2].strip()
 
     out, fmt = testFormats(text, TIME_FORMATS)
