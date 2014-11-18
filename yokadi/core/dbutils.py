@@ -40,7 +40,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         return None
 
     # Create task
-    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title, description=u"", status=u"new")
+    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title, description="", status="new")
     session.add(task)
     task.setKeywordDict(keywordDict)
     session.merge(task)
@@ -53,7 +53,7 @@ def updateTask(task, projectName, title, keywordDict):
     Update an existing task, returns True if it went well, False if user
     canceled the update
     """
-    if not createMissingKeywords(keywordDict.keys()):
+    if not createMissingKeywords(list(keywordDict.keys())):
         return False
 
     project = getOrCreateProject(projectName)
@@ -99,7 +99,7 @@ def getOrCreateKeyword(keywordName, interactive=True):
             return None
         keyword = Keyword(name=keywordName)
         session.add(keyword)
-        print "Added keyword '%s'" % keywordName
+        print("Added keyword '%s'" % keywordName)
         return keyword
 
 
@@ -124,7 +124,7 @@ def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
 
     project = Project(name=projectName)
     session.add(project)
-    print "Added project '%s'" % projectName
+    print("Added project '%s'" % projectName)
     return project
 
 

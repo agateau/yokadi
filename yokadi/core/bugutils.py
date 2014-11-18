@@ -7,27 +7,27 @@ Bug related commands.
 """
 from yokadi.ycli import tui
 
-SEVERITY_PROPERTY_NAME = u"_severity"
-LIKELIHOOD_PROPERTY_NAME = u"_likelihood"
-BUG_PROPERTY_NAME = u"_bug"
+SEVERITY_PROPERTY_NAME = "_severity"
+LIKELIHOOD_PROPERTY_NAME = "_likelihood"
+BUG_PROPERTY_NAME = "_bug"
 PROPERTY_NAMES = SEVERITY_PROPERTY_NAME, LIKELIHOOD_PROPERTY_NAME, BUG_PROPERTY_NAME
 
 SEVERITY_LIST = [
-    (1, u"Documentation"),
-    (2, u"Localization"),
-    (3, u"Aesthetic issues"),
-    (4, u"Balancing: Enables degenerate usage strategies that harm the experience"),
-    (5, u"Minor usability: Impairs usability in secondary scenarios"),
-    (6, u"Major usability: Impairs usability in key scenarios"),
-    (7, u"Crash: Bug causes crash or data loss. Asserts in the Debug release"),
+    (1, "Documentation"),
+    (2, "Localization"),
+    (3, "Aesthetic issues"),
+    (4, "Balancing: Enables degenerate usage strategies that harm the experience"),
+    (5, "Minor usability: Impairs usability in secondary scenarios"),
+    (6, "Major usability: Impairs usability in key scenarios"),
+    (7, "Crash: Bug causes crash or data loss. Asserts in the Debug release"),
     ]
 
 LIKELIHOOD_LIST = [
-    (1, u"Will affect almost no one"),
-    (2, u"Will only affect a few users"),
-    (3, u"Will affect average number of users"),
-    (4, u"Will affect most users"),
-    (5, u"Will affect all users"),
+    (1, "Will affect almost no one"),
+    (2, "Will only affect a few users"),
+    (3, "Will affect average number of users"),
+    (4, "Will affect most users"),
+    (5, "Will affect all users"),
     ]
 
 

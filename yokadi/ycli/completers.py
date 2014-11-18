@@ -26,7 +26,7 @@ def getItemPropertiesStartingWith(item, field, text):
     @param text: The begining of the text as a str
     @return: list of matching strings"""
     session = db.getSession()
-    return [x.name for x in session.query(item).filter(field.like(unicode(text) + u"%"))]
+    return [x.name for x in session.query(item).filter(field.like(str(text) + "%"))]
 
 
 class ProjectCompleter(object):
@@ -71,10 +71,10 @@ def taskIdCompleter(cmd, text, line, begidx, endidx):
     # TODO: potential performance issue with lots of tasks, find a better way to do it
     session = db.getSession()
     tasks = [x for x in session.query(Task).filter(Task.status != 'done') if str(x.id).startswith(text)]
-    print
+    print()
     for task in tasks:
         # Move that in a renderer class ?
-        print "%s: %s / %s" % (task.id, task.project.name, task.title)
+        print("%s: %s / %s" % (task.id, task.project.name, task.title))
     return [str(x.id) for x in tasks]
 
 
@@ -83,7 +83,7 @@ def recurrenceCompleter(cmd, text, line, begidx, endidx):
     if position == 1:  # Task id
         return taskIdCompleter(cmd, text, line, begidx, endidx)
     elif position == 2:  # frequency
-        return [x for x in FREQUENCY.values() + ["None"] if x.lower().startswith(text.lower())]
+        return [x for x in list(FREQUENCY.values()) + ["None"] if x.lower().startswith(text.lower())]
     elif position == 3 and "weekly" in line.lower():
         return [str(x) for x in rrule.weekdays if str(x).lower().startswith(text.lower())]
 
@@ -93,6 +93,6 @@ def dueDateCompleter(cmd, text, line, begidx, endidx):
     if position == 1:  # Task id
         return taskIdCompleter(cmd, text, line, begidx, endidx)
     elif position == 2 and not text.startswith("+"):  # week day
-        return [str(x) for x in ydateutils.WEEKDAYS.keys() if str(x).lower().startswith(text.lower())]
+        return [str(x) for x in list(ydateutils.WEEKDAYS.keys()) if str(x).lower().startswith(text.lower())]
 
 # vi: ts=4 sw=4 et

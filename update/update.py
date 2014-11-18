@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 This script updates a Yokadi database to the latest version
@@ -37,12 +37,12 @@ def createWorkDb(fileName):
 
 def createFinalDb(workFileName, finalFileName):
     dumpFileName = "dump.sql"
-    print "Dumping into %s" % dumpFileName
-    dumpFile = file(dumpFileName, "w")
+    print("Dumping into %s" % dumpFileName)
+    dumpFile = open(dumpFileName, "w", encoding='utf-8')
     dump.dumpDatabase(workFileName, dumpFile)
     dumpFile.close()
 
-    print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
+    print("Restoring dump from %s into %s" % (dumpFileName, finalFileName))
     database = db.Database(finalFileName, True, updateMode=True)
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
@@ -67,10 +67,10 @@ def main():
 
     # Check version
     version = getVersion(dbFileName)
-    print "Found version %d" % version
+    print("Found version %d" % version)
 
     if version == db.DB_VERSION:
-        print "Nothing to do"
+        print("Nothing to do")
         return 0
 
     # Start import
@@ -80,10 +80,10 @@ def main():
     oldVersion = getVersion(workDbFileName)
     for version in range(oldVersion, db.DB_VERSION):
         scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
-        print "Running %s" % scriptFileName
+        print("Running %s" % scriptFileName)
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
-            print "Update failed."
+            print("Update failed.")
             return 2
 
     setVersion(workDbFileName, db.DB_VERSION)

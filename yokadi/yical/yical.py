@@ -11,16 +11,16 @@ import sys
 try:
     import icalendar
 except ImportError:
-    print "You don't have the icalendar package."
-    print "Get it on http://pypi.python.org/pypi/icalendar/"
-    print "Or use 'easy_install icalendar'"
+    print("You don't have the icalendar package.")
+    print("Get it on http://pypi.python.org/pypi/icalendar/")
+    print("Or use 'easy_install icalendar'")
     sys.exit(1)
 
 if not hasattr(icalendar.Calendar, "from_ical"):
     print("Your version of icalendar is outdated: you need icalendar > 3.0.")
     sys.exit(1)
 
-import BaseHTTPServer
+import http.server
 from threading import Thread
 import re
 
@@ -32,22 +32,22 @@ from yokadi.ycli import parseutils
 from yokadi.core.yokadiexception import YokadiException
 
 # UID pattern
-UID_PREFIX = u"yokadi"
-TASK_UID = UID_PREFIX + u"-task-%s"
+UID_PREFIX = "yokadi"
+TASK_UID = UID_PREFIX + "-task-%s"
 TASK_RE = re.compile(TASK_UID.replace("%s", "(\d+)"))
-PROJECT_UID = UID_PREFIX + u"-project-%s"
+PROJECT_UID = UID_PREFIX + "-project-%s"
 
 # Default project where new task are added
 # TODO: make this a configurable items via c_set
-INBOX_PROJECT = u"inbox"
+INBOX_PROJECT = "inbox"
 
 # Yokadi task <=> iCalendar VTODO attribute mapping
-YOKADI_ICAL_ATT_MAPPING = {u"title": u"summary",
-                           u"urgency": u"priority",
-                           u"creationDate": u"dtstart",
-                           u"dueDate": u"due",
-                           u"doneDate": u"completed",
-                           u"description": u"description"}
+YOKADI_ICAL_ATT_MAPPING = {"title": "summary",
+                           "urgency": "priority",
+                           "creationDate": "dtstart",
+                           "dueDate": "due",
+                           "doneDate": "completed",
+                           "description": "description"}
 
 
 def generateCal():
@@ -80,7 +80,7 @@ def createVTodoFromTask(task):
     vTodo["related-to"] = PROJECT_UID % task.project.id
 
     # Add standard attribute
-    for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
+    for yokadiAttribute, icalAttribute in list(YOKADI_ICAL_ATT_MAPPING.items()):
         attr = getattr(task, yokadiAttribute)
         if attr:
             if yokadiAttribute == "urgency":
@@ -92,7 +92,7 @@ def createVTodoFromTask(task):
     # Add categories from keywords
     categories = []
     if task.taskKeywords:
-        for name, value in task.getKeywordDict().items():
+        for name, value in list(task.getKeywordDict().items()):
             if value:
                 categories.append("%s=%s" % (name, value))
             else:
@@ -106,7 +106,7 @@ def updateTaskFromVTodo(task, vTodo):
     """Update a yokadi task with an ical VTODO object
     @param task: yokadi task (db.Task object)
     @param vTodo: ical VTODO (icalendar.Calendar.Todo object)"""
-    for yokadiAttribute, icalAttribute in YOKADI_ICAL_ATT_MAPPING.items():
+    for yokadiAttribute, icalAttribute in list(YOKADI_ICAL_ATT_MAPPING.items()):
         attr = vTodo.get(icalAttribute)
         if attr:
             # Convert ical type (vDates, vInt..) to sql alchemy understandable type (datetime, int...)
@@ -140,11 +140,11 @@ def updateTaskFromVTodo(task, vTodo):
         garbage, keywordFilters = parseutils.extractKeywords(" ".join(keywords))
         newKwDict = parseutils.keywordFiltersToDict(keywordFilters)
         if garbage:
-            print "Got garbage while parsing categories: %s" % garbage
-        dbutils.createMissingKeywords(newKwDict.keys(), interactive=False)
+            print("Got garbage while parsing categories: %s" % garbage)
+        dbutils.createMissingKeywords(list(newKwDict.keys()), interactive=False)
         task.setKeywordDict(newKwDict)
 
-class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
     newTask = {}  # Dict recording new task origin UID
 
@@ -163,7 +163,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if "UID" in vTodo:
                 try:
                     self._processVTodo(vTodo)
-                except YokadiException, e:
+                except YokadiException as e:
                     self.send_response(503, e)
 
         # Tell caller everything is ok
@@ -175,19 +175,19 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         if vTodo["UID"] in self.newTask:
             # This is a recent new task but remote ical calendar tool is not
             # aware of new Yokadi UID. Update it here to avoid duplicate new tasks
-            print "update UID to avoid duplicate task"
+            print("update UID to avoid duplicate task")
             vTodo["UID"] = TASK_UID % self.newTask[vTodo["UID"]]
 
         if vTodo["UID"].startswith(UID_PREFIX):
             # This is a yokadi Task.
             if vTodo["LAST-MODIFIED"].dt > vTodo["CREATED"].dt:
                 # Task has been modified
-                print "Modified task: %s" % vTodo["UID"]
+                print("Modified task: %s" % vTodo["UID"])
                 result = TASK_RE.match(vTodo["UID"])
                 if result:
                     id = result.group(1)
                     task = dbutils.getTaskFromId(id)
-                    print "Task found in yokadi db: %s" % task.title
+                    print("Task found in yokadi db: %s" % task.title)
                     updateTaskFromVTodo(task, vTodo)
                     session.merge(task)
                     session.commit()
@@ -195,7 +195,7 @@ class IcalHttpRequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     raise YokadiException("Task %s does exist in yokadi db " % id)
         else:
             # This is a new task
-            print "New task %s (%s)" % (vTodo["summary"], vTodo["UID"])
+            print("New task %s (%s)" % (vTodo["summary"], vTodo["UID"]))
             keywordDict = {}
             task = dbutils.addTask(INBOX_PROJECT, vTodo["summary"],
                                keywordDict, interactive=False)
@@ -220,9 +220,9 @@ class YokadiIcalServer(Thread):
 
     def run(self):
         """Method executed when the thread object start() method is called"""
-        print "IcalServer starting..."
-        icalServer = BaseHTTPServer.HTTPServer((self.address, self.port), IcalHttpRequestHandler)
+        print("IcalServer starting...")
+        icalServer = http.server.HTTPServer((self.address, self.port), IcalHttpRequestHandler)
         icalServer.serve_forever()
-        print "IcalServer crash. Oups !"
+        print("IcalServer crash. Oups !")
 
 # vi: ts=4 sw=4 et

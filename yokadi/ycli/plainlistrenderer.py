@@ -24,14 +24,14 @@ class PlainListRenderer(object):
         """
 
         if not self.first:
-            print >> self.out
+            print(file=self.out)
         else:
             self.first = False
-        print >> self.out, sectionName.encode(tui.ENCODING)
+        print(sectionName, file=self.out)
 
         for task in taskList:
             title = self.cryptoMgr.decrypt(task.title)
-            print >> self.out, (u"- " + title).encode(tui.ENCODING)
+            print(("- " + title), file=self.out)
 
     def end(self):
         pass

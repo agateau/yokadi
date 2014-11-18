@@ -15,7 +15,7 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
 
 - Unix or Linux system. Mac OS X and Windows should work but have not been
   tested yet.
-- Python 2.7.
+- Python 3.4.
 - iCalendar module (optional, for Yokadi Daemon only)
 - setproctitle module (optional, for Yokadi Daemon only)
 - SQLAlchemy 0.9.X.

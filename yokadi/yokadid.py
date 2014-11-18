@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 Yokadi daemon. Used to monitor due tasks and warn user.
@@ -14,13 +14,14 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from argparse import ArgumentParser
+import imp
 
 try:
     import setproctitle
 except ImportError:
-    print "You don't have the setproctitle package."
-    print "Get it on http://pypi.python.org/pypi/setproctitle/"
-    print "Or use 'easy_install setproctitle'"
+    print("You don't have the setproctitle package.")
+    print("Get it on http://pypi.python.org/pypi/setproctitle/")
+    print("Or use 'easy_install setproctitle'")
     sys.exit(1)
 
 from yokadi.core.daemon import Daemon
@@ -28,12 +29,8 @@ from yokadi.core import basedirs
 from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
-# Force default encoding to prefered encoding
-reload(sys)
-sys.setdefaultencoding(tui.ENCODING)
-
 from yokadi.core import db
-from yokadi.core.db import Config, Project, Task, getConfigKey
+from yokadi.core.db import Config, Project, Task, getConfigKey, DBHandler
 
 
 # Daemon polling delay (in seconds)
@@ -48,25 +45,25 @@ event = [True, ""]
 
 def sigTermHandler(signal, stack):
     """Handler when yokadid receive SIGTERM"""
-    print "Receive SIGTERM. Exiting"
-    print "End of yokadi Daemon"
+    print("Receive SIGTERM. Exiting")
+    print("End of yokadi Daemon")
     event[0] = False
     event[1] = "SIGTERM"
 
 
 def sigHupHandler(signal, stack):
     """Handler when yokadid receive SIGHUP"""
-    print "Receive SIGHUP. Reloading configuration"
+    print("Receive SIGHUP. Reloading configuration")
     event[0] = False
     event[1] = "SIGHUP"
 
 
 def eventLoop():
     """Main event loop"""
-    delta = timedelta(hours=float(getConfigKey(u"ALARM_DELAY")))
-    suspend = timedelta(hours=float(getConfigKey(u"ALARM_SUSPEND")))
-    cmdDelayTemplate = getConfigKey(u"ALARM_DELAY_CMD")
-    cmdDueTemplate = getConfigKey(u"ALARM_DUE_CMD")
+    delta = timedelta(hours=float(getConfigKey("ALARM_DELAY")))
+    suspend = timedelta(hours=float(getConfigKey("ALARM_SUSPEND")))
+    cmdDelayTemplate = getConfigKey("ALARM_DELAY_CMD")
+    cmdDueTemplate = getConfigKey("ALARM_DUE_CMD")
     session = db.getSession()
     # For the two following dict, task id is key, and value is (duedate, triggerdate)
     triggeredDelayTasks = {}
@@ -99,7 +96,7 @@ def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
             if now - triggeredTasks[task.id][1] < suspend:
                 # Task has been trigger recently, skip to next
                 continue
-        print "Task %s is due soon" % task.title
+        print("Task %s is due soon" % task.title)
         cmd = cmdTemplate.replace("{ID}", str(task.id))
         cmd = cmd.replace("{TITLE}", task.title.replace('"', '\"'))
         cmd = cmd.replace("{PROJECT}", task.project.name.replace('"', '\"'))
@@ -165,7 +162,7 @@ def createDirForFile(name):
     dirname = os.path.dirname(name)
     if os.path.exists(dirname):
         return
-    os.makedirs(dirname, 0700)
+    os.makedirs(dirname, 0o700)
 
 
 class YokadiDaemon(Daemon):
@@ -177,13 +174,13 @@ class YokadiDaemon(Daemon):
         filename = self.options.filename
         if not filename:
             filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
-            print "Using default database (%s)" % filename
+            print("Using default database (%s)" % filename)
 
         db.connectDatabase(filename, createIfNeeded=False)
 
         # Basic tests :
         if not (db.database.engine.has_table("Task") and db.database.engine.has_table("Config")):
-            print "Your database seems broken or not initialised properly. Start yokadi command line tool to do it"
+            print("Your database seems broken or not initialised properly. Start yokadi command line tool to do it")
             sys.exit(1)
 
         # Start ical http handler
@@ -197,7 +194,7 @@ class YokadiDaemon(Daemon):
                 eventLoop()
                 event[0] = True
         except KeyboardInterrupt:
-            print "\nExiting..."
+            print("\nExiting...")
 
 
 def main():

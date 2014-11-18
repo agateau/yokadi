@@ -46,10 +46,10 @@ scripts = ["bin/yokadi", "bin/yokadid"]
 
 # Version
 try:
-    version = file(join(root, "version")).readline().rstrip().rstrip("\n")
-except Exception, e:
-    print "Warning, cannot read version file (%s)" % e
-    print "Defaulting to 'snapshot'"
+    version = open(join(root, "version"), encoding='utf-8').readline().rstrip().rstrip("\n")
+except Exception as e:
+    print("Warning, cannot read version file (%s)" % e)
+    print("Defaulting to 'snapshot'")
     version = "snaphot"
 
 # Windows post install script

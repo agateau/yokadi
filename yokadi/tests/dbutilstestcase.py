@@ -26,7 +26,7 @@ class DbUtilsTestCase(unittest.TestCase):
         t1 = dbutils.addTask("x", "t1", {})
 
         task = dbutils.getTaskFromId(str(t1.id))
-        self.assertEquals(task, t1)
+        self.assertEqual(task, t1)
 
     def testGetOrCreateKeyword(self):
         # interactive

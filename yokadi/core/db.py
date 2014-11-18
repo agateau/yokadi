@@ -21,9 +21,9 @@ from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, Foreig
 try:
     from dateutil import rrule
 except ImportError:
-    print "You must install python-dateutil to use Yokadi"
-    print "This library is used for task recurrence"
-    print "Use 'pip install python-dateutil'"
+    print("You must install python-dateutil to use Yokadi")
+    print("This library is used for task recurrence")
+    print("Use 'pip install python-dateutil'")
     sys.exit(1)
 
 from yokadi.core.yokadiexception import YokadiException
@@ -34,7 +34,7 @@ from yokadi.core import utils
 # If database config key DB_VERSION differs from this one a database migration
 # is required
 DB_VERSION = 7
-DB_VERSION_KEY = u"DB_VERSION"
+DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
 FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
@@ -86,7 +86,7 @@ class Project(Base):
         Value is not displayed if none
         """
         result = []
-        for key, value in self.getKeywordDict().items():
+        for key, value in list(self.getKeywordDict().items()):
             if value:
                 result.append("%s=%s" % (key, value))
             else:
@@ -133,9 +133,9 @@ class Task(Base):
     creationDate = Column("creation_date", DateTime, nullable=False)
     dueDate = Column("due_date", DateTime, default=None)
     doneDate = Column("done_date", DateTime, default=None)
-    description = Column(Unicode, default=u"", nullable=False)
+    description = Column(Unicode, default="", nullable=False)
     urgency = Column(Integer, default=0, nullable=False)
-    status = Column(Enum(u"new", u"started", u"done"), default=u"new")
+    status = Column(Enum("new", "started", "done"), default="new")
     projectId = Column("project_id", Integer, ForeignKey("project.id"))
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
@@ -151,7 +151,7 @@ class Task(Base):
         for taskKeyword in self.taskKeywords:
             session.delete(taskKeyword)
 
-        for name, value in dct.items():
+        for name, value in list(dct.items()):
             keyword = session.query(Keyword).filter_by(name=name).one()
             session.add(TaskKeyword(task=self, keyword=keyword, value=value))
 
@@ -169,14 +169,14 @@ class Task(Base):
         """
         Returns all keywords as a string like "key1=value1, key2=value2..."
         """
-        return ", ".join(list(("%s=%s" % k for k in self.getKeywordDict().items())))
+        return ", ".join(list(("%s=%s" % k for k in list(self.getKeywordDict().items()))))
 
     def getUserKeywordsNameAsString(self):
         """
         Returns all keywords keys as a string like "key1, key2, key3...".
         Internal keywords (starting with _) are ignored.
         """
-        keywords = [k for k in self.getKeywordDict().keys() if not k.startswith("_")]
+        keywords = [k for k in list(self.getKeywordDict().keys()) if not k.startswith("_")]
         keywords.sort()
         if keywords:
             return ", ".join(keywords)
@@ -188,7 +188,7 @@ class Recurrence(Base):
     """Task recurrence definition"""
     __tablename__ = "recurrence"
     id = Column(Integer, primary_key=True)
-    rule = Column(Unicode, default=u"")
+    rule = Column(Unicode, default="")
 
     def getRrule(self):
         """Create rrule object from its Recurrence representation
@@ -282,14 +282,14 @@ class Database(object):
 
         if not os.path.exists(dbFileName) or memoryDatabase:
             if createIfNeeded:
-                print "Creating database"
+                print("Creating database")
                 self.createTables()
                 # Set database version according to current yokadi release
                 if not updateMode: # Update script add it from dump
-                    self.session.add(Config(name=DB_VERSION_KEY, value=unicode(DB_VERSION), system=True, desc=u"Database schema release number"))
+                    self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
                 self.session.commit()
             else:
-                print "Database file (%s) does not exist or is not readable. Exiting" % dbFileName
+                print("Database file (%s) does not exist or is not readable. Exiting" % dbFileName)
                 sys.exit(1)
 
         if not updateMode:
@@ -312,7 +312,7 @@ class Database(object):
     def setVersion(self, version):
         assert self.engine.has_table("config")
         instance = self.session.query(Config).filter_by(name=DB_VERSION_KEY).one()
-        instance.value = unicode(version)
+        instance.value = str(version)
         self.session.add(instance)
         self.session.commit()
 
@@ -323,24 +323,25 @@ class Database(object):
             sharePath = os.path.abspath(utils.shareDirPath())
             tui.error("Your database version is %d but Yokadi wants version %d." \
                 % (version, DB_VERSION))
-            print "Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
-                    sharePath
-            print "See %s/update/README.markdown for details" % sharePath
+            print("Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
+                    sharePath)
+            print("See %s/update/README.markdown for details" % sharePath)
             sys.exit(1)
 
 
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig = {
-        u"ALARM_DELAY_CMD" : (u'''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
-                             u"Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        u"ALARM_DUE_CMD"   : (u'''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''', False,
-                             u"Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        u"ALARM_DELAY"     : (u"8", False, u"Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
-        u"ALARM_SUSPEND"   : (u"1", False, u"Delay (in hours) before an alarm trigger again"),
-        u"PURGE_DELAY"     : (u"90", False, u"Default delay (in days) for the t_purge command"),
-        u"PASSPHRASE_CACHE": (u"1", False, u"Keep passphrase in memory till Yokadi is started (0 is false else true"),
+        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
+                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''', False,
+                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
+        "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again"),
+        "PURGE_DELAY"     : ("90", False, "Default delay (in days) for the t_purge command"),
+        "PASSPHRASE_CACHE": ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
         }
+
     session = getSession()
     for name, value in defaultConfig.items():
         if session.query(Config).filter_by(name=name).count() == 0:

@@ -25,14 +25,14 @@ class ProjectTestCase(unittest.TestCase):
 
     def testAdd(self):
         tui.addInputAnswers("y")
-        self.cmd.do_p_add(u"p1")
+        self.cmd.do_p_add("p1")
 
         tui.addInputAnswers("y", "y")
-        self.cmd.do_p_add(u"p2 @kw1 @kw2=12")
+        self.cmd.do_p_add("p2 @kw1 @kw2=12")
 
         projects = self.session.query(Project).all()
         result = [x.name for x in projects]
-        expected = [u"p1", u"p2"]
+        expected = ["p1", "p2"]
         self.assertEqual(result, expected)
 
         kwDict = self.session.query(Project).filter_by(id=2).one().getKeywordDict()
@@ -40,22 +40,22 @@ class ProjectTestCase(unittest.TestCase):
 
     def testEdit(self):
         # Create project p1 and rename it to p2
-        self.cmd.do_p_add(u"p1")
+        self.cmd.do_p_add("p1")
         project = self.session.query(Project).filter_by(id=1).one()
-        self.assertEqual(project.name, u"p1")
+        self.assertEqual(project.name, "p1")
 
         tui.addInputAnswers("p2")
-        self.cmd.do_p_edit(u"p1")
-        self.assertEqual(project.name, u"p2")
+        self.cmd.do_p_edit("p1")
+        self.assertEqual(project.name, "p2")
 
         # Create project p3 and try to rename it to p2
-        self.cmd.do_p_add(u"p3")
-        project = self.session.query(Project).filter_by(name=u"p3").one()
-        self.assertEqual(project.name, u"p3")
+        self.cmd.do_p_add("p3")
+        project = self.session.query(Project).filter_by(name="p3").one()
+        self.assertEqual(project.name, "p3")
 
-        tui.addInputAnswers(u"p2")
-        self.assertRaises(YokadiException, self.cmd.do_p_edit, u"p3")
-        self.assertEqual(project.name, u"p3")
+        tui.addInputAnswers("p2")
+        self.assertRaises(YokadiException, self.cmd.do_p_edit, "p3")
+        self.assertEqual(project.name, "p3")
 
     def testRemove(self):
         # Create project p1, with one project keyword and one associated task

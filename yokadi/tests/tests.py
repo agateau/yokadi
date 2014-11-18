@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 Yokadi unit tests
@@ -20,7 +20,7 @@ try:
     hasIcalendar = True
 except ImportError:
     hasIcalendar = False
-    print "icalendar is not installed, some tests won't be run"
+    print("icalendar is not installed, some tests won't be run")
 
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
@@ -37,6 +37,7 @@ if hasIcalendar:
 from keywordtestcase import KeywordTestCase
 from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
+from helptestcase import HelpTestCase
 
 
 def main():

@@ -69,22 +69,22 @@ def extractKeywords(line):
         else:
             remainingText.append(token)
 
-    return (u" ".join(remainingText), keywordFilters)
+    return (" ".join(remainingText), keywordFilters)
 
 
 def createLine(projectName, title, keywordDict):
     tokens = []
-    for keywordName, value in keywordDict.items():
+    for keywordName, value in list(keywordDict.items()):
         if value:
-            tokens.append(u"@" + keywordName + "=" + str(value))
+            tokens.append("@" + keywordName + "=" + str(value))
         else:
-            tokens.append(u"@" + keywordName)
+            tokens.append("@" + keywordName)
 
     if projectName:
         tokens.insert(0, projectName)
 
     tokens.append(title)
-    return u" ".join(tokens)
+    return " ".join(tokens)
 
 
 def keywordFiltersToDict(keywordFilters):

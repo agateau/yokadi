@@ -12,7 +12,6 @@ import subprocess
 import sys
 import tempfile
 import time
-import locale
 import unicodedata
 import re
 from getpass import getpass
@@ -22,7 +21,6 @@ from yokadi.ycli import colors as C
 # Default user encoding. Used to decode all input strings
 # This is the central yokadi definition of encoding - this constant is imported from all other modules
 # Beware of circular import definition when add dependencies to this module
-ENCODING = locale.getpreferredencoding()
 
 # Number of seconds between checks for end of process
 PROC_POLL_INTERVAL = 0.5
@@ -53,14 +51,15 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text, onChanged=None, lockManager=None, prefix=u"yokadi-"):
+def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     """Edit text with external editor
     @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
     @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
     @param prefix: temporary file prefix.
     @return: newText"""
     def readFile(name):
-        return unicode(file(name).read(), ENCODING)
+        with open(name, encoding='utf-8') as data:
+            return str(data.read())
 
     def waitProcess(proc):
         start = time.time()
@@ -69,17 +68,18 @@ def editText(text, onChanged=None, lockManager=None, prefix=u"yokadi-"):
             if not proc.returncode is None:
                 return
             time.sleep(PROC_POLL_INTERVAL)
-    prefix = unicodedata.normalize('NFKD', prefix).encode('ascii', 'ignore')
     prefix = NON_SIMPLE_ASCII.sub("-", prefix)
     prefix = MULTIPLE_DASH.sub("-", prefix)
+    prefix = unicodedata.normalize('NFKD', prefix)
+
     (fd, name) = tempfile.mkstemp(suffix=".md", prefix=prefix)
     if text is None:
         text = ""
     try:
         if lockManager:
             lockManager.acquire()
-        fl = file(name, "w")
-        fl.write(text.encode(ENCODING, "replace"))
+        fl = open(name, "w", encoding='utf-8')
+        fl.write(text)
         fl.close()
         editor = os.environ.get("EDITOR", "vi")
         proc = subprocess.Popen([editor, name])
@@ -111,7 +111,7 @@ def reinjectInRawInput(line):
     # Set readline.pre_input_hook to feed it with our line
     # (Code copied from yagtd)
     def pre_input_hook():
-        readline.insert_text(line.encode(ENCODING))
+        readline.insert_text(line)
         readline.redisplay()
 
         # Unset the hook again
@@ -134,7 +134,7 @@ def editLine(line, prompt="edit> ", echo=True):
     else:
         try:
             if echo:
-                line = raw_input(prompt)
+                line = input(prompt)
             else:
                 line = getpass(prompt)
         except EOFError:
@@ -148,12 +148,12 @@ def editLine(line, prompt="edit> ", echo=True):
         if length > 0:
             readline.remove_history_item(length - 1)
 
-    return line.decode(ENCODING)
+    return line
 
 
 def selectFromList(prompt, lst, default):
     for score, caption in lst:
-        print "%d: %s" % (score, caption)
+        print("%d: %s" % (score, caption))
     minStr = str(lst[0][0])
     maxStr = str(lst[-1][0])
     if default is None:
@@ -203,7 +203,7 @@ def renderFields(fields):
     maxWidth = max([len(x) for x, y in fields])
     format = C.BOLD + "%" + str(maxWidth) + "s" + C.RESET + ": %s"
     for caption, value in fields:
-        print >> stdout, format % (caption, value)
+        print(format % (caption, value), file=stdout)
 
 
 def warnDeprecated(old, new):
@@ -216,15 +216,15 @@ def warnDeprecated(old, new):
 
 
 def error(message):
-    print >> stderr, C.BOLD + C.RED + "Error: %s" % message + C.RESET
+    print(C.BOLD + C.RED + "Error: %s" % message + C.RESET, file=stderr)
 
 
 def warning(message):
-    print >> stderr, C.RED + "Warning: " + C.RESET + message
+    print(C.RED + "Warning: " + C.RESET + message, file=stderr)
 
 
 def info(message):
-    print >> stderr, C.CYAN + "Info: " + C.RESET + message
+    print(C.CYAN + "Info: " + C.RESET + message, file=stderr)
 
 
 def addInputAnswers(*answers):

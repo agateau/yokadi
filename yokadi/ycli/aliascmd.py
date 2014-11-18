@@ -16,7 +16,7 @@ from sqlalchemy.orm.exc import NoResultFound
 class AliasCmd(object):
     def __init__(self):
         try:
-            self.aliases = eval(db.getConfigKey(u"ALIASES", environ=False))
+            self.aliases = eval(db.getConfigKey("ALIASES", environ=False))
         except NoResultFound:
             self.aliases = {}
         except Exception:
@@ -26,10 +26,10 @@ class AliasCmd(object):
     def do_a_list(self, line):
         """List all aliases."""
         if self.aliases:
-            for name, command in self.aliases.items():
-                print C.BOLD + name.ljust(10) + C.RESET + "=> " + command
+            for name, command in list(self.aliases.items()):
+                print(C.BOLD + name.ljust(10) + C.RESET + "=> " + command)
         else:
-            print "No alias defined. Use a_add to create one"
+            print("No alias defined. Use a_add to create one")
 
     def do_a_add(self, line):
         """Add an alias on a command
@@ -43,12 +43,12 @@ class AliasCmd(object):
         command = " ".join(tokens[1:])
         self.aliases.update({name: command})
         try:
-            aliases = session.query(db.Config).filter_by(name=u"ALIASES").one()
+            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
         except NoResultFound:
             # Config entry does not exist. Create it.
-            aliases = db.Config(name=u"ALIASES", value=u"{}", system=True, desc=u"User command aliases")
+            aliases = db.Config(name="ALIASES", value="{}", system=True, desc="User command aliases")
 
-        aliases.value = unicode(repr(self.aliases))
+        aliases.value = str(repr(self.aliases))
         session.add(aliases)
         session.commit()
 
@@ -57,8 +57,8 @@ class AliasCmd(object):
         if line in self.aliases:
             session = db.getSession()
             del self.aliases[line]
-            aliases = session.query(db.Config).filter_by(name=u"ALIASES").one()
-            aliases.value = unicode(repr(self.aliases))
+            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
+            aliases.value = str(repr(self.aliases))
             session.add(aliases)
             session.commit()
         else:

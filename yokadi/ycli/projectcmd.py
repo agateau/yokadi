@@ -40,7 +40,7 @@ class ProjectCmd(object):
         """Add new project. Will prompt to create keywords if they do not exist.
         p_add <projectName> [@<keyword1>] [@<keyword2>]"""
         if not line:
-            print "Give at least a project name !"
+            print("Give at least a project name !")
             return
         projectName, garbage, keywordDict = parseutils.parseLine(line)
         session = db.getSession()
@@ -53,8 +53,8 @@ class ProjectCmd(object):
         except IntegrityError:
             session.rollback()
             raise YokadiException("A project named %s already exists. Please find another name" % projectName)
-        print "Added project '%s'" % projectName
-        if not dbutils.createMissingKeywords(keywordDict.keys()):
+        print("Added project '%s'" % projectName)
+        if not dbutils.createMissingKeywords(list(keywordDict.keys())):
             return None
         project.setKeywordDict(keywordDict)
         session.merge(project)
@@ -79,7 +79,7 @@ class ProjectCmd(object):
         projectName, garbage, keywordDict = parseutils.parseLine(line)
         if garbage:
             raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
-        if not dbutils.createMissingKeywords(keywordDict.keys()):
+        if not dbutils.createMissingKeywords(list(keywordDict.keys())):
             return
         try:
             project.name = projectName
@@ -100,7 +100,7 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print "%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active)
+            print("%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active))
 
     def do_p_set_active(self, line):
         """Activate the given project"""
@@ -140,7 +140,7 @@ class ProjectCmd(object):
                 return
         session.delete(project)
         session.commit()
-        print "Project removed"
+        print("Project removed")
     complete_p_remove = ProjectCompleter(1)
 
 # vi: ts=4 sw=4 et
