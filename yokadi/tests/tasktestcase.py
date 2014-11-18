@@ -15,7 +15,8 @@ from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
-from yokadi.core.db import Task, setDefaultConfig
+from yokadi.core import dbutils
+from yokadi.core.db import Task, TaskLock, Keyword, Recurrence, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -53,6 +54,36 @@ class TaskTestCase(unittest.TestCase):
         tui.addInputAnswers("a Secret passphrase")
         self.cmd.do_t_add("-c x encrypted t1")
         self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
+
+    def testRemove(self):
+        # Create a recurrent task with one keyword
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_t_add("x @kw bla")
+        task = self.session.query(Task).one()
+        self.cmd.do_t_recurs("1 daily 10:00")
+
+        keyword = self.session.query(Keyword).filter_by(name="kw").one()
+        self.assertEqual(keyword.tasks, [task])
+
+        recurrence = self.session.query(Recurrence).one()
+
+        # Pretend we edit the task description so that we have a TaskLock for
+        # this task
+        taskLockManager = dbutils.TaskLockManager(task)
+        taskLockManager.acquire()
+        lock = self.session.query(TaskLock).one()
+
+        # Remove it, the keyword should no longer be associated with any task,
+        # the recurrence and the lock should be gone
+        tui.addInputAnswers("y")
+        self.cmd.do_t_remove(str(task.id))
+
+        self.assertEqual(keyword.tasks, [])
+        self.assertEqual(list(self.session.query(Recurrence)), [])
+        self.assertEqual(list(self.session.query(TaskLock)), [])
+
+        # Should not crash
+        taskLockManager.release()
 
     def testMark(self):
         tui.addInputAnswers("y")

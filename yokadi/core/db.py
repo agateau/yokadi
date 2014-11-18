@@ -47,7 +47,8 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
-    projectKeywords = relationship("ProjectKeyword", backref="project")
+    projectKeywords = relationship("ProjectKeyword", cascade="all", backref="project")
+    tasks = relationship("Task", cascade="all", backref="project")
 
     def __repr__(self):
         keywords = self.getKeywordsAsString()
@@ -98,6 +99,7 @@ class Keyword(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     tasks = association_proxy("taskKeywords", "task")
+    projects = association_proxy("projectKeywords", "project")
 
     def __repr__(self):
         return self.name
@@ -135,10 +137,10 @@ class Task(Base):
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum(u"new", u"started", u"done"), default=u"new")
     projectId = Column("project_id", Integer, ForeignKey("project.id"))
-    project = relationship("Project", backref="tasks")
-    taskKeywords = relationship("TaskKeyword", backref="task")
+    taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
-    recurrence = relationship("Recurrence")
+    recurrence = relationship("Recurrence", cascade="all", backref="task")
+    lock = relationship("TaskLock", cascade="all", backref="task")
 
     def setKeywordDict(self, dct):
         """
@@ -226,7 +228,6 @@ class TaskLock(Base):
     __tablename__ = "task_lock"
     id = Column(Integer, primary_key=True)
     taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True)
-    task = relationship("Task")
     pid = Column(Integer, default=None)
     updateDate = Column("update_date", DateTime, default=None)
 
