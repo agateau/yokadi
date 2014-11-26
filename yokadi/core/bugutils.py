@@ -35,7 +35,7 @@ def computeUrgency(keywordDict):
     likelihood = keywordDict[LIKELIHOOD_PROPERTY_NAME]
     severity = keywordDict[SEVERITY_PROPERTY_NAME]
     maxUrgency = LIKELIHOOD_LIST[-1][0] * SEVERITY_LIST[-1][0]
-    return 100 * likelihood * severity / maxUrgency
+    return int(100 * likelihood * severity / maxUrgency)
 
 
 def editBugKeywords(keywordDict):
