@@ -38,6 +38,7 @@ from keywordtestcase import KeywordTestCase
 from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
 from helptestcase import HelpTestCase
+from conftestcase import ConfTestCase
 
 
 def main():
