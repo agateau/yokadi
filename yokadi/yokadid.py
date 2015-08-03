@@ -30,7 +30,7 @@ from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
 from yokadi.core import db
-from yokadi.core.db import Config, Project, Task, getConfigKey, DBHandler
+from yokadi.core.db import Config, Project, Task, getConfigKey
 
 
 # Daemon polling delay (in seconds)
