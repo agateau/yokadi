@@ -177,9 +177,10 @@ class YokadiDaemon(Daemon):
             print("Using default database (%s)" % filename)
 
         db.connectDatabase(filename, createIfNeeded=False)
+        session = db.getSession()
 
         # Basic tests :
-        if not (db.database.engine.has_table("Task") and db.database.engine.has_table("Config")):
+        if not len(session.query(db.Config).all()) >=1:
             print("Your database seems broken or not initialised properly. Start yokadi command line tool to do it")
             sys.exit(1)
 
