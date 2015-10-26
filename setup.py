@@ -56,10 +56,6 @@ except Exception as e:
 if "win" in " ".join(sys.argv[1:]):
     scripts.append("w32_postinst.py")
 
-requirements = ['sqlalchemy', 'dateutils']
-if sys.version_info < (2, 7):
-    requirements.append('argparse')
-
 # Go for setup
 setup(name="yokadi",
       version=version,
@@ -74,7 +70,10 @@ setup(name="yokadi",
         "yokadi.ycli",
         "yokadi.yical",
       ],
-      install_requires=requirements,
+      install_requires=[
+        "sqlalchemy",
+        "dateutils",
+      ],
       scripts=scripts,
       data_files=data_files
       )
