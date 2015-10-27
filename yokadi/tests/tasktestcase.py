@@ -210,30 +210,21 @@ class TaskTestCase(unittest.TestCase):
             self.cmd.do_t_list(line)
 
     def testTfilter(self):
-        tui.addInputAnswers("y")
-        self.cmd.do_t_add("x t1")
-        tui.addInputAnswers("y", "y")
-        self.cmd.do_t_add("x @kw1 @kw2=12 t2")
-        tui.addInputAnswers("y")
-        self.cmd.do_t_add("y t3")
+        t1 = dbutils.addTask("x", "t1", interactive=False)
+        t2 = dbutils.addTask("x", "t2", keywordDict={"kw1": None, "kw2": 12}, interactive=False)
+        t3 = dbutils.addTask("y", "t3", interactive=False)
 
-        for filter in ("@kw1", "x", "x @kw1", "none"):
+        testData = [
+            ("@kw1", {"x": [t2]}),
+            ("x", {"x": [t1, t2]}),
+            ("x @kw1", {"x": [t2]}),
+            ("none", {"x": [t1, t2], "y": [t3]}),
+        ]
+        for filter, expectedTaskDict in testData:
             self.cmd.do_t_filter(filter)
-            out = StringIO()
-            oldstdout = sys.stdout
-            tui.stdout = out
-            self.cmd.do_t_list("")
-            self.assertTrue("t2" in out.getvalue())
-            if filter in ("x", "none"):
-                self.assertTrue("t1" in out.getvalue())
-            else:
-                self.assertFalse("t1" in out.getvalue())
-            if filter == "none":
-                self.assertTrue("t3" in out.getvalue())
-            else:
-                self.assertFalse("t3" in out.getvalue())
-
-            tui.stdout = oldstdout
+            renderer = testutils.TestRenderer()
+            self.cmd.do_t_list("", renderer=renderer)
+            self.assertEqual(renderer.taskDict, expectedTaskDict)
 
         self.assertRaises(YokadiException, self.cmd.do_t_filter, "")
 
