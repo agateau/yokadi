@@ -562,7 +562,7 @@ class TaskCmd(object):
             if len(hiddenProjectNames) > 0:
                 tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
-    def do_t_list(self, line):
+    def do_t_list(self, line, renderer=None):
 
         def selectRendererClass():
             if args.format != "auto":
@@ -623,8 +623,9 @@ class TaskCmd(object):
             out = tui.stdout
 
         # Instantiate renderer
-        rendererClass = selectRendererClass()
-        renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
+        if renderer is None:
+            rendererClass = selectRendererClass()
+            renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
 
         # Fill the renderer
         self._renderList(renderer, projectList, filters, order, limit, args.keyword)

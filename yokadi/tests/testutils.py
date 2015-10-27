@@ -13,4 +13,18 @@ def multiLinesAssertEqual(test, str1, str2):
         line1, line2 = lines
         test.assertEqual(line1, line2, "Error line %d:\n%r\n!=\n%r" % (row + 1, line1, line2))
     test.assertEqual(len(lst1), len(lst2))
+
+
+class TestRenderer(object):
+    """
+    A fake renderer, which stores all rendered tasks in taskDict
+    """
+    def __init__(self):
+        self.taskDict = {}
+
+    def addTaskList(self, sectionName, taskList):
+        self.taskDict[sectionName] = taskList
+
+    def end(self):
+        pass
 # vi: ts=4 sw=4 et
