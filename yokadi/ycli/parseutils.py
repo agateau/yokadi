@@ -8,6 +8,7 @@ Parse utilities. Used to manipulate command line text.
 """
 import re
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
 from sqlalchemy.sql import text
 
 from yokadi.ycli import tui
@@ -113,7 +114,7 @@ class KeywordFilter(object):
         self.name = ""  # Keyword name
         self.value = ""  # Keyword value
         self.negative = False  # Negative filter
-        self.valueOperator = "="  # Operator to compare value
+        self.valueOperator = None  # Operator to compare value
         self.session = db.getSession()
 
         if filterLine:
@@ -130,44 +131,27 @@ class KeywordFilter(object):
         else:
             return prefix + self.name
 
-    def filter(self):
-        """Return a filter in SQL Alchemy format"""
-        taskValueFilter = text("1 = 1")
-        projectValueFilter = text("1 = 1")
-        if self.name:
-            if self.value:
-                if self.valueOperator == "=":
-                    taskValueFilter = (TaskKeyword.value == self.value)
-                    projectValueFilter = (ProjectKeyword.value == self.value)
-                elif self.valueOperator == "!=":
-                    taskValueFilter = (TaskKeyword.value != self.value)
-                    projectValueFilter = (ProjectKeyword.value != self.value)
-                # TODO: handle also <, >, =< and >=
+    def apply(self, taskList):
+        """Apply keyword filters to taskList
+        @return: a new taskList"""
+        assert self.name, "Cannot call KeywordFilter.applyFilter to an empty KeywordFilter"
 
-            taskKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
-                                                                 TaskKeyword.keywordId == Keyword.id,
-                                                                 TaskKeyword.taskId == Task.id,
-                                                                 taskValueFilter).values(Task.id)
-            projectKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
-                                                                    ProjectKeyword.keywordId == Keyword.id,
-                                                                    ProjectKeyword.projectId == Project.id,
-                                                                    Project.id == Task.project,
-                                                                    projectValueFilter).values(Task.id)
+        keywordAlias = aliased(Keyword)
+        taskKeywordAlias = aliased(TaskKeyword)
+        taskList = taskList.outerjoin(taskKeywordAlias, Task.taskKeywords)
+        taskList = taskList.outerjoin(keywordAlias, taskKeywordAlias.keyword)
 
-            taskKeywordTaskIDs = list(taskKeywordTaskIDs)
-            projectKeywordTaskIDs = list(projectKeywordTaskIDs)
-            if len(taskKeywordTaskIDs) == 0:
-                taskInKeywords = text("1 <> 1")  # Use subtitue condition as SQLA protest again IN clause with empty list
-            else:
-                taskInKeywords = Task.id.in_([i[0] for i in taskKeywordTaskIDs])
-            if len(projectKeywordTaskIDs) == 0:
-                projectInKeywords = text("1 <> 1")  # See above comment
-            else:
-                projectInKeywords = Task.id.in_([i[0] for i in projectKeywordTaskIDs])
-            if self.negative:
-                return and_(~taskInKeywords, ~projectInKeywords)
-            else:
-                return or_(taskInKeywords, projectInKeywords)
+        if self.negative:
+            filter = or_(keywordAlias.name == None, ~keywordAlias.name.like(self.name))
+        else:
+            filter = keywordAlias.name.like(self.name)
+            if self.valueOperator == "=":
+                filter = and_(filter, taskKeywordAlias.value == self.value)
+            elif self.valueOperator == "!=":
+                filter = and_(filter, taskKeywordAlias.value != self.value)
+            # TODO: handle also <, >, =< and >=
+
+        return taskList.filter(filter)
 
     def parse(self, line):
         """Parse given line to create a keyword filter"""

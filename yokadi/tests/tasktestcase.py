@@ -216,6 +216,7 @@ class TaskTestCase(unittest.TestCase):
 
         testData = [
             ("@kw1", {"x": [t2]}),
+            ("@kw1 @kw2", {"x": [t2]}),
             ("x", {"x": [t1, t2]}),
             ("x @kw1", {"x": [t2]}),
             ("none", {"x": [t1, t2], "y": [t3]}),
@@ -224,7 +225,9 @@ class TaskTestCase(unittest.TestCase):
             self.cmd.do_t_filter(filter)
             renderer = testutils.TestRenderer()
             self.cmd.do_t_list("", renderer=renderer)
-            self.assertEqual(renderer.taskDict, expectedTaskDict)
+            self.assertEqual(renderer.taskDict.keys(), expectedTaskDict.keys())
+            for key in renderer.taskDict.keys():
+                self.assertEqual([x.title for x in renderer.taskDict[key]], [x.title for x in expectedTaskDict[key]])
 
         self.assertRaises(YokadiException, self.cmd.do_t_filter, "")
 

@@ -197,4 +197,16 @@ class TaskLockManager:
             self.session.delete(lock)
             self.session.commit()
 
+
+class DbFilter(object):
+    """
+    Light wrapper around SQL Alchemy filters. Makes it possible to have the
+    same interface as parseutils.KeywordFilter
+    """
+    def __init__(self, condition):
+        self.condition = condition
+
+    def apply(self, lst):
+        return lst.filter(self.condition)
+
 # vi: ts=4 sw=4 et
