@@ -23,7 +23,7 @@ from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
-from yokadi.core.dbutils import DbFilter
+from yokadi.core.dbutils import DbFilter, KeywordFilter
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.ycli.textlistrenderer import TextListRenderer
 from yokadi.ycli.xmllistrenderer import XmlListRenderer
@@ -587,7 +587,7 @@ class TaskCmd(object):
         args, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
-        filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD))
+        filters.append(KeywordFilter(NOTE_KEYWORD, negative=True))
 
         # Handle t_list specific options
         order = [desc(Task.urgency), Task.creationDate]
@@ -661,7 +661,7 @@ class TaskCmd(object):
         if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
-        filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD))
+        filters.append(KeywordFilter(NOTE_KEYWORD))
         order = [Task.creationDate, ]
         renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
