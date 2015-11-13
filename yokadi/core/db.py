@@ -10,6 +10,7 @@ import os
 import sys
 from pickle import loads, dumps
 from datetime import datetime
+from uuid import uuid1
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -40,6 +41,10 @@ DB_VERSION_KEY = "DB_VERSION"
 FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
 Base = declarative_base()
+
+
+def uuidGenerator():
+    return str(uuid1())
 
 
 class Project(Base):
@@ -79,6 +84,7 @@ class TaskKeyword(Base):
 class Task(Base):
     __tablename__ = "task"
     id = Column(Integer, primary_key=True)
+    uuid = Column(Unicode, default=uuidGenerator, nullable=False)
     title = Column(Unicode)
     creationDate = Column("creation_date", DateTime, nullable=False)
     dueDate = Column("due_date", DateTime, default=None)

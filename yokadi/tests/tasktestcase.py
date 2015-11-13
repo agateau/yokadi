@@ -42,6 +42,8 @@ class TaskTestCase(unittest.TestCase):
         result = [x.title for x in tasks]
         expected = ["t1", "t2"]
         self.assertEqual(result, expected)
+        for x in tasks:
+            self.assert_(x.uuid)
 
         kwDict = self.session.query(Task).get(2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))

@@ -6,8 +6,8 @@ Database utilities.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-from datetime import datetime, timedelta
 import os
+from datetime import datetime, timedelta
 
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
@@ -27,8 +27,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
     @param interactive: Ask user before creating project (this is the default)
     @type interactive: Bool
     @returns : Task instance on success, None if cancelled."""
-    session = db.getSession(
-                                   )
+    session = db.getSession()
     if keywordDict is None:
         keywordDict = {}
 
@@ -42,7 +41,11 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         return None
 
     # Create task
-    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title, description="", status="new")
+    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0),
+                project=project,
+                title=title,
+                description="",
+                status="new")
     session.add(task)
     task.setKeywordDict(keywordDict)
     session.merge(task)
