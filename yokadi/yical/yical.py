@@ -61,7 +61,7 @@ def generateCal():
     for project in session.query(Project).filter(Project.active == True):
         vTodo = icalendar.Todo()
         vTodo.add("summary", project.name)
-        vTodo["uid"] = PROJECT_UID % project.id
+        vTodo["uid"] = PROJECT_UID % project.name
         cal.add_component(vTodo)
     # Add tasks
     for task in session.query(Task).filter(Task.status != "done"):
@@ -77,7 +77,7 @@ def createVTodoFromTask(task):
     @return: ical VTODO (icalendar.Calendar.Todo object)"""
     vTodo = icalendar.Todo()
     vTodo["uid"] = TASK_UID % task.id
-    vTodo["related-to"] = PROJECT_UID % task.project.id
+    vTodo["related-to"] = PROJECT_UID % task.project.name
 
     # Add standard attribute
     for yokadiAttribute, icalAttribute in list(YOKADI_ICAL_ATT_MAPPING.items()):
