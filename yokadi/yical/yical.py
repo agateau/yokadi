@@ -92,7 +92,7 @@ def createVTodoFromTask(task):
     # Add categories from keywords
     categories = []
     if task.taskKeywords:
-        for name, value in list(task.getKeywordDict().items()):
+        for name, value in sorted(task.getKeywordDict().items()):
             if value:
                 categories.append("%s=%s" % (name, value))
             else:
