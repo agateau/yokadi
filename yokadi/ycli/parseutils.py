@@ -39,6 +39,16 @@ def parseParameters(line):
     return (parameters, " ".join(text))
 
 
+def parseProjectName(line):
+    """Parse line, check it is a valid project name and return it
+    @return: the project name
+    """
+    line = line.strip()
+    if " " in line:
+        raise YokadiException("Project name cannot contain spaces")
+    return line
+
+
 def parseLine(line):
     """Parse line of form:
     project some text @keyword1 @keyword2=12 some other text

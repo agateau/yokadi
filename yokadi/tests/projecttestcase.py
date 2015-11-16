@@ -26,17 +26,12 @@ class ProjectTestCase(unittest.TestCase):
     def testAdd(self):
         tui.addInputAnswers("y")
         self.cmd.do_p_add("p1")
-
-        tui.addInputAnswers("y", "y")
-        self.cmd.do_p_add("p2 @kw1 @kw2=12")
+        self.cmd.do_p_add("p2")
 
         projects = self.session.query(Project).all()
         result = [x.name for x in projects]
         expected = ["p1", "p2"]
         self.assertEqual(result, expected)
-
-        kwDict = self.session.query(Project).filter_by(id=2).one().getKeywordDict()
-        self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
     def testEdit(self):
         # Create project p1 and rename it to p2
@@ -58,22 +53,16 @@ class ProjectTestCase(unittest.TestCase):
         self.assertEqual(project.name, "p3")
 
     def testRemove(self):
-        # Create project p1, with one project keyword and one associated task
+        # Create project p1 with one associated task
         tui.addInputAnswers("y")
-        self.cmd.do_p_add("p1 @kw")
+        self.cmd.do_p_add("p1")
         project = self.session.query(Project).one()
         task = dbutils.addTask("p1", "t1", interactive=False)
         taskId = task.id
 
-        keyword = self.session.query(Keyword).filter_by(name="kw").one()
-        self.assertEqual(keyword.projects, [project])
-
-        # Remove project, its task should be removed and the created keyword
-        # should no longer be associated with any project
+        # Remove project, its task should be removed
         tui.addInputAnswers("y")
         self.cmd.do_p_remove("p1")
-
-        self.assertEqual(keyword.projects, [])
 
         self.assertEqual(list(self.session.query(Task).filter_by(id=taskId)), [])
 
