@@ -29,16 +29,16 @@ def createFileList(sourceDir, *patterns):
 # Additional files
 data_files = []
 data_files.append(["share/yokadi",
-                  ["version", "README.markdown", "NEWS", "LICENSE"]])
+                  ["version", "README.md", "NEWS", "LICENSE"]])
 
 # Doc
-data_files.append(["share/yokadi/doc", createFileList("doc", "*.markdown")])
+data_files.append(["share/yokadi/doc", createFileList("doc", "*.md")])
 
 # Man
 data_files.append(["share/man/man1", createFileList("man", "*.1")])
 
 # Update scripts
-data_files.append(["share/yokadi/update", createFileList("update", "*.py", "update*to*", "README*")])
+data_files.append(["share/yokadi/update", createFileList("update", "*.py", "update*to*")])
 
 # Icon
 for size in os.listdir("icon"):

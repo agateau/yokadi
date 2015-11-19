@@ -325,7 +325,7 @@ class Database(object):
                 % (version, DB_VERSION))
             print("Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
                     sharePath)
-            print("See %s/update/README.markdown for details" % sharePath)
+            print("See %s/doc/update.md for details" % sharePath)
             sys.exit(1)
 
 

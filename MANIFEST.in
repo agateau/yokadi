@@ -1,10 +1,9 @@
 include update/update*to*
 include update/*py
-include update/README.markdown
-include doc/*markdown
+include doc/*.md
 include man/*.1
 include *py
-include README.markdown
+include README.md
 include LICENSE
 include MANIFEST.in
 include version
