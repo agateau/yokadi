@@ -10,27 +10,35 @@
 from distutils.core import setup
 import sys
 import os
+from fnmatch import fnmatch
 from os.path import abspath, isdir, dirname, join
 
 # yokadi root path
 root = abspath(dirname(__file__))
 
+def createFileList(sourceDir, *patterns):
+    """
+    List files from sourceDir which match one of the pattern in patterns
+    Returns the path including sourceDir
+    """
+    for name in os.listdir(sourceDir):
+        for pattern in patterns:
+            if fnmatch(name, pattern):
+                yield join(sourceDir, name)
+
 # Additional files
 data_files = []
 data_files.append(["share/yokadi",
-                   ["version", "README.markdown", "NEWS", "LICENSE"]])
+                  ["version", "README.markdown", "NEWS", "LICENSE"]])
 
 # Doc
-data_files.append(["share/yokadi/doc",
-                   ["doc/%s" % f for f in os.listdir(join(root, "doc"))]])
+data_files.append(["share/yokadi/doc", createFileList("doc", "*.markdown")])
 
 # Man
-data_files.append(["share/man/man1",
-                   ["man/%s" % f for f in os.listdir(join(root, "man"))]])
+data_files.append(["share/man/man1", createFileList("man", "*.1")])
 
 # Update scripts
-data_files.append(["share/yokadi/update",
-                   ["update/%s" % f for f in os.listdir(join(root, "update"))]])
+data_files.append(["share/yokadi/update", createFileList("update", "*.py", "update*to*", "README*")])
 
 # Icon
 for size in os.listdir("icon"):
