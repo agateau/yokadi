@@ -3,7 +3,7 @@
 """
 This script updates a Yokadi database to the latest version
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or newer
 """
 

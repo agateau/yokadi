@@ -2,7 +2,7 @@
 """
 Parse utilities. Used to manipulate command line text.
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """

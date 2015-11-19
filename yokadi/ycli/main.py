@@ -3,7 +3,7 @@
 """
 Command line oriented, sqlite powered, todo list
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """

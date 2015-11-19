@@ -4,7 +4,7 @@
 Generates a data-only sqlite dump, with insert statements including column
 names.
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or newer
 """
 
