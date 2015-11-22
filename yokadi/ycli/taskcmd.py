@@ -23,6 +23,7 @@ from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
+from yokadi.core.dbutils import DbFilter, KeywordFilter
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.ycli.textlistrenderer import TextListRenderer
 from yokadi.ycli.xmllistrenderer import XmlListRenderer
@@ -467,14 +468,14 @@ class TaskCmd(object):
         """
         args = parser.parse_args(line)
         if len(args.filter) > 0:
-            projectName, keywordFilters = parseutils.extractKeywords(" ".join(args.filter))
+            projectName, filters = parseutils.extractKeywords(" ".join(args.filter))
         else:
             projectName = ""
-            keywordFilters = []
+            filters = []
 
         if self.kFilters:
             # Add keyword filter
-            keywordFilters.extend(self.kFilters)
+            filters.extend(self.kFilters)
 
         if not projectName:
             if self.pFilter:
@@ -495,14 +496,7 @@ class TaskCmd(object):
             raise YokadiException("Found no project matching '%s'" % projectName)
 
         # Check keywords exist
-        parseutils.warnIfKeywordDoesNotExist(keywordFilters)
-
-        # Filtering and sorting according to parameters
-        filters = []
-
-        # Filter on keywords
-        for keywordFilter in keywordFilters:
-            filters.append(keywordFilter.filter())
+        parseutils.warnIfKeywordDoesNotExist(filters)
 
         # Search
         if args.search:
@@ -510,8 +504,9 @@ class TaskCmd(object):
                 if word.startswith("@"):
                     tui.warning("Maybe you want keyword search (without -s option) "
                                 "instead of plain text search?")
-                filters.append(or_(Task.title.like("%" + word + "%"),
-                                   Task.description.like("%" + word + "%")))
+                condition = or_(Task.title.like("%" + word + "%"),
+                                Task.description.like("%" + word + "%"))
+                filters.append(DbFilter(condition))
 
         return args, projectList, filters
 
@@ -527,6 +522,11 @@ class TaskCmd(object):
         @param limit: limit number tasks (int) or None for no limit
         @param groupKeyword: keyword used for grouping (as unicode string) or None
         """
+        def applyFilters(lst):
+            for filter in filters:
+                lst = filter.apply(lst)
+            return lst
+
         if groupKeyword:
             if groupKeyword.startswith("@"):
                 groupKeyword = groupKeyword[1:]
@@ -534,8 +534,9 @@ class TaskCmd(object):
                 if str(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
                     # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
                     continue
-                taskList = self.session.query(Task).filter(TaskKeyword.keywordId == keyword.id).filter(and_(*filters))
+                taskList = self.session.query(Task).filter(TaskKeyword.keywordId == keyword.id)
                 taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
+                taskList = applyFilters(taskList)
                 taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
                 if projectList:
@@ -550,8 +551,9 @@ class TaskCmd(object):
                 if not project.active:
                     hiddenProjectNames.append(project.name)
                     continue
-                taskList = self.session.query(Task).filter(Task.project == project).filter(and_(*filters))
+                taskList = self.session.query(Task).filter(Task.project == project)
                 taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
+                taskList = applyFilters(taskList)
                 taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
                 if len(taskList) > 0:
@@ -585,33 +587,33 @@ class TaskCmd(object):
         args, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
-        filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
+        filters.append(KeywordFilter(NOTE_KEYWORD, negative=True))
 
         # Handle t_list specific options
         order = [desc(Task.urgency), Task.creationDate]
         limit = None
         if args.done:
-            filters.append(Task.status == 'done')
+            filters.append(DbFilter(Task.status == 'done'))
             if args.done != "all":
                 minDate = ydateutils.parseMinDate(args.done)
-                filters.append(Task.doneDate >= minDate)
+                filters.append(DbFilter(Task.doneDate >= minDate))
         elif args.status == "all":
             pass
         elif args.status == "started":
-            filters.append(Task.status == "started")
+            filters.append(DbFilter(Task.status == "started"))
         else:
-            filters.append(Task.status != "done")
+            filters.append(DbFilter(Task.status != "done"))
         if args.urgency:
             order = [desc(Task.urgency), ]
-            filters.append(Task.urgency >= args.urgency)
+            filters.append(DbFilter(Task.urgency >= args.urgency))
         if args.topDue:
-            filters.append(Task.dueDate != None)
+            filters.append(DbFilter(Task.dueDate != None))
             order = [Task.dueDate, ]
             limit = 5
         if args.due:
             for due in args.due:
                 dueOperator, dueLimit = ydateutils.parseDateLimit(due)
-                filters.append(dueOperator(Task.dueDate, dueLimit))
+                filters.append(DbFilter(dueOperator(Task.dueDate, dueLimit)))
             order = [Task.dueDate, ]
         if args.decrypt:
             self.cryptoMgr.force_decrypt = True
@@ -659,7 +661,7 @@ class TaskCmd(object):
         if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
-        filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
+        filters.append(KeywordFilter(NOTE_KEYWORD))
         order = [Task.creationDate, ]
         renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,

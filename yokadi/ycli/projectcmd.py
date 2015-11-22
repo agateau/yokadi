@@ -37,15 +37,13 @@ def getProjectFromName(name, parameterName="project_name"):
 
 class ProjectCmd(object):
     def do_p_add(self, line):
-        """Add new project. Will prompt to create keywords if they do not exist.
-        p_add <projectName> [@<keyword1>] [@<keyword2>]"""
+        """Add new project.
+        p_add <projectName>"""
         if not line:
-            print("Give at least a project name !")
+            print("Missing project name.")
             return
-        projectName, garbage, keywordDict = parseutils.parseLine(line)
+        projectName = parseutils.parseProjectName(line)
         session = db.getSession()
-        if garbage:
-            raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
         try:
             project = Project(name=projectName)
             session.add(project)
@@ -54,11 +52,6 @@ class ProjectCmd(object):
             session.rollback()
             raise YokadiException("A project named %s already exists. Please find another name" % projectName)
         print("Added project '%s'" % projectName)
-        if not dbutils.createMissingKeywords(list(keywordDict.keys())):
-            return None
-        project.setKeywordDict(keywordDict)
-        session.merge(project)
-        session.commit()
 
     def do_p_edit(self, line):
         """Edit a project.
@@ -69,22 +62,13 @@ class ProjectCmd(object):
         if not project:
             raise YokadiException("Project does not exist.")
 
-        # Create project line
-        projectLine = parseutils.createLine(project.name, "", project.getKeywordDict())
-
         # Edit
-        line = tui.editLine(projectLine)
+        line = tui.editLine(project.name)
 
         # Update project
-        projectName, garbage, keywordDict = parseutils.parseLine(line)
-        if garbage:
-            raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
-        if not dbutils.createMissingKeywords(list(keywordDict.keys())):
-            return
+        projectName = parseutils.parseProjectName(line)
         try:
             project.name = projectName
-            project.setKeywordDict(keywordDict)
-            session.merge(project)
             session.commit()
         except IntegrityError:
             session.rollback()
@@ -100,7 +84,7 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print("%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active))
+            print("%s %s %s" % (project.name.ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active))
 
     def do_p_set_active(self, line):
         """Activate the given project"""

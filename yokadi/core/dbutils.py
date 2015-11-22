@@ -9,11 +9,13 @@ Database utilities.
 from datetime import datetime, timedelta
 import os
 
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from yokadi.ycli import tui
 from yokadi.core import db
-from yokadi.core.db import Keyword, Project, Task, TaskLock
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, TaskLock
 from yokadi.core.yokadiexception import YokadiException
 
 
@@ -196,5 +198,46 @@ class TaskLockManager:
         if lock and lock.pid == os.getpid():
             self.session.delete(lock)
             self.session.commit()
+
+
+class DbFilter(object):
+    """
+    Light wrapper around SQL Alchemy filters. Makes it possible to have the
+    same interface as KeywordFilter
+    """
+    def __init__(self, condition):
+        self.condition = condition
+
+    def apply(self, lst):
+        return lst.filter(self.condition)
+
+
+class KeywordFilter(object):
+    """Represent a filter on a keyword"""
+    def __init__(self, name, negative=False, value=None, valueOperator=None):
+        self.name = name  # Keyword name
+        assert self.name, "Keyword name cannot be empty"
+        self.negative = negative  # Negative filter
+        self.value = value  # Keyword value
+        self.valueOperator = valueOperator  # Operator to compare value
+
+    def apply(self, lst):
+        """Apply keyword filters to lst
+        @return: a new lst"""
+        keywordAlias = aliased(Keyword)
+        taskKeywordAlias = aliased(TaskKeyword)
+        lst = lst.outerjoin(taskKeywordAlias, Task.taskKeywords)
+        lst = lst.outerjoin(keywordAlias, taskKeywordAlias.keyword)
+
+        if self.negative:
+            filter = or_(keywordAlias.name == None, ~keywordAlias.name.like(self.name))
+        else:
+            filter = keywordAlias.name.like(self.name)
+            if self.valueOperator == "=":
+                filter = and_(filter, taskKeywordAlias.value == self.value)
+            elif self.valueOperator == "!=":
+                filter = and_(filter, taskKeywordAlias.value != self.value)
+
+        return lst.filter(filter)
 
 # vi: ts=4 sw=4 et

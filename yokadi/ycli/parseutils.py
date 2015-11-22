@@ -7,12 +7,12 @@ Parse utilities. Used to manipulate command line text.
 @license: GPL v3 or later
 """
 import re
-from sqlalchemy import and_, or_
-from sqlalchemy.sql import text
 
 from yokadi.ycli import tui
 from yokadi.core import db
-from yokadi.core.db import TaskKeyword, ProjectKeyword, Keyword, Task, Project
+from yokadi.core.db import Keyword
+from yokadi.core.dbutils import KeywordFilter
+from yokadi.core.yokadiexception import YokadiException
 
 
 gSimplifySpaces = re.compile("  +")
@@ -37,6 +37,16 @@ def parseParameters(line):
         else:
             text.append(word)
     return (parameters, " ".join(text))
+
+
+def parseProjectName(line):
+    """Parse line, check it is a valid project name and return it
+    @return: the project name
+    """
+    line = line.strip()
+    if " " in line:
+        raise YokadiException("Project name cannot contain spaces")
+    return line
 
 
 def parseLine(line):
@@ -65,7 +75,7 @@ def extractKeywords(line):
     remainingText = []
     for token in line.split():
         if token.startswith("@") or token.startswith("!@"):
-            keywordFilters.append(KeywordFilter(token))
+            keywordFilters.append(parseKeyword(token))
         else:
             remainingText.append(token)
 
@@ -107,95 +117,41 @@ def warnIfKeywordDoesNotExist(keywordFilters):
     return doesNotExist
 
 
-class KeywordFilter(object):
-    """Represent a filter on a keyword"""
-    def __init__(self, filterLine=None):
-        self.name = ""  # Keyword name
-        self.value = ""  # Keyword value
-        self.negative = False  # Negative filter
-        self.valueOperator = "="  # Operator to compare value
-        self.session = db.getSession()
+def parseKeyword(line):
+    """Parse given line to create a keyword filter
+    @return: a KeywordFilter instance"""
+    operators = ("!=", "=")
+    if " " in line:
+        raise YokadiException("Keyword filter should not contain spaces")
 
-        if filterLine:
-            self.parse(filterLine)
+    name = None
+    negative = False
+    value = None
+    valueOperator = None
 
-    def __str__(self):
-        """Represent keyword filter as a string. Identical to what parse() method wait for"""
-        if self.negative:
-            prefix = "!@"
-        else:
-            prefix = "@"
-        if self.value:
-            return prefix + self.name + self.valueOperator + str(self.value)
-        else:
-            return prefix + self.name
+    if line.startswith("!"):
+        negative = True
+        line = line[1:]
 
-    def filter(self):
-        """Return a filter in SQL Alchemy format"""
-        taskValueFilter = text("1 = 1")
-        projectValueFilter = text("1 = 1")
-        if self.name:
-            if self.value:
-                if self.valueOperator == "=":
-                    taskValueFilter = (TaskKeyword.value == self.value)
-                    projectValueFilter = (ProjectKeyword.value == self.value)
-                elif self.valueOperator == "!=":
-                    taskValueFilter = (TaskKeyword.value != self.value)
-                    projectValueFilter = (ProjectKeyword.value != self.value)
-                # TODO: handle also <, >, =< and >=
+    if not line.startswith("@"):
+        raise YokadiException("Keyword name must be prefixed with a @")
 
-            taskKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
-                                                                 TaskKeyword.keywordId == Keyword.id,
-                                                                 TaskKeyword.taskId == Task.id,
-                                                                 taskValueFilter).values(Task.id)
-            projectKeywordTaskIDs = self.session.query(Task).filter(Keyword.name.like(self.name),
-                                                                    ProjectKeyword.keywordId == Keyword.id,
-                                                                    ProjectKeyword.projectId == Project.id,
-                                                                    Project.id == Task.project,
-                                                                    projectValueFilter).values(Task.id)
+    line = line[1:]  # Squash @
+    line = line.replace("==", "=")  # Tolerate == syntax
+    for operator in operators:
+        if operator in line:
+            name, value = line.split(operator, 1)
+            valueOperator = operator
+            try:
+                value = int(value)
+            except ValueError:
+                raise YokadiException("Value of %s keyword must be an integer (got %s)" %
+                                      (name, value))
+            break
+    else:
+        # No operator found, only keyword name has been provided
+        name = line
 
-            taskKeywordTaskIDs = list(taskKeywordTaskIDs)
-            projectKeywordTaskIDs = list(projectKeywordTaskIDs)
-            if len(taskKeywordTaskIDs) == 0:
-                taskInKeywords = text("1 <> 1")  # Use subtitue condition as SQLA protest again IN clause with empty list
-            else:
-                taskInKeywords = Task.id.in_([i[0] for i in taskKeywordTaskIDs])
-            if len(projectKeywordTaskIDs) == 0:
-                projectInKeywords = text("1 <> 1")  # See above comment
-            else:
-                projectInKeywords = Task.id.in_([i[0] for i in projectKeywordTaskIDs])
-            if self.negative:
-                return and_(~taskInKeywords, ~projectInKeywords)
-            else:
-                return or_(taskInKeywords, projectInKeywords)
-
-    def parse(self, line):
-        """Parse given line to create a keyword filter"""
-        operators = ("=<", ">=", "!=", "<", ">", "=")
-        if " " in line:
-            tui.error("No space in keyword filter !")
-            return
-        if line.startswith("!"):
-            self.negative = True
-            line = line[1:]
-        if not line.startswith("@"):
-            tui.error("Keyword name must be be prefixed with a @")
-            return
-        line = line[1:]  # Squash @
-        line = line.replace("==", "=")  # Tolerate == syntax
-        for operator in operators:
-            if operator in line:
-                self.name, self.value = line.split(operator, 1)
-                self.valueOperator = operator
-                try:
-                    self.value = int(self.value)
-                except ValueError:
-                    tui.error("Keyword value must be an integer (got %s)" %
-                              (self.value, self.name))
-                    return
-                break  # Exit operator loop
-        else:
-            # No operator found, only keyword name has been provided
-            self.name, self.value = line, None
+    return KeywordFilter(name, negative=negative, value=value, valueOperator=valueOperator)
 
 # vi: ts=4 sw=4 et

@@ -33,7 +33,7 @@ from yokadi.core import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 7
+DB_VERSION = 8
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
@@ -47,51 +47,10 @@ class Project(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
-    projectKeywords = relationship("ProjectKeyword", cascade="all", backref="project")
     tasks = relationship("Task", cascade="all", backref="project")
 
     def __repr__(self):
-        keywords = self.getKeywordsAsString()
-        if keywords:
-            return "%s (%s)" % (self.name, keywords)
-        else:
-            return self.name
-
-    def setKeywordDict(self, dct):
-        """
-        Defines keywords of a project.
-        Dict is of the form: keywordName => value
-        """
-        session = getSession()
-        for projectKeyword in self.projectKeywords:
-            session.delete(projectKeyword)
-
-        for name, value in dct.items():
-            keyword = session.query(Keyword).filter_by(name=name).one()
-            session.add(ProjectKeyword(project=self, keyword=keyword, value=value))
-
-    def getKeywordDict(self):
-        """
-        Returns all keywords of a project as a dict of the form:
-        keywordName => value
-        """
-        dct = {}
-        for projectKeyword in self.projectKeywords:
-            dct[projectKeyword.keyword.name] = projectKeyword.value
-        return dct
-
-    def getKeywordsAsString(self):
-        """
-        Returns all keywords as a string like "key1=value1, key2=value2..."
-        Value is not displayed if none
-        """
-        result = []
-        for key, value in list(self.getKeywordDict().items()):
-            if value:
-                result.append("%s=%s" % (key, value))
-            else:
-                result.append(key)
-        return ", ".join(result)
+        return self.name
 
 
 class Keyword(Base):
@@ -115,15 +74,6 @@ class TaskKeyword(Base):
     keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"))
     value = Column(Integer, default=None)
     keyword = relationship("Keyword", backref="taskKeywords")
-
-
-class ProjectKeyword(Base):
-    __tablename__ = "project_keyword"
-    id = Column(Integer, primary_key=True)
-    projectId = Column("project_id", Integer, ForeignKey("project.id"))
-    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"))
-    value = Column(Integer, default=None)
-    keyword = relationship("Keyword", backref="projectKeywords")
 
 
 class Task(Base):
