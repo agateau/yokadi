@@ -80,7 +80,7 @@ setup(name="yokadi",
       ],
       install_requires=[
         "sqlalchemy",
-        "dateutils",
+        "dateutil",
       ],
       scripts=scripts,
       data_files=data_files
