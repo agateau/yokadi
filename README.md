@@ -288,16 +288,17 @@ the `YOKADI_HISTORY` env variable to point to your history file:
 If you want to be automatically reminded of due tasks, you can use the Yokadi
 daemon.
 
-The Yokadi daemon can be launched via desktop autostart services. In KDE, you
-must create a symlink to yokadid (or a shell script that calls it) in `$HOME/.kde/Autostart/`.
+The Yokadi daemon can be launched via desktop autostart services. In most
+desktop environments, you just need to create a symlink to yokadid (or a shell script
+that calls it) in `$HOME/.config/autostart/`:
 
-    ln -s `which yokadid` $HOME/.kde/Autostart/
+    ln -s `which yokadid` $HOME/.config/autostart/
 
 # Contact
 
-The project is hosted on http://yokadi.github.com.
+The project is hosted on <http://yokadi.github.io>.
 
-All discussion happens on Yokadi mailing-list, hosted by our friends from the
+All discussions happen on Yokadi mailing-list, hosted by our friends from the
 Sequanux LUG. To join, visit
 <http://sequanux.org/cgi-bin/mailman/listinfo/ml-yokadi>.
 
