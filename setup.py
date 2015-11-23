@@ -70,7 +70,7 @@ setup(name="yokadi",
       description="Command line oriented todo list system",
       author="The Yokadi Team",
       author_email="ml-yokadi@sequanux.org",
-      url="http://yokadi.github.com/",
+      url="http://yokadi.github.io/",
       packages=[
         "yokadi",
         "yokadi.core",

@@ -55,7 +55,7 @@ def generateCal():
     @return: icalendar.Calendar object"""
     session = db.getSession()
     cal = icalendar.Calendar()
-    cal.add("prodid", '-//Yokadi calendar //yokadi.github.com//')
+    cal.add("prodid", '-//Yokadi calendar //yokadi.github.io//')
     cal.add("version", "2.0")
     # Add projects
     for project in session.query(Project).filter(Project.active == True):
