@@ -13,12 +13,19 @@ keywords. Keywords can be any word that help you to find and sort your tasks.
 
 # Dependencies
 
-- Unix or Linux system. Mac OS X and Windows should work but have not been
-  tested yet.
-- Python 3.4.
-- iCalendar module (optional, for Yokadi Daemon only)
-- setproctitle module (optional, for Yokadi Daemon only)
-- SQLAlchemy 0.9.X.
+Yokadi should run on any Unix-like systems. There is also some support for
+Windows but it is not as tested.
+
+Yokadi requires Python 3.4 or more and a few other modules, which you can install with:
+
+    pip install -r requirements.txt
+
+It can also make use of other modules listed in extra-requirements.txt. You can
+install them with:
+
+    pip install -r extra-requirements.txt
+
+These modules are needed for the Yokadi Daemon and for the cryptography features.
 
 # Quickstart
 

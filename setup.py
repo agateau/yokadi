@@ -78,10 +78,6 @@ setup(name="yokadi",
         "yokadi.ycli",
         "yokadi.yical",
       ],
-      install_requires=[
-        "sqlalchemy",
-        "dateutil",
-      ],
       scripts=scripts,
       data_files=data_files
       )

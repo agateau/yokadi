@@ -1,0 +1,3 @@
+icalendar==3.6.1
+pycrypto==2.6.1
+setproctitle==1.1.8

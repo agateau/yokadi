@@ -6,7 +6,8 @@ python:
 
 install:
   - pip install -r requirements.txt
-  - pip install coveralls
+  - pip install -r extra-requirements.txt
+  - pip install coverage coveralls
 script:
   - coverage run --source=yokadi --omit="yokadi/tests/*" yokadi/tests/tests.py
 after_success:
