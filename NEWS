@@ -1,8 +1,8 @@
 v1.0 2015/11/xx
 
-- Yokadi now uses SQLAlchemy instead of SQLObject to access the SQLite database
-- The application has been ported to Python 3
-- Removed the project keywords feature. It was not very useful and complicated the searching code
+- Yokadi has been ported to Python 3
+- The application now uses SQLAlchemy instead of SQLObject to access the SQLite database
+- Removed the project keywords feature. It was not very useful and made the searching code more complicated
 - Improved documentation
 - Fixed ical support: it now works with ical 3.6 or later
 - Added coveralls support

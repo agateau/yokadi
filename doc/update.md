@@ -28,6 +28,8 @@ The final dump/restore steps ensure that:
   'non null')
 - The updated database has the exact same structure as a brand new database.
 
-Updating from x to x+1 is done in separate scripts because update scripts may
-define tables. SQLObject (which used to be Yokadi ORM) can't handle table
-redefinitions, so using separate scripts solves the problem.
+Each update step is run in a separate process because update scripts may
+define tables, but SQLObject (which used to be Yokadi ORM) does not handle
+table redefinitions, so it would raise an exception if a table was defined in
+`update<x>to<x+1>.py` then redefined in `update<x+1>to<x+2>.py`.
+Running update step in its own process avoids this problem.
