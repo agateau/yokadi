@@ -1,12 +1,14 @@
 v1.0 2015/11/xx
 
-- Yokadi has been ported to Python 3
-- The application now uses SQLAlchemy instead of SQLObject to access the SQLite database
-- Removed the project keywords feature. It was not very useful and made the searching code more complicated
-- Improved documentation
-- Fixed ical support: it now works with ical 3.6 or later
-- Added coveralls support
-- Added Keywords field to yokadi.desktop
+- User changes:
+    - Fixed an issue which caused t_list to fail when filtering by keywords on large lists
+    - Removed the project keywords feature. It was not very useful and made the searching code more complicated
+    - Fixed ical support: it now works with ical 3.6 or later
+    - Improved documentation
+    - Added Keywords field to yokadi.desktop
+- Developer changes:
+    - Yokadi has been ported to Python 3
+    - The application now uses SQLAlchemy instead of SQLObject to access the SQLite database
 
 v0.14 2014/05/03
 - Command changes:
