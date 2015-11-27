@@ -4,6 +4,7 @@ Ical utils functions
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
+import re
 
 import icalendar
 
@@ -40,5 +41,15 @@ def yokadiUrgencyToIcalPriority(urgency):
     if priority > 9: priority = 9
     if priority < 1: priority = 1
     return priority
+
+
+def yokadiTaskTitleToIcalSummary(title, taskId):
+    """Append " (id)" to the end of title"""
+    return "{} ({})".format(title, taskId)
+
+
+def icalSummaryToYokadiTaskTitle(summary, taskId):
+    """Remove " (id)" part of the summary"""
+    return re.sub("\s?\({}\)".format(taskId), "", summary)
 
 # vi: ts=4 sw=4 et
