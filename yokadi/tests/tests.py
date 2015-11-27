@@ -39,7 +39,7 @@ from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
 from helptestcase import HelpTestCase
 from conftestcase import ConfTestCase
-from importexporttestcase import ImportExportTestCase
+from dumptestcase import DumpTestCase
 
 
 def main():

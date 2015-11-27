@@ -39,7 +39,7 @@ from yokadi.core import db
 from yokadi.ycli import tui
 from yokadi.core import utils
 from yokadi.core import cryptutils
-from yokadi.sync import sync
+from yokadi.sync import dump
 
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
@@ -207,8 +207,8 @@ def main():
                       dest="version", action="store_true",
                       help="Display Yokadi current version")
 
-    parser.add_argument("-x", "--export",
-                      help="Export database to DIR", metavar="DIR")
+    parser.add_argument("--dump",
+                      help="Dump database to DIR", metavar="DIR")
 
     parser.add_argument('cmd', nargs='*')
 
@@ -233,8 +233,8 @@ def main():
         return
     db.setDefaultConfig()  # Set default config parameters
 
-    if args.export:
-        sync.dump(args.export)
+    if args.dump:
+        dump.dump(args.dump)
         return
 
     cmd = YokadiCmd()

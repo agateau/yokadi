@@ -8,7 +8,7 @@ import icalendar
 
 from yokadi.core import db
 from yokadi.core import dbutils
-from yokadi.sync import sync
+from yokadi.sync.dump import dump
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.yical import icalutils
 
@@ -24,7 +24,7 @@ def loadVTodoFromPath(taskFilePath):
         return cal.walk()[1]
 
 
-class ImportExportTestCase(unittest.TestCase):
+class DumpTestCase(unittest.TestCase):
     def setUp(self):
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
@@ -39,7 +39,7 @@ class ImportExportTestCase(unittest.TestCase):
         vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            sync.dump(dumpDir, vcsImpl)
+            dump(dumpDir, vcsImpl)
 
             for task in t1, t2, t3:
                 taskFilePath = getTaskPath(dumpDir, task)
@@ -58,7 +58,7 @@ class ImportExportTestCase(unittest.TestCase):
         vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            sync.dump(dumpDir, vcsImpl)
+            dump(dumpDir, vcsImpl)
 
             # Do some changes: update t3, add t4, remove t2, then dump again
             newTitle = "New T3 title"
@@ -72,7 +72,7 @@ class ImportExportTestCase(unittest.TestCase):
 
             self.session.commit()
 
-            sync.dump(dumpDir, vcsImpl)
+            dump(dumpDir, vcsImpl)
 
             # Check t3 has been updated
             taskFilePath = getTaskPath(dumpDir, t3)
@@ -87,15 +87,3 @@ class ImportExportTestCase(unittest.TestCase):
             # Check t2 file has been removed
             taskFilePath = getTaskPath(dumpDir, t2)
             self.assertFalse(os.path.exists(taskFilePath))
-
-    def testSyncOnlyLocalChanges(self):
-        pass
-
-    def testSyncOnlyRemoteChanges(self):
-        pass
-
-    def testSyncLocalAndRemoteChanges(self):
-        pass
-
-    def testSyncConflict(self):
-        pass
