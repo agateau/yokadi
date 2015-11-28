@@ -42,11 +42,16 @@ def createFinalDb(workFileName, finalFileName):
     dump.dumpDatabase(workFileName, dumpFile)
     dumpFile.close()
 
-    print("Restoring dump from %s into %s" % (dumpFileName, finalFileName))
     database = db.Database(finalFileName, True, updateMode=True)
+    print("Restoring dump from %s into %s" % (dumpFileName, finalFileName))
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
         raise Exception("Dump restoration failed")
+
+
+def die(message):
+    print("error: " + message, file=sys.stderr)
+    sys.exit(1)
 
 
 def main():
@@ -60,10 +65,10 @@ def main():
     dbFileName = abspath(args.current)
     newDbFileName = abspath(args.updated)
     if not os.path.exists(dbFileName):
-        parser.error("'%s' does not exist" % dbFileName)
+        die("'%s' does not exist." % dbFileName)
 
     if os.path.exists(newDbFileName):
-        parser.error("'%s' already exists" % newDbFileName)
+        die("'%s' already exists." % newDbFileName)
 
     # Check version
     version = getVersion(dbFileName)
@@ -83,8 +88,7 @@ def main():
         print("Running %s" % scriptFileName)
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
-            print("Update failed.")
-            return 2
+            die("Update failed.")
 
     setVersion(workDbFileName, db.DB_VERSION)
     createFinalDb(workDbFileName, newDbFileName)

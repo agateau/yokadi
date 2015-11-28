@@ -232,7 +232,7 @@ class Database(object):
 
         if not os.path.exists(dbFileName) or memoryDatabase:
             if createIfNeeded:
-                print("Creating database")
+                print("Creating %s" % dbFileName)
                 self.createTables()
                 # Set database version according to current yokadi release
                 if not updateMode: # Update script add it from dump
