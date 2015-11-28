@@ -13,6 +13,7 @@ try:
     from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, StringCol
 except ImportError:
     print("To run this update you need sqlobject")
+    sys.exit(1)
 
 
 """ This is the v4 table """

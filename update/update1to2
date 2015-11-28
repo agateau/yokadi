@@ -12,6 +12,7 @@ try:
     from sqlobject import connectionForURI, BoolCol, DateTimeCol, sqlhub, SQLObject, UnicodeCol
 except ImportError:
     print("To run this update you need sqlobject")
+    sys.exit(1)
 
 """ This is the v2 table """
 class Config(SQLObject):

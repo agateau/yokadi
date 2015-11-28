@@ -13,6 +13,7 @@ try:
     from sqlobject import connectionForURI, RelatedJoin, sqlhub, SQLObject
 except ImportError:
     print("To run this update you need sqlobject")
+    sys.exit(1)
 
 """ This is a fake table (we only need table name) """
 class Project(SQLObject):

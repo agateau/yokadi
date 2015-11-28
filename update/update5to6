@@ -12,6 +12,7 @@ try:
     from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, IntCol, DateTimeCol
 except ImportError:
     print("To run this update you need sqlobject")
+    sys.exit(1)
 
 
 class TaskLock(SQLObject):
