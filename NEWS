@@ -1,4 +1,4 @@
-v1.0 2015/11/xx
+v1.0 2015/11/29
 
 - User changes:
     - Fixed an issue which caused t_list to fail when filtering by keywords on large lists
