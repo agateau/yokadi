@@ -49,6 +49,7 @@ Write a blog entry in `_posts/`
 
 Update version in download page (download.markdown)
 
-## Tell the world
+## Upload on PyPI
 
-- pypi.python.org
+    cd download/
+    twine upload yokadi-<version>.*
