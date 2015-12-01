@@ -12,12 +12,11 @@ log() {
     echo "### $*" >&2
 }
 
-[ $# = 2 ] || die "USAGE: $PROGNAME <src/dir> <dst/dir>"
+[ $# = 1 ] || die "USAGE: $PROGNAME <dst/dir>"
 
-SRC_DIR=$(cd "$1" ; pwd)
-DST_DIR=$(cd "$2" ; pwd)
+SRC_DIR=$(cd "$(dirname $0)/.." ; pwd)
+DST_DIR=$(cd "$1" ; pwd)
 
-[ -d "$SRC_DIR" ] || die "Source dir '$SRC_DIR' does not exist"
 [ -d "$DST_DIR" ] || die "Destination dir '$SRC_DIR' does not exist"
 
 WORK_DIR=$(mktemp -d "$DST_DIR/yokadi-dist.XXXXXX")
