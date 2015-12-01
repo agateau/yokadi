@@ -35,7 +35,7 @@ git reset --hard HEAD
 git clean -q -dxf
 
 log "Building archives"
-python setup.py -q sdist --formats=bztar,zip
+./setup.py -q sdist --formats=bztar,zip
 
 log "Unpacking .tar.bz2"
 cd dist/
