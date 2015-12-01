@@ -1,24 +1,51 @@
 # Release check list
 
+## Introduction
+
+A series is major.minor (ex: 0.12). There is a branch for each series.
+
+A version is major.minor.patch (ex 0.12.1). There is a tag for each version.
+
+This doc assumes there is a checkout of yokadi.github.com next to the checkout
+of yokadi.
+
 ## In yokadi checkout
 
-Ensure checkout is up to date
+    export version=<version>
+    export series=<series>
 
-Ensure version is OK in "version" file
+### For a new series
 
-Ensure NEWS file is up to date with new stuff and correct release date
+Update `NEWS` file (add changes, check release date)
 
-Series is major.minor (ex: 0.12)
-Version is major.minor.patch (ex 0.12.1)
+Ensure `version` file contains $version
 
-For a new series:
+Create branch:
 
-    git checkout -b <series>
-    git push origin <series>:<series>
+    git checkout -b $series
+    git push -u origin $series
 
-For a new release in an existing series:
+The version in master should always be bigger than the version in release
+branches, so update version in master:
+
+    git checkout master
+    vi version
+    git commit version -m "Bump version number"
+    git push
+    git checkout -
+
+### For a new release in an existing series
 
     git checkout <series>
+
+Update `NEWS` file (add changes, check release date)
+
+Bump version number
+
+    echo $version > version
+    git commit version -m "Getting ready for $version"
+
+### Common
 
 Build archives
 
@@ -26,27 +53,39 @@ Build archives
 
 Tag
 
-    git tag -a <version>
+    git tag -a $version -m "Releasing $version"
+
+Push changes
+
     git push
     git push --tags
 
-Bump version on master
+Merge changes in master (so that future forward merges are simpler). Be careful
+to keep version to its master value.
 
     git checkout master
-    vi version
-    git commit version
+    git merge --no-ff $series
     git push
+    git checkout -
+
+## Post on PyPI
+
+    twine upload ../yokadi.github.com/download/yokadi-$version.*
 
 ## In yokadi.github.com checkout
 
 Ensure checkout is up to date
 
-    ./updatedoc.py <path/to/yokadi/checkout> .
+Update documentation
+
+    ./updatedoc.py ../yokadi .
 
 Write a blog entry in `_posts/`
 
-Update version in download page (download.markdown)
+Update version in download page (`download.md`)
 
-## Tell the world
+Publish
 
-- pypi.python.org
+    git add .
+    git commit
+    git push
