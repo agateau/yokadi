@@ -8,8 +8,6 @@ Ensure version is OK in "version" file
 
 Ensure NEWS file is up to date with new stuff and correct release date
 
-Run tests
-
 Series is major.minor (ex: 0.12)
 Version is major.minor.patch (ex 0.12.1)
 
@@ -22,9 +20,14 @@ For a new release in an existing series:
 
     git checkout <series>
 
-In all cases:
+Build archives
+
+    ./scripts/mkdist.sh ../yokadi.github.com/download
+
+Tag
 
     git tag -a <version>
+    git push
     git push --tags
 
 Bump version on master
@@ -34,16 +37,11 @@ Bump version on master
     git commit version
     git push
 
-Go back to branch in order to prepare tarballs
-
-    git checkout <series>
-
 ## In yokadi.github.com checkout
 
 Ensure checkout is up to date
 
     ./updatedoc.py <path/to/yokadi/checkout> .
-    ./mkdist.sh <path/to/yokadi/checkout> download/
 
 Write a blog entry in `_posts/`
 
