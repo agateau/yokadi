@@ -36,14 +36,29 @@ git clean -q -dxf
 log "Building archives"
 ./setup.py -q sdist --formats=bztar,zip
 
-log "Unpacking .tar.bz2"
+log "Installing archive"
 cd dist/
 YOKADI_TARBZ2=$(ls ./*.tar.bz2)
 tar xf "$YOKADI_TARBZ2"
 
-log "Running tests"
-cd "${YOKADI_TARBZ2%.tar.bz2}"
-python yokadi/tests/tests.py
+ARCHIVE_DIR="$PWD/${YOKADI_TARBZ2%.tar.bz2}"
+
+virtualenv --python python3 "$WORK_DIR/venv"
+(
+    . "$WORK_DIR/venv/bin/activate"
+
+    # Install Yokadi in the virtualenv and make sure it can be started
+    # That ensures dependencies got installed by pip
+    log "Smoke test"
+    pip3 install "$ARCHIVE_DIR"
+    yokadi exit
+
+    log "Installing extra requirements"
+    pip3 install -r "$ARCHIVE_DIR/extra-requirements.txt"
+
+    log "Running tests"
+    "$ARCHIVE_DIR/yokadi/tests/tests.py"
+)
 
 log "Moving archives out of work dir"
 cd "$WORK_DIR/dist"
