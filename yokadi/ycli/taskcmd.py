@@ -14,7 +14,7 @@ from dateutil import rrule
 from sqlalchemy import or_, and_, desc
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence, NOTE_KEYWORD
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
@@ -40,8 +40,6 @@ gRendererClassDict = dict(
     html=HtmlListRenderer,
     plain=PlainListRenderer,
     )
-
-NOTE_KEYWORD = "_note"
 
 
 class TaskCmd(object):

@@ -42,6 +42,9 @@ FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 Base = declarative_base()
 
 
+NOTE_KEYWORD = "_note"
+
+
 class Project(Base):
     __tablename__ = "project"
     id = Column(Integer, primary_key=True)
