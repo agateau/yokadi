@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 Yokadi unit tests
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
@@ -20,7 +20,7 @@ try:
     hasIcalendar = True
 except ImportError:
     hasIcalendar = False
-    print "icalendar is not installed, some tests won't be run"
+    print("icalendar is not installed, some tests won't be run")
 
 from parseutilstestcase import ParseUtilsTestCase
 from yokadioptionparsertestcase import YokadiOptionParserTestCase
@@ -37,12 +37,11 @@ if hasIcalendar:
 from keywordtestcase import KeywordTestCase
 from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
+from helptestcase import HelpTestCase
+from conftestcase import ConfTestCase
 
 
 def main():
-    db.connectDatabase("", memoryDatabase=True)
-    db.setDefaultConfig()
-
     unittest.main()
 
 if __name__ == "__main__":

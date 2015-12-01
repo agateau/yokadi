@@ -2,14 +2,16 @@
 """
 Text rendering of t_list output
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
 from datetime import datetime, timedelta
+from sqlalchemy.sql import func
 
 import yokadi.ycli.colors as C
 from yokadi.core import ydateutils
+from yokadi.core import db
 from yokadi.core.db import Task
 from yokadi.ycli import tui
 
@@ -113,9 +115,9 @@ class AgeFormater(object):
         self.asDate = asDate
 
     def __call__(self, task):
-        delta = self.today - task.creationDate
+        delta = self.today - task.creationDate.replace(microsecond=0)
         if self.asDate:
-            return unicode(task.creationDate), None
+            return task.creationDate.strftime("%x %H:%M"), None
         else:
             return ydateutils.formatTimeDelta(delta), colorizer(delta.days)
 
@@ -168,7 +170,7 @@ class TextListRenderer(object):
 
         if renderAsNotes:
             self.splitOnDate = True
-            creationDateColumnWidth = 19
+            creationDateColumnWidth = 16
             creationDateTitle = "Creation date"
         else:
             creationDateColumnWidth = 8
@@ -189,7 +191,7 @@ class TextListRenderer(object):
 
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
-        @param sectionName: name of the task groupement section
+        @param sectionName: name of the task groupment section
         @type sectionName: unicode
         @param taskList: list of tasks to display
         @type taskList: list of db.Task instances
@@ -207,9 +209,9 @@ class TextListRenderer(object):
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
 
     def end(self):
-        today = datetime.now().replace(hour=0, minute=0)
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         # Adjust idColumn
-        maxId = Task.select().max(Task.q.id)
+        maxId = db.getSession().query(func.max(Task.id)).one()[0]
         self.idColumn.width = max(2, len(str(maxId)))
 
         # Adjust titleColumn
@@ -234,7 +236,7 @@ class TextListRenderer(object):
                         self.splitOnDate = False
 
                 if splitterText:
-                    print >> self.out, C.GREEN + splitterText.center(totalWidth) + C.RESET
+                    print(C.GREEN + splitterText.center(totalWidth) + C.RESET, file=self.out)
                     splitterText = None
 
                 self._renderTaskListRow(task)
@@ -250,12 +252,12 @@ class TextListRenderer(object):
         if self.firstHeader:
             self.firstHeader = False
         else:
-            print >> self.out
-        print >> self.out, C.CYAN + sectionName.center(width) + C.RESET
-        print >> self.out, C.BOLD + line + C.RESET
-        print >> self.out, "-" * width
+            print(file=self.out)
+        print(C.CYAN + sectionName.center(width) + C.RESET, file=self.out)
+        print(C.BOLD + line + C.RESET, file=self.out)
+        print("-" * width, file=self.out)
 
     def _renderTaskListRow(self, task):
         cells = [column.createCell(task) for column in self.columns]
-        print >> self.out, "|".join(cells)
+        print("|".join(cells), file=self.out)
 # vi: ts=4 sw=4 et

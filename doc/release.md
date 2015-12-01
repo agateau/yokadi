@@ -18,7 +18,7 @@ For a new series:
     git checkout -b <series>
     git push origin <series>:<series>
 
-For an new release in an existing series:
+For a new release in an existing series:
 
     git checkout <series>
 
@@ -52,4 +52,3 @@ Update version in download page (download.markdown)
 ## Tell the world
 
 - pypi.python.org
-- freshmeat.net

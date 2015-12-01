@@ -2,70 +2,81 @@
 """
 Keyword related commands.
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
+@author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
+from sqlalchemy.exc import IntegrityError
+
 from yokadi.core import dbutils
 from yokadi.ycli import tui
 
+from yokadi.core import db
 from yokadi.core.db import Keyword
 from yokadi.core.yokadiexception import BadUsageException
 from yokadi.ycli.completers import KeywordCompleter
-from sqlobject.dberrors import DuplicateEntryError
 
 
 class KeywordCmd(object):
     def do_k_list(self, line):
         """List all keywords."""
-        for keyword in Keyword.select():
+        for keyword in db.getSession().query(Keyword).all():
             tasks = ", ".join(str(task.id) for task in keyword.tasks)
-            print "%s (tasks: %s)" % (keyword.name, tasks)
+            print("%s (tasks: %s)" % (keyword.name, tasks))
 
     def do_k_add(self, line):
         """Add a keyword
         k_add @<keyword1> [@<keyword2>...]"""
+        session = db.getSession()
         if not line:
             raise BadUsageException("You must provide at least one keyword name")
         for keyword in line.split():
             try:
-                Keyword(name=keyword)
-                print "Keyword %s has been created" % keyword
-            except DuplicateEntryError:
-                print "Keyword %s already exist" % keyword
+                session.add(Keyword(name=keyword))
+                session.commit()
+                print("Keyword %s has been created" % keyword)
+            except IntegrityError:
+                session.rollback()
+                print("Keyword %s already exist" % keyword)
 
     def do_k_remove(self, line):
         """Remove a keyword
         k_remove @<keyword>"""
+        session = db.getSession()
         keyword = dbutils.getKeywordFromName(line)
 
         if keyword.tasks:
-            print "The keyword %s is used by the following tasks: %s" % (keyword.name,
-                                                                         ", ".join(str(task.id) for task in keyword.tasks))
+            print("The keyword %s is used by the following tasks: %s" % (keyword.name,
+                                                                         ", ".join(str(task.id) for task in keyword.tasks)))
             if tui.confirm("Do you really want to remove this keyword"):
-                keyword.destroySelf()
-                print "Keyword %s has been removed" % keyword.name
+                session.delete(keyword)
+                session.commit()
+                print("Keyword %s has been removed" % keyword.name)
 
     complete_k_remove = KeywordCompleter(1)
 
     def do_k_edit(self, line):
         """Edit a keyword
         k_edit @<keyword>"""
+        session = db.getSession()
         keyword = dbutils.getKeywordFromName(line)
         oldName = keyword.name
         newName = tui.editLine(oldName)
         if newName == "":
-            print "Cancelled"
+            print("Cancelled")
             return
 
-        lst = list(Keyword.selectBy(name=newName))
+        lst = session.query(Keyword).filter_by(name=newName).all()
         if len(lst) == 0:
             # Simple case: newName does not exist, just rename the existing keyword
             keyword.name = newName
-            print "Keyword %s has been renamed to %s" % (oldName, newName)
+            session.merge(keyword)
+            session.commit()
+            print("Keyword %s has been renamed to %s" % (oldName, newName))
             return
 
         # We already have a keyword with this name, we need to merge
-        print "Keyword %s already exists" % newName
+        print("Keyword %s already exists" % newName)
         if not tui.confirm("Do you want to merge %s and %s" % (oldName, newName)):
             return
 
@@ -80,8 +91,8 @@ class KeywordCmd(object):
             # We cannot merge
             tui.error("Cannot merge keywords %s and %s because they are both used with different values in these tasks:" % (oldName, newName))
             for task in conflictingTasks:
-                print "- %d, %s" % (task.id, task.title)
-            print "Edit these tasks and try again"
+                print("- %d, %s" % (task.id, task.title))
+            print("Edit these tasks and try again")
             return
 
         # Merge
@@ -91,7 +102,8 @@ class KeywordCmd(object):
                 kwDict[newName] = kwDict[oldName]
             del kwDict[oldName]
             task.setKeywordDict(kwDict)
-        keyword.destroySelf()
-        print "Keyword %s has been merged with %s" % (oldName, newName)
+        session.delete(keyword)
+        session.commit()
+        print("Keyword %s has been merged with %s" % (oldName, newName))
 
     complete_k_edit = KeywordCompleter(1)

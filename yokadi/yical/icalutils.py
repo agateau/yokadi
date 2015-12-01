@@ -19,7 +19,7 @@ def convertIcalType(attr):
         return int(attr)
     else:
         # Default to unicode string
-        return unicode(attr)
+        return str(attr)
 
 
 def icalPriorityToYokadiUrgency(priority):
@@ -36,7 +36,7 @@ def yokadiUrgencyToIcalPriority(urgency):
     """Convert yokadi urgency (100 / -99) to ical priority (1 / 9)
     @param urgency: yokadi urgency
     @return: ical priority"""
-    priority = -(urgency - 100) / 20
+    priority = int(-(urgency - 100) / 20)
     if priority > 9: priority = 9
     if priority < 1: priority = 1
     return priority

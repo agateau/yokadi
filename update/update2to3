@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 """
 Update from version 2 to version 3 of Yokadi DB
@@ -7,24 +7,35 @@ Update from version 2 to version 3 of Yokadi DB
 @license: GPL v3 or newer
 """
 import sys
-from os.path import dirname, join
 
-from sqlobject import connectionForURI, RelatedJoin, sqlhub, SQLObject
+try:
+    from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey
+except ImportError:
+    print("To run this update you need sqlobject")
+    sys.exit(1)
 
-""" This is a fake table (we only need table name) """
+
+# Fake tables (we only need table names)
+class Keyword(SQLObject):
+    pass
+
+
 class Project(SQLObject):
     pass
 
-def alterProjectTable():
-    Project.sqlmeta.addJoin(RelatedJoin("Keyword",
-                                          createRelatedTable=False,
-                                          intermediateTable="project_keyword",
-                                          joinColumn="project_id",
-                                          otherColumn="keyword_id"))
+
+class ProjectKeyword(SQLObject):
+    project_id=ForeignKey('Project')
+    keyword_id=ForeignKey('Keyword')
+
+
+def createProjectKeywordTable():
+    ProjectKeyword.createTable()
+
 
 def main():
     sqlhub.processConnection = connectionForURI('sqlite:' + sys.argv[1])
-    alterProjectTable()
+    createProjectKeywordTable()
 
 
 if __name__ == "__main__":

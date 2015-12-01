@@ -89,6 +89,6 @@ Here are a few tricks I came up with while using Yokadi to do bug tracking:
 - Find a bug by id: `t_list fooplayer -k bug=12`
 
 - I often keep two projects in Yokadi, one for the stable release, another for
-  development. For example I have 'yokadi_stable' and 'yokadi_dev'.
+  development. For example I have `yokadi_stable` and `yokadi_dev`.
 
 <!-- vim: set ts=4 sw=4 et: -->

@@ -14,7 +14,7 @@ from yokadi.ycli import tui
 from yokadi.core import db
 from yokadi.core.yokadiexception import YokadiException
 
-from sqlobject import SQLObjectNotFound
+from sqlalchemy.orm.exc import NoResultFound
 
 # Prefix used to recognise encrypted message
 CRYPTO_PREFIX = "---YOKADI-ENCRYPTED-MESSAGE---"
@@ -42,8 +42,8 @@ class YokadiCryptoManager(object):
         # previously provided
         self.force_decrypt = False
         try:
-            self.crypto_check = db.Config.byName("CRYPTO_CHECK").value
-        except SQLObjectNotFound:
+            self.crypto_check = db.getConfigKey("CRYPTO_CHECK", environ=False)
+        except NoResultFound:
             # Ok, set it to None. It will be setup after user defined passphrase
             self.crypto_check = None
 
@@ -59,10 +59,10 @@ class YokadiCryptoManager(object):
     def _encrypt(self, data):
         """Low level encryption interface. For internal usage only"""
         # Complete data with blanck
-        data_length = (1 + (len(data) / KEY_LENGTH)) * KEY_LENGTH
+        data_length = int(1 + (len(data) / KEY_LENGTH)) * KEY_LENGTH
         data = adjustString(data, data_length)
         cypher = Cypher.new(self.passphrase)
-        return CRYPTO_PREFIX + base64.b64encode(cypher.encrypt(data))
+        return CRYPTO_PREFIX + base64.b64encode(cypher.encrypt(data)).decode(encoding='utf8')
 
     def decrypt(self, data):
         """Decrypt user data.
@@ -93,17 +93,15 @@ class YokadiCryptoManager(object):
         data = data[len(CRYPTO_PREFIX):]  # Remove crypto prefix
         data = base64.b64decode(data)
         cypher = Cypher.new(self.passphrase)
-        return cypher.decrypt(data).rstrip()
+        return cypher.decrypt(data).rstrip().decode(encoding='utf-8')
 
     def askPassphrase(self):
         """Ask user for passphrase if needed"""
-        delay = int(db.Config.byName("PURGE_DELAY").value)
-        cache = bool(int(db.Config.byName("PASSPHRASE_CACHE").value))
+        cache = bool(int(db.getConfigKey("PASSPHRASE_CACHE", environ=False)))
         if self.passphrase and cache:
             return
         self.passphrase = tui.editLine("", prompt="passphrase> ", echo=False)
         self.passphrase = adjustString(self.passphrase, KEY_LENGTH)
-
         if not self.isPassphraseValid() and cache:
             self.passphrase = None
             self.force_decrypt = False  # As passphrase is invalid, don't force decrypt for next time
@@ -143,8 +141,8 @@ class YokadiCryptoManager(object):
             self.crypto_check = self._encrypt(check_word)
 
             # Save it to database config
-            db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
-                      desc="Cryptographic check data of passphrase")
+            db.getSession().add(db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
+                      desc="Cryptographic check data of passphrase"))
             return True
 
 

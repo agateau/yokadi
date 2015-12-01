@@ -1,12 +1,12 @@
 # -*- coding: UTF-8 -*-
 """
 TextListRenderer test cases
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
 
 import unittest
-from StringIO import StringIO
+from io import StringIO
 
 import yokadi.ycli.colors as C
 from yokadi.core import dbutils
@@ -15,11 +15,13 @@ import testutils
 from yokadi.ycli import tui
 from yokadi.ycli.textlistrenderer import TextListRenderer
 from yokadi.core.cryptutils import YokadiCryptoManager
+from yokadi.core import db
 
 
 class TextListRendererTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         tui.clearInputAnswers()
 
     def testTitleFormater(self):
@@ -34,9 +36,9 @@ class TextListRendererTestCase(unittest.TestCase):
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
         renderer.addTaskList("Foo", [t1])
-        self.assertEquals(renderer.maxTitleWidth, 5)
+        self.assertEqual(renderer.maxTitleWidth, 5)
         renderer.end()
-        expected = unicode(\
+        expected = str(\
               "%(CYAN)s              Foo               %(RESET)s\n" \
             + "%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s\n" \
             + "--------------------------------\n" \
@@ -47,9 +49,9 @@ class TextListRendererTestCase(unittest.TestCase):
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
         renderer.addTaskList("Foo", [t1, t2])
-        self.assertEquals(renderer.maxTitleWidth, 11)
+        self.assertEqual(renderer.maxTitleWidth, 11)
         renderer.end()
-        expected = unicode(\
+        expected = str(\
               "%(CYAN)s                 Foo                  %(RESET)s\n" \
             + "%(BOLD)sID|Title      |U  |S|Age     |Due date%(RESET)s\n" \
             + "--------------------------------------\n" \
@@ -61,9 +63,9 @@ class TextListRendererTestCase(unittest.TestCase):
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
         renderer.addTaskList("Foo", [t2, longerTask])
-        self.assertEquals(renderer.maxTitleWidth, len(longerTask.title) + 1)
+        self.assertEqual(renderer.maxTitleWidth, len(longerTask.title) + 1)
         renderer.end()
-        expected = unicode(\
+        expected = str(\
               "%(CYAN)s                     Foo                      %(RESET)s\n" \
             + "%(BOLD)sID|Title              |U  |S|Age     |Due date%(RESET)s\n" \
             + "----------------------------------------------\n" \

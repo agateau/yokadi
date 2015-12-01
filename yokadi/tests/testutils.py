@@ -1,24 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
 Utils for unit-test
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-from yokadi.core import db
-
-
-def clearDatabase():
-    """
-    Clear all tables of the database. Should be called in the setUp() method of
-    the testcase. Useful to ensure unit-tests start from a blank state.
-    """
-    print "Cleaning database"
-    for table in db.TABLE_LIST:
-        table.dropTable()
-    # Recreate database and default parameters
-    db.connectDatabase("", memoryDatabase=True)
-    db.setDefaultConfig()
 
 
 def multiLinesAssertEqual(test, str1, str2):
@@ -28,4 +13,18 @@ def multiLinesAssertEqual(test, str1, str2):
         line1, line2 = lines
         test.assertEqual(line1, line2, "Error line %d:\n%r\n!=\n%r" % (row + 1, line1, line2))
     test.assertEqual(len(lst1), len(lst2))
+
+
+class TestRenderer(object):
+    """
+    A fake renderer, which stores all rendered tasks in taskDict
+    """
+    def __init__(self):
+        self.taskDict = {}
+
+    def addTaskList(self, sectionName, taskList):
+        self.taskDict[sectionName] = taskList
+
+    def end(self):
+        pass
 # vi: ts=4 sw=4 et

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 """
 Update from version 3 to version 4 of Yokadi DB
@@ -9,7 +9,11 @@ Update from version 3 to version 4 of Yokadi DB
 import sys
 from os.path import dirname, join
 
-from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, StringCol
+try:
+    from sqlobject import connectionForURI, sqlhub, SQLObject, ForeignKey, StringCol
+except ImportError:
+    print("To run this update you need sqlobject")
+    sys.exit(1)
 
 
 """ This is the v4 table """

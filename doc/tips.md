@@ -4,7 +4,7 @@ This document presents practical advices on how to get the best out of Yokadi.
 
 # Completion
 
-Yokadi supports completion of command names, and in quite a few commands it can
+Yokadi supports completion of command names, and in many commands it can
 complete project names. Do not hesitate to try the `[tab]` key!
 
 # Setting up a project hierarchy
@@ -22,11 +22,11 @@ For example to list all `fooplayer` related tasks you can use:
 
 # Using keywords
 
-Keywords are great to group tasks in different way. For example you can create a
-keyword named `phone`, and assign it to tasks which you must accomplish on the
-phone.
+Keywords are great to group tasks in different ways. For example you can create
+a keyword named `phone`, and assign it to tasks which you must accomplish on
+the phone.
 
-Another useful keyword is `diy_store`: Everytime you find that you need to buy
+Another useful keyword is `diy_store`: Every time you find that you need to buy
 some supply from a do-it-yourself store, add it with this keyword. Next time you
 are planning a trip to the store, get the list of what to buy with:
 
@@ -48,9 +48,9 @@ When you delegate a task to someone, add a keyword with its name to the task.
 So you can check that people really do what they promise to do even if they
 are not as organized as you are.
 
-To list all task asigned to Bob:
+To list all tasks assigned to Bob:
 
-    t_list -@bob
+    t_list @bob
 
 To check all task that Bob should have done:
 
@@ -58,10 +58,11 @@ To check all task that Bob should have done:
 
 # Some useful shortcuts
 
-Yokadi rely on readline library, so you can use very useful readline shortcuts
-such as:
-- up/down arrows to browse history 
-- ctrl-r to search backward in yokadi history
+Yokadi relies on readline library, so you can use very useful readline
+shortcuts such as:
+
+- up/down arrows to browse history
+- ctrl-r to search backward in Yokadi history
 - ctrl-l to clear the screen
 - ctrl-t to swap two letters
 - ctrl-a to go the begin of the line

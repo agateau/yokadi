@@ -2,7 +2,7 @@
 """
 Task related commands.
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
@@ -11,18 +11,19 @@ import readline
 import re
 from datetime import datetime, timedelta
 from dateutil import rrule
-from sqlobject import LIKE, AND, OR, NOT, SQLObjectNotFound
-from sqlobject.sqlbuilder import LEFTJOINOn
+from sqlalchemy import or_, and_, desc
+from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from yokadi.core.db import Config, Keyword, Project, Task, \
-                    TaskKeyword, Recurrence
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence
 from yokadi.core import bugutils
 from yokadi.core import dbutils
+from yokadi.core import db
 from yokadi.core import ydateutils
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
                        taskIdCompleter, recurrenceCompleter, dueDateCompleter
+from yokadi.core.dbutils import DbFilter, KeywordFilter
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.ycli.textlistrenderer import TextListRenderer
 from yokadi.ycli.xmllistrenderer import XmlListRenderer
@@ -49,9 +50,11 @@ class TaskCmd(object):
         self.lastTaskIds = []  # Last list of ids selected with t_list
         self.kFilters = []  # Permanent keyword filters (List of KeywordFilter)
         self.pFilter = ""  # Permanent project filter (name of project)
+        self.session = db.getSession()
         for name in bugutils.PROPERTY_NAMES:
             dbutils.getOrCreateKeyword(name, interactive=False)
         dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
+        self.session.commit()
 
     def _parser_t_add(self, cmd):
         """Code shared by t_add, bug_add and n_add parsers."""
@@ -89,13 +92,12 @@ class TaskCmd(object):
 
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
-            tui.reinjectInRawInput(u"%s %s" % (cmd, line))
+            tui.reinjectInRawInput("%s %s" % (cmd, line))
             return None
         self.lastTaskId = task.id
 
         if args.describe:
             self.do_t_describe(self.lastTaskId)
-
         return task
 
     def do_t_add(self, line):
@@ -107,7 +109,10 @@ class TaskCmd(object):
                 title = "<... encrypted data...>"
             else:
                 title = task.title
-            print "Added task '%s' (id=%d)" % (title, task.id)
+            self.session.add(task)
+            self.session.commit()
+            print("Added task '%s' (id=%d)" % (title, task.id))
+
     complete_t_add = projectAndKeywordCompleter
 
     def do_bug_add(self, line):
@@ -128,7 +133,9 @@ class TaskCmd(object):
         else:
             title = task.title
 
-        print "Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency)
+        self.session.add(task)
+        self.session.commit()
+        print("Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency))
 
     complete_bug_add = ProjectCompleter(1)
 
@@ -139,6 +146,7 @@ class TaskCmd(object):
         task = self._t_add("n_add", line)
         if not task:
             return
+        self.session.add(task)
         keywordDict = task.getKeywordDict()
         keywordDict[NOTE_KEYWORD] = None
         task.setKeywordDict(keywordDict)
@@ -146,7 +154,8 @@ class TaskCmd(object):
             title = "<... encrypted data...>"
         else:
             title = task.title
-        print "Added note '%s' (id=%d)" % (title, task.id)
+        self.session.commit()
+        print("Added note '%s' (id=%d)" % (title, task.id))
     complete_n_add = projectAndKeywordCompleter
 
     def do_bug_edit(self, line):
@@ -160,6 +169,8 @@ class TaskCmd(object):
         bugutils.editBugKeywords(keywordDict)
         task.setKeywordDict(keywordDict)
         task.urgency = bugutils.computeUrgency(keywordDict)
+        self.session.merge(task)
+        self.session.commit()
     complete_bug_edit = taskIdCompleter
 
     def getTaskFromId(self, tid):
@@ -190,10 +201,12 @@ class TaskCmd(object):
             description = tui.editText(self.cryptoMgr.decrypt(task.description),
                                        onChanged=updateDescription,
                                        lockManager=dbutils.TaskLockManager(task),
-                                       prefix=u"yokadi-%s-%s-" % (task.project, task.title))
-        except Exception, e:
+                                       prefix="yokadi-%s-%s-" % (task.project, task.title))
+        except Exception as e:
             raise YokadiException(e)
         updateDescription(description)
+        self.session.merge(task)
+        self.session.commit()
 
     complete_t_describe = taskIdCompleter
 
@@ -225,6 +238,8 @@ class TaskCmd(object):
             urgency = -99
 
         task.urgency = urgency
+        self.session.merge(task)
+        self.session.commit()
 
     complete_t_set_urgency = taskIdCompleter
     complete_t_urgency = taskIdCompleter
@@ -254,15 +269,17 @@ class TaskCmd(object):
         task = self.getTaskFromId(line)
         if task.recurrence and status == "done":
             task.dueDate = task.recurrence.getNext(task.dueDate)
-            print "Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate)
-            print "To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id
+            print("Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate))
+            print("To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id)
         else:
             task.status = status
             if status == "done":
-                task.doneDate = datetime.now()
+                task.doneDate = datetime.now().replace(second=0, microsecond=0)
             else:
                 task.doneDate = None
-            print "Task '%s' marked as %s" % (task.title, status)
+            print("Task '%s' marked as %s" % (task.title, status))
+        self.session.merge(task)
+        self.session.commit()
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
@@ -288,7 +305,7 @@ class TaskCmd(object):
             if idScan:
                 result = rangeId.match(token)
                 if result:
-                    ids.extend(range(int(result.group(1)), int(result.group(2)) + 1))
+                    ids.extend(list(range(int(result.group(1)), int(result.group(2)) + 1)))
                 elif token.isdigit():
                     ids.append(int(token))
                 else:
@@ -301,9 +318,9 @@ class TaskCmd(object):
         if not cmdTokens:
             raise BadUsageException("Give a command to apply")
         cmd = cmdTokens.pop(0)
-        for id in ids:
-            line = " ".join([cmd, str(id), " ".join(cmdTokens)])
-            print "Executing: %s" % line
+        for taskId in ids:
+            line = " ".join([cmd, str(taskId), " ".join(cmdTokens)])
+            print("Executing: %s" % line)
             self.onecmd(line.strip())
 
     complete_t_apply = taskIdCompleter
@@ -324,14 +341,14 @@ class TaskCmd(object):
         if not args.force:
             if not tui.confirm("Remove task '%s'" % task.title):
                 return
-        projectId = task.project.id
-        task.destroySelf()
-        print "Task '%s' removed" % (task.title)
+        project = task.project
+        self.session.delete(task)
+        print("Task '%s' removed" % (task.title))
 
         # Delete project with no associated tasks
-        if Task.select(Task.q.projectID == projectId).count() == 0:
-            Project.delete(projectId)
-
+        if self.session.query(Task).filter_by(project=project).count() == 0:
+            self.session.delete(project)
+        self.session.commit()
     complete_t_remove = taskIdCompleter
 
     def parser_t_purge(self):
@@ -340,7 +357,7 @@ class TaskCmd(object):
         parser.description = "Remove old done tasks from all projects."
         parser.add_argument("-f", "--force", dest="force", default=False, action="store_true",
                           help="Skip confirmation prompt")
-        delay = int(Config.byName("PURGE_DELAY").value)
+        delay = int(db.getConfigKey("PURGE_DELAY", environ=False))
         parser.add_argument("-d", "--delay", dest="delay", default=delay,
                           type=int, help="Delay (in days) after which done tasks are destroyed. Default is %d." % delay)
         return parser
@@ -349,19 +366,20 @@ class TaskCmd(object):
         parser = self.parser_t_purge()
         args = parser.parse_args(line)
         filters = []
-        filters.append(Task.q.status == "done")
-        filters.append(Task.q.doneDate < (datetime.now() - timedelta(days=args.delay)))
-        tasks = Task.select(AND(*filters))
+        filters.append(Task.status == "done")
+        filters.append(Task.doneDate < (datetime.now() - timedelta(days=args.delay)))
+        tasks = self.session.query(Task).filter(*filters)
         if tasks.count() == 0:
-            print "No tasks need to be purged"
+            print("No tasks need to be purged")
             return
-        print "The following tasks will be removed:"
-        print "\n".join(["%s: %s" % (task.id, task.title) for task in tasks])
+        print("The following tasks will be removed:")
+        print("\n".join(["%s: %s" % (task.id, task.title) for task in tasks]))
         if args.force or tui.confirm("Do you really want to remove those tasks (this action cannot be undone)?"):
-            Task.deleteMany(AND(*filters))
-            print "Tasks deleted"
+            self.session.delete(tasks)
+            self.session.commit()
+            print("Tasks deleted")
         else:
-            print "Purge canceled"
+            print("Purge canceled")
 
     def parser_t_list(self):
         parser = YokadiOptionParser()
@@ -420,7 +438,7 @@ class TaskCmd(object):
                           help="only list tasks whose title or description match <value>. You can repeat this option to search on multiple words.",
                           metavar="<value>")
 
-        formatList = ["auto"] + gRendererClassDict.keys()
+        formatList = ["auto"] + list(gRendererClassDict.keys())
         parser.add_argument("-f", "--format", dest="format",
                           default="auto", choices=formatList,
                           help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
@@ -450,14 +468,14 @@ class TaskCmd(object):
         """
         args = parser.parse_args(line)
         if len(args.filter) > 0:
-            projectName, keywordFilters = parseutils.extractKeywords(u" ".join(args.filter))
+            projectName, filters = parseutils.extractKeywords(" ".join(args.filter))
         else:
             projectName = ""
-            keywordFilters = []
+            filters = []
 
         if self.kFilters:
             # Add keyword filter
-            keywordFilters.extend(self.kFilters)
+            filters.extend(self.kFilters)
 
         if not projectName:
             if self.pFilter:
@@ -469,23 +487,16 @@ class TaskCmd(object):
 
         if projectName.startswith("!"):
             projectName = self._realProjectName(projectName[1:])
-            projectList = Project.select(NOT(LIKE(Project.q.name, projectName)))
+            projectList = self.session.query(Project).filter(Project.name.notlike(projectName)).all()
         else:
             projectName = self._realProjectName(projectName)
-            projectList = Project.select(LIKE(Project.q.name, projectName))
+            projectList = self.session.query(Project).filter(Project.name.like(projectName)).all()
 
-        if projectList.count() == 0:
+        if len(projectList) == 0:
             raise YokadiException("Found no project matching '%s'" % projectName)
 
         # Check keywords exist
-        parseutils.warnIfKeywordDoesNotExist(keywordFilters)
-
-        # Filtering and sorting according to parameters
-        filters = []
-
-        # Filter on keywords
-        for keywordFilter in keywordFilters:
-            filters.append(keywordFilter.filter())
+        parseutils.warnIfKeywordDoesNotExist(filters)
 
         # Search
         if args.search:
@@ -493,8 +504,9 @@ class TaskCmd(object):
                 if word.startswith("@"):
                     tui.warning("Maybe you want keyword search (without -s option) "
                                 "instead of plain text search?")
-                filters.append(OR(LIKE(Task.q.title, "%" + word + "%"),
-                                  LIKE(Task.q.description, "%" + word + "%")))
+                condition = or_(Task.title.like("%" + word + "%"),
+                                Task.description.like("%" + word + "%"))
+                filters.append(DbFilter(condition))
 
         return args, projectList, filters
 
@@ -505,28 +517,33 @@ class TaskCmd(object):
         other parameters
         @param renderer: renderer class (for example: TextListRenderer)
         @param projectList: list of project name (as unicode string)
-        @param filters: filters in sqlobject format (example: Task.q.status == 'done')
-        @param order: ordering in sqlobject format (example: -Task.q.urgency)
+        @param filters: filters in sql alchemy format (example: Task.status == 'done')
+        @param order: ordering in sqlalchemy format (example: desc(Task.urgency))
         @param limit: limit number tasks (int) or None for no limit
         @param groupKeyword: keyword used for grouping (as unicode string) or None
         """
+        def applyFilters(lst):
+            for filter in filters:
+                lst = filter.apply(lst)
+            return lst
+
         if groupKeyword:
             if groupKeyword.startswith("@"):
                 groupKeyword = groupKeyword[1:]
-            for keyword in Keyword.select(LIKE(Keyword.q.name, groupKeyword)):
-                if unicode(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
-                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed whith _
+            for keyword in self.session.query(Keyword).filter(Keyword.name.like(groupKeyword)):
+                if str(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
+                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
                     continue
-                taskList = Task.select(AND(TaskKeyword.q.keywordID == keyword.id,
-                                           *filters),
-                                       orderBy=order, limit=limit, distinct=True,
-                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
+                taskList = self.session.query(Task).filter(TaskKeyword.keywordId == keyword.id)
+                taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
+                taskList = applyFilters(taskList)
+                taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
                 if projectList:
                     taskList = [x for x in taskList if x.project in projectList]
                 if len(taskList) > 0:
                     self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
-                    renderer.addTaskList(unicode(keyword), taskList)
+                    renderer.addTaskList(str(keyword), taskList)
             renderer.end()
         else:
             hiddenProjectNames = []
@@ -534,20 +551,20 @@ class TaskCmd(object):
                 if not project.active:
                     hiddenProjectNames.append(project.name)
                     continue
-                taskList = Task.select(AND(Task.q.projectID == project.id, *filters),
-                                       orderBy=order, limit=limit, distinct=True,
-                                       join=LEFTJOINOn(Task, TaskKeyword, Task.q.id == TaskKeyword.q.taskID))
+                taskList = self.session.query(Task).filter(Task.project == project)
+                taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
+                taskList = applyFilters(taskList)
+                taskList = taskList.order_by(*order).limit(limit).distinct()
                 taskList = list(taskList)
-
                 if len(taskList) > 0:
                     self.lastTaskIds.extend([t.id for t in taskList])  # Keep selected id for further use
-                    renderer.addTaskList(unicode(project), taskList)
+                    renderer.addTaskList(str(project), taskList)
             renderer.end()
 
             if len(hiddenProjectNames) > 0:
                 tui.info("hidden projects: %s" % ", ".join(hiddenProjectNames))
 
-    def do_t_list(self, line):
+    def do_t_list(self, line, renderer=None):
 
         def selectRendererClass():
             if args.format != "auto":
@@ -566,50 +583,51 @@ class TaskCmd(object):
         # Reset last tasks id list
         self.lastTaskIds = []
 
-        # BUG: completion based on parameter position is broken when parameter is given
+        # BUG: completion based on parameter position is broken when parameter is given"
         args, projectList, filters = self._parseListLine(self.parser_t_list(), line)
 
         # Skip notes
-        filters.append(parseutils.KeywordFilter("!@" + NOTE_KEYWORD).filter())
+        filters.append(KeywordFilter(NOTE_KEYWORD, negative=True))
 
         # Handle t_list specific options
-        order = -Task.q.urgency, Task.q.creationDate
+        order = [desc(Task.urgency), Task.creationDate]
         limit = None
         if args.done:
-            filters.append(Task.q.status == 'done')
+            filters.append(DbFilter(Task.status == 'done'))
             if args.done != "all":
                 minDate = ydateutils.parseMinDate(args.done)
-                filters.append(Task.q.doneDate >= minDate)
+                filters.append(DbFilter(Task.doneDate >= minDate))
         elif args.status == "all":
             pass
         elif args.status == "started":
-            filters.append(Task.q.status == 'started')
+            filters.append(DbFilter(Task.status == "started"))
         else:
-            filters.append(Task.q.status != 'done')
+            filters.append(DbFilter(Task.status != "done"))
         if args.urgency:
-            order = -Task.q.urgency
-            filters.append(Task.q.urgency >= args.urgency)
+            order = [desc(Task.urgency), ]
+            filters.append(DbFilter(Task.urgency >= args.urgency))
         if args.topDue:
-            filters.append(Task.q.dueDate != None)
-            order = Task.q.dueDate
+            filters.append(DbFilter(Task.dueDate != None))
+            order = [Task.dueDate, ]
             limit = 5
         if args.due:
             for due in args.due:
                 dueOperator, dueLimit = ydateutils.parseDateLimit(due)
-                filters.append(dueOperator(Task.q.dueDate, dueLimit))
-            order = Task.q.dueDate
+                filters.append(DbFilter(dueOperator(Task.dueDate, dueLimit)))
+            order = [Task.dueDate, ]
         if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
         # Define output
         if args.output:
-            out = open(args.output, "w")
+            out = open(args.output, "w", encoding='utf-8')
         else:
             out = tui.stdout
 
         # Instantiate renderer
-        rendererClass = selectRendererClass()
-        renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
+        if renderer is None:
+            rendererClass = selectRendererClass()
+            renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
 
         # Fill the renderer
         self._renderList(renderer, projectList, filters, order, limit, args.keyword)
@@ -630,7 +648,7 @@ class TaskCmd(object):
                           metavar="<value>")
 
         parser.add_argument("-k", "--keyword", dest="keyword",
-                          help="Group tasks by given keyword instead of project. The % wildcard can be used.",
+                          help="Group tasks by given keyword instead of project. The '%%' wildcard can be used.",
                           metavar="<keyword>")
         parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
                           help="Decrypt note title and description")
@@ -643,8 +661,8 @@ class TaskCmd(object):
         if args.decrypt:
             self.cryptoMgr.force_decrypt = True
 
-        filters.append(parseutils.KeywordFilter("@" + NOTE_KEYWORD).filter())
-        order = Task.q.creationDate
+        filters.append(KeywordFilter(NOTE_KEYWORD))
+        order = [Task.creationDate, ]
         renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=args.keyword)
@@ -657,13 +675,12 @@ class TaskCmd(object):
         updated to match the order.
         t_reorder <project_name>"""
         try:
-            project = Project.byName(line)
-        except SQLObjectNotFound:
+            project = self.session.query(Project).filter_by(name=line).one()
+        except (MultipleResultsFound, NoResultFound):
             raise BadUsageException("You must provide a valid project name")
 
-        taskList = Task.select(AND(Task.q.projectID == project.id,
-                                   Task.q.status != 'done'),
-                               orderBy=-Task.q.urgency)
+        taskList = self.session.query(Task).filter(Task.projectId == project.id,
+                                                   Task.status != 'done').order_by(desc(Task.urgency))
         lines = ["%d,%s" % (x.id, x.title) for x in taskList]
         text = tui.editText("\n".join(lines))
 
@@ -672,14 +689,14 @@ class TaskCmd(object):
             line = line.strip()
             if not "," in line:
                 continue
-            id = int(line.split(",")[0])
-            ids.append(id)
+            ids.append(int(line.split(",")[0]))
 
         ids.reverse()
-        for urgency, id in enumerate(ids):
-            task = Task.get(id)
+        for urgency, taskId in enumerate(ids):
+            task = self.session.query(Task).get(taskId)
             task.urgency = urgency
-
+            self.session.merge(task)
+        self.session.commit()
     complete_t_reorder = ProjectCompleter(1)
 
     def parser_t_show(self):
@@ -712,7 +729,7 @@ class TaskCmd(object):
         if args.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
             keywordArray = []
-            for name, value in keywordDict.items():
+            for name, value in list(keywordDict.items()):
                 txt = name
                 if value:
                     txt += "=" + str(value)
@@ -738,8 +755,8 @@ class TaskCmd(object):
 
         if args.output in ("all", "description") and task.description:
             if args.output == "all":
-                print
-            print description
+                print()
+            print(description)
 
     complete_t_show = taskIdCompleter
 
@@ -777,15 +794,15 @@ class TaskCmd(object):
 
         while True:
             # Edit
-            print "(Press Ctrl+C to cancel)"
+            print("(Press Ctrl+C to cancel)")
             try:
                 line = tui.editLine(taskLine)
                 if not line.strip():
                     tui.warning("Missing title")
                     continue
             except KeyboardInterrupt:
-                print
-                print "Cancelled"
+                print()
+                print("Cancelled")
                 task = None
                 break
             foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
@@ -795,12 +812,14 @@ class TaskCmd(object):
                 break
 
         readline.set_completer(oldCompleter)  # Restore standard completer
+        self.session.merge(task)
         return task
 
     def do_t_edit(self, line):
         """Edit a task.
         t_edit <id>"""
         self._t_edit(line)
+        self.session.commit()
     complete_t_edit = taskIdCompleter
 
     def do_t_set_project(self, line):
@@ -819,8 +838,10 @@ class TaskCmd(object):
         projectName = self._realProjectName(projectName)
 
         task.project = dbutils.getOrCreateProject(projectName)
+        self.session.merge(task)
+        self.session.commit()
         if task.project:
-            print "Moved task '%s' to project '%s'" % (task.title, projectName)
+            print("Moved task '%s' to project '%s'" % (task.title, projectName))
 
     complete_t_set_project = ProjectCompleter(2)
     complete_t_project = ProjectCompleter(2)
@@ -861,11 +882,12 @@ class TaskCmd(object):
 
         if line.lower() == "none":
             task.dueDate = None
-            print "Due date for task '%s' reset" % task.title
+            print("Due date for task '%s' reset" % task.title)
         else:
             task.dueDate = ydateutils.parseHumaneDateTime(line)
-            print "Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime())
-
+            print("Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime()))
+        self.session.merge(task)
+        self.session.commit()
     complete_t_set_due = dueDateCompleter
     complete_t_due = dueDateCompleter
 
@@ -883,13 +905,15 @@ class TaskCmd(object):
             raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
                                    % garbage)
 
-        if not dbutils.createMissingKeywords(newKwDict.keys()):
+        if not dbutils.createMissingKeywords(list(newKwDict.keys())):
             # User cancel keyword creation
             return
 
         kwDict = task.getKeywordDict()
         kwDict.update(newKwDict)
         task.setKeywordDict(kwDict)
+        self.session.merge(task)
+        self.session.commit()
 
     def do_t_recurs(self, line):
         """Make a task recurs
@@ -913,7 +937,7 @@ class TaskCmd(object):
 
         if tokens[1] == "none":
             if task.recurrence:
-                task.recurrence.destroySelf()
+                self.session.delete(task.recurrence)
                 task.recurrence = None
             return
         elif tokens[1] == "daily":
@@ -941,7 +965,7 @@ class TaskCmd(object):
                 byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
             except ValueError:
                 POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
-                if tokens[2].lower() in POSITION.keys() and len(tokens) == 5:
+                if tokens[2].lower() in list(POSITION.keys()) and len(tokens) == 5:
                     byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
                                               POSITION[tokens[2]])
                     byhour, byminute = ydateutils.getHourAndMinute(tokens[4])
@@ -964,6 +988,8 @@ class TaskCmd(object):
                          bymonthday=bymonthday, bymonth=bymonth)
         task.recurrence.setRrule(rr)
         task.dueDate = task.recurrence.getNext()
+        self.session.merge(task)
+        self.session.commit()
     complete_t_recurs = recurrenceCompleter
 
     def do_t_filter(self, line):

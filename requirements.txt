@@ -1,6 +1,2 @@
-SQLObject>=0.9
-dateutils>=0.6.6
-icalendar==3.6.1
+sqlalchemy>=0.9, <0.9.99
 python-dateutil==2.2
-pycrypto==2.6.1
-setproctitle==1.1.8

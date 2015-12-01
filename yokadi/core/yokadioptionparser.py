@@ -3,7 +3,7 @@
 An ArgumentParser which accepts a single string as input and raise an exception
 instead of calling sys.exit() in case of error
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
 from argparse import ArgumentParser
@@ -22,9 +22,9 @@ class YokadiOptionParser(ArgumentParser):
         ArgumentParser.__init__(self, prog=prog)
 
     def parse_args(self, line):
-        argv = line.split(u" ")
+        argv = line.split(" ")
         # Splitting an empty line gives us [""], not an empty array
-        if argv == [u""]:
+        if argv == [""]:
             argv = []
 
         # Unknown options will throw an error

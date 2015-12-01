@@ -105,18 +105,19 @@ fields). You should:
 
 - Implement your changes in db.py
 
-- Increase the database version number
+- Increase the database version number (`DB_VERSION` in db.py)
 
 - Write an update script in update/
 
-- Assuming the current version is x and your new version is x+1, you should tag
-  the last commit *before* your changes as "db-vx".
-  This way one can checkout the latest version of Yokadi before your changes,
-  create a database version x and test your update script.
-  The correct way to create the tag is:
+- When the changes are merged in master, tag the merge commit using the tag
+  name `db-v<new-version-number>`, like this:
 
-        # Note the -a!
-        git tag -a db-vx
-        git push --tags
+      # Note the -a!
+      git tag -a db-v<version-number>
+      git push --tags
+
+Note: up to db-v4, `db-v*` have been created on the last commit before the
+update to a new version, so `db-v4` is on the last commit before `DB_VERSION`
+was bumped to 5.
 
 <!-- vim: set ts=4 sw=4 et: -->

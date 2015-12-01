@@ -2,7 +2,7 @@
 """
 Csv rendering of t_list output
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
@@ -28,5 +28,5 @@ class CsvListRenderer(object):
         pass
 
     def _writerow(self, row):
-        self.writer.writerow([unicode(x).encode(tui.ENCODING) for x in row])
+        self.writer.writerow([str(x) for x in row])
 # vi: ts=4 sw=4 et

@@ -2,15 +2,17 @@
 """
 Project related commands.
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-from sqlobject import SQLObjectNotFound
-from sqlobject.dberrors import DuplicateEntryError
+
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import IntegrityError
 
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter
 from yokadi.ycli import parseutils
+from yokadi.core import db
 from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParser
@@ -27,75 +29,79 @@ def getProjectFromName(name, parameterName="project_name"):
         raise BadUsageException("Missing <%s> parameter" % parameterName)
 
     try:
-        return Project.byName(name)
-    except SQLObjectNotFound:
+        session = db.getSession()
+        return session.query(Project).filter_by(name=name).one()
+    except NoResultFound:
         raise YokadiException("Project '%s' not found. Use p_list to see all projects." % name)
 
 
 class ProjectCmd(object):
     def do_p_add(self, line):
-        """Add new project. Will prompt to create keywords if they do not exist.
-        p_add <projectName> [@<keyword1>] [@<keyword2>]"""
+        """Add new project.
+        p_add <projectName>"""
         if not line:
-            print "Give at least a project name !"
+            print("Missing project name.")
             return
-        projectName, garbage, keywordDict = parseutils.parseLine(line)
-        if garbage:
-            raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
+        projectName = parseutils.parseProjectName(line)
+        session = db.getSession()
         try:
             project = Project(name=projectName)
-        except DuplicateEntryError:
+            session.add(project)
+            session.commit()
+        except IntegrityError:
+            session.rollback()
             raise YokadiException("A project named %s already exists. Please find another name" % projectName)
-        print "Added project '%s'" % projectName
-        if not dbutils.createMissingKeywords(keywordDict.keys()):
-            return None
-        project.setKeywordDict(keywordDict)
+        print("Added project '%s'" % projectName)
 
     def do_p_edit(self, line):
         """Edit a project.
         p_edit <project name>"""
+        session = db.getSession()
         project = dbutils.getOrCreateProject(line, createIfNeeded=False)
 
         if not project:
             raise YokadiException("Project does not exist.")
 
-        # Create project line
-        projectLine = parseutils.createLine(project.name, "", project.getKeywordDict())
-
         # Edit
-        line = tui.editLine(projectLine)
+        line = tui.editLine(project.name)
 
         # Update project
-        projectName, garbage, keywordDict = parseutils.parseLine(line)
-        if garbage:
-            raise BadUsageException("Cannot parse line, got garbage (%s)" % garbage)
-        if not dbutils.createMissingKeywords(keywordDict.keys()):
-            return
+        projectName = parseutils.parseProjectName(line)
         try:
             project.name = projectName
-        except DuplicateEntryError:
+            session.commit()
+        except IntegrityError:
+            session.rollback()
             raise YokadiException("A project named %s already exists. Please find another name" % projectName)
-        project.setKeywordDict(keywordDict)
 
     complete_p_edit = ProjectCompleter(1)
 
     def do_p_list(self, line):
         """List all projects."""
-        for project in Project.select():
+        session = db.getSession()
+        for project in session.query(Project).all():
             if project.active:
                 active = ""
             else:
                 active = "(inactive)"
-            print "%s %s %s %s" % (project.name.ljust(20), project.getKeywordsAsString().ljust(20), str(Task.select(Task.q.project == project).count()).rjust(4), active)
+            print("%s %s %s" % (project.name.ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active))
 
     def do_p_set_active(self, line):
         """Activate the given project"""
-        getProjectFromName(line).active = True
+        session = db.getSession()
+        project = getProjectFromName(line)
+        project.active = True
+        session.merge(project)
+        session.commit()
     complete_p_set_active = ProjectCompleter(1)
 
     def do_p_set_inactive(self, line):
         """Desactivate the given project"""
-        getProjectFromName(line).active = False
+        session = db.getSession()
+        project = getProjectFromName(line)
+        project.active = False
+        session.merge(project)
+        session.commit()
     complete_p_set_inactive = ProjectCompleter(1)
 
     def parser_p_remove(self):
@@ -108,20 +114,17 @@ class ProjectCmd(object):
         return parser
 
     def do_p_remove(self, line):
+        session = db.getSession()
         parser = self.parser_p_remove()
         args = parser.parse_args(line)
         project = getProjectFromName(args.project)
-        taskList = Task.select(Task.q.projectID == project.id)
-        taskList = list(taskList)
+        nbTasks = len(project.tasks)
         if not args.force:
-            if not tui.confirm("Remove project '%s' and its %d tasks" % (project.name, len(taskList))):
+            if not tui.confirm("Remove project '%s' and its %d tasks" % (project.name, nbTasks)):
                 return
-        print "Removing project tasks:"
-        for task in taskList:
-            task.delete(task.id)
-            print "- task %(id)-3s: %(title)-30s" % dict(id=str(task.id), title=str(task.title))
-        project.delete(project.id)
-        print "Project removed"
+        session.delete(project)
+        session.commit()
+        print("Project removed")
     complete_p_remove = ProjectCompleter(1)
 
 # vi: ts=4 sw=4 et

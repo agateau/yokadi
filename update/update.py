@@ -1,9 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 This script updates a Yokadi database to the latest version
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or newer
 """
 
@@ -14,25 +14,19 @@ import sys
 import shutil
 from argparse import ArgumentParser
 
-from sqlobject import *
-
 import dump
 
-sys.path.append(join(dirname(__file__), "..", "src"))
+sys.path.append(join(dirname(__file__), ".."))
 from yokadi.core import db
 
 def getVersion(fileName):
-    cx = connectionForURI('sqlite:' + fileName)
-    if not cx.tableExists("config"):
-        return 1
-    row = cx.queryOne("select value from config where name='DB_VERSION'")
-    return int(row[0])
+    database = db.Database(fileName, createIfNeeded=False, updateMode=True)
+    return database.getVersion()
 
 
 def setVersion(fileName, version):
-    cx = connectionForURI('sqlite:' + fileName)
-    assert cx.tableExists("config")
-    cx.query("update config set value=%d where name='DB_VERSION'" % version)
+    database = db.Database(fileName, createIfNeeded=False, updateMode=True)
+    database.setVersion(version)
 
 
 def createWorkDb(fileName):
@@ -43,17 +37,21 @@ def createWorkDb(fileName):
 
 def createFinalDb(workFileName, finalFileName):
     dumpFileName = "dump.sql"
-    print "Dumping into %s" % dumpFileName
-    dumpFile = file(dumpFileName, "w")
+    print("Dumping into %s" % dumpFileName)
+    dumpFile = open(dumpFileName, "w", encoding='utf-8')
     dump.dumpDatabase(workFileName, dumpFile)
     dumpFile.close()
 
-    print "Restoring dump from %s into %s" % (dumpFileName, finalFileName)
-    sqlhub.processConnection = connectionForURI("sqlite:" + finalFileName)
-    db.createTables()
+    database = db.Database(finalFileName, True, updateMode=True)
+    print("Restoring dump from %s into %s" % (dumpFileName, finalFileName))
     err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
     if err != 0:
         raise Exception("Dump restoration failed")
+
+
+def die(message):
+    print("error: " + message, file=sys.stderr)
+    sys.exit(1)
 
 
 def main():
@@ -67,16 +65,17 @@ def main():
     dbFileName = abspath(args.current)
     newDbFileName = abspath(args.updated)
     if not os.path.exists(dbFileName):
-        parser.error("'%s' does not exist" % dbFileName)
+        die("'%s' does not exist." % dbFileName)
 
     if os.path.exists(newDbFileName):
-        parser.error("'%s' already exists" % newDbFileName)
+        die("'%s' already exists." % newDbFileName)
 
     # Check version
     version = getVersion(dbFileName)
-    print "Found version %d" % version
+    print("Found version %d" % version)
+
     if version == db.DB_VERSION:
-        print "Nothing to do"
+        print("Nothing to do")
         return 0
 
     # Start import
@@ -86,13 +85,12 @@ def main():
     oldVersion = getVersion(workDbFileName)
     for version in range(oldVersion, db.DB_VERSION):
         scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
-        print "Running %s" % scriptFileName
+        print("Running %s" % scriptFileName)
         err = subprocess.call([scriptFileName, workDbFileName])
         if err != 0:
-            print "Update failed."
-            return 2
-    setVersion(workDbFileName, db.DB_VERSION)
+            die("Update failed.")
 
+    setVersion(workDbFileName, db.DB_VERSION)
     createFinalDb(workDbFileName, newDbFileName)
 
     return 0

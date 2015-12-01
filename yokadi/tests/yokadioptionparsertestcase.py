@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 """
 Yokadi parser test cases
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
 
@@ -16,7 +16,7 @@ class YokadiOptionParserTestCase(unittest.TestCase):
     def testQuote(self):
         parser = YokadiOptionParser()
         parser.add_argument("cmd", nargs='*')
-        src = u"There's a quote here"
+        src = "There's a quote here"
         args = parser.parse_args(src)
         # Recreate the line
         line = " ".join(args.cmd)

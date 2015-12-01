@@ -13,11 +13,14 @@ import datetime
 from yokadi.ycli import tui
 from yokadi.yical import yical
 from yokadi.core import dbutils
+from yokadi.core import db
+from yokadi.core.db import Task
 
 
 class IcalTestCase(unittest.TestCase):
     def setUp(self):
-        testutils.clearDatabase()
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
         tui.clearInputAnswers()
 
     def testUrgencyMapping(self):
@@ -25,18 +28,18 @@ class IcalTestCase(unittest.TestCase):
         t1 = dbutils.addTask("x", "t1", {})
         v1 = yical.createVTodoFromTask(t1)
 
-        self.assertEquals(v1.get("priority"), None)  # No priority
+        self.assertEqual(v1.get("priority"), None)  # No priority
 
         t1.urgency = 45
         v1 = yical.createVTodoFromTask(t1)
-        self.assertEquals(v1.get("priority"), 2)
+        self.assertEqual(v1.get("priority"), 2)
 
         yical.updateTaskFromVTodo(t1, v1)
-        self.assertEquals(t1.urgency, 45)  # Ensure urgency does change
+        self.assertEqual(t1.urgency, 45)  # Ensure urgency does change
 
         v1["priority"] = 4
         yical.updateTaskFromVTodo(t1, v1)
-        self.assertEquals(t1.urgency, 20)  # Check urgency is updated
+        self.assertEqual(t1.urgency, 20)  # Check urgency is updated
 
     def testTitleMapping(self):
         tui.addInputAnswers("y")
@@ -78,33 +81,36 @@ class IcalTestCase(unittest.TestCase):
         v1 = yical.createVTodoFromTask(t1)
 
         # Check categories are created
-        categories = [unicode(c) for c in v1.get("categories")]
+        categories = [str(c) for c in v1.get("categories")]
         categories.sort()
         self.assertEqual(categories, ["k1", "k2=123"])
 
         # Check keywords are still here
         yical.updateTaskFromVTodo(t1, v1)
-        keywords = t1.getKeywordDict().keys()
+        keywords = list(t1.getKeywordDict().keys())
+        self.session.commit()
         keywords.sort()
-        self.assertEqual(keywords, [u"k1", u"k2"])
+        self.assertEqual(keywords, ["k1", "k2"])
         self.assertEqual(t1.getKeywordDict()["k2"], 123)
 
         # Remove k2 category
         v1["categories"] = ["k1"]
         yical.updateTaskFromVTodo(t1, v1)
-        self.assertEqual(t1.getKeywordDict().keys(), [u"k1", ])
+        self.session.commit()
+        self.assertEqual(list(t1.getKeywordDict().keys()), ["k1", ])
 
         # Set k1 value
         v1["categories"] = ["k1=456", ]
         yical.updateTaskFromVTodo(t1, v1)
+        self.session.commit()
         self.assertEqual(t1.getKeywordDict()["k1"], 456)
 
         # Create a category
         v1["categories"] = ["k1", "k4=789"]
         yical.updateTaskFromVTodo(t1, v1)
-        keywords = t1.getKeywordDict().keys()
+        keywords = list(t1.getKeywordDict().keys())
         keywords.sort()
-        self.assertEqual(keywords, [u"k1", "k4"])
+        self.assertEqual(keywords, ["k1", "k4"])
         self.assertEqual(t1.getKeywordDict()["k4"], 789)
 
     def testTaskDoneMapping(self):

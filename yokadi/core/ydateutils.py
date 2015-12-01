@@ -211,7 +211,7 @@ def formatTimeDelta(delta):
         minutes = delta.seconds / 60
         hours = minutes / 60
         minutes = minutes % 60
-        if hours > 0:
+        if hours >= 1:
             value = "%dh " % hours
         else:
             value = ""

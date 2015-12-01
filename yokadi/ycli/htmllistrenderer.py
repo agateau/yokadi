@@ -2,7 +2,7 @@
 """
 HTML rendering of t_list output
 
-@author: Aurélien Gâteau <aurelien.gateau@free.fr>
+@author: Aurélien Gâteau <mail@agateau.com>
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
@@ -12,15 +12,15 @@ TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "urgency", "statu
 
 
 def escape(text):
-    return saxutils.escape(unicode(text))
+    return saxutils.escape(str(text))
 
 
 def printRow(out, tag, lst):
-    print >> out, "<tr>"
+    print("<tr>", file=out)
     for value in lst:
         text = escape(value).encode("utf-8") or "&nbsp;"
-        print >> out, "<%s>%s</%s>" % (tag, text, tag)
-    print >> out, "</tr>"
+        print("<%s>%s</%s>" % (tag, text, tag), file=out)
+    print("</tr>", file=out)
 
 
 class HtmlListRenderer(object):
@@ -29,7 +29,7 @@ class HtmlListRenderer(object):
         self.cryptoMgr = cryptoMgr
 
         # TODO: make this fancier
-        print >> self.out, """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+        print("""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
                 <html>
                 <head>
                     <style>
@@ -41,7 +41,7 @@ class HtmlListRenderer(object):
                     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
                 </head>
                 <body>
-                """
+                """, file=self.out)
 
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
@@ -51,8 +51,8 @@ class HtmlListRenderer(object):
         @type taskList: list of db.Task instances
         """
 
-        print >> self.out, (u"<h1>%s</h1>" % escape(sectionName)).encode("utf-8")
-        print >> self.out, "<table width='100%'>"
+        print(("<h1>%s</h1>" % escape(sectionName)).encode("utf-8"), file=self.out)
+        print("<table width='100%'>", file=self.out)
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:
             lst = [self.cryptoMgr.decrypt(task.title), ]
@@ -62,8 +62,8 @@ class HtmlListRenderer(object):
             lst.append(self.cryptoMgr.decrypt(task.description))
             lst.append(task.getKeywordsAsString())
             printRow(self.out, "td", lst)
-        print >> self.out, "</table>"
+        print("</table>", file=self.out)
 
     def end(self):
-        print >> self.out, "</body></html>"
+        print("</body></html>", file=self.out)
 # vi: ts=4 sw=4 et

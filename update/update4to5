@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 """
 Update from version 4 to version 5 of Yokadi DB
@@ -7,7 +7,12 @@ Update from version 4 to version 5 of Yokadi DB
 @license: GPL v3 or newer
 """
 import sys
-from sqlobject import connectionForURI, sqlhub
+
+try:
+    from sqlobject import connectionForURI, sqlhub
+except ImportError:
+    print("To run this update you need sqlobject")
+    sys.exit(1)
 
 
 def updateBugsKeywordsNames():

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """Setup script used to build and install Yokadi
@@ -10,27 +10,35 @@
 from distutils.core import setup
 import sys
 import os
+from fnmatch import fnmatch
 from os.path import abspath, isdir, dirname, join
 
 # yokadi root path
-root=abspath(dirname(__file__))
+root = abspath(dirname(__file__))
+
+def createFileList(sourceDir, *patterns):
+    """
+    List files from sourceDir which match one of the pattern in patterns
+    Returns the path including sourceDir
+    """
+    for name in os.listdir(sourceDir):
+        for pattern in patterns:
+            if fnmatch(name, pattern):
+                yield join(sourceDir, name)
 
 # Additional files
-data_files=[]
+data_files = []
 data_files.append(["share/yokadi",
-                   ["version", "README.markdown", "NEWS", "LICENSE"]])
+                  ["version", "README.md", "NEWS", "LICENSE"]])
 
 # Doc
-data_files.append(["share/yokadi/doc",
-                   ["doc/%s" % f for f in os.listdir(join(root, "doc"))]])
+data_files.append(["share/yokadi/doc", createFileList("doc", "*.md")])
 
 # Man
-data_files.append(["share/man/man1",
-                   ["man/%s" % f for f in os.listdir(join(root, "man"))]])
+data_files.append(["share/man/man1", createFileList("man", "*.1")])
 
 # Update scripts
-data_files.append(["share/yokadi/update",
-                   ["update/%s" % f for f in os.listdir(join(root, "update"))]])
+data_files.append(["share/yokadi/update", createFileList("update", "*.py", "update*to*")])
 
 # Icon
 for size in os.listdir("icon"):
@@ -42,31 +50,27 @@ for size in os.listdir("icon"):
 data_files.append(["share/applications", ["icon/yokadi.desktop"]])
 
 # Scripts
-scripts=["bin/yokadi", "bin/yokadid"]
+scripts = ["bin/yokadi", "bin/yokadid"]
 
 # Version
 try:
-    version=file(join(root, "version")).readline().rstrip().rstrip("\n")
-except Exception, e:
-    print "Warning, cannot read version file (%s)" % e
-    print "Defaulting to 'snapshot'"
-    version="snaphot"
+    version = open(join(root, "version"), encoding='utf-8').readline().rstrip().rstrip("\n")
+except Exception as e:
+    print("Warning, cannot read version file (%s)" % e)
+    print("Defaulting to 'snapshot'")
+    version = "snaphot"
 
 # Windows post install script
 if "win" in " ".join(sys.argv[1:]):
     scripts.append("w32_postinst.py")
 
-requirements = ['sqlobject', 'dateutils']
-if sys.version_info < (2, 7):
-    requirements.append('argparse')
-
-#Go for setup
+# Go for setup
 setup(name="yokadi",
       version=version,
       description="Command line oriented todo list system",
       author="The Yokadi Team",
       author_email="ml-yokadi@sequanux.org",
-      url="http://yokadi.github.com/",
+      url="http://yokadi.github.io/",
       packages=[
         "yokadi",
         "yokadi.core",
@@ -74,7 +78,6 @@ setup(name="yokadi",
         "yokadi.ycli",
         "yokadi.yical",
       ],
-      install_requires=requirements,
       scripts=scripts,
       data_files=data_files
       )
