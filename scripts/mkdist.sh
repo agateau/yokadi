@@ -47,7 +47,7 @@ cd "${YOKADI_TARBZ2%.tar.bz2}"
 python yokadi/tests/tests.py
 
 log "Moving archives out of work dir"
-cd "$WORK_DIR"/dist
+cd "$WORK_DIR/dist"
 mv ./*.tar.bz2 ./*.zip "$DST_DIR"
 rm -rf "$WORK_DIR"
 log "Done"
