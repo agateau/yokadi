@@ -11,9 +11,10 @@ from datetime import datetime
 from sqlalchemy import desc
 
 from yokadi.core import db
-from yokadi.core.db import Task
+from yokadi.core.db import Task, NOTE_KEYWORD
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core import dbutils
+from yokadi.core.dbutils import KeywordFilter
 from yokadi.ycli import parseutils
 
 
@@ -81,7 +82,10 @@ def parseMEditText(text):
 def createMEditEntriesForProject(project):
     session = db.getSession()
     lst = session.query(Task).filter(Task.projectId == project.id,
-                                     Task.status != 'done').order_by(desc(Task.urgency))
+                                     Task.status != 'done')
+
+    lst = KeywordFilter(NOTE_KEYWORD, negative=True).apply(lst)
+    lst = lst.order_by(desc(Task.urgency))
     return [createMEditEntryForTask(x) for x in lst]
 
 

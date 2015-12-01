@@ -8,6 +8,7 @@ Mass edit test cases
 import unittest
 
 from yokadi.core import db
+from yokadi.core.db import NOTE_KEYWORD
 from yokadi.core import dbutils
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli import massedit
@@ -18,6 +19,8 @@ from yokadi.ycli.massedit import MEditEntry, parseMEditText
 class MassEditTestCase(unittest.TestCase):
     def setUp(self):
         db.connectDatabase("", memoryDatabase=True)
+        # FIXME: Do this in db
+        dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)
         self.session = db.getSession()
         tui.clearInputAnswers()
 
@@ -82,5 +85,13 @@ class MassEditTestCase(unittest.TestCase):
         output = parseMEditText(text)
 
         self.assertEqual(output, expected)
+
+    def testOnlyListTasks(self):
+        prj = dbutils.getOrCreateProject("p1", interactive=False)
+        t1 = dbutils.addTask("p1", "Task", {})
+        t2 = dbutils.addTask("p1", "Note", {NOTE_KEYWORD: None})
+
+        oldList = massedit.createMEditEntriesForProject(prj)
+        self.assertEqual(len(oldList), 1)
 
 # vi: ts=4 sw=4 et
