@@ -710,7 +710,7 @@ class TaskCmd(object):
         oldText = massedit.createMEditText(oldList)
         newText = oldText
         while True:
-            newText = tui.editText(newText)
+            newText = tui.editText(newText, suffix=".medit")
             if newText == oldText:
                 print("No changes")
                 return
