@@ -706,7 +706,7 @@ class TaskCmd(object):
         except (MultipleResultsFound, NoResultFound):
             raise BadUsageException("You must provide a valid project name")
 
-        oldList = massedit.createMEditEntriesForProject(project)
+        oldList = massedit.createEntriesForProject(project)
         oldText = massedit.createMEditText(oldList)
         newText = oldText
         while True:
@@ -726,7 +726,7 @@ class TaskCmd(object):
                     return
 
             try:
-                massedit.applyMEditChanges(project, oldList, newList)
+                massedit.applyChanges(project, oldList, newList)
                 self.session.commit()
                 break
             except YokadiException as exc:

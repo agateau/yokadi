@@ -79,21 +79,21 @@ def parseMEditText(text):
     return lst
 
 
-def createMEditEntriesForProject(project):
+def createEntriesForProject(project):
     session = db.getSession()
     lst = session.query(Task).filter(Task.projectId == project.id,
                                      Task.status != 'done')
 
     lst = KeywordFilter(NOTE_KEYWORD, negative=True).apply(lst)
     lst = lst.order_by(desc(Task.urgency))
-    return [createMEditEntryForTask(x) for x in lst]
+    return [createEntryForTask(x) for x in lst]
 
 
-def createMEditEntryForTask(task):
+def createEntryForTask(task):
     return MEditEntry(task.id, task.status, task.title, task.getKeywordDict())
 
 
-def applyMEditChanges(project, oldList, newList, interactive=True):
+def applyChanges(project, oldList, newList, interactive=True):
     """
     Modify a project so that its task list is newList
 

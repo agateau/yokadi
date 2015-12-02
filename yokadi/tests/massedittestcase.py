@@ -39,7 +39,7 @@ class MassEditTestCase(unittest.TestCase):
 
         tasks = (t1, t2, t3, t4, t5)
 
-        oldList = massedit.createMEditEntriesForProject(prj)
+        oldList = massedit.createEntriesForProject(prj)
         newList = [
             MEditEntry(None, "new", u"Added", {}),
             MEditEntry(t1.id, "new", u"New text", {}),
@@ -48,7 +48,7 @@ class MassEditTestCase(unittest.TestCase):
             MEditEntry(t3.id, "done", u"Done", {}),
         ]
 
-        massedit.applyMEditChanges(prj, oldList, newList, interactive=False)
+        massedit.applyChanges(prj, oldList, newList, interactive=False)
         self.session.commit()
 
         newTask = self.session.query(db.Task).filter_by(title=u"Added").one()
@@ -91,7 +91,7 @@ class MassEditTestCase(unittest.TestCase):
         t1 = dbutils.addTask("p1", "Task", {})
         t2 = dbutils.addTask("p1", "Note", {NOTE_KEYWORD: None})
 
-        oldList = massedit.createMEditEntriesForProject(prj)
+        oldList = massedit.createEntriesForProject(prj)
         self.assertEqual(len(oldList), 1)
 
 # vi: ts=4 sw=4 et
