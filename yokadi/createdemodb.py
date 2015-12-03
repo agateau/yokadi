@@ -30,12 +30,13 @@ def main():
 
     db.connectDatabase(dbname)
     db.setDefaultConfig()
+    session = db.getSession()
 
     for name in PROJECTS:
-        db.Project(name=name)
+        session.add(db.Project(name=name))
 
     for name in KEYWORDS:
-        db.Keyword(name=name)
+        dbutils.getOrCreateKeyword(name, interactive=False)
 
     dbutils.addTask("birthday", "Buy food", {"grocery": None})
     dbutils.addTask("birthday", "Buy drinks", {"grocery": None})
@@ -58,6 +59,8 @@ def main():
     task.description = """Include results from Acme department: http://acme.intranet/results.
     Don't forget to CC boss@acme.intranet.
     """
+
+    session.commit()
 
     return 0
 
