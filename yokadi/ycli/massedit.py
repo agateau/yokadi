@@ -74,6 +74,7 @@ def parseMEditText(text):
         return ParseError(num + 1, line, message)
 
     lst = []
+    ids = set()
     for num, line in enumerate(text.split("\n")):
         line = line.strip()
         if not line or line[0] == "#":
@@ -94,6 +95,9 @@ def parseMEditText(text):
                 id = int(tokens[0])
             except ValueError:
                 raise createException("Invalid id value")
+            if id in ids:
+                raise createException("Duplicate id value")
+            ids.add(id)
 
         statusChar = tokens[1].lower()
         line = tokens[2]
