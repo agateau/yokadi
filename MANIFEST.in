@@ -4,7 +4,7 @@ include update/*py
 include doc/*.md
 include man/*.1
 include icon/*
-include script/*
+include scripts/*
 include *py
 include README.md
 include LICENSE
