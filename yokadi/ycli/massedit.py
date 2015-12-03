@@ -51,7 +51,7 @@ Quit without saving to cancel all changes.
 
 
 class ParseError(YokadiException):
-    def __init__(self, lineNumber, line, message):
+    def __init__(self, message, lineNumber, line):
         fullMessage = "Error line %d (\"%s\"): %s" % (lineNumber + 1, line, message)
         YokadiException.__init__(self, fullMessage)
         self.lineNumber = lineNumber
@@ -69,55 +69,65 @@ def createMEditText(entries):
     return "\n".join(lines)
 
 
-def parseMEditText(text):
-    def createException(message):
-        return ParseError(num + 1, line, message)
+def parseMEditLine(line):
+    tokens = line.split(" ", 2)
+    nbTokens = len(tokens)
+    if nbTokens < 3:
+        if nbTokens == 2 and tokens[0] == "-":
+            # Special case: adding a one-word new task
+            tokens.append("")
+        else:
+            raise Exception("Invalid line")
 
+    if tokens[0] == "-":
+        id = None
+    else:
+        try:
+            id = int(tokens[0])
+        except ValueError:
+            raise Exception("Invalid id value")
+
+    statusChar = tokens[1].lower()
+    line = tokens[2]
+    if statusChar == "n":
+        status = "new"
+    elif statusChar == "s":
+        status = "started"
+    elif statusChar == "d":
+        status = "done"
+    elif id == None:
+        # Special case: if this is a new task, then statusChar is actually a
+        # one-letter word starting the task title
+        status = "new"
+        line = tokens[1] + ((" " + line) if line else "")
+    else:
+        raise Exception("Invalid status")
+
+    _, title, keywords = parseutils.parseLine("dummy " + line)
+    return MEditEntry(id, status, title, keywords)
+
+
+def parseMEditText(text):
     lst = []
     ids = set()
     for num, line in enumerate(text.split("\n")):
         line = line.strip()
         if not line or line[0] == "#":
             continue
-        tokens = line.split(" ", 2)
-        nbTokens = len(tokens)
-        if nbTokens < 3:
-            if nbTokens == 2 and tokens[0] == "-":
-                # Special case: adding a one-word new task
-                tokens.append("")
-            else:
-                raise createException("Invalid line")
 
-        if tokens[0] == "-":
-            id = None
-        else:
-            try:
-                id = int(tokens[0])
-            except ValueError:
-                raise createException("Invalid id value")
-            if id in ids:
-                raise createException("Duplicate id value")
-            ids.add(id)
+        try:
+            entry = parseMEditLine(line)
+        except Exception as exc:
+            exc = ParseError(str(exc), lineNumber=num + 1, line=line)
+            raise exc
 
-        statusChar = tokens[1].lower()
-        line = tokens[2]
-        if statusChar == "n":
-            status = "new"
-        elif statusChar == "s":
-            status = "started"
-        elif statusChar == "d":
-            status = "done"
-        elif id == None:
-            # Special case: if this is a new task, then statusChar is actually a
-            # one-letter word starting the task title
-            status = "new"
-            line = tokens[1] + ((" " + line) if line else "")
-        else:
-            raise createException("Invalid status")
+        if entry.id is not None:
+            if entry.id in ids:
+                exc = ParseError("Duplicate id value", lineNumber=num + 1, line=line)
+                raise exc
+            ids.add(entry.id)
 
-        _, title, keywords = parseutils.parseLine("dummy " + line)
-
-        lst.append(MEditEntry(id, status, title, keywords))
+        lst.append(entry)
     return lst
 
 
