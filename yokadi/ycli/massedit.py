@@ -50,6 +50,14 @@ Quit without saving to cancel all changes.
 """
 
 
+class ParseError(YokadiException):
+    def __init__(self, lineNumber, line, message):
+        fullMessage = "Error line %d (\"%s\"): %s" % (lineNumber + 1, line, message)
+        YokadiException.__init__(self, fullMessage)
+        self.lineNumber = lineNumber
+        self.message = message
+
+
 def createMEditText(entries):
     def formatLine(entry):
         status = entry.status[0].upper()
@@ -63,7 +71,7 @@ def createMEditText(entries):
 
 def parseMEditText(text):
     def createException(message):
-        return YokadiException("Error line %d (\"%s\"): %s" % (num + 1, line, message))
+        return ParseError(num + 1, line, message)
 
     lst = []
     for num, line in enumerate(text.split("\n")):

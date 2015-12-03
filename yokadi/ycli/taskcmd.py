@@ -717,10 +717,13 @@ class TaskCmd(object):
 
             try:
                 newList = massedit.parseMEditText(newText)
-            except YokadiException as exc:
+            except massedit.ParseError as exc:
                 print(exc)
                 print()
                 if tui.confirm("Modify text and try again"):
+                    lst = newText.splitlines()
+                    lst.insert(exc.lineNumber, "# ^ " + exc.message)
+                    newText = "\n".join(lst)
                     continue
                 else:
                     return
