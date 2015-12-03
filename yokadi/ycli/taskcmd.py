@@ -19,6 +19,7 @@ from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
 from yokadi.core import ydateutils
+from yokadi.ycli import massedit
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
@@ -692,6 +693,50 @@ class TaskCmd(object):
             self.session.merge(task)
         self.session.commit()
     complete_t_reorder = ProjectCompleter(1)
+
+    def do_t_medit(self, line):
+        """Mass edit tasks of a project.
+        It works by starting an editor with the task list, you can then:
+        - mark tasks as done or started
+        - add new tasks
+        - change tasks text and flags
+        - change the order of the lines, urgency is updated to match this order
+        - remove tasks
+        t_medit <project_name>"""
+        try:
+            project = self.session.query(Project).filter_by(name=line).one()
+        except (MultipleResultsFound, NoResultFound):
+            raise BadUsageException("You must provide a valid project name")
+
+        oldList = massedit.createMEditEntriesForProject(project)
+        oldText = massedit.createMEditText(oldList)
+        newText = oldText
+        while True:
+            newText = tui.editText(newText)
+            if newText == oldText:
+                print("No changes")
+                return
+
+            try:
+                newList = massedit.parseMEditText(newText)
+            except YokadiException as exc:
+                print(exc)
+                print()
+                if tui.confirm("Modify text and try again"):
+                    continue
+                else:
+                    return
+
+            try:
+                massedit.applyMEditChanges(project, oldList, newList)
+                self.session.commit()
+                break
+            except YokadiException as exc:
+                print(exc)
+                print()
+                if not tui.confirm("Modify text and try again"):
+                    return
+    complete_t_medit = ProjectCompleter(1)
 
     def parser_t_show(self):
         parser = YokadiOptionParser()

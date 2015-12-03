@@ -1,0 +1,86 @@
+# -*- coding: UTF-8 -*-
+"""
+Mass edit test cases
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
+
+import unittest
+
+from yokadi.core import db
+from yokadi.core import dbutils
+from yokadi.core.yokadiexception import YokadiException
+from yokadi.ycli import massedit
+from yokadi.ycli import tui
+from yokadi.ycli.massedit import MEditEntry, parseMEditText
+
+
+class MassEditTestCase(unittest.TestCase):
+    def setUp(self):
+        db.connectDatabase("", memoryDatabase=True)
+        self.session = db.getSession()
+        tui.clearInputAnswers()
+
+    def testApplyMEditChanges(self):
+        prj = dbutils.getOrCreateProject("p1", interactive=False)
+        t1 = dbutils.addTask("p1", "Change text", {})
+        tui.addInputAnswers("y", "y")
+        t2 = dbutils.addTask("p1", "Change keywords", {"k1": None, "k2": 1})
+        t3 = dbutils.addTask("p1", "Done", {})
+        t3.status = "started"
+        self.session.merge(t3)
+        t4 = dbutils.addTask("p1", "Deleted", {})
+        t5 = dbutils.addTask("p1", "Moved", {})
+        self.session.commit()
+        deletedId = t4.id
+
+        tasks = (t1, t2, t3, t4, t5)
+
+        oldList = massedit.createMEditEntriesForProject(prj)
+        newList = [
+            MEditEntry(None, "new", u"Added", {}),
+            MEditEntry(t1.id, "new", u"New text", {}),
+            MEditEntry(t2.id, "new", u"Change keywords", {"k2": 2, "k3": None}),
+            MEditEntry(t5.id, "new", u"Moved", {}),
+            MEditEntry(t3.id, "done", u"Done", {}),
+        ]
+
+        massedit.applyMEditChanges(prj, oldList, newList, interactive=False)
+        self.session.commit()
+
+        newTask = self.session.query(db.Task).filter_by(title=u"Added").one()
+
+        self.assertEqual(t1.title, u"New text")
+        self.assertEqual(t2.getKeywordDict(), {"k2": 2, "k3": None})
+        self.assertEqual(t3.status, "done")
+        self.assertTrue(t3.doneDate)
+        self.assertRaises(YokadiException, dbutils.getTaskFromId, deletedId)
+        self.assertEqual(newTask.urgency, 5)
+        self.assertEqual(t1.urgency, 4)
+        self.assertEqual(t2.urgency, 3)
+        self.assertEqual(t5.urgency, 2)
+        self.assertEqual(t3.urgency, 1)
+
+    def testParseMEditText(self):
+        text = """1 N Hello
+            4 N Some keywords @foo @bar=1
+            6 S A started task
+            12 D A done task
+            - A newly added task
+            - OneWordNewTask
+
+            # A comment
+            """
+        expected = [
+            MEditEntry(1, "new", u"Hello", {}),
+            MEditEntry(4, "new", u"Some keywords", {"foo": None, "bar": 1}),
+            MEditEntry(6, "started", u"A started task", {}),
+            MEditEntry(12, "done", u"A done task", {}),
+            MEditEntry(None, "new", u"A newly added task", {}),
+            MEditEntry(None, "new", u"OneWordNewTask", {}),
+        ]
+        output = parseMEditText(text)
+
+        self.assertEqual(output, expected)
+
+# vi: ts=4 sw=4 et
