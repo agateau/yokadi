@@ -1,54 +1,90 @@
 # Release check list
 
+## Introduction
+
+A series is major.minor (ex: 0.12). There is a branch for each series.
+
+A version is major.minor.patch (ex 0.12.1). There is a tag for each version.
+
+This doc assumes there is a checkout of yokadi.github.com next to the checkout
+of yokadi.
+
 ## In yokadi checkout
 
-Ensure checkout is up to date
+    export version=<version>
+    export series=<series>
 
-Ensure version is OK in "version" file
+### For a new series
 
-Ensure NEWS file is up to date with new stuff and correct release date
+Update `NEWS` file (add changes, check release date)
 
-Run tests
+Ensure `version` file contains $version
 
-Series is major.minor (ex: 0.12)
-Version is major.minor.patch (ex 0.12.1)
+Create branch:
 
-For a new series:
+    git checkout -b $series
+    git push -u origin $series
 
-    git checkout -b <series>
-    git push origin <series>:<series>
-
-For a new release in an existing series:
-
-    git checkout <series>
-
-In all cases:
-
-    git tag -a <version>
-    git push --tags
-
-Bump version on master
+The version in master should always be bigger than the version in release
+branches, so update version in master:
 
     git checkout master
     vi version
-    git commit version
+    git commit version -m "Bump version number"
     git push
+    git checkout -
 
-Go back to branch in order to prepare tarballs
+### For a new release in an existing series
 
     git checkout <series>
+
+Update `NEWS` file (add changes, check release date)
+
+Bump version number
+
+    echo $version > version
+    git commit version -m "Getting ready for $version"
+
+### Common
+
+Build archives
+
+    ./scripts/mkdist.sh ../yokadi.github.com/download
+
+Tag
+
+    git tag -a $version -m "Releasing $version"
+
+Push changes
+
+    git push
+    git push --tags
+
+Merge changes in master (so that future forward merges are simpler). Be careful
+to keep version to its master value.
+
+    git checkout master
+    git merge --no-ff $series
+    git push
+    git checkout -
+
+## Post on PyPI
+
+    twine upload ../yokadi.github.com/download/yokadi-$version.*
 
 ## In yokadi.github.com checkout
 
 Ensure checkout is up to date
 
-    ./updatedoc.py <path/to/yokadi/checkout> .
-    ./mkdist.sh <path/to/yokadi/checkout> download/
+Update documentation
+
+    ./updatedoc.py ../yokadi .
 
 Write a blog entry in `_posts/`
 
-Update version in download page (download.markdown)
+Update version in download page (`download.md`)
 
-## Tell the world
+## Upload on PyPI
 
-- pypi.python.org
+    cd download/
+    twine upload yokadi-<version>.*

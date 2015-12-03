@@ -78,6 +78,12 @@ setup(name="yokadi",
         "yokadi.ycli",
         "yokadi.yical",
       ],
+      # distutils does not support install_requires, but pip needs it to be
+      # able to automatically install dependencies
+      install_requires=[
+        "sqlalchemy",
+        "python-dateutil",
+      ],
       scripts=scripts,
       data_files=data_files
       )

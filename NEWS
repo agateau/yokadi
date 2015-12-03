@@ -1,3 +1,11 @@
+v1.0.1 2015/12/03
+
+- User changes:
+    - Make sure installing via pip installs the required dependencies
+
+- Developer changes:
+    - Improved release process
+
 v1.0.0 2015/11/29
 
 - User changes:
