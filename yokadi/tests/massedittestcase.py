@@ -13,7 +13,7 @@ from yokadi.core import dbutils
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli import massedit
 from yokadi.ycli import tui
-from yokadi.ycli.massedit import MEditEntry, parseMEditText
+from yokadi.ycli.massedit import MEditEntry, parseMEditText, ParseError
 
 
 class MassEditTestCase(unittest.TestCase):
@@ -85,6 +85,29 @@ class MassEditTestCase(unittest.TestCase):
         output = parseMEditText(text)
 
         self.assertEqual(output, expected)
+
+    def testParseMEditTextErrors(self):
+        testData = [
+            # Duplicate id
+            """
+            1 N X
+            1 N Y
+            """,
+            # Invalid id
+            """
+            A N X
+            """,
+            # Invalid status
+            """
+            1 z Y
+            """,
+            # Invalid line
+            """
+            bla
+            """
+        ]
+        for text in testData:
+            self.assertRaises(ParseError, parseMEditText, text)
 
     def testOnlyListTasks(self):
         prj = dbutils.getOrCreateProject("p1", interactive=False)
