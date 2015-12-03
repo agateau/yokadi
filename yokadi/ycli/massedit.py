@@ -21,6 +21,35 @@ from yokadi.ycli import parseutils
 MEditEntry = namedtuple("MEditEntry", ["id", "status", "title", "keywords"])
 
 
+DOC_COMMENT = """
+Line format: <id> <status> <task title>
+
+You can change the status string to one of:
+ N new
+ S started
+ D done
+
+Edit the text after the status to change the task title. You can add or
+remove keywords just like you do when using t_add.
+
+Do NOT edit the task id, this will confuse Yokadi.
+
+Add new lines to add new tasks. Use '-' for the task id. If you don't specify
+the status, the task will be marked as new. Examples:
+
+    - Do more work
+    - S A task that has already been started
+
+Re-order lines to define priorities.
+
+Remove a line to permanently delete a task.
+
+Empty lines or lines starting with a '#' are ignored.
+
+Quit without saving to cancel all changes.
+"""
+
+
 def createMEditText(entries):
     def formatLine(entry):
         status = entry.status[0].upper()
@@ -28,6 +57,7 @@ def createMEditText(entries):
         return "%d %s %s" % (entry.id, status, line)
 
     lines = [formatLine(x) for x in entries]
+    lines.append("\n# ".join(DOC_COMMENT.splitlines()))
     return "\n".join(lines)
 
 
