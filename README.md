@@ -4,12 +4,12 @@
 # What is it?
 
 Yokadi is a command-line oriented, SQLite powered, TODO list tool.  It helps
-you organize all the things you have to do and you must not forget. It aims to
-be simple, intuitive and very efficient.
+you organize all the things you have to do and must not forget. It aims to be
+simple, intuitive and very efficient.
 
-In Yokadi you manage projects, which contains tasks. At the minimum, a task has
+In Yokadi you manage projects, which contain tasks. At the minimum, a task has
 a title, but it can also have a description, a due date, an urgency or
-keywords. Keywords can be any word that help you to find and sort your tasks.
+keywords. Keywords can be any word that help you find and sort your tasks.
 
 # Dependencies
 
@@ -178,7 +178,7 @@ If you have periodic tasks, you can tell it to Yokadi with `t_recurs`:
     yokadi> t_recurs 1 monthly last saturday 11:00
     yokadi> t_recurs 1 yearly 23/2 14:00
 
-Type `help t_recurs` to see all possible syntax
+Type `help t_recurs` to see all possible syntaxes.
 
 ## Encrypt your tasks
 
@@ -196,7 +196,7 @@ Yokadi asks you for a passphrase. Don't forget it! It is a global passphrase
 for this Yokadi database.  Each time you will want to encrypt something, you
 will have to use this passphrase. For convenience, Yokadi will keep this
 passphrase in memory during your Yokadi session. If you are quite paranoiac
-and feel bad with that, don't panic, you can set the PASSPHRASE_CACHE
+and feel bad with that, don't panic, you can set the `PASSPHRASE_CACHE`
 option to 0 to disable passphrase cache:
 
     yokadi> c_set PASSPHRASE_CACHE 0
@@ -207,48 +207,48 @@ session, Yokadi won't bother you with asking for passphrase, but won't display
 data in a clear way:
 
     yokadi> t_list
-                                 my_project                             
-    ID|Title                  |U  |S|Age     |Due date                  
+                                 my_project
+    ID|Title                  |U  |S|Age     |Due date
     --------------------------------------------------------------------
-    1 |<... encrypted data...>|0  |N|5m      |                          
-    yokadi> 
+    1 |<... encrypted data...>|0  |N|5m      |
+    yokadi>
 
 To reveal secret data, you have to use the --decrypt option and type your
 passphrase when prompted to:
 
     yokadi> t_list --decrypt
-    passphrase> 
-                                             my_project                                         
-    ID|Title                                          |U  |S|Age     |Due date                  
+    passphrase>
+                                             my_project
+    ID|Title                                          |U  |S|Age     |Due date
     --------------------------------------------------------------------------------------------
-    1 |this is a very secret task, don't tell anyone !|0  |N|6m      |                          
-    yokadi> 
+    1 |this is a very secret task, don't tell anyone !|0  |N|6m      |
+    yokadi>
 
 Note: when you encrypt a task or note title, the description will be also
-encrypted. 
+encrypted.
 
 ## Tasks range and magic __ keyword
 
-t_apply is a very powerful function but sometimes you have to use it on
+`t_apply` is a very powerful function but sometimes you have to use it on
 numerous tasks.  First, you can use task range like this:
 
     yokadi> t_apply 1-3 t_urgency 10
     Executing: t_urgency 1 10
     Executing: t_urgency 2 10
     Executing: t_urgency 3 10
-    yokadi> 
+    yokadi>
 
 But sometimes tasks are not consecutive and you would like to use wonderful
-t_list options to select your tasks.  Here's the trick: each time you display
-tasks with t_list, Yokadi stores the id list in the magic keyword __ that you
-can give to t_apply like this:
+`t_list` options to select your tasks.  Here's the trick: each time you display
+tasks with `t_list`, Yokadi stores the id list in the magic keyword `__` that
+you can give to `t_apply` like this:
 
     yokadi> t_list @keyword myProject
     (...)
     yokadi> t_apply __ t_urgency 35
 
-Oh, by the way, some Yokadi dev use the following alias which is quite self
-explicit:
+Oh, by the way, one Yokadi dev uses the following alias which is quite self
+explanatory:
 
     yokadi> a_list
     procrastinate => t_apply __ t_due +1d
@@ -260,7 +260,7 @@ explicit:
 By default, Yokadi creates a database in `$HOME/.yokadi.db`, but you can
 specify an alternative location with the `--db` option.
 
-A convenient way to start yokadi is by creating an alias in your `.bashrc` file
+A convenient way to start Yokadi is by creating an alias in your `.bashrc` file
 like this:
 
     alias y=yokadi
@@ -269,7 +269,7 @@ The single letter `y` will start Yokadi with your favorite database from
 wherever you are.
 
 If you do not want to use the default database location, you can define
-the `YOKADI_DB` env variable to point to your database:
+the `YOKADI_DB` environment variable to point to your database:
 
     export YOKADI_DB=$HOME/work/yokadi.db
 
@@ -279,7 +279,7 @@ By default, Yokadi will store input history in `$HOME/.yokadi_history`. This fil
 stores commands used in Yokadi for future use and reference.
 
 If you do now want to use the default history file location, you can define
-the `YOKADI_HISTORY` env variable to point to your history file:
+the `YOKADI_HISTORY` environment variable to point to your history file:
 
     export YOKADI_HISTORY=$HOME/.hist/yokadi_history
 
@@ -289,8 +289,8 @@ If you want to be automatically reminded of due tasks, you can use the Yokadi
 daemon.
 
 The Yokadi daemon can be launched via desktop autostart services. In most
-desktop environments, you just need to create a symlink to yokadid (or a shell script
-that calls it) in `$HOME/.config/autostart/`:
+desktop environments, you just need to create a symbolic link to yokadid (or a
+shell script that calls it) in `$HOME/.config/autostart/`:
 
     ln -s `which yokadid` $HOME/.config/autostart/
 
