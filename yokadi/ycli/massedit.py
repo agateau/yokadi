@@ -24,29 +24,29 @@ MEditEntry = namedtuple("MEditEntry", ["id", "status", "title", "keywords"])
 DOC_COMMENT = """
 Line format: <id> <status> <task title>
 
-You can change the status string to one of:
+To change the title of a task, just change the text after the status character.
+You can add or remove keywords like you do when using t_add.
+
+To change the status of a task, change the status character to one of:
  N new
  S started
  D done
 
-Edit the text after the status to change the task title. You can add or
-remove keywords just like you do when using t_add.
+To add a new task, add a new line using '-' for the task id. If you do not
+specify a status, the task will be marked as new. Examples:
 
-Do NOT edit the task id, this will confuse Yokadi.
+- Do more work
+- S A task that has already been started
 
-Add new lines to add new tasks. Use '-' for the task id. If you don't specify
-the status, the task will be marked as new. Examples:
+To adust task urgencies, re-order the lines.
 
-    - Do more work
-    - S A task that has already been started
+To remove a task, delete its line or comment it out with '#'.
 
-Re-order lines to define priorities.
+To cancel changes, quit without saving.
 
-Remove a line to permanently delete a task.
+Empty lines and lines starting with a '#' are ignored.
 
-Empty lines or lines starting with a '#' are ignored.
-
-Quit without saving to cancel all changes.
+Warning: Do NOT edit the task id, this will confuse Yokadi.
 """
 
 

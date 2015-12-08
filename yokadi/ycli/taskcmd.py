@@ -694,13 +694,15 @@ class TaskCmd(object):
 
     def do_t_medit(self, line):
         """Mass edit tasks of a project.
-        It works by starting an editor with the task list, you can then:
+        t_medit <project_name>
+
+        Starts a text editor with the task list, you can then:
+        - edit tasks text and keywords
         - mark tasks as done or started
         - add new tasks
-        - change tasks text and flags
-        - change the order of the lines, urgency is updated to match this order
-        - remove tasks
-        t_medit <project_name>"""
+        - adjust urgency
+        - delete tasks
+        """
         try:
             project = self.session.query(Project).filter_by(name=line).one()
         except (MultipleResultsFound, NoResultFound):
