@@ -253,6 +253,34 @@ explanatory:
     yokadi> a_list
     procrastinate => t_apply __ t_due +1d
 
+## Mass editing tasks
+
+`t_medit` lets you edit all tasks of a project at once by opening a text editor
+with all the tasks and let you editing them, applying the changes when you
+quit.  If you are familiar with `git`, this is similar to the way the `git
+rebase --interactive` command works.
+
+For example to edit all the tasks of the "birthday" project do the following:
+
+    yokadi> t_medit birthday
+
+Make adjustments to the task list (the syntax is documented as comments in the
+text opened in the editor), then save the file and quit to apply the changes.
+
+Yokadi provides Vim syntax highlighting files to make mass edit more
+convenient. You can find them in `editors/vim`. To install them, run the
+following:
+
+    cd place/to/editors/vim
+    mkdir -p ~/.vim/ftdetect
+    mkdir -p ~/.vim/syntax
+    cp ftdetect/medit.vim ~/.vim/ftdetect
+    cp syntax/medit.vim ~/.vim/syntax
+
+If you use another editor and can provide support for highlighting files, your
+contribution is very welcome! Get in touch so that we can add your work to the
+next version of Yokadi.
+
 # Integration
 
 ## Database location
