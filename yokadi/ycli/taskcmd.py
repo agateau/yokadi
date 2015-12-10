@@ -703,8 +703,9 @@ class TaskCmd(object):
         - adjust urgency
         - delete tasks
         """
+        projectName = self._realProjectName(line)
         try:
-            project = self.session.query(Project).filter_by(name=line).one()
+            project = self.session.query(Project).filter_by(name=projectName).one()
         except (MultipleResultsFound, NoResultFound):
             raise BadUsageException("You must provide a valid project name")
 
