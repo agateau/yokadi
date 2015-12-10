@@ -704,10 +704,9 @@ class TaskCmd(object):
         - delete tasks
         """
         projectName = self._realProjectName(line)
-        try:
-            project = self.session.query(Project).filter_by(name=projectName).one()
-        except (MultipleResultsFound, NoResultFound):
-            raise BadUsageException("You must provide a valid project name")
+        project = dbutils.getOrCreateProject(projectName)
+        if not project:
+            return
 
         oldList = massedit.createEntriesForProject(project)
         oldText = massedit.createMEditText(oldList)
