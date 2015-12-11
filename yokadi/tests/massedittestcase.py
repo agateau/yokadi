@@ -117,4 +117,17 @@ class MassEditTestCase(unittest.TestCase):
         oldList = massedit.createEntriesForProject(prj)
         self.assertEqual(len(oldList), 1)
 
+    def testCreateMEditText(self):
+        e1 = MEditEntry(1, "N", "Hello", {})
+        e2 = MEditEntry(2, "S", "Started", {})
+        EXPECTED_TEXT = """1 N Hello
+2 S Started
+
+# doc1
+#
+# doc2
+"""
+
+        txt = massedit.createMEditText([e1, e2], docComment="doc1\n\ndoc2\n")
+        self.assertEqual(txt, EXPECTED_TEXT)
 # vi: ts=4 sw=4 et

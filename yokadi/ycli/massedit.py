@@ -59,15 +59,23 @@ class ParseError(YokadiException):
         self.message = message
 
 
-def createMEditText(entries):
+def createMEditText(entries, docComment=DOC_COMMENT):
     def formatLine(entry):
         status = entry.status[0].upper()
         line = parseutils.createLine(None, entry.title, entry.keywords)
         return "%d %s %s" % (entry.id, status, line)
 
+    def prefixComment(comment):
+        for line in comment.strip().splitlines():
+            if line:
+                yield "# " + line
+            else:
+                yield "#"
+
     lines = [formatLine(x) for x in entries]
-    lines.append("\n# ".join(DOC_COMMENT.splitlines()))
-    return "\n".join(lines)
+    lines.append('')
+    lines.extend(prefixComment(docComment))
+    return "\n".join(lines) + "\n"
 
 
 def parseMEditLine(line):
