@@ -37,8 +37,6 @@ class MassEditTestCase(unittest.TestCase):
         self.session.commit()
         deletedId = t4.id
 
-        tasks = (t1, t2, t3, t4, t5)
-
         oldList = massedit.createEntriesForProject(prj)
         newList = [
             MEditEntry(None, "new", u"Added", {}),
