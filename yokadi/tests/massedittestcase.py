@@ -62,6 +62,20 @@ class MassEditTestCase(unittest.TestCase):
         self.assertEqual(t5.urgency, 2)
         self.assertEqual(t3.urgency, 1)
 
+    def testApplyMEditChangesUnknownIds(self):
+        prj = dbutils.getOrCreateProject("p1", interactive=False)
+        t1 = dbutils.addTask("p1", "Foo", {})
+        t2 = dbutils.addTask("p1", "Bar", {})
+
+        oldList = massedit.createEntriesForProject(prj)
+        newList = [
+            MEditEntry(t1.id, "new", t1.title, {}),
+            MEditEntry(t2.id + 1, "new", t2.title, {}),
+        ]
+
+        self.assertRaises(YokadiException, massedit.applyChanges, prj, oldList,
+                          newList, interactive=False)
+
     def testParseMEditText(self):
         text = """1 N Hello
             4 N Some keywords @foo @bar=1
