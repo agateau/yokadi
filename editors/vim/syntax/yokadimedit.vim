@@ -11,7 +11,9 @@ syn case match
 
 syn match yokadimeditComment "^\s*#.*$" skipwhite
 syn match yokadimeditTaskId "\v^\s*(\d+|-)" nextgroup=yokadimeditStatus skipwhite
-syn match yokadimeditStatus "[NSD]" nextgroup=yokadimeditTitle contained
+syn match yokadimeditError "^\s*[^-0-9#].*" skipwhite
+
+syn match yokadimeditStatus "[NSDnsd] " nextgroup=yokadimeditTitle contained
 syn match yokadimeditTitle ".*" contains=yokadimeditKeyword contained
 syn match yokadimeditKeyword "@\w\+" contained
 syn match yokadimeditKeyword "@\w\+=\d\+" contained
@@ -20,5 +22,6 @@ hi def link yokadimeditComment Comment
 hi def link yokadimeditTaskId Constant
 hi def link yokadimeditStatus Statement
 hi def link yokadimeditKeyword Type
+hi def link yokadimeditError Error
 
 let b:current_syntax = "yokadimedit"
