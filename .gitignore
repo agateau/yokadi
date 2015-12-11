@@ -12,3 +12,4 @@ MANIFEST
 .idea/
 __pycache__/
 .coverage
+htmlcov
