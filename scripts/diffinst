@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or newer
+"""
+
 import argparse
 import fnmatch
 import os
