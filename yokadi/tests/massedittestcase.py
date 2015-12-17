@@ -71,7 +71,6 @@ class MassEditTestCase(unittest.TestCase):
             12 D A done task
             - A newly added task
             - OneWordNewTask
-            - s is a cool letter
 
             # A comment
             """
@@ -82,7 +81,6 @@ class MassEditTestCase(unittest.TestCase):
             MEditEntry(12, "done", u"A done task", {}),
             MEditEntry(None, "new", u"A newly added task", {}),
             MEditEntry(None, "new", u"OneWordNewTask", {}),
-            MEditEntry(None, "new", u"s is a cool letter", {}),
         ]
         output = parseMEditText(text)
 
