@@ -703,7 +703,10 @@ class TaskCmd(object):
         - adjust urgency
         - delete tasks
         """
-        projectName = self._realProjectName(line)
+        if not line:
+            raise BadUsageException("Missing parameters")
+        projectName = parseutils.parseProjectName(line)
+        projectName = self._realProjectName(projectName)
         project = dbutils.getOrCreateProject(projectName)
         if not project:
             return
