@@ -35,10 +35,11 @@ To change the status of a task, change the status character to one of:
 To add a new task, add a new line using '-' for the task id. If you do not
 specify a status, the task will be marked as new. Examples:
 
-- Do more work
-- S A task that has already been started
+- This is a new task
+- N This is another new task
+- S This task has already been started
 
-To adust task urgencies, re-order the lines.
+To adjust task urgencies, re-order the lines.
 
 To remove a task, delete its line or comment it out with '#'.
 
