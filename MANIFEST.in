@@ -5,6 +5,7 @@ include doc/*.md
 include man/*.1
 include icon/*
 include scripts/*
+include editors/vim/*/*.vim
 include *py
 include README.md
 include LICENSE

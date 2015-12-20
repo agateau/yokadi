@@ -1,0 +1,16 @@
+1 N New task @kw1 @kw2=12
+2 S Started task
+3 D Done task
+4 n Lower case should work too
+5 s Lower case should work too
+6 d Lower case should work too
+- Just added this new task in this session
+- N Another freshly added task, this time with explicit "new" status
+- S Another freshly added task, this time with explicit "started" status
+- D Another freshly added task, this time with explicit "done" status
+- SSS This added task starts with an S, but the S is part of the first word of this task
+- NNN This added task starts with an N, but the N is part of the first word of this task
+- DDD This added task starts with an D, but the D is part of the first word of this task
+Not a valid line
+
+# Comments
