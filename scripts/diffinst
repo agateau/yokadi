@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or newer
+"""
+
+import argparse
+import fnmatch
+import os
+import tarfile
+import subprocess
+import sys
+
+
+DESCRIPTION = """\
+Compare a tarball and a git tree, list files unique on each side.
+"""
+
+
+GIT_IGNORE = (
+    '.gitignore',
+)
+
+
+TARBALL_IGNORE = (
+    'PKG-INFO',
+)
+
+
+def list_git_dir(root):
+    out = subprocess.check_output(['git', 'ls-files'], cwd=root)
+    return [x.decode() for x in out.splitlines()]
+
+
+def remove_first_dir(path):
+    lst = path.split(os.sep)
+    return os.path.join(*lst[1:])
+
+
+def list_tarball(tarball):
+    with tarfile.open(tarball) as tf:
+        for info in tf.getmembers():
+            if info.isfile():
+                yield remove_first_dir(info.name)
+
+
+def apply_blacklist(lst, blacklist):
+    for item in lst:
+        for pattern in blacklist:
+            if fnmatch.fnmatch(item, pattern):
+                break
+        else:
+            yield item
+
+
+def print_set(st):
+    for item in sorted(list(st)):
+        print(item)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.description = DESCRIPTION
+
+    parser.add_argument('-q', '--quiet', action='store_true',
+        help='Do not list changes')
+
+    parser.add_argument('tarball')
+    parser.add_argument('git_dir', nargs='?', default='.')
+
+    args = parser.parse_args()
+
+    dir_set = set(apply_blacklist(list_git_dir(args.git_dir), GIT_IGNORE))
+    tb_set = set(apply_blacklist(list_tarball(args.tarball), TARBALL_IGNORE))
+
+    only_in_dir = dir_set.difference(tb_set)
+    only_in_tb = tb_set.difference(dir_set)
+
+    if not args.quiet:
+        if only_in_dir:
+            print('# Only in {}'.format(args.git_dir))
+            print_set(only_in_dir)
+
+        if only_in_tb:
+            print('# Only in {}'.format(args.tarball))
+            print_set(only_in_tb)
+
+    if only_in_dir or only_in_tb:
+        return 1
+    else:
+        return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
+# vi: ts=4 sw=4 et

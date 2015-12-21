@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+cd $(dirname $0)/..
+
+COVERAGE_BIN=python3-coverage
+
+if ! which $COVERAGE_BIN > /dev/null ; then
+    echo "Could not find $COVERAGE_BIN make sure Coverage is installed"
+    exit 1
+fi
+
+$COVERAGE_BIN run --source=yokadi --omit="yokadi/tests/*" yokadi/tests/tests.py
+$COVERAGE_BIN html

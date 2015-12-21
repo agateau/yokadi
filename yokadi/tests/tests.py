@@ -39,6 +39,7 @@ from cryptotestcase import CryptoTestCase
 from tuitestcase import TuiTestCase
 from helptestcase import HelpTestCase
 from conftestcase import ConfTestCase
+from massedittestcase import MassEditTestCase
 from dumptestcase import DumpTestCase
 
 

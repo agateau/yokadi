@@ -40,6 +40,10 @@ data_files.append(["share/man/man1", createFileList("man", "*.1")])
 # Update scripts
 data_files.append(["share/yokadi/update", createFileList("update", "*.py", "update*to*")])
 
+# Editor scripts
+data_files.append(["share/yokadi/editors/vim/ftdetect", ["editors/vim/ftdetect/yokadimedit.vim"]])
+data_files.append(["share/yokadi/editors/vim/syntax", ["editors/vim/syntax/yokadimedit.vim"]])
+
 # Icon
 for size in os.listdir("icon"):
     if not isdir(join("icon", size)):
@@ -77,6 +81,12 @@ setup(name="yokadi",
         "yokadi.tests",
         "yokadi.ycli",
         "yokadi.yical",
+      ],
+      # distutils does not support install_requires, but pip needs it to be
+      # able to automatically install dependencies
+      install_requires=[
+        "sqlalchemy",
+        "python-dateutil",
       ],
       scripts=scripts,
       data_files=data_files

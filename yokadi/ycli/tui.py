@@ -48,11 +48,12 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
-def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
+def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".md"):
     """Edit text with external editor
     @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
     @param lockManager: function parameter that is called to 'acquire', 'update' or 'release' an editing lock
     @param prefix: temporary file prefix.
+    @param suffix: temporary file suffix.
     @return: newText"""
     encoding = locale.getpreferredencoding()
     def readFile(name):
@@ -70,7 +71,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-"):
     prefix = MULTIPLE_DASH.sub("-", prefix)
     prefix = unicodedata.normalize('NFKD', prefix)
 
-    (fd, name) = tempfile.mkstemp(suffix=".md", prefix=prefix)
+    (fd, name) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
     if text is None:
         text = ""
     try:

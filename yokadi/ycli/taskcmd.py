@@ -14,11 +14,12 @@ from dateutil import rrule
 from sqlalchemy import or_, and_, desc
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence, NOTE_KEYWORD
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
 from yokadi.core import ydateutils
+from yokadi.ycli import massedit
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
@@ -39,8 +40,6 @@ gRendererClassDict = dict(
     html=HtmlListRenderer,
     plain=PlainListRenderer,
     )
-
-NOTE_KEYWORD = "_note"
 
 
 class TaskCmd(object):
@@ -267,19 +266,13 @@ class TaskCmd(object):
 
     def _t_set_status(self, line, status):
         task = self.getTaskFromId(line)
+        task.setStatus(status)
+        self.session.commit()
         if task.recurrence and status == "done":
-            task.dueDate = task.recurrence.getNext(task.dueDate)
             print("Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate))
             print("To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id)
         else:
-            task.status = status
-            if status == "done":
-                task.doneDate = datetime.now().replace(second=0, microsecond=0)
-            else:
-                task.doneDate = None
             print("Task '%s' marked as %s" % (task.title, status))
-        self.session.merge(task)
-        self.session.commit()
 
     def do_t_apply(self, line):
         """Apply a command to several tasks.
@@ -698,6 +691,58 @@ class TaskCmd(object):
             self.session.merge(task)
         self.session.commit()
     complete_t_reorder = ProjectCompleter(1)
+
+    def do_t_medit(self, line):
+        """Mass edit tasks of a project.
+        t_medit <project_name>
+
+        Starts a text editor with the task list, you can then:
+        - edit tasks text and keywords
+        - mark tasks as done or started
+        - add new tasks
+        - adjust urgency
+        - delete tasks
+        """
+        if not line:
+            raise BadUsageException("Missing parameters")
+        projectName = parseutils.parseProjectName(line)
+        projectName = self._realProjectName(projectName)
+        project = dbutils.getOrCreateProject(projectName)
+        if not project:
+            return
+
+        oldList = massedit.createEntriesForProject(project)
+        oldText = massedit.createMEditText(oldList)
+        newText = oldText
+        while True:
+            newText = tui.editText(newText, suffix=".medit")
+            if newText == oldText:
+                print("No changes")
+                return
+
+            try:
+                newList = massedit.parseMEditText(newText)
+            except massedit.ParseError as exc:
+                print(exc)
+                print()
+                if tui.confirm("Modify text and try again"):
+                    lst = newText.splitlines()
+                    lst.insert(exc.lineNumber, "# ^ " + exc.message)
+                    newText = "\n".join(lst)
+                    continue
+                else:
+                    return
+
+            try:
+                massedit.applyChanges(project, oldList, newList)
+                self.session.commit()
+                break
+            except YokadiException as exc:
+                print(exc)
+                print()
+                if not tui.confirm("Modify text and try again"):
+                    return
+    complete_t_medit = ProjectCompleter(1)
 
     def parser_t_show(self):
         parser = YokadiOptionParser()
