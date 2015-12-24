@@ -58,14 +58,10 @@ class Keyword(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     tasks = association_proxy("taskKeywords", "task")
-    projects = association_proxy("projectKeywords", "project")
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="keyword")
 
     def __repr__(self):
         return self.name
-
-    def getTasks(self):
-        return [taskKeyword.task for taskKeyword in self.taskKeywords]
 
 
 class TaskKeyword(Base):
