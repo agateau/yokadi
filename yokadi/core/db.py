@@ -15,7 +15,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
 
 
 try:
@@ -293,4 +293,12 @@ def setDefaultConfig():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))
 
+
+def deleteInvalidTaskKeywordRows():
+    # TODO: Remove this function when we migrate to database version 9. See
+    # update8to9.
+    session = getSession()
+    filters = or_(TaskKeyword.taskId == None, TaskKeyword.keywordId == None)
+    session.query(TaskKeyword).filter(filters).delete(synchronize_session=False)
+    session.commit()
 # vi: ts=4 sw=4 et
