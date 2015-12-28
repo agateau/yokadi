@@ -5,3 +5,5 @@ Yokadi main package
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license:GPL v3 or later
 """
+
+__version__ = "1.1.0"

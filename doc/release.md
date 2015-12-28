@@ -18,7 +18,7 @@ of yokadi.
 
 Update `NEWS` file (add changes, check release date)
 
-Ensure `version` file contains $version
+Edit `yokadi/__init__.py`, set `__version__` to $version
 
 Create branch:
 
@@ -29,7 +29,7 @@ The version in master should always be bigger than the version in release
 branches, so update version in master:
 
     git checkout master
-    vi version
+    vi yokadi/__init__.py
     git commit version -m "Bump version number"
     git push
     git checkout -
@@ -42,7 +42,7 @@ Update `NEWS` file (add changes, check release date)
 
 Bump version number
 
-    echo $version > version
+    vi yokadi/__init__.py
     git commit version -m "Getting ready for $version"
 
 ### Common
