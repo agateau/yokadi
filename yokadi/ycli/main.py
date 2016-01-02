@@ -37,8 +37,10 @@ except ImportError:
 
 from yokadi.core import db
 from yokadi.ycli import tui
-from yokadi.core import utils
+from yokadi.core import basepaths
 from yokadi.core import cryptutils
+from yokadi.core import fileutils
+from yokadi.core import utils
 from yokadi.sync import dump
 
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
@@ -60,13 +62,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
         self.prompt = "yokadi> "
-        self.historyPath = os.getenv("YOKADI_HISTORY")
-        if not self.historyPath:
-            if os.name == "posix":
-                self.historyPath = os.path.join(os.path.expandvars("$HOME"), ".yokadi_history")
-            else:
-                # Windows location
-                self.historyPath = os.path.join(os.path.expandvars("$APPDATA"), ".yokadi_history")
+        self.historyPath = basepaths.getHistoryPath()
         self.loadHistory()
         self.cryptoMgr = cryptutils.YokadiCryptoManager()  # Load shared cryptographic manager
 
@@ -155,6 +151,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
     def writeHistory(self):
         """Writes shell history to disk"""
         try:
+            fileutils.createParentDirs(self.historyPath)
             # Open r/w and close file to create one if needed
             historyFile = open(self.historyPath, "w", encoding='utf-8')
             historyFile.close()
@@ -197,7 +194,7 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument("-d", "--db", dest="filename",
-                      help="TODO database", metavar="FILE")
+                      help="TODO database (default: %s)" % basepaths.getDbPath(), metavar="FILE")
 
     parser.add_argument("-c", "--create-only",
                       dest="createOnly", default=False, action="store_true",
@@ -218,16 +215,22 @@ def main():
         print("Yokadi - %s" % utils.currentVersion())
         return
 
-    if not args.filename:
-        # Look if user define an env VAR for yokadi db
-        args.filename = os.getenv("YOKADI_DB")
-        if args.filename:
-            print("Using env defined database (%s)" % args.filename)
-        else:
-            args.filename = os.path.normcase(os.path.expanduser("~/.yokadi.db"))
-            print("Using default database (%s)" % args.filename)
+    basepaths.migrateOldHistory()
+    try:
+        basepaths.migrateOldDb()
+    except basepaths.MigrationException as exc:
+        print(exc)
+        sys.exit(1)
 
-    db.connectDatabase(args.filename)
+    if not args.filename:
+        args.filename = basepaths.getDbPath()
+        fileutils.createParentDirs(args.filename)
+
+    try:
+        db.connectDatabase(args.filename)
+    except db.DbUserException as exc:
+        print(exc)
+        sys.exit(1)
 
     if args.createOnly:
         return

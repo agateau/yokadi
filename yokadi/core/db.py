@@ -28,7 +28,6 @@ except ImportError:
     sys.exit(1)
 
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.ycli import tui  # TODO: try to remove dependancy on tui
 from yokadi.core import utils
 
 # Yokadi database version needed for this code
@@ -39,6 +38,15 @@ DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
 FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
+
+
+class DbUserException(Exception):
+    """
+    This exception is for errors which are not caused by a failure in our code
+    and which must be fixed by the user.
+    """
+    pass
+
 
 Base = declarative_base()
 
@@ -256,16 +264,15 @@ class Database(object):
         self.session = Session()
 
         if not os.path.exists(dbFileName) or memoryDatabase:
-            if createIfNeeded:
+            if not createIfNeeded:
+                raise DbUserException("Database file (%s) does not exist or is not readable." % dbFileName)
+            if not memoryDatabase:
                 print("Creating %s" % dbFileName)
-                self.createTables()
-                # Set database version according to current yokadi release
-                if not updateMode: # Update script add it from dump
-                    self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
-                self.session.commit()
-            else:
-                print("Database file (%s) does not exist or is not readable. Exiting" % dbFileName)
-                sys.exit(1)
+            self.createTables()
+            # Set database version according to current yokadi release
+            if not updateMode: # Update script add it from dump
+                self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
+            self.session.commit()
 
         if not updateMode:
             self.checkVersion()
@@ -296,12 +303,10 @@ class Database(object):
         version = self.getVersion()
         if version != DB_VERSION:
             sharePath = os.path.abspath(utils.shareDirPath())
-            tui.error("Your database version is %d but Yokadi wants version %d." \
-                % (version, DB_VERSION))
-            print("Please, run the %s/update/update.py script to migrate your database prior to running Yokadi" % \
-                    sharePath)
-            print("See %s/doc/update.md for details" % sharePath)
-            sys.exit(1)
+            msg = "Your database version is %d but Yokadi wants version %d.\n" % (version, DB_VERSION)
+            msg += "Please run the %s/update/update.py script to migrate your database prior to running Yokadi.\n" % sharePath
+            msg += "See %s/doc/update.md for details." % sharePath
+            raise DbUserException(msg)
 
 
 def setDefaultConfig():
