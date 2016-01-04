@@ -32,8 +32,7 @@ def pull(dumpDir, vcsImpl=None, conflictResolver=None):
 
     vcsImpl.setDir(dumpDir)
     commitId = vcsImpl.getCommitId()
-    vcsImpl.fetch()
-    vcsImpl.merge()
+    vcsImpl.pull()
 
     for conflict in vcsImpl.getConflicts():
         if not conflictResolver.resolve(conflict):
