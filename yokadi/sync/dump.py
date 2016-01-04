@@ -77,5 +77,5 @@ def dump(dstDir, vcsImpl=None):
     for task in session.query(Task).all():
         dumpTask(task, tasksDir)
 
-    if vcsImpl.hasChanges():
+    if not vcsImpl.isWorkTreeClean():
         vcsImpl.commit()

@@ -16,9 +16,9 @@ class GitVcsImpl(object):
         self._run("init")
         self.commit("Created")
 
-    def hasChanges(self):
+    def isWorkTreeClean(self):
         out = self._run("status", "-s")
-        return len(out) > 0
+        return len(out) == 0
 
     def commit(self, message=None):
         if message is None:
