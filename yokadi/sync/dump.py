@@ -5,7 +5,7 @@ import icalendar
 
 from yokadi.core import db
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.core.db import Project, Task
+from yokadi.core.db import Task
 from yokadi.yical import yical
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 
@@ -13,6 +13,7 @@ from yokadi.sync.gitvcsimpl import GitVcsImpl
 VERSION = 1
 VERSION_FILENAME = "version"
 PROJECTS_DIRNAME = "projects"
+TASKS_DIRNAME = "tasks"
 
 
 def createVersionFile(dstDir):
@@ -38,16 +39,17 @@ def checkIsValidDumpDir(dstDir, vcsImpl):
 
 
 def rmPreviousDump(dstDir):
-    path = os.path.join(dstDir, PROJECTS_DIRNAME)
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    os.mkdir(path)
+    for dirname in PROJECTS_DIRNAME, TASKS_DIRNAME:
+        path = os.path.join(dstDir, dirname)
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        os.mkdir(path)
 
 
-def dumpTask(task, projectPath):
+def dumpTask(task, dumpDir):
     uuid = task.uuid
     name = "{}.ics".format(uuid)
-    taskPath = os.path.join(projectPath, name)
+    taskPath = os.path.join(dumpDir, name)
 
     cal = icalendar.Calendar()
     cal.add("prodid", "-//Yokadi calendar //yokadi.github.com//")
@@ -56,14 +58,6 @@ def dumpTask(task, projectPath):
     cal.add_component(vTodo)
     with open(taskPath, "wb") as fp:
         fp.write(cal.to_ical())
-
-
-def dumpProjectTasks(project, dstDir):
-    projectPath = os.path.join(dstDir, PROJECTS_DIRNAME, project.name)
-    os.mkdir(projectPath)
-    session = db.getSession()
-    for task in session.query(Task).filter(Task.project==project).all():
-        dumpTask(task, projectPath)
 
 
 def dump(dstDir, vcsImpl=None):
@@ -79,8 +73,9 @@ def dump(dstDir, vcsImpl=None):
 
     rmPreviousDump(dstDir)
     session = db.getSession()
-    for project in session.query(Project).all():
-        dumpProjectTasks(project, dstDir)
+    tasksDir = os.path.join(dstDir, TASKS_DIRNAME)
+    for task in session.query(Task).all():
+        dumpTask(task, tasksDir)
 
     if vcsImpl.hasChanges():
         vcsImpl.commit()

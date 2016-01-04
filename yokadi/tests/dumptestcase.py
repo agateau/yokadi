@@ -14,7 +14,7 @@ from yokadi.yical import icalutils
 
 
 def getTaskPath(dumpDir, task):
-    return os.path.join(dumpDir, "projects", task.project.name, task.uuid + ".ics")
+    return os.path.join(dumpDir, "tasks", task.uuid + ".ics")
 
 
 def loadVTodoFromPath(taskFilePath):
