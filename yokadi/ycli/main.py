@@ -41,7 +41,8 @@ from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.core import utils
-from yokadi.sync import dump
+
+from yokadi.sync.synccmd import SyncCmd
 
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
@@ -53,7 +54,7 @@ from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
 
 
 # TODO: move YokadiCmd to a separate module in ycli package
-class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
+class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd):
     def __init__(self):
         Cmd.__init__(self)
         TaskCmd.__init__(self)
@@ -61,6 +62,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         KeywordCmd.__init__(self)
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
+        SyncCmd.__init__(self)
         self.prompt = "yokadi> "
         self.historyPath = basepaths.getHistoryPath()
         self.loadHistory()
