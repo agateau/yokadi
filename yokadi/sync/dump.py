@@ -68,8 +68,9 @@ def dump(dstDir, vcsImpl=None):
         checkIsValidDumpDir(dstDir, vcsImpl)
     else:
         os.makedirs(dstDir)
-        createVersionFile(dstDir)
         vcsImpl.init()
+        createVersionFile(dstDir)
+        vcsImpl.commit("Created")
 
     rmPreviousDump(dstDir)
     session = db.getSession()

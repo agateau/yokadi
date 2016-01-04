@@ -14,7 +14,6 @@ class GitVcsImpl(object):
 
     def init(self):
         self._run("init")
-        self.commit("Created")
 
     def isWorkTreeClean(self):
         out = self._run("status", "-s")
