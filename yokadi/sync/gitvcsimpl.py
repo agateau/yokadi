@@ -30,9 +30,11 @@ class GitVcsImpl(object):
         self._run("clone", "--quiet", remoteUrl, cloneDir, cwd=parentDir)
 
     def pull(self):
+        self._run("fetch", "--quiet")
         # Force a high rename-threshold: we are not interested in finding renames
-        self._run("pull", "--strategy", "recursive",
-                          "--strategy-option", "rename-threshold=100%")
+        self._run("merge", "--quiet", "--strategy", "recursive",
+                           "--strategy-option", "rename-threshold=100%",
+                           "FETCH_HEAD")
 
     def getConflicts(self):
         """

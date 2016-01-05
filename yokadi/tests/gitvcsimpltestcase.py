@@ -94,6 +94,29 @@ class GitVcsImplTestCase(unittest.TestCase):
             fooPath = join(repoDir, "foo")
             self.assertTrue(os.path.exists(fooPath))
 
+    def testPull(self):
+        with TemporaryDirectory() as tmpDir:
+            remoteRepoDir = join(tmpDir, "remote")
+            createGitRepository(remoteRepoDir)
+            remoteImpl = GitVcsImpl()
+            remoteImpl.setDir(remoteRepoDir)
+            touch(remoteRepoDir, "bar")
+            remoteImpl.commitAll()
+
+            repoDir = join(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+            impl.clone(remoteRepoDir)
+
+            fooPath = join(repoDir, "foo")
+            self.assertFalse(os.path.exists(fooPath))
+
+            touch(remoteRepoDir, "foo")
+            remoteImpl.commitAll()
+
+            impl.pull()
+            self.assertTrue(os.path.exists(fooPath))
+
     def testGetStatus(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = join(tmpDir, "repo")
