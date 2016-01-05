@@ -24,6 +24,11 @@ class GitVcsImpl(object):
         self._run("add", ".")
         self._run("commit", "-m", message)
 
+    def clone(self, remoteUrl):
+        parentDir = os.path.dirname(self._srcDir)
+        cloneDir = os.path.basename(self._srcDir)
+        self._run("clone", "--quiet", remoteUrl, cloneDir, cwd=parentDir)
+
     def pull(self):
         # Force a high rename-threshold: we are not interested in finding renames
         self._run("pull", "--strategy", "recursive",
@@ -52,8 +57,9 @@ class GitVcsImpl(object):
     def abortMerge(self):
         self._run("merge", "--abort")
 
-    def _run(self, *args):
-        cmd = ["git", "-C", self._srcDir]
+    def _run(self, *args, **kwargs):
+        cwd = kwargs.get("cwd", self._srcDir)
+        cmd = ["git", "-C", cwd]
         cmd.extend(args)
         return subprocess.check_output(cmd)
 

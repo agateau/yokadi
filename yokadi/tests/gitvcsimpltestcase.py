@@ -76,6 +76,24 @@ class GitVcsImplTestCase(unittest.TestCase):
             impl.commitAll()
             self.assertTrue(impl.isWorkTreeClean())
 
+    def testClone(self):
+        with TemporaryDirectory() as tmpDir:
+            remoteRepoDir = join(tmpDir, "remote")
+            createGitRepository(remoteRepoDir)
+
+            touch(remoteRepoDir, "foo")
+            impl = GitVcsImpl()
+            impl.setDir(remoteRepoDir)
+            impl.commitAll()
+
+            repoDir = join(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+            impl.clone(remoteRepoDir)
+
+            fooPath = join(repoDir, "foo")
+            self.assertTrue(os.path.exists(fooPath))
+
     def testGetStatus(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = join(tmpDir, "repo")
