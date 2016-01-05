@@ -32,9 +32,16 @@ class GitVcsImpl(object):
     def pull(self):
         self._run("fetch", "--quiet")
         # Force a high rename-threshold: we are not interested in finding renames
-        self._run("merge", "--quiet", "--strategy", "recursive",
-                           "--strategy-option", "rename-threshold=100%",
-                           "FETCH_HEAD")
+        try:
+            self._run("merge", "--quiet", "--strategy", "recursive",
+                               "--strategy-option", "rename-threshold=100%",
+                               "FETCH_HEAD")
+            return True
+        except subprocess.CalledProcessError as exc:
+            if exc.returncode == 1:
+                # Merge failed because of conflicts
+                return False
+            raise exc
 
     def getConflicts(self):
         """
@@ -50,7 +57,7 @@ class GitVcsImpl(object):
            A           A    unmerged, both added
            U           U    unmerged, both modified
         """
-        CONFLICTS = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
+        CONFLICTS = set([b"DD", b"AU", b"UD", b"UA", b"DU", b"AA", b"UU"])
 
         for status, path in self.getStatus():
             if status in CONFLICTS:
