@@ -25,6 +25,37 @@ def touch(dirname, name):
     return path
 
 
+def createGitRepositoryWithConflict(tmpDir, path):
+    # Create remote repo
+    remoteRepoDir = join(tmpDir, path + "-remote")
+    createGitRepository(remoteRepoDir)
+    remoteImpl = GitVcsImpl()
+    remoteImpl.setDir(remoteRepoDir)
+    remoteFooPath = touch(remoteRepoDir, "foo")
+    remoteImpl.commitAll()
+
+    # Clone it
+    repoDir = join(tmpDir,path)
+    impl = GitVcsImpl()
+    impl.setDir(repoDir)
+    impl.clone(remoteRepoDir)
+
+    # Modify remote
+    with open(remoteFooPath, "w") as f:
+        f.write("hello")
+    remoteImpl.commitAll()
+
+    # Modify local
+    fooPath = join(repoDir, "foo")
+    with open(fooPath, "w") as f:
+        f.write("world")
+    impl.commitAll()
+
+    # Pull => conflict
+    impl.pull()
+    return impl
+
+
 class GitVcsImplTestCase(unittest.TestCase):
     def testIsValidVcsDir(self):
         with TemporaryDirectory() as tmpDir:
@@ -120,38 +151,20 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testGetConflicts(self):
         with TemporaryDirectory() as tmpDir:
-            # Create remote repo
-            remoteRepoDir = join(tmpDir, "remote")
-            createGitRepository(remoteRepoDir)
-            remoteImpl = GitVcsImpl()
-            remoteImpl.setDir(remoteRepoDir)
-            remoteFooPath = touch(remoteRepoDir, "foo")
-            remoteImpl.commitAll()
-
-            # Clone it
-            repoDir = join(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
-            impl.clone(remoteRepoDir)
-
-            # Modify remote
-            with open(remoteFooPath, "w") as f:
-                f.write("hello")
-            remoteImpl.commitAll()
-
-            # Modify local
-            fooPath = join(repoDir, "foo")
-            with open(fooPath, "w") as f:
-                f.write("world")
-            impl.commitAll()
-
-            # Pull => conflict
-            ok = impl.pull()
-            self.assertFalse(ok)
+            impl = createGitRepositoryWithConflict(tmpDir, "repo")
 
             conflicts = set(impl.getConflicts())
             self.assertTrue((b"UU", b"foo") in conflicts)
             self.assertEqual(len(conflicts), 1)
+
+    def testAbortMerge(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo")
+            conflicts = set(impl.getConflicts())
+            self.assertEqual(len(conflicts), 1)
+            impl.abortMerge()
+            conflicts = set(impl.getConflicts())
+            self.assertEqual(len(conflicts), 0)
 
     def testGetStatus(self):
         with TemporaryDirectory() as tmpDir:
