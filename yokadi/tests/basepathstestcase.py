@@ -19,7 +19,10 @@ def saveEnv():
 
 
 def restoreEnv(env):
-    os.environ = env
+    # Do not use `os.environ = env`: this would replace the special os.environ
+    # object with a plain dict. We must update the *existing* object.
+    os.environ.clear()
+    os.environ.update(env)
 
 
 class BasePathsUnixTestCase(unittest.TestCase):
