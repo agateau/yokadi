@@ -70,7 +70,7 @@ def dump(dstDir, vcsImpl=None):
         os.makedirs(dstDir)
         vcsImpl.init()
         createVersionFile(dstDir)
-        vcsImpl.commit("Created")
+        vcsImpl.commitAll("Created")
 
     rmPreviousDump(dstDir)
     session = db.getSession()
@@ -79,4 +79,4 @@ def dump(dstDir, vcsImpl=None):
         dumpTask(task, tasksDir)
 
     if not vcsImpl.isWorkTreeClean():
-        vcsImpl.commit()
+        vcsImpl.commitAll()

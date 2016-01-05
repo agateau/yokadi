@@ -18,7 +18,7 @@ class GitVcsImpl(object):
     def isWorkTreeClean(self):
         return len(list(self.getStatus())) == 0
 
-    def commit(self, message=None):
+    def commitAll(self, message=None):
         if message is None:
             message = "Synced"
         self._run("add", ".")
