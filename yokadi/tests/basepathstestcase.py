@@ -12,17 +12,7 @@ import unittest
 from pathlib import Path
 
 from yokadi.core import basepaths
-
-
-def saveEnv():
-    return dict(os.environ)
-
-
-def restoreEnv(env):
-    # Do not use `os.environ = env`: this would replace the special os.environ
-    # object with a plain dict. We must update the *existing* object.
-    os.environ.clear()
-    os.environ.update(env)
+from yokadi.tests.testutils import EnvironSaver
 
 
 class BasePathsUnixTestCase(unittest.TestCase):
@@ -30,13 +20,13 @@ class BasePathsUnixTestCase(unittest.TestCase):
         self._oldWindows = basepaths._WINDOWS
         basepaths._WINDOWS = False
 
-        self._oldEnv = saveEnv()
+        self._envSaver = EnvironSaver()
         self.testHomeDir = tempfile.mkdtemp(prefix="yokadi-basepaths-testcase")
         os.environ["HOME"] = self.testHomeDir
 
     def tearDown(self):
         shutil.rmtree(self.testHomeDir)
-        restoreEnv(self._oldEnv)
+        self._envSaver.restore()
         basepaths._WINDOWS = self._oldWindows
 
     def testMigrateOldDb(self):
@@ -105,7 +95,7 @@ class BasePathsUnixTestCase(unittest.TestCase):
 class BasePathsWindowsTestCase(unittest.TestCase):
     def setUp(self):
         self._oldWindows = basepaths._WINDOWS
-        self._oldEnv = saveEnv()
+        self._envSaver = EnvironSaver()
         basepaths._WINDOWS = True
         self.testAppDataDir = tempfile.mkdtemp(prefix="yokadi-basepaths-testcase")
         os.environ["APPDATA"] = self.testAppDataDir
@@ -113,7 +103,7 @@ class BasePathsWindowsTestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.testAppDataDir)
         basepaths._WINDOWS = self._oldWindows
-        restoreEnv(self._oldEnv)
+        self._envSaver.restore()
 
     def testGetCacheDir(self):
         expected = os.path.join(self.testAppDataDir, "yokadi", "cache")
