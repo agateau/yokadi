@@ -61,7 +61,7 @@ def dumpTask(task, dumpDir):
 
 
 def dump(dstDir, vcsImpl=None):
-    if vcsImpl == None:
+    if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dstDir)
     if os.path.exists(dstDir):

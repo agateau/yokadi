@@ -27,7 +27,7 @@ def removeTask(filename):
 
 
 def pull(dumpDir, vcsImpl=None, conflictResolver=None):
-    if vcsImpl == None:
+    if vcsImpl is None:
         vcsImpl = GitVcsImpl()
 
     vcsImpl.setDir(dumpDir)
