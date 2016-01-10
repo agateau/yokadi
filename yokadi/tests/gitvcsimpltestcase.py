@@ -1,16 +1,24 @@
 import os
+import shutil
 import subprocess
+import tempfile
 import unittest
 
 from os.path import join
 from tempfile import TemporaryDirectory
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
+from yokadi.tests.testutils import EnvironSaver
 
 
 def createGitRepository(path):
     os.mkdir(path)
     subprocess.check_call(('git', 'init', '--quiet'), cwd=path)
+
+
+def createGitConfig():
+    subprocess.check_call(('git', 'config', '--global', 'user.name', 'Test User'))
+    subprocess.check_call(('git', 'config', '--global', 'user.email', 'test@example.com'))
 
 
 def gitAdd(path):
@@ -57,6 +65,19 @@ def createGitRepositoryWithConflict(tmpDir, path):
 
 
 class GitVcsImplTestCase(unittest.TestCase):
+    def setUp(self):
+        self._envSaver = EnvironSaver()
+        self.testHomeDir = tempfile.mkdtemp(prefix="yokadi-basepaths-testcase")
+        os.environ["HOME"] = self.testHomeDir
+        createGitConfig()
+
+    def tearDown(self):
+        shutil.rmtree(self.testHomeDir)
+        self._envSaver.restore()
+
+    def _deleteGitConfig(self):
+        os.remove(join(self.testHomeDir, ".gitconfig"))
+
     def testIsValidVcsDir(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = join(tmpDir, "repo")
@@ -107,6 +128,21 @@ class GitVcsImplTestCase(unittest.TestCase):
             impl.commitAll()
             self.assertTrue(impl.isWorkTreeClean())
 
+    def testInitNoGitUserInfo(self):
+        # If there is no user info, init() should set some default info so that
+        # commitAll() does not fail
+        self._deleteGitConfig()
+        with TemporaryDirectory() as tmpDir:
+            repoDir = join(tmpDir, "repo")
+            os.mkdir(repoDir)
+
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+            impl.init()
+
+            touch(repoDir, "foo")
+            impl.commitAll()
+
     def testClone(self):
         with TemporaryDirectory() as tmpDir:
             remoteRepoDir = join(tmpDir, "remote")
@@ -124,6 +160,17 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             fooPath = join(repoDir, "foo")
             self.assertTrue(os.path.exists(fooPath))
+
+    def testCloneNoGitUserInfo(self):
+        self._deleteGitConfig()
+        with TemporaryDirectory() as tmpDir:
+            remoteRepoDir = join(tmpDir, "remote")
+            createGitRepository(remoteRepoDir)
+
+            touch(remoteRepoDir, "foo")
+            impl = GitVcsImpl()
+            impl.setDir(remoteRepoDir)
+            impl.commitAll()
 
     def testPull(self):
         with TemporaryDirectory() as tmpDir:
