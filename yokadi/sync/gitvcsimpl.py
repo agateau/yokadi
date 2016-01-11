@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 
 
@@ -14,6 +15,7 @@ class GitVcsImpl(object):
 
     def init(self):
         self._run("init")
+        self._ensureUserInfoIsSet()
 
     def isWorkTreeClean(self):
         return len(list(self.getStatus())) == 0
@@ -28,6 +30,7 @@ class GitVcsImpl(object):
         parentDir = os.path.dirname(self._srcDir)
         cloneDir = os.path.basename(self._srcDir)
         self._run("clone", "--quiet", remoteUrl, cloneDir, cwd=parentDir)
+        self._ensureUserInfoIsSet()
 
     def pull(self):
         self._run("fetch", "--quiet")
@@ -71,6 +74,34 @@ class GitVcsImpl(object):
         cmd = ["git", "-C", cwd]
         cmd.extend(args)
         return subprocess.check_output(cmd)
+
+    def _ensureUserInfoIsSet(self):
+        username = self._getConfig("user", "name")
+        email = self._getConfig("user", "email")
+        if username and email:
+            return
+
+        hostname = platform.node()
+        if not hostname:
+            hostname = "example.com"
+        if not username:
+            username = os.environ.get("USER", "user")
+            self._setConfig("user", "name", username)
+        if not email:
+            email = username + "@" + hostname
+            self._setConfig("user", "email", email)
+
+    def _getConfig(self, section, key):
+        try:
+            return self._run("config", section + "." + key)
+        except subprocess.CalledProcessError as exc:
+            if exc.returncode == 1:
+                # Key does not exist
+                return None
+            raise exc
+
+    def _setConfig(self, section, key, value):
+        self._run("config", section + "." + key, value)
 
     def getStatus(self):
         output = self._run("status", "--porcelain")

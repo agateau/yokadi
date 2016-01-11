@@ -162,7 +162,6 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertTrue(os.path.exists(fooPath))
 
     def testCloneNoGitUserInfo(self):
-        self._deleteGitConfig()
         with TemporaryDirectory() as tmpDir:
             remoteRepoDir = join(tmpDir, "remote")
             createGitRepository(remoteRepoDir)
@@ -171,6 +170,17 @@ class GitVcsImplTestCase(unittest.TestCase):
             impl = GitVcsImpl()
             impl.setDir(remoteRepoDir)
             impl.commitAll()
+
+            self._deleteGitConfig()
+
+            repoDir = join(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+            impl.clone(remoteRepoDir)
+
+            touch(repoDir, "bar")
+            impl.commitAll()
+
 
     def testPull(self):
         with TemporaryDirectory() as tmpDir:
