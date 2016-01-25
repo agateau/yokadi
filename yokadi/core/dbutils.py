@@ -172,22 +172,32 @@ class TaskLockManager:
         except NoResultFound:
             return  None
 
-    def acquire(self):
+    def acquire(self, pid=None, now=None):
         """Acquire a lock for that task and remove any previous stale lock"""
+        if now is None:
+            now = datetime.now()
+        if pid is None:
+            pid = os.getpid()
+
         lock = self._getLock()
         if lock:
-            if lock.updateDate < datetime.now() - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
-                # Stale lock, removing
-                self.session.delete(lock)
+            if lock.updateDate < now - 2 * timedelta(seconds=tui.MTIME_POLL_INTERVAL):
+                # Stale lock, reusing it
+                lock.pid = pid
+                lock.updateDate = now
             else:
                 raise YokadiException("Task %s is already locked by process %s" % (lock.task.id, lock.pid))
-        self.session.add(TaskLock(task=self.task, pid=os.getpid(), updateDate=datetime.now()))
+        else:
+            # Create a lock
+            self.session.add(TaskLock(task=self.task, pid=pid, updateDate=now))
         self.session.commit()
 
-    def update(self):
+    def update(self, now=None):
         """Update lock timestamp to avoid it to expire"""
+        if now is None:
+            now = datetime.now()
         lock = self._getLock()
-        lock.updateDate = datetime.now()
+        lock.updateDate = now
         self.session.merge(lock)
         self.session.commit()
 
