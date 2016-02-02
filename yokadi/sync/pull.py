@@ -35,7 +35,7 @@ def pull(dumpDir, vcsImpl=None, conflictResolver=None):
     vcsImpl.pull()
 
     for conflict in vcsImpl.getConflicts():
-        if not conflictResolver.resolve(conflict):
+        if not conflictResolver or not conflictResolver.resolve(conflict):
             vcsImpl.abortMerge()
             return False
 
