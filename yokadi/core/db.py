@@ -67,8 +67,8 @@ class Keyword(Base):
 class TaskKeyword(Base):
     __tablename__ = "task_keyword"
     id = Column(Integer, primary_key=True)
-    taskId = Column("task_id", Integer, ForeignKey("task.id"))
-    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"))
+    taskId = Column("task_id", Integer, ForeignKey("task.id"), nullable=False)
+    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
     value = Column(Integer, default=None)
 
 
@@ -82,7 +82,7 @@ class Task(Base):
     description = Column(Unicode, default="", nullable=False)
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum("new", "started", "done"), default="new")
-    projectId = Column("project_id", Integer, ForeignKey("project.id"))
+    projectId = Column("project_id", Integer, ForeignKey("project.id"), nullable=False)
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
     recurrence = relationship("Recurrence", cascade="all", backref="task")
@@ -173,7 +173,7 @@ class Config(Base):
 class TaskLock(Base):
     __tablename__ = "task_lock"
     id = Column(Integer, primary_key=True)
-    taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True)
+    taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True, nullable=False)
     pid = Column(Integer, default=None)
     updateDate = Column("update_date", DateTime, default=None)
 
