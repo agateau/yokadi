@@ -27,6 +27,16 @@ def gitAdd(path):
     subprocess.check_call(('git', 'add', basename), cwd=dirname)
 
 
+def createBranch(repoDir, name):
+    subprocess.check_call(('git', 'branch', name), cwd=repoDir)
+
+
+def getBranchCommitId(repoDir, name):
+    path = os.path.join(repoDir, ".git", "refs", "heads", name)
+    with open(path) as f:
+        return f.read().strip()
+
+
 def touch(dirname, name):
     path = join(dirname, name)
     open(path, "w").close()
@@ -246,3 +256,29 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertTrue((b'??', b'unknown') in status)
             self.assertTrue((b'A ', b'added') in status)
             self.assertEqual(len(status), 3)
+
+    def testUpdateBranch(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = join(tmpDir, "repo")
+            createGitRepository(repoDir)
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            # Create a foo branch which lags behind master
+            touch(repoDir, "file1")
+            impl.commitAll()
+
+            createBranch(repoDir, "foo")
+            fooId = getBranchCommitId(repoDir, "foo")
+
+            touch(repoDir, "file2")
+            impl.commitAll()
+            masterId = getBranchCommitId(repoDir, "master")
+
+            self.assertNotEqual(fooId, masterId)
+
+            # Update branch, branch ids should be the same now
+            impl.updateBranch("foo", "master")
+
+            fooId = getBranchCommitId(repoDir, "foo")
+            self.assertEqual(fooId, masterId)

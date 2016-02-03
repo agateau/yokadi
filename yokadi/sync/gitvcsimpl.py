@@ -69,6 +69,12 @@ class GitVcsImpl(object):
     def abortMerge(self):
         self._run("merge", "--abort")
 
+    def updateBranch(self, branchName, commitId):
+        """
+        Make the branch `branchName` point to `commitId`
+        """
+        self._run("branch", "--force", branchName, commitId)
+
     def _run(self, *args, **kwargs):
         cwd = kwargs.get("cwd", self._srcDir)
         cmd = ["git", "-C", cwd]
