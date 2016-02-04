@@ -31,7 +31,7 @@ def createBranch(repoDir, name):
     subprocess.check_call(('git', 'branch', name), cwd=repoDir)
 
 
-def getBranchCommitId(repoDir, name):
+def getBranchCommitId(repoDir, name="master"):
     path = os.path.join(repoDir, ".git", "refs", "heads", name)
     with open(path) as f:
         return f.read().strip()
@@ -282,3 +282,61 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             fooId = getBranchCommitId(repoDir, "foo")
             self.assertEqual(fooId, masterId)
+
+    def testGetChangesSince(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = join(tmpDir, "repo")
+            createGitRepository(repoDir)
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            # Create a repo with a removed, a modified and an added file
+            modifiedPath = touch(repoDir, "modified")
+            removedPath = touch(repoDir, "removed")
+            impl.commitAll()
+
+            # Add a new file
+            beforeAddId = getBranchCommitId(repoDir)
+            touch(repoDir, "added")
+            impl.commitAll()
+
+            changes = impl.getChangesSince(beforeAddId)
+            self.assertEqual(changes.modified, set())
+            self.assertEqual(changes.added, {"added"})
+            self.assertEqual(changes.removed, set())
+
+            # Remove a file
+            beforeRemoveId = getBranchCommitId(repoDir)
+            os.unlink(removedPath)
+            impl.commitAll()
+
+            changes = impl.getChangesSince(beforeRemoveId)
+            self.assertEqual(changes.modified, set())
+            self.assertEqual(changes.added, set())
+            self.assertEqual(changes.removed, {"removed"})
+
+            changes = impl.getChangesSince(beforeAddId)
+            self.assertEqual(changes.modified, set())
+            self.assertEqual(changes.added, {"added"})
+            self.assertEqual(changes.removed, {"removed"})
+
+            # Modify a file
+            beforeModifyId = getBranchCommitId(repoDir)
+            with open(modifiedPath, "w") as f:
+                f.write("Boo")
+            impl.commitAll()
+
+            changes = impl.getChangesSince(beforeModifyId)
+            self.assertEqual(changes.modified, {"modified"})
+            self.assertEqual(changes.added, set())
+            self.assertEqual(changes.removed, set())
+
+            changes = impl.getChangesSince(beforeRemoveId)
+            self.assertEqual(changes.modified, {"modified"})
+            self.assertEqual(changes.added, set())
+            self.assertEqual(changes.removed, {"removed"})
+
+            changes = impl.getChangesSince(beforeAddId)
+            self.assertEqual(changes.modified, {"modified"})
+            self.assertEqual(changes.added, {"added"})
+            self.assertEqual(changes.removed, {"removed"})

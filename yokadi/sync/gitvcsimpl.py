@@ -3,6 +3,13 @@ import platform
 import subprocess
 
 
+class VcsChanges(object):
+    def __init__(self):
+        self.added = set()
+        self.modified = set()
+        self.removed = set()
+
+
 class GitVcsImpl(object):
     name = "Git"
 
@@ -68,6 +75,21 @@ class GitVcsImpl(object):
 
     def abortMerge(self):
         self._run("merge", "--abort")
+
+    def getChangesSince(self, commitId):
+        output = self._run("diff", "--name-status", commitId + "..").decode("utf-8")
+        changes = VcsChanges()
+        for line in output.splitlines():
+            status, filename = line.split()
+            if status == "M":
+                changes.modified.add(filename)
+            elif status == "A":
+                changes.added.add(filename)
+            elif status == "D":
+                changes.removed.add(filename)
+            else:
+                raise Exception("Unknown status {} in line '{}'".format(status, line))
+        return changes
 
     def updateBranch(self, branchName, commitId):
         """
