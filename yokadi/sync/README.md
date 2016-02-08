@@ -25,14 +25,15 @@ Configuration file
 
 - Make DB read-only
 - Check Git repository is clean. If not, warn and propose committing pending changes
-- Note current commit id in $oldCommitId
 - git pull. If conflicts, handle them...
 - Commit changes
-- List all Git changes since $oldCommitId
+- List all Git changes since `synced` branch
     - for all new files: create task
     - for all modified files: update task
     - for all removed files: remove task
 - Make DB read-write
+- Updated `synced` branch to HEAD:
+    git branch --force synced
 
 ## gs.push
 
@@ -48,6 +49,7 @@ Configuration file
 - Declare a Git remote
 - Publish remote
 - Make origin/master the upstream branch of master
+- Create the `synced` branch
 
 ## gs.clone
 

@@ -43,6 +43,7 @@ from massedittestcase import MassEditTestCase
 from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase
 from dumptestcase import DumpTestCase
 from gitvcsimpltestcase import GitVcsImplTestCase
+from pulltestcase import PullTestCase
 
 
 def main():

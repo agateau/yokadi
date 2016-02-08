@@ -55,4 +55,12 @@ class EnvironSaver(object):
         # object with a plain dict. We must update the *existing* object.
         os.environ.clear()
         os.environ.update(self.oldEnv)
+
+
+def createFile(dirname, basename, content=""):
+    path = os.path.join(dirname, basename)
+    with open(path, "wt") as f:
+        f.write(content)
+
+
 # vi: ts=4 sw=4 et
