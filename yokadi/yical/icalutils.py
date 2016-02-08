@@ -9,6 +9,10 @@ import re
 import icalendar
 
 
+UID_PREFIX = "yokadi"
+PROJECT_PREFIX = UID_PREFIX + "-project-"
+
+
 def convertIcalType(attr):
     """Convert data from icalendar types (vDates, vInt etc.) to python standard equivalent
     @param attr: icalendar type
@@ -51,5 +55,14 @@ def yokadiTaskTitleToIcalSummary(title, taskId):
 def icalSummaryToYokadiTaskTitle(summary, taskId):
     """Remove " (id)" part of the summary"""
     return re.sub("\s?\({}\)".format(taskId), "", summary)
+
+
+def yokadiProjectNameToIcalRelatedTo(projectName):
+    return PROJECT_PREFIX + projectName
+
+
+def icalRelatedToToYokadiProjectName(relatedTo):
+    return relatedTo[len(PROJECT_PREFIX):]
+
 
 # vi: ts=4 sw=4 et

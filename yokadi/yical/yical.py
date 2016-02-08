@@ -32,10 +32,8 @@ from yokadi.ycli import parseutils
 from yokadi.core.yokadiexception import YokadiException
 
 # UID pattern
-UID_PREFIX = "yokadi"
-TASK_UID = UID_PREFIX + "-task-%s"
+TASK_UID = icalutils.UID_PREFIX + "-task-%s"
 TASK_RE = re.compile(TASK_UID.replace("%s", "(\d+)"))
-PROJECT_UID = UID_PREFIX + "-project-%s"
 
 # Default project where new task are added
 # TODO: make this a configurable items via c_set
@@ -47,7 +45,9 @@ YOKADI_ICAL_ATT_MAPPING = {"title": "summary",
                            "creationDate": "dtstart",
                            "dueDate": "due",
                            "doneDate": "completed",
-                           "description": "description"}
+                           "description": "description",
+                           "project": "related-to",
+                           }
 
 
 def generateCal():
@@ -61,7 +61,7 @@ def generateCal():
     for project in session.query(Project).filter(Project.active == True):
         vTodo = icalendar.Todo()
         vTodo.add("summary", project.name)
-        vTodo["uid"] = PROJECT_UID % project.name
+        vTodo["uid"] = icalutils.yokadiProjectNameToIcalRelatedTo(project.name)
         cal.add_component(vTodo)
     # Add tasks
     for task in session.query(Task).filter(Task.status != "done"):
@@ -77,7 +77,6 @@ def createVTodoFromTask(task):
     @return: ical VTODO (icalendar.Calendar.Todo object)"""
     vTodo = icalendar.Todo()
     vTodo["uid"] = TASK_UID % task.id
-    vTodo["related-to"] = PROJECT_UID % task.project.name
 
     # Add standard attribute
     for yokadiAttribute, icalAttribute in list(YOKADI_ICAL_ATT_MAPPING.items()):
@@ -85,8 +84,10 @@ def createVTodoFromTask(task):
         if attr:
             if yokadiAttribute == "urgency":
                 attr = icalutils.yokadiUrgencyToIcalPriority(attr)
-            if yokadiAttribute == "title":
+            elif yokadiAttribute == "title":
                 attr = icalutils.yokadiTaskTitleToIcalSummary(attr, task.id)
+            elif yokadiAttribute == "project":
+                attr = icalutils.yokadiProjectNameToIcalRelatedTo(task.project.name)
         if attr:
             vTodo.add(icalAttribute, attr)
 
@@ -114,17 +115,20 @@ def updateTaskFromVTodo(task, vTodo):
             attr = icalutils.convertIcalType(attr)
             if yokadiAttribute == "title":
                 attr = icalutils.icalSummaryToYokadiTaskTitle(attr, task.id)
-            if yokadiAttribute == "doneDate":
+            elif yokadiAttribute == "doneDate":
                 # A done date defined indicate that task is done
                 task.status = "done"
                 # BUG: Done date is UTC, we must compute local time for yokadi
-            if yokadiAttribute == "urgency":
+            elif yokadiAttribute == "urgency":
                 if attr == icalutils.yokadiUrgencyToIcalPriority(task.urgency):
                     # Priority does not change - don't update it
                     continue
                 else:
                     # Priority has changed, we need to update urgency
                     attr = icalutils.icalPriorityToYokadiUrgency(int(attr))
+            elif yokadiAttribute == "project":
+                projectName = icalutils.icalRelatedToToYokadiProjectName(attr)
+                attr = dbutils.getOrCreateProject(projectName, interactive=False)
 
             # Update attribute
             setattr(task, yokadiAttribute, attr)
@@ -178,7 +182,7 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
             print("update UID to avoid duplicate task")
             vTodo["UID"] = TASK_UID % self.newTask[vTodo["UID"]]
 
-        if vTodo["UID"].startswith(UID_PREFIX):
+        if vTodo["UID"].startswith(icalutils.UID_PREFIX):
             # This is a yokadi Task.
             if vTodo["LAST-MODIFIED"].dt > vTodo["CREATED"].dt:
                 # Task has been modified
