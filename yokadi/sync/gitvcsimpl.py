@@ -2,12 +2,7 @@ import os
 import platform
 import subprocess
 
-
-class VcsChanges(object):
-    def __init__(self):
-        self.added = set()
-        self.modified = set()
-        self.removed = set()
+from yokadi.sync.vcschanges import VcsChanges
 
 
 class GitVcsImpl(object):

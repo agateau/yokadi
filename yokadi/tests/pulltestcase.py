@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task
 from yokadi.sync.pull import pull
-from yokadi.sync.gitvcsimpl import VcsChanges
+from yokadi.sync.vcschanges import VcsChanges
 from yokadi.tests.testutils import createFile
 
 
