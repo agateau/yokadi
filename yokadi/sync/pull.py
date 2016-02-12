@@ -1,43 +1,42 @@
+import json
 import os
 
-import icalendar
-
 from yokadi.core import db
+from yokadi.core import dbs13n
 from yokadi.core.db import Task
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.yical import yical
 
 
-def getTaskUuidFromFilename(filename):
-    return os.path.splitext(filename)[0]
+def getTaskUuidFromFilePath(filePath):
+    name = os.path.basename(filePath)
+    return os.path.splitext(name)[0]
 
 
-def addTask(session, taskDir, filename):
-    uuid = getTaskUuidFromFilename(filename)
+def addTask(session, taskDir, filePath):
+    uuid = getTaskUuidFromFilePath(filePath)
     task = Task(uuid=uuid)
-    _updateTaskFromVtodo(task, taskDir, filename)
+    _updateTaskFromJson(task, taskDir, filePath)
     session.add(task)
 
 
-def updateTask(session, taskDir, filename):
-    uuid = getTaskUuidFromFilename(filename)
+def updateTask(session, taskDir, filePath):
+    uuid = getTaskUuidFromFilePath(filePath)
     task = session.query(Task).filter_by(uuid=uuid).one()
-    _updateTaskFromVtodo(task, taskDir, filename)
+    # Call session.add *before* updating, so that related objects like
+    # TaskKeywords can be added to the session.
     session.add(task)
+    _updateTaskFromJson(task, taskDir, filePath)
 
 
-def _updateTaskFromVtodo(task, taskDir, filename):
-    with open(os.path.join(taskDir, filename), "rt") as f:
-        content = f.read()
-    cal = icalendar.Calendar.from_ical(content)
-    for vTodo in cal.walk():
-        if "UID" in vTodo:
-            yical.updateTaskFromVTodo(task, vTodo)
+def _updateTaskFromJson(task, taskDir, filePath):
+    with open(os.path.join(taskDir, filePath), "rt") as fp:
+        dct = json.load(fp)
+    dbs13n.updateTaskFromDict(task, dct)
 
 
-def removeTask(session, filename):
-    uuid = getTaskUuidFromFilename(filename)
+def removeTask(session, filePath):
+    uuid = getTaskUuidFromFilePath(filePath)
     session.query(Task).filter_by(uuid=uuid).delete()
 
 
@@ -58,12 +57,12 @@ def pull(dumpDir, vcsImpl=None, conflictResolver=None):
 
     changes = vcsImpl.getChangesSince("synced")
     session = db.getSession()
-    for name in changes.added:
-        addTask(session, dumpDir, name)
-    for name in changes.modified:
-        updateTask(session, dumpDir, name)
-    for name in changes.removed:
-        removeTask(session, name)
+    for path in changes.added:
+        addTask(session, dumpDir, path)
+    for path in changes.modified:
+        updateTask(session, dumpDir, path)
+    for path in changes.removed:
+        removeTask(session, path)
     session.commit()
 
     vcsImpl.updateBranch("synced", "master")

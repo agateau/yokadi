@@ -1,27 +1,18 @@
 #!/usr/bin/env python3
 import os
+import json
 import unittest
 
 from tempfile import TemporaryDirectory
-
-import icalendar
 
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.sync.dump import dump
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.yical import icalutils
 
 
 def getTaskPath(dumpDir, task):
-    return os.path.join(dumpDir, "tasks", task.uuid + ".ics")
-
-
-def loadVTodoFromPath(taskFilePath):
-    with open(taskFilePath) as fp:
-        calData = fp.read()
-        cal = icalendar.Calendar.from_ical(calData)
-        return cal.walk()[1]
+    return os.path.join(dumpDir, "tasks", task.uuid + ".json")
 
 
 class DumpTestCase(unittest.TestCase):
@@ -44,11 +35,11 @@ class DumpTestCase(unittest.TestCase):
             for task in t1, t2, t3:
                 taskFilePath = getTaskPath(dumpDir, task)
                 self.assertTrue(os.path.exists(taskFilePath))
-                vtodo = loadVTodoFromPath(taskFilePath)
-                title = icalutils.icalSummaryToYokadiTaskTitle(vtodo["summary"], task.id)
-                self.assertEqual(task.title, title)
+                with open(taskFilePath) as f:
+                    dct = json.load(f)
+                self.assertEqual(task.title, dct["title"])
                 if task.description:
-                    self.assertEqual(task.description, vtodo["description"])
+                    self.assertEqual(task.description, dct["description"])
 
     def testUpdateDump(self):
         t1 = dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)
@@ -76,8 +67,9 @@ class DumpTestCase(unittest.TestCase):
 
             # Check t3 has been updated
             taskFilePath = getTaskPath(dumpDir, t3)
-            vtodo = loadVTodoFromPath(taskFilePath)
-            title = icalutils.icalSummaryToYokadiTaskTitle(vtodo["summary"], t3.id)
+            with open(taskFilePath) as f:
+                dct = json.load(f)
+            title = dct["title"]
             self.assertEqual(title, newTitle)
 
             # Check t4 has been dumped

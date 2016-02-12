@@ -1,3 +1,5 @@
+import json
+import os
 import unittest
 
 from tempfile import TemporaryDirectory
@@ -6,7 +8,6 @@ from yokadi.core import db, dbutils
 from yokadi.core.db import Task
 from yokadi.sync.pull import pull
 from yokadi.sync.vcschanges import VcsChanges
-from yokadi.tests.testutils import createFile
 
 
 class StubConflictResolver(object):
@@ -37,20 +38,17 @@ class StubVcsImpl(object):
         pass
 
 
-def createTaskFile(dirname, uuid, projectName, title):
-    content = """
-BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Yokadi calendar //yokadi.github.com//
-BEGIN:VTODO
-DTSTART;VALUE=DATE-TIME:20160112T191200
-RELATED-TO:yokadi-project-{projectName}
-SUMMARY:{title}
-UID:yokadi-task-{uuid}
-END:VTODO
-END:VCALENDAR
-""".format(**locals())
-    createFile(dirname, uuid + ".ics", content)
+def createTaskFile(dirname, uuid, projectName, title, **kwargs):
+    dct = {
+        "project": projectName,
+        "uuid": uuid,
+        "title": title,
+        "creationDate": "2016-01-12T19:12:00",
+        "keywords": {},
+    }
+    dct.update(kwargs)
+    with open(os.path.join(dirname, uuid + ".json"), "wt") as fp:
+        json.dump(dct, fp)
 
 
 class PullTestCase(unittest.TestCase):
@@ -71,6 +69,8 @@ class PullTestCase(unittest.TestCase):
             modifiedTask = dbutils.addTask("prj", "Modified", interactive=False)
             modifiedTask.uuid = "1234-modified"
             self.session.add(modifiedTask)
+            dbutils.createMissingKeywords(("kw1", "kw2"), interactive=False)
+            modifiedTask.setKeywordDict(dict(kw1=None, kw2=2))
 
             removedTask = dbutils.addTask("prj", "Removed", interactive=False)
             removedTask.uuid = "1234-removed"
@@ -80,14 +80,18 @@ class PullTestCase(unittest.TestCase):
             # Prepare a fake vcs pull: create files which would result from the
             # pull and create a VcsImpl to fake it
             createTaskFile(tmpDir, uuid="1234-added", projectName="prj", title="Added")
-            createTaskFile(tmpDir, uuid="1234-modified", projectName="prj2", title="New task title")
+            createTaskFile(tmpDir,
+                           uuid="1234-modified",
+                           projectName="prj2",
+                           title="New task title",
+                           keywords=dict(kw1=None, kw2=2))
 
             class MyVcsImpl(StubVcsImpl):
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
-                    changes.added = {"1234-added.ics"}
-                    changes.modified = {"1234-modified.ics"}
-                    changes.removed = {"1234-removed.ics"}
+                    changes.added = {"1234-added.json"}
+                    changes.modified = {"1234-modified.json"}
+                    changes.removed = {"1234-removed.json"}
                     return changes
 
             # Do the pull
@@ -117,7 +121,7 @@ class PullTestCase(unittest.TestCase):
 
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
-                    changes.added = {"1234-added.ics"}
+                    changes.added = {"1234-added.json"}
                     return changes
 
                 def isWorkTreeClean(self):
@@ -147,14 +151,14 @@ class PullTestCase(unittest.TestCase):
 
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
-                    changes.added = {"1234-conflict.ics"}
+                    changes.added = {"1234-conflict.json"}
                     return changes
 
                 def isWorkTreeClean(self):
                     return False
 
                 def getConflicts(self):
-                    return [(b'UU', '1234-conflict.ics')]
+                    return [(b'UU', '1234-conflict.json')]
 
                 def abortMerge(self):
                     self.abortMergeCallCount += 1
@@ -186,14 +190,14 @@ class PullTestCase(unittest.TestCase):
 
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
-                    changes.added = {"1234-conflict.ics"}
+                    changes.added = {"1234-conflict.json"}
                     return changes
 
                 def isWorkTreeClean(self):
                     return False
 
                 def getConflicts(self):
-                    return [(b'UU', '1234-conflict.ics')]
+                    return [(b'UU', '1234-conflict.json')]
 
                 def abortMerge(self):
                     self.abortMergeCallCount += 1

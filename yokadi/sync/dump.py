@@ -1,12 +1,11 @@
+import json
 import os
 import shutil
 
-import icalendar
-
 from yokadi.core import db
+from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task
-from yokadi.yical import yical
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 
 
@@ -48,16 +47,12 @@ def rmPreviousDump(dstDir):
 
 def dumpTask(task, dumpDir):
     uuid = task.uuid
-    name = "{}.ics".format(uuid)
+    name = "{}.json".format(uuid)
     taskPath = os.path.join(dumpDir, name)
 
-    cal = icalendar.Calendar()
-    cal.add("prodid", "-//Yokadi calendar //yokadi.github.com//")
-    cal.add("version", "2.0")
-    vTodo = yical.createVTodoFromTask(task)
-    cal.add_component(vTodo)
-    with open(taskPath, "wb") as fp:
-        fp.write(cal.to_ical())
+    dct = dbs13n.dictFromTask(task)
+    with open(taskPath, "wt") as fp:
+        json.dump(dct, fp, indent=2)
 
 
 def dump(dstDir, vcsImpl=None):
