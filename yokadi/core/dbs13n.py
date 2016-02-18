@@ -3,7 +3,9 @@ from datetime import datetime
 
 import dateutil.parser
 
+from yokadi.core import db
 from yokadi.core import dbutils
+from yokadi.core.db import Project
 
 TASK_DATE_FIELDS = {"creationDate", "dueDate", "doneDate"}
 
@@ -41,17 +43,25 @@ def _convertStringsToDates(dct, keys):
         dct[key] = dateutil.parser.parse(value)
 
 
+def dictFromProject(project):
+    return _dictFromRow(project, skippedKeys={"tasks"})
+
+
+def updateProjectFromDict(project, dct):
+    _updateRowFromDict(project, dct)
+
+
 def dictFromTask(task):
-    dct = _dictFromRow(task, skippedKeys={"recurrenceId", "projectId", "taskKeywords"})
-    dct["project"] = task.project.name
+    dct = _dictFromRow(task, skippedKeys={"recurrenceId", "project", "projectId", "taskKeywords"})
+    dct["projectUuid"] = task.project.uuid
     dct["keywords"] = task.getKeywordDict()
     # TODO: recurrence
     return dct
 
 
 def updateTaskFromDict(task, dct):
-    projectName = dct.pop("project")
-    project = dbutils.getOrCreateProject(projectName, interactive=False)
+    projectUuid = dct.pop("projectUuid")
+    project = db.getSession().query(Project).filter_by(uuid=projectUuid).one()
     dct["project"] = project
 
     _convertStringsToDates(dct, TASK_DATE_FIELDS)

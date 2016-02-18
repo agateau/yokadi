@@ -5,14 +5,9 @@ import shutil
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.core.db import Task
+from yokadi.core.db import Task, Project
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-
-
-VERSION = 1
-VERSION_FILENAME = "version"
-PROJECTS_DIRNAME = "projects"
-TASKS_DIRNAME = "tasks"
+from yokadi.sync import VERSION, VERSION_FILENAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 
 
 def createVersionFile(dstDir):
@@ -45,6 +40,16 @@ def rmPreviousDump(dstDir):
         os.mkdir(path)
 
 
+def dumpProject(project, dumpDir):
+    uuid = project.uuid
+    name = "{}.json".format(uuid)
+    projectPath = os.path.join(dumpDir, name)
+
+    dct = dbs13n.dictFromProject(project)
+    with open(projectPath, "wt") as fp:
+        json.dump(dct, fp, indent=2)
+
+
 def dumpTask(task, dumpDir):
     uuid = task.uuid
     name = "{}.json".format(uuid)
@@ -69,6 +74,9 @@ def dump(dstDir, vcsImpl=None):
 
     rmPreviousDump(dstDir)
     session = db.getSession()
+    projectsDir = os.path.join(dstDir, PROJECTS_DIRNAME)
+    for project in session.query(Project).all():
+        dumpProject(project, projectsDir)
     tasksDir = os.path.join(dstDir, TASKS_DIRNAME)
     for task in session.query(Task).all():
         dumpTask(task, tasksDir)

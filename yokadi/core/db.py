@@ -61,6 +61,7 @@ def uuidGenerator():
 class Project(Base):
     __tablename__ = "project"
     id = Column(Integer, primary_key=True)
+    uuid = Column(Unicode, default=uuidGenerator, nullable=False)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
     tasks = relationship("Task", cascade="all", backref="project")

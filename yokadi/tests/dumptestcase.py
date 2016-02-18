@@ -7,12 +7,17 @@ from tempfile import TemporaryDirectory
 
 from yokadi.core import db
 from yokadi.core import dbutils
+from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.dump import dump
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 
 
 def getTaskPath(dumpDir, task):
-    return os.path.join(dumpDir, "tasks", task.uuid + ".json")
+    return os.path.join(dumpDir, TASKS_DIRNAME, task.uuid + ".json")
+
+
+def getProjectPath(dumpDir, project):
+    return os.path.join(dumpDir, PROJECTS_DIRNAME, project.uuid + ".json")
 
 
 class DumpTestCase(unittest.TestCase):
@@ -27,10 +32,22 @@ class DumpTestCase(unittest.TestCase):
         t3 = dbutils.addTask("prj2", "Baz", interactive=False)
         t3.description = "Hello"
 
+        p1 = t1.project
+        p2 = t3.project
+
         vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
             dump(dumpDir, vcsImpl)
+
+            for project in p1, p2:
+                projectFilePath = getProjectPath(dumpDir, project)
+                self.assertTrue(os.path.exists(projectFilePath))
+                with open(projectFilePath) as f:
+                    dct = json.load(f)
+                    self.assertEqual(project.name, dct["name"])
+                    self.assertEqual(project.uuid, dct["uuid"])
+                    self.assertEqual(project.active, dct["active"])
 
             for task in t1, t2, t3:
                 taskFilePath = getTaskPath(dumpDir, task)
@@ -38,6 +55,7 @@ class DumpTestCase(unittest.TestCase):
                 with open(taskFilePath) as f:
                     dct = json.load(f)
                 self.assertEqual(task.title, dct["title"])
+                self.assertEqual(task.project.uuid, dct["projectUuid"])
                 if task.description:
                     self.assertEqual(task.description, dct["description"])
 

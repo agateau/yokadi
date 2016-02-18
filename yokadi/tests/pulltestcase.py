@@ -5,7 +5,8 @@ import unittest
 from tempfile import TemporaryDirectory
 
 from yokadi.core import db, dbutils
-from yokadi.core.db import Task
+from yokadi.core.db import Task, Project
+from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.pull import pull
 from yokadi.sync.vcschanges import VcsChanges
 
@@ -38,17 +39,37 @@ class StubVcsImpl(object):
         pass
 
 
-def createTaskFile(dirname, uuid, projectName, title, **kwargs):
+def createProjectFile(dirname, uuid, name, active=True):
+    projectDir = os.path.join(dirname, PROJECTS_DIRNAME)
+    if not os.path.exists(projectDir):
+        os.mkdir(projectDir)
     dct = {
-        "project": projectName,
+        "uuid": uuid,
+        "name": name,
+        "active": active,
+    }
+    filePath = os.path.join(projectDir, uuid + ".json")
+    with open(filePath, "wt") as fp:
+        json.dump(dct, fp)
+    return os.path.relpath(filePath, dirname)
+
+
+def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
+    taskDir = os.path.join(dirname, TASKS_DIRNAME)
+    if not os.path.exists(taskDir):
+        os.mkdir(taskDir)
+    dct = {
+        "projectUuid": projectUuid,
         "uuid": uuid,
         "title": title,
         "creationDate": "2016-01-12T19:12:00",
         "keywords": {},
     }
     dct.update(kwargs)
-    with open(os.path.join(dirname, uuid + ".json"), "wt") as fp:
+    filePath = os.path.join(taskDir, uuid + ".json")
+    with open(filePath, "wt") as fp:
         json.dump(dct, fp)
+    return os.path.relpath(filePath, dirname)
 
 
 class PullTestCase(unittest.TestCase):
@@ -66,6 +87,8 @@ class PullTestCase(unittest.TestCase):
         with TemporaryDirectory() as tmpDir:
             # Create two tasks, one which will be modified and one which will be
             # removed
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+
             modifiedTask = dbutils.addTask("prj", "Modified", interactive=False)
             modifiedTask.uuid = "1234-modified"
             self.session.add(modifiedTask)
@@ -79,19 +102,29 @@ class PullTestCase(unittest.TestCase):
 
             # Prepare a fake vcs pull: create files which would result from the
             # pull and create a VcsImpl to fake it
-            createTaskFile(tmpDir, uuid="1234-added", projectName="prj", title="Added")
-            createTaskFile(tmpDir,
-                           uuid="1234-modified",
-                           projectName="prj2",
-                           title="New task title",
-                           keywords=dict(kw1=None, kw2=2))
+            addedProjectPath = createProjectFile(
+                    tmpDir,
+                    name="prj2",
+                    uuid="5678-prj2")
+            addedTaskPath = createTaskFile(
+                    tmpDir,
+                    uuid="1234-added",
+                    projectUuid=prj.uuid,
+                    title="Added")
+            modifiedTaskPath = createTaskFile(
+                    tmpDir,
+                    uuid="1234-modified",
+                    projectUuid="5678-prj2",
+                    title="New task title",
+                    keywords=dict(kw1=None, kw2=2))
+            removedTaskPath = os.path.join(TASKS_DIRNAME, removedTask.uuid + ".json")
 
             class MyVcsImpl(StubVcsImpl):
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
-                    changes.added = {"1234-added.json"}
-                    changes.modified = {"1234-modified.json"}
-                    changes.removed = {"1234-removed.json"}
+                    changes.added = {addedProjectPath, addedTaskPath}
+                    changes.modified = {modifiedTaskPath}
+                    changes.removed = {removedTaskPath}
                     return changes
 
             # Do the pull
@@ -111,9 +144,16 @@ class PullTestCase(unittest.TestCase):
 
     def testRemoteAndLocalChanges(self):
         with TemporaryDirectory() as tmpDir:
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            self.session.commit()
+
             # Prepare a fake vcs pull: create an added file
             # and create a VcsImpl to fake it
-            createTaskFile(tmpDir, uuid="1234-added", projectName="prj", title="Added")
+            addedTaskPath = createTaskFile(
+                    tmpDir,
+                    uuid="1234-added",
+                    projectUuid=prj.uuid,
+                    title="Added")
 
             class MyVcsImpl(StubVcsImpl):
                 def __init__(self):
@@ -121,7 +161,7 @@ class PullTestCase(unittest.TestCase):
 
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
-                    changes.added = {"1234-added.json"}
+                    changes.added = {addedTaskPath}
                     return changes
 
                 def isWorkTreeClean(self):
@@ -177,7 +217,17 @@ class PullTestCase(unittest.TestCase):
 
     def testConflictsSolved(self):
         with TemporaryDirectory() as tmpDir:
-            createTaskFile(tmpDir, uuid="1234-conflict", projectName="prj", title="Added")
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+
+            modifiedTask = dbutils.addTask("prj", "Local title", interactive=False)
+            modifiedTask.uuid = "1234-conflict"
+            self.session.add(modifiedTask)
+
+            modifiedTaskPath = createTaskFile(
+                    tmpDir,
+                    uuid=modifiedTask.uuid,
+                    projectUuid=prj.uuid,
+                    title="Remote title")
 
             class MyConflictResolver(StubConflictResolver):
                 def resolve(self, vcsImpl, conflict):
@@ -189,15 +239,17 @@ class PullTestCase(unittest.TestCase):
                     self.commitAllCallCount = 0
 
                 def getChangesSince(self, commitId):
+                    # This is called after the conflict has been resolved, so it
+                    # must return the task as modified
                     changes = VcsChanges()
-                    changes.added = {"1234-conflict.json"}
+                    changes.modified = {modifiedTaskPath}
                     return changes
 
                 def isWorkTreeClean(self):
                     return False
 
                 def getConflicts(self):
-                    return [(b'UU', '1234-conflict.json')]
+                    return [(b'UU', modifiedTaskPath)]
 
                 def abortMerge(self):
                     self.abortMergeCallCount += 1
@@ -213,3 +265,55 @@ class PullTestCase(unittest.TestCase):
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(vcsImpl.abortMergeCallCount, 0)
             self.assertEqual(vcsImpl.commitAllCallCount, 1)
+
+            modifiedTask2 = dbutils.getTaskFromId(modifiedTask.id)
+            self.assertEqual(modifiedTask2.title, "Remote title")
+
+    def testProjectUpdated(self):
+        with TemporaryDirectory() as tmpDir:
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            self.session.commit()
+
+            modifiedProjectPath = createProjectFile(
+                    tmpDir,
+                    name="prj2",
+                    uuid=prj.uuid)
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.modified = {modifiedProjectPath}
+                    return changes
+
+            # Do the pull
+            vcsImpl = MyVcsImpl()
+            pull(tmpDir, vcsImpl=vcsImpl)
+
+            # Check changes
+            prj2 = self.session.query(Project).filter_by(id=prj.id).one()
+            self.assertEqual(prj2.name, "prj2")
+
+    def testProjectRemoved(self):
+        with TemporaryDirectory() as tmpDir:
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            task = dbutils.addTask(prj.name, "title", interactive=False)
+            self.session.commit()
+
+            removedProjectPath = os.path.join(PROJECTS_DIRNAME, prj.uuid + ".json")
+            removedTaskPath = os.path.join(TASKS_DIRNAME, task.uuid + ".json")
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.removed = {removedProjectPath, removedTaskPath}
+                    return changes
+
+            # Do the pull
+            vcsImpl = MyVcsImpl()
+            pull(tmpDir, vcsImpl=vcsImpl)
+
+            # DB should be empty
+            projects = self.session.query(Project).all()
+            self.assertEqual(len(list(projects)), 0)
+            tasks = self.session.query(Task).all()
+            self.assertEqual(len(list(tasks)), 0)
