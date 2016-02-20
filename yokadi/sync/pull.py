@@ -1,6 +1,8 @@
 import json
 import os
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.db import Task, Project
@@ -55,12 +57,19 @@ class ChangeHandler(object):
 class ProjectChangeHandler(ChangeHandler):
     domain = PROJECTS_DIRNAME
 
+    def __init__(self, taskChangeHandler):
+        self._taskChangeHandler = taskChangeHandler
+
     def _add(self, session, dct):
+        if self._handleNameConflicts(session, dct):
+            return
         project = Project()
         dbs13n.updateProjectFromDict(project, dct)
         session.add(project)
 
     def _update(self, session, dct):
+        if self._handleNameConflicts(session, dct):
+            return
         project = session.query(Project).filter_by(uuid=dct["uuid"]).one()
         session.add(project)
         dbs13n.updateProjectFromDict(project, dct)
@@ -68,16 +77,36 @@ class ProjectChangeHandler(ChangeHandler):
     def _remove(self, session, uuid):
         session.query(Project).filter_by(uuid=uuid).delete()
 
+    def _handleNameConflicts(self, session, dct):
+        try:
+            project = session.query(Project).filter_by(name=dct["name"]).one()
+        except NoResultFound:
+            # No conflicts
+            return False
+        self._taskChangeHandler.projectMap[dct["uuid"]] = project.uuid
+        return True
+
 
 class TaskChangeHandler(ChangeHandler):
     domain = TASKS_DIRNAME
 
+    def __init__(self):
+        # If remote created a project whose name is the same as a local project,
+        # we do not import the remote project, instead we assign the tasks
+        # associated with the remote project to the local project.
+        #
+        # projectMap is a dict of remoteProjectUuid => localProjectUuid. It is
+        # populated by the ProjectChangeHandler
+        self.projectMap = {}
+
     def _add(self, session, dct):
+        self._applyProjectMap(dct)
         task = Task()
         dbs13n.updateTaskFromDict(task, dct)
         session.add(task)
 
     def _update(self, session, dct):
+        self._applyProjectMap(dct)
         task = session.query(Task).filter_by(uuid=dct["uuid"]).one()
         # Call session.add *before* updating, so that related objects like
         # TaskKeywords can be added to the session.
@@ -87,12 +116,12 @@ class TaskChangeHandler(ChangeHandler):
     def _remove(self, session, uuid):
         session.query(Task).filter_by(uuid=uuid).delete()
 
-
-# Handlers must be defined in dependency order
-CHANGE_HANDLERS = [
-    ProjectChangeHandler(),
-    TaskChangeHandler(),
-]
+    def _applyProjectMap(self, dct):
+        try:
+            projectUuid = self.projectMap[dct["projectUuid"]]
+        except KeyError:
+            return
+        dct["projectUuid"] = projectUuid
 
 
 def pull(dumpDir, vcsImpl=None, conflictResolver=None):
@@ -112,7 +141,9 @@ def pull(dumpDir, vcsImpl=None, conflictResolver=None):
 
     changes = vcsImpl.getChangesSince("synced")
     session = db.getSession()
-    for changeHandler in CHANGE_HANDLERS:
+    taskChangeHandler = TaskChangeHandler()
+    projectChangeHandler = ProjectChangeHandler(taskChangeHandler)
+    for changeHandler in projectChangeHandler, taskChangeHandler:
         changeHandler.handle(session, dumpDir, changes)
     session.commit()
 

@@ -317,3 +317,39 @@ class PullTestCase(unittest.TestCase):
             self.assertEqual(len(list(projects)), 0)
             tasks = self.session.query(Task).all()
             self.assertEqual(len(list(tasks)), 0)
+
+    def testRemoteCreateSameProject(self):
+        with TemporaryDirectory() as tmpDir:
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
+            self.session.commit()
+
+            addedProjectPath = createProjectFile(
+                    tmpDir,
+                    name="prj",
+                    uuid="5678-prj2")
+            addedTaskPath = createTaskFile(
+                    tmpDir,
+                    title="task2",
+                    projectUuid="5678-prj2",
+                    uuid="1234-task")
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.added = {addedProjectPath, addedTaskPath}
+                    return changes
+
+            # Do the pull
+            vcsImpl = MyVcsImpl()
+            pull(tmpDir, vcsImpl=vcsImpl)
+
+            # The added project should not be there, task2 should be in prj
+            projects = list(self.session.query(Project).all())
+            self.assertEqual(len(projects), 1)
+            self.assertEqual(projects[0].uuid, prj.uuid)
+
+            tasks = list(self.session.query(Task).all())
+            self.assertEqual(len(tasks), 2)
+            task2 = self.session.query(Task).filter_by(uuid="1234-task").one()
+            self.assertEqual(task2.project.uuid, prj.uuid)
