@@ -353,3 +353,35 @@ class PullTestCase(unittest.TestCase):
             self.assertEqual(len(tasks), 2)
             task2 = self.session.query(Task).filter_by(uuid="1234-task").one()
             self.assertEqual(task2.project.uuid, prj.uuid)
+
+    def testRemoteRenamedProject(self):
+        with TemporaryDirectory() as tmpDir:
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
+            self.session.commit()
+
+            renamedProjectPath = createProjectFile(
+                    tmpDir,
+                    name="prj2",
+                    uuid=prj.uuid)
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.modified = {renamedProjectPath}
+                    return changes
+
+            # Do the pull
+            vcsImpl = MyVcsImpl()
+            pull(tmpDir, vcsImpl=vcsImpl)
+
+            # The project should have a new name, task1 should still be there
+            projects = list(self.session.query(Project).all())
+            self.assertEqual(len(projects), 1)
+            self.assertEqual(projects[0].uuid, prj.uuid)
+            self.assertEqual(projects[0].name, "prj2")
+
+            tasks = list(self.session.query(Task).all())
+            self.assertEqual(len(tasks), 1)
+            self.assertEqual(tasks[0].project.uuid, prj.uuid)
+            self.assertEqual(tasks[0].title, task1.title)
