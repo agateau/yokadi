@@ -54,13 +54,24 @@ class GitVcsImpl(object):
 
         <status> is a two letter string which can take the following values:
 
-           D           D    unmerged, both deleted
-           A           U    unmerged, added by us
-           U           D    unmerged, deleted by them
-           U           A    unmerged, added by them
-           D           U    unmerged, deleted by us
-           A           A    unmerged, both added
-           U           U    unmerged, both modified
+        UU: unmerged, both modified
+        Most common: Local and remote modified A in incompatible way.
+
+        UD: unmerged, deleted by them
+        Local updated A. Remote deleted it.
+
+        DU: unmerged, deleted by us
+        Local deleted A. Remote updated it.
+
+        DD: unmerged, both deleted
+        AU: unmerged, added by us
+        UA: unmerged, added by them
+        Local renamed A to B. Remote renamed A to C.
+        Should not happen with guid-based file names.
+
+        AA: unmerged, both added
+        Both local and remote created A.
+        Should not happen with guid-based file names.
         """
         CONFLICTS = set([b"DD", b"AU", b"UD", b"UA", b"DU", b"AA", b"UU"])
 
