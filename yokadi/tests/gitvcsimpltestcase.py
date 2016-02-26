@@ -43,7 +43,11 @@ def touch(dirname, name):
     return path
 
 
-def createGitRepositoryWithConflict(tmpDir, path):
+def createGitRepositoryWithConflict(tmpDir, path, localContent="", remoteContent=""):
+    """
+    @param localContent is the content of the local file, use None to remove it
+    @param remoteContent is the content of the remote file, use None to remove it
+    """
     # Create remote repo
     remoteRepoDir = join(tmpDir, path + "-remote")
     createGitRepository(remoteRepoDir)
@@ -59,14 +63,20 @@ def createGitRepositoryWithConflict(tmpDir, path):
     impl.clone(remoteRepoDir)
 
     # Modify remote
-    with open(remoteFooPath, "w") as f:
-        f.write("hello")
+    if remoteContent is None:
+        os.unlink(remoteFooPath)
+    else:
+        with open(remoteFooPath, "w") as f:
+            f.write(remoteContent)
     remoteImpl.commitAll()
 
     # Modify local
     fooPath = join(repoDir, "foo")
-    with open(fooPath, "w") as f:
-        f.write("world")
+    if localContent is None:
+        os.unlink(fooPath)
+    else:
+        with open(fooPath, "w") as f:
+            f.write(localContent)
     impl.commitAll()
 
     # Pull => conflict
@@ -218,15 +228,51 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testGetConflicts(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo")
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    localContent="local",
+                    remoteContent="remote")
 
-            conflicts = set(impl.getConflicts())
-            self.assertTrue((b"UU", b"foo") in conflicts)
+            conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
+            conflict = conflicts[0]
+            self.assertEqual(conflict.path, "foo")
+            self.assertEqual(conflict.ancestor, b"")
+            self.assertEqual(conflict.local, b"local")
+            self.assertEqual(conflict.remote, b"remote")
+
+    def testGetConflictsRemovedLocally(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    localContent=None,
+                    remoteContent="remote")
+
+            conflicts = list(impl.getConflicts())
+            self.assertEqual(len(conflicts), 1)
+            conflict = conflicts[0]
+            self.assertEqual(conflict.path, "foo")
+            self.assertEqual(conflict.ancestor, b"")
+            self.assertEqual(conflict.local, None)
+            self.assertEqual(conflict.remote, b"remote")
+
+    def testGetConflictsRemovedRemotely(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    localContent="local",
+                    remoteContent=None)
+
+            conflicts = list(impl.getConflicts())
+            self.assertEqual(len(conflicts), 1)
+            conflict = conflicts[0]
+            self.assertEqual(conflict.path, "foo")
+            self.assertEqual(conflict.ancestor, b"")
+            self.assertEqual(conflict.local, b"local")
+            self.assertEqual(conflict.remote, None)
 
     def testAbortMerge(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo")
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    remoteContent="hello",
+                    localContent="world")
             conflicts = set(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
             impl.abortMerge()
@@ -252,9 +298,9 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             status = set(impl.getStatus())
 
-            self.assertTrue((b' D', b'removed') in status)
-            self.assertTrue((b'??', b'unknown') in status)
-            self.assertTrue((b'A ', b'added') in status)
+            self.assertTrue((' D', 'removed') in status)
+            self.assertTrue(('??', 'unknown') in status)
+            self.assertTrue(('A ', 'added') in status)
             self.assertEqual(len(status), 3)
 
     def testUpdateBranch(self):

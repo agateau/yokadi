@@ -3,6 +3,7 @@ import platform
 import subprocess
 
 from yokadi.sync.vcschanges import VcsChanges
+from yokadi.sync.vcsconflict import VcsConflict
 
 
 class GitVcsImpl(object):
@@ -50,9 +51,12 @@ class GitVcsImpl(object):
 
     def getConflicts(self):
         """
-        Returns a list of (status, path) for conflicting paths:
+        Returns a list of VcsConflict for conflicting paths
+        """
 
-        <status> is a two letter string which can take the following values:
+        """
+        Output of git status is made of two letter strings which can take the
+        following values in case of conflicts:
 
         UU: unmerged, both modified
         Most common: Local and remote modified A in incompatible way.
@@ -73,11 +77,20 @@ class GitVcsImpl(object):
         Both local and remote created A.
         Should not happen with guid-based file names.
         """
-        CONFLICTS = set([b"DD", b"AU", b"UD", b"UA", b"DU", b"AA", b"UU"])
+        CONFLICTS = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 
         for status, path in self.getStatus():
             if status in CONFLICTS:
-                yield status, path
+                ancestor = self.getFileContentAt(path, ":1")
+                if status[0] == "D":
+                    local = None
+                else:
+                    local = self.getFileContentAt(path, ":2")
+                if status[1] == "D":
+                    remote = None
+                else:
+                    remote = self.getFileContentAt(path, ":3")
+                yield VcsConflict(path, ancestor=ancestor, local=local, remote=remote)
 
     def abortMerge(self):
         self._run("merge", "--abort")
@@ -102,6 +115,9 @@ class GitVcsImpl(object):
         Make the branch `branchName` point to `commitId`
         """
         self._run("branch", "--force", branchName, commitId)
+
+    def getFileContentAt(self, filePath, commitId):
+        return self._run("show", commitId + ":" + filePath)
 
     def _run(self, *args, **kwargs):
         cwd = kwargs.get("cwd", self._srcDir)
@@ -138,7 +154,7 @@ class GitVcsImpl(object):
         self._run("config", section + "." + key, value)
 
     def getStatus(self):
-        output = self._run("status", "--porcelain")
+        output = self._run("status", "--porcelain").decode("utf-8")
         for line in output.splitlines():
             status = line[:2]
             path = line[3:].strip()
