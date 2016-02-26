@@ -131,8 +131,12 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
     vcsImpl.setDir(dumpDir)
     vcsImpl.pull()
 
-    if vcsImpl.getConflicts():
-        if not pullUi or not pullUi.resolveConflicts(vcsImpl):
+    if vcsImpl.hasConflicts():
+        if not pullUi:
+            vcsImpl.abortMerge()
+            return False
+        pullUi.resolveConflicts(vcsImpl)
+        if vcsImpl.hasConflicts():
             vcsImpl.abortMerge()
             return False
 

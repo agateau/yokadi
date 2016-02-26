@@ -19,6 +19,9 @@ class StubVcsImpl(object):
     def pull(self):
         pass
 
+    def hasConflicts(self):
+        return bool(self.getConflicts())
+
     def getConflicts(self):
         return []
 
@@ -227,12 +230,13 @@ class PullTestCase(unittest.TestCase):
 
             class MyPullUi(PullUi):
                 def resolveConflicts(self, vcsImpl):
-                    return True
+                    vcsImpl.conflicts = []
 
             class MyVcsImpl(StubVcsImpl):
                 def __init__(self):
                     self.abortMergeCallCount = 0
                     self.commitAllCallCount = 0
+                    self.conflicts = [(b'UU', modifiedTaskPath)]
 
                 def getChangesSince(self, commitId):
                     # This is called after the conflict has been resolved, so it
@@ -245,7 +249,7 @@ class PullTestCase(unittest.TestCase):
                     return False
 
                 def getConflicts(self):
-                    return [(b'UU', modifiedTaskPath)]
+                    return self.conflicts
 
                 def abortMerge(self):
                     self.abortMergeCallCount += 1
@@ -395,9 +399,6 @@ class PullTestCase(unittest.TestCase):
                     uuid=prj2.uuid)
 
             class MyPullUi(PullUi):
-                def resolveConflicts(self, vcsImpl):
-                    return True
-
                 def getMergeStrategy(self, local, remote):
                     return PullUi.MERGE
 

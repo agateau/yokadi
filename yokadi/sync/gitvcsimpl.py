@@ -6,6 +6,32 @@ from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
 
 
+"""
+Output of `git status` is made of two letter strings which can take the
+following values in case of conflicts:
+
+UU: unmerged, both modified
+Most common: Local and remote modified A in incompatible way.
+
+UD: unmerged, deleted by them
+Local updated A. Remote deleted it.
+
+DU: unmerged, deleted by us
+Local deleted A. Remote updated it.
+
+DD: unmerged, both deleted
+AU: unmerged, added by us
+UA: unmerged, added by them
+Local renamed A to B. Remote renamed A to C.
+Should not happen with guid-based file names since files are never renamed.
+
+AA: unmerged, both added
+Both local and remote created A.
+Should not happen with guid-based file names since files are never renamed.
+"""
+CONFLICT_STATES = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
+
+
 class GitVcsImpl(object):
     name = "Git"
 
@@ -49,38 +75,18 @@ class GitVcsImpl(object):
                 return False
             raise exc
 
+    def hasConflicts(self):
+        for status, path in self.getStatus():
+            if status in CONFLICT_STATES:
+                return True
+        return False
+
     def getConflicts(self):
         """
         Returns a list of VcsConflict for conflicting paths
         """
-
-        """
-        Output of git status is made of two letter strings which can take the
-        following values in case of conflicts:
-
-        UU: unmerged, both modified
-        Most common: Local and remote modified A in incompatible way.
-
-        UD: unmerged, deleted by them
-        Local updated A. Remote deleted it.
-
-        DU: unmerged, deleted by us
-        Local deleted A. Remote updated it.
-
-        DD: unmerged, both deleted
-        AU: unmerged, added by us
-        UA: unmerged, added by them
-        Local renamed A to B. Remote renamed A to C.
-        Should not happen with guid-based file names.
-
-        AA: unmerged, both added
-        Both local and remote created A.
-        Should not happen with guid-based file names.
-        """
-        CONFLICTS = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
-
         for status, path in self.getStatus():
-            if status in CONFLICTS:
+            if status in CONFLICT_STATES:
                 ancestor = self.getFileContentAt(path, ":1")
                 if status[0] == "D":
                     local = None

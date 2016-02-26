@@ -226,6 +226,23 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertTrue(ok)
             self.assertTrue(os.path.exists(fooPath))
 
+    def testHasConflicts_noConflicts(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = join(tmpDir, "repo")
+            createGitRepository(repoDir)
+            touch(repoDir, "foo")
+
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+            self.assertFalse(impl.hasConflicts())
+
+    def testHasConflicts_conflicts(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    localContent="local",
+                    remoteContent="remote")
+            self.assertTrue(impl.hasConflicts())
+
     def testGetConflicts(self):
         with TemporaryDirectory() as tmpDir:
             impl = createGitRepositoryWithConflict(tmpDir, "repo",
