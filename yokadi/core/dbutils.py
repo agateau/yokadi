@@ -243,4 +243,20 @@ class KeywordFilter(object):
 
         return lst.filter(filter)
 
+
+def getObject(session, table, **kwargs):
+    try:
+        return session.query(table).filter_by(**kwargs).one()
+    except NoResultFound:
+        return None
+
+
+def getProject(session, **kwargs):
+    return getObject(session, Project, **kwargs)
+
+
+def getTask(session, **kwargs):
+    return getObject(session, Task, **kwargs)
+
+
 # vi: ts=4 sw=4 et
