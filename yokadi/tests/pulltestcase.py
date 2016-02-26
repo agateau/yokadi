@@ -130,7 +130,7 @@ class PullTestCase(unittest.TestCase):
             pull(tmpDir, MyVcsImpl())
 
             # Check changes
-            modifiedTask2 = dbutils.getTaskFromId(modifiedTask.id)
+            modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
             self.assertEqual(modifiedTask2.project.name, "prj2")
             self.assertEqual(modifiedTask2.title, "New task title")
 
@@ -265,7 +265,7 @@ class PullTestCase(unittest.TestCase):
             self.assertEqual(vcsImpl.abortMergeCallCount, 0)
             self.assertEqual(vcsImpl.commitAllCallCount, 1)
 
-            modifiedTask2 = dbutils.getTaskFromId(modifiedTask.id)
+            modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
             self.assertEqual(modifiedTask2.title, "Remote title")
 
     def testProjectUpdated(self):

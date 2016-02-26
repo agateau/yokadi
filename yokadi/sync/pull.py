@@ -65,7 +65,7 @@ class ProjectChangeHandler(ChangeHandler):
         # If a local project exists, update it. This will change its uuid to the
         # uuid of the remote project, resolving the conflict.
         # If there is no local project with this name, create a new one.
-        project = dbutils.getProject(session, name=dct["name"])
+        project = dbutils.getProject(session, name=dct["name"], _allowNone=True)
         if project is None:
             project = Project()
         dbs13n.updateProjectFromDict(project, dct)
@@ -73,7 +73,7 @@ class ProjectChangeHandler(ChangeHandler):
 
     def _update(self, session, dct):
         project = dbutils.getProject(session, uuid=dct["uuid"])
-        existingProject = dbutils.getProject(session, name=dct["name"])
+        existingProject = dbutils.getProject(session, name=dct["name"], _allowNone=True)
         if existingProject is not None and existingProject is not project:
             # There is already a project with this name in the database. What do
             # we do? We can either merge or rename.
@@ -92,7 +92,7 @@ class ProjectChangeHandler(ChangeHandler):
                 name = dct["name"]
                 while True:
                     dct["name"] = name + "_" + str(idx)
-                    if dbutils.getProject(session, name=dct["name"]) is None:
+                    if dbutils.getProject(session, name=dct["name"], _allowNone=True) is None:
                         break
                     idx += 1
             else:

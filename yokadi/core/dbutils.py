@@ -245,10 +245,22 @@ class KeywordFilter(object):
 
 
 def getObject(session, table, **kwargs):
+    """
+    Get an object from table @p table, passing **kwargs to `filter_by`.
+    Raises NoResultFound if no such object exists, unless `kwargs` contains
+    _allowNone=True.
+    """
+    try:
+        allowNone = kwargs.pop("_allowNone")
+    except KeyError:
+        allowNone = False
     try:
         return session.query(table).filter_by(**kwargs).one()
     except NoResultFound:
-        return None
+        if allowNone:
+            return None
+        else:
+            raise
 
 
 def getProject(session, **kwargs):
