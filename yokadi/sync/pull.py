@@ -1,13 +1,14 @@
 import json
 import os
 
-from sqlalchemy.orm.exc import NoResultFound
-
 from yokadi.core import db
+from yokadi.core import dbutils
 from yokadi.core import dbs13n
 from yokadi.core.db import Task, Project
+from yokadi.core.yokadiexception import YokadiException
 from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
+from yokadi.sync.pullui import PullUi
 
 
 class ChangeHandler(object):
@@ -57,56 +58,62 @@ class ChangeHandler(object):
 class ProjectChangeHandler(ChangeHandler):
     domain = PROJECTS_DIRNAME
 
-    def __init__(self, taskChangeHandler):
-        self._taskChangeHandler = taskChangeHandler
+    def __init__(self, pullUi):
+        self._pullUi = pullUi
 
     def _add(self, session, dct):
-        if self._handleNameConflicts(session, dct):
-            return
-        project = Project()
+        # If a local project exists, update it. This will change its uuid to the
+        # uuid of the remote project, resolving the conflict.
+        # If there is no local project with this name, create a new one.
+        project = dbutils.getProject(session, name=dct["name"])
+        if project is None:
+            project = Project()
         dbs13n.updateProjectFromDict(project, dct)
         session.add(project)
 
     def _update(self, session, dct):
-        if self._handleNameConflicts(session, dct):
-            return
-        project = session.query(Project).filter_by(uuid=dct["uuid"]).one()
+        project = dbutils.getProject(session, uuid=dct["uuid"])
+        existingProject = dbutils.getProject(session, name=dct["name"])
+        if existingProject is not None and existingProject is not project:
+            # There is already a project with this name in the database. What do
+            # we do? We can either merge or rename.
+            strategy = self._pullUi.getMergeStrategy(project, existingProject)
+            if strategy == PullUi.MERGE:
+                # Merge `project` into `existingProject`
+                # Assign `project` tasks to `existingProject`
+                for task in project.tasks:
+                    task.project = existingProject
+                session.delete(project)
+                # TODO Merge `project` fields into `existingProject`
+                project = existingProject
+            elif strategy == PullUi.RENAME:
+                # Generate a new, unique, name
+                idx = 1
+                name = dct["name"]
+                while True:
+                    dct["name"] = name + "_" + str(idx)
+                    if dbutils.getProject(session, name=dct["name"]) is None:
+                        break
+                    idx += 1
+            else:
+                raise YokadiException("Merge cancelled")
+        assert project
         session.add(project)
         dbs13n.updateProjectFromDict(project, dct)
 
     def _remove(self, session, uuid):
         session.query(Project).filter_by(uuid=uuid).delete()
 
-    def _handleNameConflicts(self, session, dct):
-        try:
-            project = session.query(Project).filter_by(name=dct["name"]).one()
-        except NoResultFound:
-            # No conflicts
-            return False
-        self._taskChangeHandler.projectMap[dct["uuid"]] = project.uuid
-        return True
-
 
 class TaskChangeHandler(ChangeHandler):
     domain = TASKS_DIRNAME
 
-    def __init__(self):
-        # If remote created a project whose name is the same as a local project,
-        # we do not import the remote project, instead we assign the tasks
-        # associated with the remote project to the local project.
-        #
-        # projectMap is a dict of remoteProjectUuid => localProjectUuid. It is
-        # populated by the ProjectChangeHandler
-        self.projectMap = {}
-
     def _add(self, session, dct):
-        self._applyProjectMap(dct)
         task = Task()
         dbs13n.updateTaskFromDict(task, dct)
         session.add(task)
 
     def _update(self, session, dct):
-        self._applyProjectMap(dct)
         task = session.query(Task).filter_by(uuid=dct["uuid"]).one()
         # Call session.add *before* updating, so that related objects like
         # TaskKeywords can be added to the session.
@@ -116,23 +123,16 @@ class TaskChangeHandler(ChangeHandler):
     def _remove(self, session, uuid):
         session.query(Task).filter_by(uuid=uuid).delete()
 
-    def _applyProjectMap(self, dct):
-        try:
-            projectUuid = self.projectMap[dct["projectUuid"]]
-        except KeyError:
-            return
-        dct["projectUuid"] = projectUuid
 
-
-def pull(dumpDir, vcsImpl=None, conflictResolver=None):
+def pull(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
 
     vcsImpl.setDir(dumpDir)
     vcsImpl.pull()
 
-    for conflict in vcsImpl.getConflicts():
-        if not conflictResolver or not conflictResolver.resolve(vcsImpl, conflict):
+    if vcsImpl.getConflicts():
+        if not pullUi or not pullUi.resolveConflicts(vcsImpl):
             vcsImpl.abortMerge()
             return False
 
@@ -141,8 +141,8 @@ def pull(dumpDir, vcsImpl=None, conflictResolver=None):
 
     changes = vcsImpl.getChangesSince("synced")
     session = db.getSession()
+    projectChangeHandler = ProjectChangeHandler(pullUi)
     taskChangeHandler = TaskChangeHandler()
-    projectChangeHandler = ProjectChangeHandler(taskChangeHandler)
     for changeHandler in projectChangeHandler, taskChangeHandler:
         changeHandler.handle(session, dumpDir, changes)
     session.commit()
