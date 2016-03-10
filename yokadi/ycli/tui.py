@@ -15,6 +15,7 @@ import time
 import unicodedata
 import re
 import locale
+import shutil
 from getpass import getpass
 
 from yokadi.ycli import colors as C
@@ -241,15 +242,8 @@ def clearInputAnswers():
 
 
 def getTermWidth():
-    """Gets the terminal width. Works only on Unix system.
-    @return: terminal width or "120" is system not supported
-    Kindly borrowed from pysql code"""
-    width = 120
-    if os.name == "posix":
-        result = subprocess.Popen(["tput", "cols"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()[0]
-        result = result.strip()
-        if result.isdigit():
-            width = int(result)
-    return width
+    """Gets the terminal width"""
+    size = shutil.get_terminal_size()
+    return size.columns
 
 # vi: ts=4 sw=4 et
