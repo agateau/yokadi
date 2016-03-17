@@ -7,6 +7,7 @@ from yokadi.core import dbs13n
 from yokadi.core.db import Task, Project
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.pullui import PullUi
 
@@ -124,24 +125,41 @@ class TaskChangeHandler(ChangeHandler):
         session.query(Task).filter_by(uuid=uuid).delete()
 
 
+def autoResolveConflicts(objects):
+    remainingObjects = []
+    for obj in objects:
+        obj.autoResolve()
+        if not obj.isResolved():
+            remainingObjects.append(obj)
+    return remainingObjects
+
+
 def pull(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
 
     vcsImpl.setDir(dumpDir)
+    assert vcsImpl.isWorkTreeClean()
     vcsImpl.pull()
 
     if vcsImpl.hasConflicts():
-        if not pullUi:
-            vcsImpl.abortMerge()
-            return False
-        pullUi.resolveConflicts(vcsImpl)
-        if vcsImpl.hasConflicts():
-            vcsImpl.abortMerge()
-            return False
+        objects = [ConflictingObject.fromVcsConflict(x) for x in vcsImpl.getConflicts()]
+        remainingObjects = autoResolveConflicts(objects)
+        if remainingObjects:
+            pullUi.resolveConflicts(remainingObjects)
 
-    if not vcsImpl.isWorkTreeClean():
-        vcsImpl.commitAll("Pulled")
+        for obj in objects:
+            if obj.isResolved():
+                obj.close(vcsImpl)
+            else:
+                vcsImpl.abortMerge()
+                return False
+
+        assert not vcsImpl.hasConflicts()
+        assert not vcsImpl.isWorkTreeClean()
+        vcsImpl.commitAll("Merged after resolving conflicts")
+
+    assert vcsImpl.isWorkTreeClean()
 
     changes = vcsImpl.getChangesSince("synced")
     session = db.getSession()

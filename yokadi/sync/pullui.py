@@ -3,13 +3,13 @@ class PullUi(object):
     RENAME = "rename"
     CANCEL = "cancel"
 
-    def resolveConflicts(self, vcsImpl):
+    def resolveConflicts(self, conflictingObjects):
         """
-        Must iterate on all conflicts returned by vcsImpl and fix them.
+        Must iterate on all conflicting objects and resolve them
         """
         raise NotImplementedError()
 
-    def getMergeStrategy(self, vcsImpl):
+    def getMergeStrategy(self, localProjectDict, remoteProjectDict):
         """
         Must return either MERGE, RENAME or CANCEL
         """

@@ -63,11 +63,14 @@ class GitVcsImpl(object):
 
     def pull(self):
         self._run("fetch", "--quiet")
+
+        commitMessage = "Merged"
         # Force a high rename-threshold: we are not interested in finding renames
         try:
             self._run("merge", "--quiet", "--strategy", "recursive",
                                "--strategy-option", "rename-threshold=100%",
-                               "FETCH_HEAD")
+                               "-m", commitMessage,
+                               "FETCH_HEAD",)
             return True
         except subprocess.CalledProcessError as exc:
             if exc.returncode == 1:
@@ -96,7 +99,7 @@ class GitVcsImpl(object):
                     remote = None
                 else:
                     remote = self.getFileContentAt(path, ":3")
-                yield VcsConflict(path, ancestor=ancestor, local=local, remote=remote)
+                yield VcsConflict(path=path, ancestor=ancestor, local=local, remote=remote)
 
     def abortMerge(self):
         self._run("merge", "--abort")
