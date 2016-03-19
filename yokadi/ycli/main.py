@@ -42,12 +42,11 @@ from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.core import utils
 
-from yokadi.sync.synccmd import SyncCmd
-
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
 from yokadi.ycli.keywordcmd import KeywordCmd
 from yokadi.ycli.projectcmd import ProjectCmd
+from yokadi.ycli.synccmd import SyncCmd
 from yokadi.ycli.taskcmd import TaskCmd
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
