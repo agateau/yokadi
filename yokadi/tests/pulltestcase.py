@@ -80,6 +80,79 @@ def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
     return os.path.relpath(filePath, dirname)
 
 
+BothModifiedConflictFixture = namedtuple("BothModifiedConflictFixture",
+    ["modifiedTask", "vcsImpl"])
+
+
+def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, remoteChanges):
+    prj = dbutils.getOrCreateProject("prj", interactive=False)
+
+    modifiedTask = dbutils.addTask("prj", "Local title", interactive=False)
+    modifiedTask.uuid = "1234-conflict"
+    session.add(modifiedTask)
+
+    modifiedTaskPath = os.path.join(TASKS_DIRNAME, modifiedTask.uuid + ".json")
+    os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
+
+    class MyVcsImpl(StubVcsImpl):
+        def __init__(self):
+            self.abortMergeCallCount = 0
+            self.commitAllCallCount = 0
+            self.pullCalled = False
+            self.conflicts = [VcsConflict(
+                path=modifiedTaskPath,
+                ancestor=createTaskJson(
+                    uuid=modifiedTask.uuid,
+                    projectUuid=prj.uuid,
+                    title="Ancestor"
+                ),
+                local=createTaskJson(
+                    uuid=modifiedTask.uuid,
+                    projectUuid=prj.uuid,
+                    **localChanges
+                ),
+                remote=createTaskJson(
+                    uuid=modifiedTask.uuid,
+                    projectUuid=prj.uuid,
+                    **remoteChanges
+                )
+            )]
+
+        def pull(self):
+            self.pullCalled = True
+
+        def getChangesSince(self, commitId):
+            # This is called after the conflict has been resolved, so it
+            # must return the task as modified
+            changes = VcsChanges()
+            changes.modified = {modifiedTaskPath}
+            return changes
+
+        def closeConflict(self, path, content):
+            testCase.assertEqual(path, self.conflicts[0].path)
+            fullPath = os.path.join(tmpDir, path)
+            with open(fullPath, "wt") as fp:
+                fp.write(content)
+            self.conflicts = []
+
+        def isWorkTreeClean(self):
+            if not self.pullCalled:
+                return True
+            return not self.hasConflicts() and self.commitAllCallCount > 0
+
+        def getConflicts(self):
+            return self.conflicts
+
+        def abortMerge(self):
+            self.abortMergeCallCount += 1
+
+        def commitAll(self, message=""):
+            self.commitAllCallCount += 1
+
+    return BothModifiedConflictFixture(
+        modifiedTask=modifiedTask,
+        vcsImpl=MyVcsImpl())
+
 
 ModifiedDeletedConflictFixture = namedtuple("ModifiedDeletedConflictFixture",
     ["modLocallyTask", "modLocallyTaskPath", "modRemotelyTask", "modRemotelyTaskPath", "vcsImpl"])
@@ -317,14 +390,15 @@ class PullTestCase(unittest.TestCase):
     def testBothModifiedConflictSolved(self):
         testCase = self
         with TemporaryDirectory() as tmpDir:
-            prj = dbutils.getOrCreateProject("prj", interactive=False)
-
-            modifiedTask = dbutils.addTask("prj", "Local title", interactive=False)
-            modifiedTask.uuid = "1234-conflict"
-            self.session.add(modifiedTask)
-
-            modifiedTaskPath = os.path.join(TASKS_DIRNAME, modifiedTask.uuid + ".json")
-            os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
+            fixture = createBothModifiedConflictFixture(self, self.session, tmpDir,
+                localChanges=dict(
+                    title="Local title",
+                    description="Local description"
+                ),
+                remoteChanges=dict(
+                    title="Remote title",
+                    keywords={"remotekw": 1}
+                ))
 
             class MyPullUi(PullUi):
                 def resolveConflicts(self, conflictingObjects):
@@ -333,72 +407,14 @@ class PullTestCase(unittest.TestCase):
                     testCase.assertEqual(obj.conflictingKeys, {"title"})
                     obj.selectValue("title", "Merged title")
 
-            class MyVcsImpl(StubVcsImpl):
-                def __init__(self):
-                    self.abortMergeCallCount = 0
-                    self.commitAllCallCount = 0
-                    self.pullCalled = False
-                    self.conflicts = [VcsConflict(
-                        path=modifiedTaskPath,
-                        ancestor=createTaskJson(
-                            uuid=modifiedTask.uuid,
-                            projectUuid=prj.uuid,
-                            title="Ancestor"
-                        ),
-                        local=createTaskJson(
-                            uuid=modifiedTask.uuid,
-                            projectUuid=prj.uuid,
-                            title="Local title",
-                            description="Local description"
-                        ),
-                        remote=createTaskJson(
-                            uuid=modifiedTask.uuid,
-                            projectUuid=prj.uuid,
-                            title="Remote title",
-                            keywords={"remotekw": 1}
-                        )
-                    )]
-
-                def pull(self):
-                    self.pullCalled = True
-
-                def getChangesSince(self, commitId):
-                    # This is called after the conflict has been resolved, so it
-                    # must return the task as modified
-                    changes = VcsChanges()
-                    changes.modified = {modifiedTaskPath}
-                    return changes
-
-                def closeConflict(self, path, content):
-                    testCase.assertEqual(path, self.conflicts[0].path)
-                    fullPath = os.path.join(tmpDir, path)
-                    with open(fullPath, "wt") as fp:
-                        fp.write(content)
-                    self.conflicts = []
-
-                def isWorkTreeClean(self):
-                    if not self.pullCalled:
-                        return True
-                    return not self.hasConflicts() and self.commitAllCallCount > 0
-
-                def getConflicts(self):
-                    return self.conflicts
-
-                def abortMerge(self):
-                    self.abortMergeCallCount += 1
-
-                def commitAll(self, message=""):
-                    self.commitAllCallCount += 1
-
             # Do the pull
-            vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl, pullUi=MyPullUi())
+            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=MyPullUi())
 
             # Check changes. Conflict has been solved, there should be a merge.
-            self.assertEqual(vcsImpl.abortMergeCallCount, 0)
-            self.assertEqual(vcsImpl.commitAllCallCount, 1)
+            self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
+            self.assertEqual(fixture.vcsImpl.commitAllCallCount, 1)
 
-            modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
+            modifiedTask2 = dbutils.getTask(self.session, id=fixture.modifiedTask.id)
             self.assertEqual(modifiedTask2.title, "Merged title")
             # Description was only changed locally
             self.assertEqual(modifiedTask2.description, "Local description")
