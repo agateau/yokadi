@@ -44,6 +44,7 @@ from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase
 from dumptestcase import DumpTestCase
 from gitvcsimpltestcase import GitVcsImplTestCase
 from pulltestcase import PullTestCase
+from textpulluitestcase import TextPullUiTestCase
 
 
 def main():
