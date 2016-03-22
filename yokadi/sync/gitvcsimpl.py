@@ -4,6 +4,7 @@ import subprocess
 
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
+from yokadi.sync.vcsimpl import VcsImpl
 
 
 """
@@ -32,7 +33,7 @@ Should not happen with guid-based file names since files are never renamed.
 CONFLICT_STATES = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 
 
-class GitVcsImpl(object):
+class GitVcsImpl(VcsImpl):
     name = "Git"
 
     def setDir(self, srcDir):
@@ -47,7 +48,7 @@ class GitVcsImpl(object):
         self._ensureUserInfoIsSet()
 
     def isWorkTreeClean(self):
-        return len(list(self.getStatus())) == 0
+        return len(list(self._getStatus())) == 0
 
     def commitAll(self, message=None):
         if message is None:
@@ -79,16 +80,13 @@ class GitVcsImpl(object):
             raise exc
 
     def hasConflicts(self):
-        for status, path in self.getStatus():
+        for status, path in self._getStatus():
             if status in CONFLICT_STATES:
                 return True
         return False
 
     def getConflicts(self):
-        """
-        Returns a list of VcsConflict for conflicting paths
-        """
-        for status, path in self.getStatus():
+        for status, path in self._getStatus():
             if status in CONFLICT_STATES:
                 ancestor = self.getFileContentAt(path, ":1")
                 if status[0] == "D":
@@ -120,9 +118,6 @@ class GitVcsImpl(object):
         return changes
 
     def updateBranch(self, branchName, commitId):
-        """
-        Make the branch `branchName` point to `commitId`
-        """
         self._run("branch", "--force", branchName, commitId)
 
     def getFileContentAt(self, filePath, commitId):
@@ -162,7 +157,7 @@ class GitVcsImpl(object):
     def _setConfig(self, section, key, value):
         self._run("config", section + "." + key, value)
 
-    def getStatus(self):
+    def _getStatus(self):
         output = self._run("status", "--porcelain").decode("utf-8")
         for line in output.splitlines():
             status = line[:2]

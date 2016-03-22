@@ -313,7 +313,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             os.unlink(removed)
 
-            status = set(impl.getStatus())
+            status = set(impl._getStatus())
 
             self.assertTrue((' D', 'removed') in status)
             self.assertTrue(('??', 'unknown') in status)
