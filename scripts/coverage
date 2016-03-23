@@ -3,7 +3,7 @@ set -e
 
 cd $(dirname $0)/..
 
-COVERAGE_BIN=python3-coverage
+COVERAGE_BIN=${COVERAGE_BIN=python3-coverage}
 
 if ! which $COVERAGE_BIN > /dev/null ; then
     echo "Could not find $COVERAGE_BIN make sure Coverage is installed"
