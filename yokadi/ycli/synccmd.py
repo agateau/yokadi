@@ -2,7 +2,7 @@ import os
 from cmd import Cmd
 
 from yokadi.core import basepaths
-from yokadi.sync import dump, pull
+from yokadi import sync
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
 from yokadi.ycli import tui
@@ -83,8 +83,8 @@ class SyncCmd(Cmd):
         self.dumpDir = os.path.join(basepaths.getCacheDir(), 'db')
 
     def do_s_dump(self, line):
-        dump.dump(self.dumpDir)
+        sync.dump(self.dumpDir)
         print('Database dumped in {}'.format(self.dumpDir))
 
     def do_s_pull(self, line):
-        pull.pull(self.dumpDir, pullUi=TextPullUi())
+        sync.pull(self.dumpDir, pullUi=TextPullUi())
