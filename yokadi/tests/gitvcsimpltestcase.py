@@ -11,9 +11,14 @@ from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.tests.testutils import EnvironSaver
 
 
-def createGitRepository(path):
-    os.mkdir(path)
-    subprocess.check_call(('git', 'init', '--quiet'), cwd=path)
+def createGitRepository(repoParentDir, name):
+    repoDir = join(repoParentDir, name)
+    os.mkdir(repoDir)
+    subprocess.check_call(("git", "init", "--quiet"), cwd=repoDir)
+    emptyPath = touch(repoDir, "EMPTY")
+    subprocess.check_call(("git", "add", "EMPTY"), cwd=repoDir)
+    subprocess.check_call(("git", "commit", "--quiet", "--message", "Init"), cwd=repoDir)
+    return repoDir
 
 
 def createGitConfig():
@@ -49,8 +54,7 @@ def createGitRepositoryWithConflict(tmpDir, path, localContent="", remoteContent
     @param remoteContent is the content of the remote file, use None to remove it
     """
     # Create remote repo
-    remoteRepoDir = join(tmpDir, path + "-remote")
-    createGitRepository(remoteRepoDir)
+    remoteRepoDir = createGitRepository(tmpDir, path + "-remote")
     remoteImpl = GitVcsImpl()
     remoteImpl.setDir(remoteRepoDir)
     remoteFooPath = touch(remoteRepoDir, "foo")
@@ -100,8 +104,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testIsValidVcsDir(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
             impl = GitVcsImpl()
 
             impl.setDir(repoDir)
@@ -124,8 +127,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testIsWorkTreeClean(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
 
             impl = GitVcsImpl()
             impl.setDir(repoDir)
@@ -137,8 +139,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testCommitAll(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
             touch(repoDir, "foo")
 
             impl = GitVcsImpl()
@@ -165,8 +166,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testClone(self):
         with TemporaryDirectory() as tmpDir:
-            remoteRepoDir = join(tmpDir, "remote")
-            createGitRepository(remoteRepoDir)
+            remoteRepoDir = createGitRepository(tmpDir, "remote")
 
             touch(remoteRepoDir, "foo")
             impl = GitVcsImpl()
@@ -183,8 +183,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testCloneNoGitUserInfo(self):
         with TemporaryDirectory() as tmpDir:
-            remoteRepoDir = join(tmpDir, "remote")
-            createGitRepository(remoteRepoDir)
+            remoteRepoDir = createGitRepository(tmpDir, "remote")
 
             touch(remoteRepoDir, "foo")
             impl = GitVcsImpl()
@@ -204,8 +203,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testPull(self):
         with TemporaryDirectory() as tmpDir:
-            remoteRepoDir = join(tmpDir, "remote")
-            createGitRepository(remoteRepoDir)
+            remoteRepoDir = createGitRepository(tmpDir, "remote")
             remoteImpl = GitVcsImpl()
             remoteImpl.setDir(remoteRepoDir)
             touch(remoteRepoDir, "bar")
@@ -228,8 +226,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testHasConflicts_noConflicts(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
             touch(repoDir, "foo")
 
             impl = GitVcsImpl()
@@ -298,8 +295,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testGetStatus(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
             impl = GitVcsImpl()
             impl.setDir(repoDir)
 
@@ -322,8 +318,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testUpdateBranch(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
             impl = GitVcsImpl()
             impl.setDir(repoDir)
 
@@ -348,8 +343,7 @@ class GitVcsImplTestCase(unittest.TestCase):
 
     def testGetChangesSince(self):
         with TemporaryDirectory() as tmpDir:
-            repoDir = join(tmpDir, "repo")
-            createGitRepository(repoDir)
+            repoDir = createGitRepository(tmpDir, "repo")
             impl = GitVcsImpl()
             impl.setDir(repoDir)
 
