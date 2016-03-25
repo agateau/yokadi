@@ -137,7 +137,7 @@ class GitVcsImpl(VcsImpl):
         cwd = kwargs.get("cwd", self._srcDir)
         cmd = ["git", "-C", cwd]
         cmd.extend(args)
-        return subprocess.check_output(cmd)
+        return subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
     def _ensureUserInfoIsSet(self):
         username = self._getConfig("user", "name")
