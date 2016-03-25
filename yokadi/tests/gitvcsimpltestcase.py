@@ -8,7 +8,7 @@ from os.path import join
 from tempfile import TemporaryDirectory
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.vcsimplerrors import VcsImplError
+from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
 from yokadi.tests.testutils import EnvironSaver
 
 
@@ -434,3 +434,32 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             # Push
             self.assertRaises(VcsImplError, impl.push)
+
+    def testPushNotFastForward(self):
+        with TemporaryDirectory() as tmpDir:
+            srcRepoDir = createGitRepository(tmpDir, "src")
+            remoteRepoDir = createBareGitRepository(tmpDir, "remote", srcRepoDir)
+
+            # We clone remote repo
+            ourRepoDir = join(tmpDir, "our")
+            impl = GitVcsImpl()
+            impl.setDir(ourRepoDir)
+            impl.clone(remoteRepoDir)
+
+            # Bob clones remote repo
+            bobRepoDir = join(tmpDir, "bob")
+            bobImpl = GitVcsImpl()
+            bobImpl.setDir(bobRepoDir)
+            bobImpl.clone(remoteRepoDir)
+
+            # We make a change
+            touch(ourRepoDir, "foo")
+            impl.commitAll()
+
+            # Bob makes a change and pushes it => no problem
+            touch(bobRepoDir, "bob-was-here")
+            bobImpl.commitAll()
+            bobImpl.push()
+
+            # We push => error, not fast forward
+            self.assertRaises(NotFastForwardError, impl.push)
