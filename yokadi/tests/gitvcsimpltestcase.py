@@ -21,6 +21,12 @@ def createGitRepository(repoParentDir, name):
     return repoDir
 
 
+def createBareGitRepository(repoParentDir, name, srcRepoDir):
+    repoDir = join(repoParentDir, name)
+    subprocess.check_call(("git", "clone", "--quiet", "--bare", srcRepoDir, repoDir))
+    return repoDir
+
+
 def createGitConfig():
     subprocess.check_call(('git', 'config', '--global', 'user.name', 'Test User'))
     subprocess.check_call(('git', 'config', '--global', 'user.email', 'test@example.com'))
@@ -397,3 +403,20 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertEqual(changes.modified, {"modified"})
             self.assertEqual(changes.added, {"added"})
             self.assertEqual(changes.removed, {"removed"})
+
+    def testPushOK(self):
+        with TemporaryDirectory() as tmpDir:
+            srcRepoDir = createGitRepository(tmpDir, "src")
+            remoteRepoDir = createBareGitRepository(tmpDir, "remote", srcRepoDir)
+
+            repoDir = join(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+            impl.clone(remoteRepoDir)
+
+            # Make a change
+            fooPath = touch(repoDir, "foo")
+            impl.commitAll()
+
+            # Push
+            impl.push()

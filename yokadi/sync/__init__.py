@@ -5,3 +5,8 @@ TASKS_DIRNAME = "tasks"
 
 from .pull import pull
 from .dump import dump
+
+
+def push(dumpDir, vcsImpl=None):
+    vcsImpl.setDir(dumpDir)
+    vcsImpl.push()

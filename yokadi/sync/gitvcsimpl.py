@@ -5,6 +5,7 @@ import subprocess
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
 from yokadi.sync.vcsimpl import VcsImpl
+from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError
 
 
 """
@@ -77,7 +78,16 @@ class GitVcsImpl(VcsImpl):
             if exc.returncode == 1:
                 # Merge failed because of conflicts
                 return False
-            raise exc
+            raise VcsImplError.fromSubprocessError(exc)
+
+    def push(self):
+        try:
+            self._run("push", "--quiet", "origin", "master:master")
+        except subprocess.CalledProcessError as exc:
+            if exc.returncode == 1:
+                raise NotFastForwardError.fromSubprocessError(exc)
+            else:
+                raise VcsImplError.fromSubprocessError(exc)
 
     def hasConflicts(self):
         for status, path in self._getStatus():
