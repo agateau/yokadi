@@ -8,6 +8,7 @@ from os.path import join
 from tempfile import TemporaryDirectory
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
+from yokadi.sync.vcsimplerrors import VcsImplError
 from yokadi.tests.testutils import EnvironSaver
 
 
@@ -420,3 +421,16 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             # Push
             impl.push()
+
+    def testPushNoRemote(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "src")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            # Make a change
+            fooPath = touch(repoDir, "foo")
+            impl.commitAll()
+
+            # Push
+            self.assertRaises(VcsImplError, impl.push)
