@@ -5,6 +5,7 @@ from yokadi.core import basepaths
 from yokadi import sync
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
+from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
 from yokadi.ycli import tui
 
 
@@ -88,3 +89,11 @@ class SyncCmd(Cmd):
 
     def do_s_pull(self, line):
         sync.pull(self.dumpDir, pullUi=TextPullUi())
+
+    def do_s_push(self, line):
+        try:
+            sync.push(self.dumpDir)
+        except NotFastForwardError:
+            print("Remote has other changes, you need to run s_pull")
+        except VcsImplError as exc:
+            print("Failed to push: {}".format(exc))
