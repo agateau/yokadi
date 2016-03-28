@@ -1,7 +1,7 @@
-## Configuration
+# Configuration
 
 - Local configuration in ~/.config/yokadi/yokadi.conf
-- Default DB in ~/.local/share/yokadi/gsdump
+- Default DB in ~/.local/share/yokadi/yokadi.db
 - Default DB dump in ~/.cache/yokadi/db/
 - History in ~/.cache/yokadi/history
 
@@ -13,7 +13,8 @@ Configuration file
     [db ~/foo/bar/yokadi.db]
     gs_dump_dir=~/foo/bar/gsdump
 
-## gs.dump
+# Commands
+## s_dump
 
 - Make DB read-only
 - Check Git repository is clean. If not, warn and propose committing pending changes
@@ -21,11 +22,11 @@ Configuration file
 - Commit changes
 - Make DB read-write
 
-## gs.pull
+## s_pull
 
 - Make DB read-only
 - Check Git repository is clean. If not, warn and propose committing pending changes
-- git pull. If conflicts, handle them...
+- git pull. If conflicts, handle them
 - Commit changes
 - List all Git changes since `synced` branch
     - for all new files: create task
@@ -35,7 +36,7 @@ Configuration file
 - Updated `synced` branch to HEAD:
     git branch --force synced
 
-## gs.push
+## s_push
 
 - Make DB read-only
 - git fetch
@@ -43,7 +44,7 @@ Configuration file
 - If no changes: git push
 - Make DB read-write
 
-## gs.init
+## s_init
 
 - Dump DB
 - Declare a Git remote
@@ -51,14 +52,43 @@ Configuration file
 - Make origin/master the upstream branch of master
 - Create the `synced` branch
 
-## gs.clone
+## s_clone
 
 - git clone DB
 - Create empty DB
 - gs.pull
 
-## gs.sync
+## s_sync
 
-- gs.dump
-- gs.pull
-- gs.push
+- s_dump
+- s_pull
+- s_push
+
+## s_create_remote_repo <url>
+
+- Creates a bare repo, url can be either a `file:` or an `ssh:` url
+- If url is an ssh url, uploads the created repository using `scp -r` (or `rsync`?)
+- Define url as the `origin` remote of the dump repo
+
+## s_set_remote_url <url>
+
+- Define url as the `origin` remote of the dump repo
+
+# Use cases
+
+## Publishing an existing DB
+
+    s_init
+    s_create_remote_repo ssh://[<user>@]<hostname>/<path/to/repo>
+
+## Setting up a new Yokadi DB to track an existing repo
+
+    s_clone ssh://[<user>@]<hostname>/<path/to/repo>
+
+## Merging an existing DB into an existing repo
+
+    s_init
+    s_set_remote_url ssh://[<user>@]<hostname>/<path/to/repo>
+    s_dump
+    s_pull
+    s_push
