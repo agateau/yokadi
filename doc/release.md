@@ -43,7 +43,7 @@ Update `NEWS` file (add changes, check release date)
 Bump version number
 
     echo $version > version
-    git commit version -m "Getting ready for $version"
+    git commit NEWS version -m "Getting ready for $version"
 
 ### Common
 
