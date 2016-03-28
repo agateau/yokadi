@@ -15,7 +15,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
 
 
 try:
@@ -69,22 +69,18 @@ class Keyword(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     tasks = association_proxy("taskKeywords", "task")
-    projects = association_proxy("projectKeywords", "project")
+    taskKeywords = relationship("TaskKeyword", cascade="all", backref="keyword")
 
     def __repr__(self):
         return self.name
-
-    def getTasks(self):
-        return [taskKeyword.task for taskKeyword in self.taskKeywords]
 
 
 class TaskKeyword(Base):
     __tablename__ = "task_keyword"
     id = Column(Integer, primary_key=True)
-    taskId = Column("task_id", Integer, ForeignKey("task.id"))
-    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"))
+    taskId = Column("task_id", Integer, ForeignKey("task.id"), nullable=False)
+    keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
     value = Column(Integer, default=None)
-    keyword = relationship("Keyword", backref="taskKeywords")
 
 
 class Task(Base):
@@ -97,7 +93,7 @@ class Task(Base):
     description = Column(Unicode, default="", nullable=False)
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum("new", "started", "done"), default="new")
-    projectId = Column("project_id", Integer, ForeignKey("project.id"))
+    projectId = Column("project_id", Integer, ForeignKey("project.id"), nullable=False)
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
     recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
     recurrence = relationship("Recurrence", cascade="all", backref="task")
@@ -204,7 +200,7 @@ class Config(Base):
 class TaskLock(Base):
     __tablename__ = "task_lock"
     id = Column(Integer, primary_key=True)
-    taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True)
+    taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True, nullable=False)
     pid = Column(Integer, default=None)
     updateDate = Column("update_date", DateTime, default=None)
 
@@ -321,4 +317,12 @@ def setDefaultConfig():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))
 
+
+def deleteInvalidTaskKeywordRows():
+    # TODO: Remove this function when we migrate to database version 9. See
+    # update8to9.
+    session = getSession()
+    filters = or_(TaskKeyword.taskId == None, TaskKeyword.keywordId == None)
+    session.query(TaskKeyword).filter(filters).delete(synchronize_session=False)
+    session.commit()
 # vi: ts=4 sw=4 et

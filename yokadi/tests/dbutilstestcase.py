@@ -7,6 +7,8 @@ Date utilities test cases
 
 import unittest
 
+from datetime import datetime
+
 import testutils
 
 from yokadi.core import dbutils, db
@@ -54,4 +56,21 @@ class DbUtilsTestCase(unittest.TestCase):
         self.assertRaises(YokadiException, dbutils.getKeywordFromName, "")
         self.assertRaises(YokadiException, dbutils.getKeywordFromName, "foo")
         self.assertEqual(k1, dbutils.getKeywordFromName("k1"))
+
+    def testTaskLockManagerStaleLock(self):
+        tui.addInputAnswers("y")
+        t1 = dbutils.addTask("x", "t1", {})
+        taskLockManager = dbutils.TaskLockManager(t1)
+
+        # Lock the task
+        taskLockManager.acquire(pid=1, now=datetime(2014, 1, 1))
+        lock1 = taskLockManager._getLock()
+        self.assertEqual(lock1.pid, 1)
+
+        # Try to lock again, the stale lock should get reused
+        taskLockManager.acquire(pid=2, now=datetime(2015, 1, 1))
+        lock2 = taskLockManager._getLock()
+        self.assertEqual(lock1.id, lock2.id)
+        self.assertEqual(lock2.pid, 2)
+
 # vi: ts=4 sw=4 et

@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+"""
+Update from version 8 to version 9 of Yokadi DB
+
+- Delete invalid TaskKeyword rows
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or newer
+"""
+import sys
+
+from sqlalchemy import create_engine
+
+
+# TODO: Current db version is 8, but this file has been created so that when we
+# create version 9, we can do the work which is currently done in
+# db.deleteInvalidTaskKeywordRows() and remove db.deleteInvalidTaskKeywordRows()
+#
+# The cleanup is done at startup for db version 8 because it is a fast,
+# data-only cleanup so it is not worth requiring users to update their database
+# schema.
+
+
+def deleteInvalidTaskKeywordRows(conn):
+    conn.execute('delete from task_keyword where task_id is null or keyword_id is null')
+
+
+def main():
+    uri = 'sqlite:///' + sys.argv[1]
+    engine = create_engine(uri)
+    with engine.begin() as conn:
+        deleteInvalidTaskKeywordRows(conn)
+
+
+if __name__ == "__main__":
+    main()
+# vi: ts=4 sw=4 et

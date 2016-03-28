@@ -59,4 +59,14 @@ class KeywordTestCase(unittest.TestCase):
         self.assertTrue("k2" in kwDict)
 
         dbutils.getKeywordFromName("k1")
+
+    def testKRemove(self):
+        t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive=False)
+        tui.addInputAnswers("y")
+        self.cmd.do_k_remove("k1")
+        kwDict = t1.getKeywordDict()
+        self.assertFalse("k1" in kwDict)
+        self.assertTrue("k2" in kwDict)
+        taskKeyword = self.session.query(db.TaskKeyword).filter_by(taskId=t1.id).one()
+        self.assertEqual(taskKeyword.keyword.name, "k2")
 # vi: ts=4 sw=4 et
