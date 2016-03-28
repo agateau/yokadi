@@ -68,10 +68,6 @@ to keep version to its master value.
     git push
     git checkout -
 
-## Post on PyPI
-
-    twine upload ../yokadi.github.com/download/yokadi-$version.*
-
 ## In yokadi.github.com checkout
 
 Ensure checkout is up to date
@@ -80,11 +76,21 @@ Update documentation
 
     ./updatedoc.py ../yokadi .
 
-Write a blog entry in `_posts/`
-
 Update version in download page (`download.md`)
 
-## Upload on PyPI
+Write a blog entry in `_posts/`
+
+Test it:
+
+    jekyll serve
+
+Upload archives on PyPI
 
     cd download/
     twine upload yokadi-<version>.*
+
+Publish blog post
+
+    git add .
+    git commit -m "Releasing $version"
+    git push
