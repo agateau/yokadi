@@ -13,50 +13,51 @@ Configuration file
     [db ~/foo/bar/yokadi.db]
     gs_dump_dir=~/foo/bar/gsdump
 
+# Branches
+
+- master contains all
+- db contains all changes which are also in the database
+
 # Commands
 ## s_dump
 
 - Make DB read-only
-- Check Git repository is clean. If not, warn and propose committing pending changes
-- Dump DB
-- Commit changes
+- sync.dump()
 - Make DB read-write
 
 ## s_pull
 
 - Make DB read-only
-- Check Git repository is clean. If not, warn and propose committing pending changes
-- git pull. If conflicts, handle them
-- Commit changes
-- List all Git changes since `synced` branch
-    - for all new files: create task
-    - for all modified files: update task
-    - for all removed files: remove task
+- sync.pull()
+- sync.importDump(all=False)
 - Make DB read-write
-- Updated `synced` branch to HEAD:
-    git branch --force synced
 
 ## s_push
 
 - Make DB read-only
-- git fetch
-- If changes: Merge remote changes and restart
-- If no changes: git push
+- sync.push()
+- if fails:
+    tell the user to run s_pull first
 - Make DB read-write
 
 ## s_init
 
-- Dump DB
-- Declare a Git remote
-- Publish remote
-- Make origin/master the upstream branch of master
-- Create the `synced` branch
+- Make DB read-only
+- sync.initDumpRepository()
+- sync.dump()
+- Make DB read-write
 
-## s_clone
+## s_clone <url>
 
-- git clone DB
-- Create empty DB
-- gs.pull
+- Make DB read-only
+- If there is already a dump repository:
+    confirm it must be deleted
+    delete it
+- git clone <url>
+- sync.importDump(all=True)
+- If db was not empty:
+    sync.dump()
+- Make DB read-write
 
 ## s_sync
 
@@ -66,13 +67,42 @@ Configuration file
 
 ## s_create_remote_repo <url>
 
-- Creates a bare repo, url can be either a `file:` or an `ssh:` url
+url can be either a `file:` or an `ssh:` url
+
+- Creates a bare repo
 - If url is an ssh url, uploads the created repository using `scp -r` (or `rsync`?)
 - Define url as the `origin` remote of the dump repo
+- Make origin/master the upstream branch of master
 
 ## s_set_remote_url <url>
 
 - Define url as the `origin` remote of the dump repo
+
+# API
+
+## sync.dump()
+
+- Dump all db
+- Update `db` branch to HEAD
+
+## sync.pull()
+
+- Assert Git repository is clean
+- git pull. If conflicts, handle them
+- Commit changes
+
+## sync.importDump(all=False)
+
+if all:
+    startPoint is the first commit id of the repo
+else:
+    startPoint is `db`
+
+- List all Git changes since startPoint
+    - for all new files: create task
+    - for all modified files: update task
+    - for all removed files: remove task
+- Update `db` branch to HEAD
 
 # Use cases
 
@@ -87,8 +117,13 @@ Configuration file
 
 ## Merging an existing DB into an existing repo
 
-    s_init
-    s_set_remote_url ssh://[<user>@]<hostname>/<path/to/repo>
+    s_clone ssh://[<user>@]<hostname>/<path/to/repo>
+    s_dump
+    s_pull
+    s_push
+
+## Fetching latest changes
+
     s_dump
     s_pull
     s_push
