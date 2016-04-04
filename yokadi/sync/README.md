@@ -29,7 +29,7 @@ Configuration file
 
 - Make DB read-only
 - sync.pull()
-- sync.importDump(all=False)
+- sync.importDump(importAll=False)
 - Make DB read-write
 
 ## s_push
@@ -54,7 +54,7 @@ Configuration file
     confirm it must be deleted
     delete it
 - git clone <url>
-- sync.importDump(all=True)
+- sync.importDump(importAll=True)
 - If db was not empty:
     sync.dump()
 - Make DB read-write
@@ -91,9 +91,9 @@ url can be either a `file:` or an `ssh:` url
 - git pull. If conflicts, handle them
 - Commit changes
 
-## sync.importDump(all=False)
+## sync.importDump(importAll=False)
 
-if all:
+if importAll:
     startPoint is the first commit id of the repo
 else:
     startPoint is `db-synced`
