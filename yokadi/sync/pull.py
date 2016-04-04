@@ -6,7 +6,7 @@ from yokadi.core import dbutils
 from yokadi.core import dbs13n
 from yokadi.core.db import Task, Project
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.pullui import PullUi
@@ -161,7 +161,7 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
 
     assert vcsImpl.isWorkTreeClean()
 
-    changes = vcsImpl.getChangesSince("synced")
+    changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
     session = db.getSession()
     projectChangeHandler = ProjectChangeHandler(pullUi)
     taskChangeHandler = TaskChangeHandler()
@@ -169,4 +169,4 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
         changeHandler.handle(session, dumpDir, changes)
     session.commit()
 
-    vcsImpl.updateBranch("synced", "master")
+    vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")

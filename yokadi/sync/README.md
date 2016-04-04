@@ -16,7 +16,7 @@ Configuration file
 # Branches
 
 - master contains all
-- db contains all changes which are also in the database
+- `db-synced` contains all changes which are also in the database
 
 # Commands
 ## s_dump
@@ -83,7 +83,7 @@ url can be either a `file:` or an `ssh:` url
 ## sync.dump()
 
 - Dump all db
-- Update `db` branch to HEAD
+- Update `db-synced` branch to HEAD
 
 ## sync.pull()
 
@@ -96,13 +96,13 @@ url can be either a `file:` or an `ssh:` url
 if all:
     startPoint is the first commit id of the repo
 else:
-    startPoint is `db`
+    startPoint is `db-synced`
 
 - List all Git changes since startPoint
     - for all new files: create task
     - for all modified files: update task
     - for all removed files: remove task
-- Update `db` branch to HEAD
+- Update `db-synced` branch to HEAD
 
 # Use cases
 
