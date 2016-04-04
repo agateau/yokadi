@@ -7,7 +7,7 @@ from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task, Project
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync import VERSION, VERSION_FILENAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import VERSION, VERSION_FILENAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 
 
 def createVersionFile(dstDir):
@@ -60,17 +60,23 @@ def dumpTask(task, dumpDir):
         json.dump(dct, fp, indent=2)
 
 
-def dump(dstDir, vcsImpl=None):
+def initDumpRepository(dstDir, vcsImpl=None):
+    assert not os.path.exists(dstDir)
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dstDir)
-    if os.path.exists(dstDir):
-        checkIsValidDumpDir(dstDir, vcsImpl)
-    else:
-        os.makedirs(dstDir)
-        vcsImpl.init()
-        createVersionFile(dstDir)
-        vcsImpl.commitAll("Created")
+    os.makedirs(dstDir)
+    vcsImpl.init()
+    createVersionFile(dstDir)
+    vcsImpl.commitAll("Created")
+
+
+def dump(dstDir, vcsImpl=None):
+    assert os.path.exists(dstDir)
+    if vcsImpl is None:
+        vcsImpl = GitVcsImpl()
+    vcsImpl.setDir(dstDir)
+    checkIsValidDumpDir(dstDir, vcsImpl)
 
     rmPreviousDump(dstDir)
     session = db.getSession()
@@ -83,3 +89,4 @@ def dump(dstDir, vcsImpl=None):
 
     if not vcsImpl.isWorkTreeClean():
         vcsImpl.commitAll()
+        vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")

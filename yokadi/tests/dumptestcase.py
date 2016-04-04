@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync.dump import dump
+from yokadi.sync import dump, initDumpRepository
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 
 
@@ -38,6 +38,7 @@ class DumpTestCase(unittest.TestCase):
         vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
+            initDumpRepository(dumpDir, vcsImpl)
             dump(dumpDir, vcsImpl)
 
             for project in p1, p2:
@@ -67,6 +68,7 @@ class DumpTestCase(unittest.TestCase):
         vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
+            initDumpRepository(dumpDir, vcsImpl)
             dump(dumpDir, vcsImpl)
 
             # Do some changes: update t3, add t4, remove t2, then dump again
