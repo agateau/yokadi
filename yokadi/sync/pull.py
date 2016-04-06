@@ -10,6 +10,7 @@ from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.pullui import PullUi
+from yokadi.sync.vcschanges import VcsChanges
 
 
 class ChangeHandler(object):
@@ -134,6 +135,27 @@ def autoResolveConflicts(objects):
     return remainingObjects
 
 
+def importDump(dumpDir, vcsImpl=None, pullUi=None, importAll=False):
+    if vcsImpl is None:
+        vcsImpl = GitVcsImpl()
+    vcsImpl.setDir(dumpDir)
+    assert vcsImpl.isWorkTreeClean()
+
+    if importAll:
+        changes = VcsChanges()
+        changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
+    else:
+        changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
+    session = db.getSession()
+    projectChangeHandler = ProjectChangeHandler(pullUi)
+    taskChangeHandler = TaskChangeHandler()
+    for changeHandler in projectChangeHandler, taskChangeHandler:
+        changeHandler.handle(session, dumpDir, changes)
+    session.commit()
+
+    vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
+
+
 def pull(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
@@ -161,12 +183,5 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
 
     assert vcsImpl.isWorkTreeClean()
 
-    changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
-    session = db.getSession()
-    projectChangeHandler = ProjectChangeHandler(pullUi)
-    taskChangeHandler = TaskChangeHandler()
-    for changeHandler in projectChangeHandler, taskChangeHandler:
-        changeHandler.handle(session, dumpDir, changes)
-    session.commit()
-
-    vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
+    importDump(dumpDir, vcsImpl=vcsImpl, pullUi=pullUi)
+    return True
