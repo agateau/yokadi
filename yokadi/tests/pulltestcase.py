@@ -8,8 +8,9 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
 from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync.pull import pull
+from yokadi.sync import initDumpRepository, dump, pull, importSinceLastSync, importAll
 from yokadi.sync.pullui import PullUi
+from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
 
@@ -259,6 +260,7 @@ class PullTestCase(unittest.TestCase):
         with TemporaryDirectory() as tmpDir:
             vcsImpl = StubVcsImpl()
             pull(tmpDir, vcsImpl)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
 
     def testRemoteChangesOnly(self):
         with TemporaryDirectory() as tmpDir:
@@ -305,7 +307,9 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            pull(tmpDir, MyVcsImpl())
+            vcsImpl = MyVcsImpl()
+            pull(tmpDir, vcsImpl=vcsImpl)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
 
             # Check changes
             modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
@@ -381,10 +385,12 @@ class PullTestCase(unittest.TestCase):
 
             # Do the pull
             vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl, pullUi=MyPullUi())
+            pullUi = MyPullUi()
+            ok = pull(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
             # commit.
+            self.assertFalse(ok)
             self.assertEqual(vcsImpl.abortMergeCallCount, 1)
             self.assertEqual(vcsImpl.commitAllCallCount, 0)
 
@@ -409,7 +415,9 @@ class PullTestCase(unittest.TestCase):
                     obj.selectValue("title", "Merged title")
 
             # Do the pull
-            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=MyPullUi())
+            pullUi = MyPullUi()
+            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
+            importSinceLastSync(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
@@ -435,7 +443,9 @@ class PullTestCase(unittest.TestCase):
                     dct[fixture.modRemotelyTaskPath].selectRemote()
 
             # Do the pull
-            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=MyPullUi())
+            pullUi = MyPullUi()
+            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
+            importSinceLastSync(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
@@ -465,6 +475,7 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pull(tmpDir, vcsImpl=vcsImpl)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
 
             # Check changes
             prj2 = self.session.query(Project).filter_by(id=prj.id).one()
@@ -488,6 +499,7 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pull(tmpDir, vcsImpl=vcsImpl)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
 
             # DB should be empty
             projects = self.session.query(Project).all()
@@ -520,6 +532,7 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pull(tmpDir, vcsImpl=vcsImpl)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
 
             # The added project should not be there, task2 should be in prj
             projects = list(self.session.query(Project).all())
@@ -551,6 +564,7 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pull(tmpDir, vcsImpl=vcsImpl)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
 
             # The project should have a new name, task1 should still be there
             projects = list(self.session.query(Project).all())
@@ -588,7 +602,9 @@ class PullTestCase(unittest.TestCase):
 
             # Do the pull
             vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl, pullUi=MyPullUi())
+            pullUi = MyPullUi()
+            pull(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
 
             # There should be only project, task1 and task2 should be associated
             # with it
@@ -632,7 +648,9 @@ class PullTestCase(unittest.TestCase):
 
             # Do the pull
             vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl, pullUi=MyPullUi())
+            pullUi = MyPullUi()
+            pull(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
+            importSinceLastSync(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
 
             # prj2 should be renamed prj_1
             projectDict = { x.uuid: x for x in self.session.query(Project).all()}
@@ -640,3 +658,26 @@ class PullTestCase(unittest.TestCase):
 
             self.assertEqual(projectDict[prj.uuid].name, prj.name)
             self.assertEqual(projectDict[prj2.uuid].name, prj.name + "_1")
+
+    def testImportAll(self):
+        with TemporaryDirectory() as tmpDir:
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            prj2 = dbutils.getOrCreateProject("prj2", interactive=False)
+            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
+            modifiedTask = dbutils.addTask(prj2.name, "task2", interactive=False)
+            self.session.commit()
+
+            dumpDir = os.path.join(tmpDir, "dump")
+            initDumpRepository(dumpDir)
+            dump(dumpDir)
+
+            # Alter some files
+            modifiedTaskPath = os.path.join(dumpDir, TASKS_DIRNAME, modifiedTask.uuid + ".json")
+            createTaskFile(dumpDir, modifiedTask.uuid, modifiedTask.project.uuid,
+                    title="modified", description="new description")
+            vcsImpl = GitVcsImpl()
+            vcsImpl.setDir(dumpDir)
+            vcsImpl.commitAll()
+
+            # Import all
+            importAll(dumpDir)

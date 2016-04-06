@@ -463,3 +463,22 @@ class GitVcsImplTestCase(unittest.TestCase):
 
             # We push => error, not fast forward
             self.assertRaises(NotFastForwardError, impl.push)
+
+    def testGetTrackedFiles(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            touch(repoDir, "foo")
+            removedPath = touch(repoDir, "removed")
+            impl.commitAll()
+
+            os.unlink(removedPath)
+            impl.commitAll()
+
+            touch(repoDir, "bar")
+            impl.commitAll()
+
+            files = impl.getTrackedFiles()
+            self.assertEqual(set(files), {"EMPTY", "foo", "bar"})

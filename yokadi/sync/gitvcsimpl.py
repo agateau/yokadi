@@ -133,6 +133,9 @@ class GitVcsImpl(VcsImpl):
     def getFileContentAt(self, filePath, commitId):
         return self._run("show", commitId + ":" + filePath)
 
+    def getTrackedFiles(self):
+        return [x for x in self._run("ls-files").decode("utf-8").split("\n") if x]
+
     def _run(self, *args, **kwargs):
         cwd = kwargs.get("cwd", self._srcDir)
         cmd = ["git", "-C", cwd]

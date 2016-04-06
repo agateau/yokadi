@@ -81,3 +81,9 @@ class VcsImpl(object):
         Returns the content of `filePath` at `commitId`
         """
         raise NotImplementedError()
+
+    def getTrackedFiles(self):
+        """
+        Returns a list of all tracked files
+        """
+        raise NotImplementedError()

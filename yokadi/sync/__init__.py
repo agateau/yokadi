@@ -5,7 +5,7 @@ TASKS_DIRNAME = "tasks"
 DB_SYNC_BRANCH = "db-synced"
 
 
-from .pull import pull
+from .pull import pull, importSinceLastSync, importAll
 from .dump import dump, initDumpRepository
 from .gitvcsimpl import GitVcsImpl
 

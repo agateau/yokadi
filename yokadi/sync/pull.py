@@ -135,17 +135,26 @@ def autoResolveConflicts(objects):
     return remainingObjects
 
 
-def importDump(dumpDir, vcsImpl=None, pullUi=None, importAll=False):
+def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean()
+    changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
+    _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
 
-    if importAll:
-        changes = VcsChanges()
-        changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
-    else:
-        changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
+
+def importAll(dumpDir, vcsImpl=None, pullUi=None):
+    if vcsImpl is None:
+        vcsImpl = GitVcsImpl()
+    vcsImpl.setDir(dumpDir)
+    assert vcsImpl.isWorkTreeClean()
+    changes = VcsChanges()
+    changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
+    _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
+
+
+def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
     session = db.getSession()
     projectChangeHandler = ProjectChangeHandler(pullUi)
     taskChangeHandler = TaskChangeHandler()
@@ -182,6 +191,4 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
         vcsImpl.commitAll("Merged after resolving conflicts")
 
     assert vcsImpl.isWorkTreeClean()
-
-    importDump(dumpDir, vcsImpl=vcsImpl, pullUi=pullUi)
     return True

@@ -88,7 +88,9 @@ class SyncCmd(Cmd):
         print('Database dumped in {}'.format(self.dumpDir))
 
     def do_s_pull(self, line):
-        sync.pull(self.dumpDir, pullUi=TextPullUi())
+        pullUi = TextPullUi()
+        sync.pull(self.dumpDir, pullUi=pullUi)
+        sync.importSinceLastSync(self.dumpDir, pullUi=pullUi)
 
     def do_s_push(self, line):
         try:
