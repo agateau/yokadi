@@ -681,3 +681,7 @@ class PullTestCase(unittest.TestCase):
 
             # Import all
             importAll(dumpDir)
+
+            modifiedTask2 = dbutils.getTask(self.session, uuid=modifiedTask.uuid)
+            self.assertEqual(modifiedTask2.title, "modified")
+            self.assertEqual(modifiedTask2.description, "new description")

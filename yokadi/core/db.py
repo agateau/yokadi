@@ -61,7 +61,7 @@ def uuidGenerator():
 class Project(Base):
     __tablename__ = "project"
     id = Column(Integer, primary_key=True)
-    uuid = Column(Unicode, default=uuidGenerator, nullable=False)
+    uuid = Column(Unicode, unique=True, default=uuidGenerator, nullable=False)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
     tasks = relationship("Task", cascade="all", backref="project")
@@ -96,7 +96,7 @@ class TaskKeyword(Base):
 class Task(Base):
     __tablename__ = "task"
     id = Column(Integer, primary_key=True)
-    uuid = Column(Unicode, default=uuidGenerator, nullable=False)
+    uuid = Column(Unicode, unique=True, default=uuidGenerator, nullable=False)
     title = Column(Unicode)
     creationDate = Column("creation_date", DateTime, nullable=False)
     dueDate = Column("due_date", DateTime, default=None)

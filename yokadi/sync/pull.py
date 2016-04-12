@@ -81,12 +81,18 @@ class ProjectChangeHandler(ChangeHandler):
             # we do? We can either merge or rename.
             strategy = self._pullUi.getMergeStrategy(project, existingProject)
             if strategy == PullUi.MERGE:
-                # Merge `project` into `existingProject`
-                # Assign `project` tasks to `existingProject`
+                # Merge `project` into `existingProject`:
+                # - Assign `project` tasks to `existingProject`
+                # - Delete `project`
+                # - TODO Merge `project` fields into `existingProject`
                 for task in project.tasks:
                     task.project = existingProject
+
+                # Flush after deleting `project` otherwise committing the
+                # session fails because `existingProject` has the same uuid as
+                # `project`, which is still in the session.
                 session.delete(project)
-                # TODO Merge `project` fields into `existingProject`
+                session.flush()
                 project = existingProject
             elif strategy == PullUi.RENAME:
                 # Generate a new, unique, name
@@ -111,7 +117,11 @@ class TaskChangeHandler(ChangeHandler):
     domain = TASKS_DIRNAME
 
     def _add(self, session, dct):
-        task = Task()
+        # If a local task exists, update it, otherwise create a new one.
+        # Updating an existing task here can happen when importing all changes
+        task = dbutils.getTask(session, uuid=dct["uuid"], _allowNone=True)
+        if task is None:
+            task = Task()
         dbs13n.updateTaskFromDict(task, dct)
         session.add(task)
 
