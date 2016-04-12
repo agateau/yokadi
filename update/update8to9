@@ -2,32 +2,35 @@
 # -*- coding: UTF-8 -*-
 """
 Update from version 8 to version 9 of Yokadi DB
-Add uuid fields to the Project and Task tables, then populate them.
+
+- Delete invalid TaskKeyword rows
 
 @author: Aurélien Gâteau <mail@agateau.com>
-@license: GPL v3 or later
+@license: GPL v3 or newer
 """
 import sys
-
-from uuid import uuid1
 
 from sqlalchemy import create_engine
 
 
-def addUuidColumn(conn, tableName):
-    conn.execute("alter table {} add column uuid".format(tableName))
-    for row in conn.execute("select id from {}".format(tableName)):
-        id = row["id"]
-        uuid = str(uuid1())
-        conn.execute("update {} set uuid = ? where id = ?".format(tableName), uuid, id)
+# TODO: Current db version is 8, but this file has been created so that when we
+# create version 9, we can do the work which is currently done in
+# db.deleteInvalidTaskKeywordRows() and remove db.deleteInvalidTaskKeywordRows()
+#
+# The cleanup is done at startup for db version 8 because it is a fast,
+# data-only cleanup so it is not worth requiring users to update their database
+# schema.
+
+
+def deleteInvalidTaskKeywordRows(conn):
+    conn.execute('delete from task_keyword where task_id is null or keyword_id is null')
 
 
 def main():
-    uri = "sqlite:///" + sys.argv[1]
+    uri = 'sqlite:///' + sys.argv[1]
     engine = create_engine(uri)
     with engine.begin() as conn:
-        addUuidColumn(conn, "project")
-        addUuidColumn(conn, "task")
+        deleteInvalidTaskKeywordRows(conn)
 
 
 if __name__ == "__main__":

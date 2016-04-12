@@ -1,3 +1,9 @@
+v1.0.2 2016/03/28
+
+- Use a more portable way to get the terminal size. This makes it possible to use Yokadi inside Android terminal emulators like Termux
+- Sometimes the task lock used to prevent editing the same task description from multiple Yokadi instances were not correctly released
+- Deleting a keyword from the database caused a crash when a t_list returned tasks which previously contained this keyword
+
 v1.0.1 2015/12/03
 
 - User changes:

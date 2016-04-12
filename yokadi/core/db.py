@@ -16,7 +16,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
 
 
 try:
@@ -33,7 +33,7 @@ from yokadi.core import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 9
+DB_VERSION = 10
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
@@ -75,13 +75,10 @@ class Keyword(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     tasks = association_proxy("taskKeywords", "task")
-    projects = association_proxy("projectKeywords", "project")
+    taskKeywords = relationship("TaskKeyword", cascade="all", backref="keyword")
 
     def __repr__(self):
         return self.name
-
-    def getTasks(self):
-        return [taskKeyword.task for taskKeyword in self.taskKeywords]
 
 
 class TaskKeyword(Base):
@@ -90,7 +87,6 @@ class TaskKeyword(Base):
     taskId = Column("task_id", Integer, ForeignKey("task.id"), nullable=False)
     keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
     value = Column(Integer, default=None)
-    keyword = relationship("Keyword", backref="taskKeywords")
 
 
 class Task(Base):
@@ -328,4 +324,12 @@ def setDefaultConfig():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))
 
+
+def deleteInvalidTaskKeywordRows():
+    # TODO: Remove this function when we migrate to database version 9. See
+    # update8to9.
+    session = getSession()
+    filters = or_(TaskKeyword.taskId == None, TaskKeyword.keywordId == None)
+    session.query(TaskKeyword).filter(filters).delete(synchronize_session=False)
+    session.commit()
 # vi: ts=4 sw=4 et
