@@ -18,9 +18,13 @@ class ConflictingObject(object):
     @staticmethod
     def fromVcsConflict(conflict):
         domain = os.path.dirname(conflict.path)
-        ancestor = json.loads(conflict.ancestor)
-        local = None if conflict.local is None else json.loads(conflict.local)
-        remote = None if conflict.remote is None else json.loads(conflict.remote)
+        def _load_json(json_or_none):
+            if json_or_none is None:
+                return None
+            return json.loads(json_or_none.decode('utf-8'))
+        ancestor = _load_json(conflict.ancestor)
+        local = _load_json(conflict.local)
+        remote = _load_json(conflict.remote)
         if local is None or remote is None:
             return ModifiedDeletedConflictingObject(
                     path=conflict.path,
@@ -48,7 +52,7 @@ class ConflictingObject(object):
             content = None
         else:
             content = json.dumps(self.final)
-        vcsImpl.closeConflict(self._path, content)
+        vcsImpl.closeConflict(self._path, content.encode('utf-8'))
 
 
 class BothModifiedConflictingObject(ConflictingObject):

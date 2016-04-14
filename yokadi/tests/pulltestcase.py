@@ -69,7 +69,7 @@ def createTaskJson(uuid, projectUuid, title, **kwargs):
         "description": "",
     }
     dct.update(kwargs)
-    return json.dumps(dct)
+    return json.dumps(dct).encode("utf-8")
 
 
 def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
@@ -77,7 +77,7 @@ def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
     if not os.path.exists(taskDir):
         os.mkdir(taskDir)
     filePath = os.path.join(taskDir, uuid + ".json")
-    with open(filePath, "wt") as fp:
+    with open(filePath, "wb") as fp:
         fp.write(createTaskJson(uuid, projectUuid, title, **kwargs))
     return os.path.relpath(filePath, dirname)
 
@@ -133,7 +133,7 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
         def closeConflict(self, path, content):
             testCase.assertEqual(path, self.conflicts[0].path)
             fullPath = os.path.join(tmpDir, path)
-            with open(fullPath, "wt") as fp:
+            with open(fullPath, "wb") as fp:
                 fp.write(content)
             self.conflicts = []
 
@@ -223,7 +223,7 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
             testCase.assertTrue(path in (modLocallyTaskPath, modRemotelyTaskPath))
             if content is not None:
                 fullPath = os.path.join(tmpDir, path)
-                with open(fullPath, "wt") as fp:
+                with open(fullPath, "wb") as fp:
                     fp.write(content)
             self.conflicts = []
 

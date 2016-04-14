@@ -37,6 +37,9 @@ CONFLICT_STATES = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 class GitVcsImpl(VcsImpl):
     name = "Git"
 
+    def getDir(self):
+        return self._srcDir
+
     def setDir(self, srcDir):
         self._srcDir = srcDir
 
@@ -108,6 +111,15 @@ class GitVcsImpl(VcsImpl):
                 else:
                     remote = self.getFileContentAt(path, ":3")
                 yield VcsConflict(path=path, ancestor=ancestor, local=local, remote=remote)
+
+    def closeConflict(self, path, content):
+        fullPath = os.path.join(self._srcDir, path)
+        if content is None:
+            os.remove(fullPath)
+        else:
+            with open(fullPath, "wb") as fp:
+                fp.write(content)
+        self._run("add", path)
 
     def abortMerge(self):
         self._run("merge", "--abort")

@@ -57,6 +57,15 @@ class VcsImpl(object):
         """
         raise NotImplementedError()
 
+    def closeConflict(self, path, content):
+        """
+        Solves the conflict
+        If `content` is empty delete path. If `content` is not empty writes
+        content to path.
+        `content` must be of type `bytes`.
+        """
+        raise NotImplementedError()
+
     def abortMerge(self):
         """
         Should be called after a pull which failed with conflicts, to abort
@@ -78,7 +87,7 @@ class VcsImpl(object):
 
     def getFileContentAt(self, filePath, commitId):
         """
-        Returns the content of `filePath` at `commitId`
+        Returns the content of `filePath` at `commitId` as bytes
         """
         raise NotImplementedError()
 

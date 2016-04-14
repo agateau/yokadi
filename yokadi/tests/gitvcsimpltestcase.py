@@ -289,6 +289,40 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertEqual(conflict.local, b"local")
             self.assertEqual(conflict.remote, None)
 
+    def testCloseConflict_withContent(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    localContent="local",
+                    remoteContent=None)
+
+            conflicts = list(impl.getConflicts())
+            self.assertEqual(len(conflicts), 1)
+            conflict = conflicts[0]
+
+            impl.closeConflict(conflict.path, b"newcontent")
+
+            self.assertFalse(impl.hasConflicts())
+            fullPath = os.path.join(impl.getDir(), conflict.path)
+            with open(fullPath, "rb") as f:
+                self.assertEqual(f.read(), b"newcontent")
+
+    def testCloseConflict_withoutContent(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    localContent="local",
+                    remoteContent=None)
+
+            conflicts = list(impl.getConflicts())
+            self.assertEqual(len(conflicts), 1)
+            conflict = conflicts[0]
+            fullPath = os.path.join(impl.getDir(), conflict.path)
+            self.assertTrue(os.path.exists(fullPath))
+
+            impl.closeConflict(conflict.path, None)
+
+            self.assertFalse(impl.hasConflicts())
+            self.assertFalse(os.path.exists(fullPath))
+
     def testAbortMerge(self):
         with TemporaryDirectory() as tmpDir:
             impl = createGitRepositoryWithConflict(tmpDir, "repo",
