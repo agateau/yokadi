@@ -55,8 +55,9 @@ def touch(dirname, name):
     return path
 
 
-def createGitRepositoryWithConflict(tmpDir, path, localContent="", remoteContent=""):
+def createGitRepositoryWithConflict(tmpDir, path, ancestorContent="", localContent="", remoteContent=""):
     """
+    @param ancestorContent is the initial content of the local file, use None to remove it
     @param localContent is the content of the local file, use None to remove it
     @param remoteContent is the content of the remote file, use None to remove it
     """
@@ -64,8 +65,11 @@ def createGitRepositoryWithConflict(tmpDir, path, localContent="", remoteContent
     remoteRepoDir = createGitRepository(tmpDir, path + "-remote")
     remoteImpl = GitVcsImpl()
     remoteImpl.setDir(remoteRepoDir)
-    remoteFooPath = touch(remoteRepoDir, "foo")
-    remoteImpl.commitAll()
+    remoteFooPath = os.path.join(remoteRepoDir, "foo")
+    if ancestorContent is not None:
+        with open(remoteFooPath, "w") as f:
+            f.write(ancestorContent)
+        remoteImpl.commitAll()
 
     # Clone it
     repoDir = join(tmpDir,path)
@@ -288,6 +292,21 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertEqual(conflict.ancestor, b"")
             self.assertEqual(conflict.local, b"local")
             self.assertEqual(conflict.remote, None)
+
+    def testGetConflictsBothAdded(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo",
+                    ancestorContent=None,
+                    localContent="local",
+                    remoteContent="remote")
+
+            conflicts = list(impl.getConflicts())
+            self.assertEqual(len(conflicts), 1)
+            conflict = conflicts[0]
+            self.assertEqual(conflict.path, "foo")
+            self.assertEqual(conflict.ancestor, None)
+            self.assertEqual(conflict.local, b"local")
+            self.assertEqual(conflict.remote, b"remote")
 
     def testCloseConflict_withContent(self):
         with TemporaryDirectory() as tmpDir:

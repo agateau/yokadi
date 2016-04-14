@@ -29,7 +29,7 @@ Should not happen with guid-based file names since files are never renamed.
 
 AA: unmerged, both added
 Both local and remote created A.
-Should not happen with guid-based file names since files are never renamed.
+Can happen if repositories for two identical database were created independently.
 """
 CONFLICT_STATES = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 
@@ -101,7 +101,10 @@ class GitVcsImpl(VcsImpl):
     def getConflicts(self):
         for status, path in self._getStatus():
             if status in CONFLICT_STATES:
-                ancestor = self.getFileContentAt(path, ":1")
+                if status == "AA":
+                    ancestor = None
+                else:
+                    ancestor = self.getFileContentAt(path, ":1")
                 if status[0] == "D":
                     local = None
                 else:
