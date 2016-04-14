@@ -83,6 +83,11 @@ class SyncCmd(Cmd):
     def __init__(self):
         self.dumpDir = os.path.join(basepaths.getCacheDir(), 'db')
 
+    def do_s_init(self, line):
+        sync.initDumpRepository(self.dumpDir)
+        sync.dump(self.dumpDir)
+        print('Synchronization initialized, repository is in {}'.format(self.dumpDir))
+
     def do_s_dump(self, line):
         sync.dump(self.dumpDir)
         print('Database dumped in {}'.format(self.dumpDir))
