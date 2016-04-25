@@ -84,6 +84,33 @@ class SyncCmd(Cmd):
         self.dumpDir = os.path.join(basepaths.getCacheDir(), 'db')
         self.syncManager = SyncManager(self.dumpDir)
 
+    def do_s_sync(self, line):
+        pullUi = TextPullUi()
+
+        print("Dumping database")
+        self.syncManager.dump()
+
+        while True:
+            print("Pulling remote changes")
+            self.syncManager.pull(pullUi=pullUi)
+            if self.syncManager.hasChangesToImport():
+                print("Importing changes")
+                self.syncManager.importSinceLastSync(pullUi=pullUi)
+            else:
+                print("No remote changes")
+
+            if not self.syncManager.hasChangesToPush():
+                return
+            print("Pushing local changes")
+            try:
+                self.syncManager.push()
+                return
+            except NotFastForwardError:
+                print("Remote has other changes, need to pull again")
+            except VcsImplError as exc:
+                print("Failed to push: {}".format(exc))
+                return
+
     def do_s_init(self, line):
         self.syncManager.initDumpRepository()
         self.syncManager.dump()

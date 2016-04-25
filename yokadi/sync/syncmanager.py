@@ -1,6 +1,6 @@
 import os
 
-from yokadi.sync import VERSION, VERSION_FILENAME
+from yokadi.sync import VERSION, VERSION_FILENAME, DB_SYNC_BRANCH
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import dump
 from yokadi.sync.pull import pull, importSinceLastSync, importAll
@@ -41,3 +41,11 @@ class SyncManager(object):
 
     def push(self):
         self.vcsImpl.push()
+
+    def hasChangesToImport(self):
+        changes = self.vcsImpl.getChangesSince(DB_SYNC_BRANCH)
+        return changes.hasChanges()
+
+    def hasChangesToPush(self):
+        changes = self.vcsImpl.getChangesSince("origin/master")
+        return changes.hasChanges()
