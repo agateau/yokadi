@@ -34,24 +34,21 @@ def rmPreviousDump(dstDir):
         os.mkdir(path)
 
 
-def dumpProject(project, dumpDir):
-    uuid = project.uuid
-    name = "{}.json".format(uuid)
-    projectPath = os.path.join(dumpDir, name)
+def dumpObject(obj, dumpDir):
+    uuid = obj["uuid"]
+    path = os.path.join(dumpDir, uuid + ".json")
+    with open(path, "wt") as fp:
+        json.dump(obj, fp, indent=2, sort_keys=True)
 
+
+def dumpProject(project, dumpDir):
     dct = dbs13n.dictFromProject(project)
-    with open(projectPath, "wt") as fp:
-        json.dump(dct, fp, indent=2)
+    dumpObject(dct, dumpDir)
 
 
 def dumpTask(task, dumpDir):
-    uuid = task.uuid
-    name = "{}.json".format(uuid)
-    taskPath = os.path.join(dumpDir, name)
-
     dct = dbs13n.dictFromTask(task)
-    with open(taskPath, "wt") as fp:
-        json.dump(dct, fp, indent=2)
+    dumpObject(dct, dumpDir)
 
 
 def dump(dstDir, vcsImpl=None):
