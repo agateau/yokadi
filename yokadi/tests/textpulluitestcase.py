@@ -7,7 +7,7 @@ from yokadi.tests.pulltestcase import createBothModifiedConflictFixture
 from yokadi.tests.pulltestcase import createModifiedDeletedConflictFixture
 from yokadi.ycli import tui
 from yokadi.ycli.synccmd import TextPullUi
-from yokadi import sync
+from yokadi.sync.syncmanager import SyncManager
 
 
 class TextPullUiTestCase(unittest.TestCase):
@@ -29,11 +29,13 @@ class TextPullUiTestCase(unittest.TestCase):
                 ))
 
             tui.addInputAnswers("1", "2")
-            sync.pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=TextPullUi())
+            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager.pull(pullUi=TextPullUi())
 
     def testModifiedDeletedConflict(self):
         with TemporaryDirectory() as tmpDir:
             fixture = createModifiedDeletedConflictFixture(self, tmpDir)
 
             tui.addInputAnswers("1", "2")
-            sync.pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=TextPullUi())
+            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager.pull(pullUi=TextPullUi())

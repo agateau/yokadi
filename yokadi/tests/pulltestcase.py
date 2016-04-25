@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
 from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync import initDumpRepository, dump, pull, importSinceLastSync, importAll
+from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
@@ -258,9 +258,9 @@ class PullTestCase(unittest.TestCase):
 
     def testNothingToDo(self):
         with TemporaryDirectory() as tmpDir:
-            vcsImpl = StubVcsImpl()
-            pull(tmpDir, vcsImpl)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(tmpDir, StubVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
 
     def testRemoteChangesOnly(self):
         with TemporaryDirectory() as tmpDir:
@@ -307,9 +307,9 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
@@ -386,7 +386,8 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pullUi = MyPullUi()
-            ok = pull(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
+            syncManager = SyncManager(tmpDir, vcsImpl)
+            ok = syncManager.pull(pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
             # commit.
@@ -416,8 +417,9 @@ class PullTestCase(unittest.TestCase):
 
             # Do the pull
             pullUi = MyPullUi()
-            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
-            importSinceLastSync(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
+            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
@@ -443,9 +445,10 @@ class PullTestCase(unittest.TestCase):
                     dct[fixture.modRemotelyTaskPath].selectRemote()
 
             # Do the pull
+            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
             pullUi = MyPullUi()
-            pull(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
-            importSinceLastSync(tmpDir, vcsImpl=fixture.vcsImpl, pullUi=pullUi)
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
@@ -473,9 +476,9 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             prj2 = self.session.query(Project).filter_by(id=prj.id).one()
@@ -497,9 +500,9 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
 
             # DB should be empty
             projects = self.session.query(Project).all()
@@ -530,9 +533,9 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
 
             # The added project should not be there, task2 should be in prj
             projects = list(self.session.query(Project).all())
@@ -562,9 +565,9 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
-            pull(tmpDir, vcsImpl=vcsImpl)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
 
             # The project should have a new name, task1 should still be there
             projects = list(self.session.query(Project).all())
@@ -601,10 +604,10 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
             pullUi = MyPullUi()
-            pull(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # There should be only project, task1 and task2 should be associated
             # with it
@@ -647,10 +650,10 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
             pullUi = MyPullUi()
-            pull(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
-            importSinceLastSync(tmpDir, vcsImpl=vcsImpl, pullUi=pullUi)
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # prj2 should be renamed prj_1
             projectDict = { x.uuid: x for x in self.session.query(Project).all()}
@@ -668,19 +671,19 @@ class PullTestCase(unittest.TestCase):
             self.session.commit()
 
             dumpDir = os.path.join(tmpDir, "dump")
-            initDumpRepository(dumpDir)
-            dump(dumpDir)
+            vcsImpl = GitVcsImpl()
+            syncManager = SyncManager(dumpDir, vcsImpl)
+            syncManager.initDumpRepository()
+            syncManager.dump()
 
             # Alter some files
             modifiedTaskPath = os.path.join(dumpDir, TASKS_DIRNAME, modifiedTask.uuid + ".json")
             createTaskFile(dumpDir, modifiedTask.uuid, modifiedTask.project.uuid,
                     title="modified", description="new description")
-            vcsImpl = GitVcsImpl()
-            vcsImpl.setDir(dumpDir)
             vcsImpl.commitAll()
 
             # Import all
-            importAll(dumpDir)
+            syncManager.importAll(pullUi=None)
 
             modifiedTask2 = dbutils.getTask(self.session, uuid=modifiedTask.uuid)
             self.assertEqual(modifiedTask2.title, "modified")

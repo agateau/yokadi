@@ -10,12 +10,6 @@ from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 
 
-def createVersionFile(dstDir):
-    versionFile = os.path.join(dstDir, VERSION_FILENAME)
-    with open(versionFile, "w") as fp:
-        fp.write(str(VERSION))
-
-
 def checkIsValidDumpDir(dstDir, vcsImpl):
     if not vcsImpl.isValidVcsDir():
         raise YokadiException("{} is not handled by {}".format(dstDir, vcsImpl.name))
@@ -58,17 +52,6 @@ def dumpTask(task, dumpDir):
     dct = dbs13n.dictFromTask(task)
     with open(taskPath, "wt") as fp:
         json.dump(dct, fp, indent=2)
-
-
-def initDumpRepository(dstDir, vcsImpl=None):
-    assert not os.path.exists(dstDir)
-    if vcsImpl is None:
-        vcsImpl = GitVcsImpl()
-    vcsImpl.setDir(dstDir)
-    os.makedirs(dstDir)
-    vcsImpl.init()
-    createVersionFile(dstDir)
-    vcsImpl.commitAll("Created")
 
 
 def dump(dstDir, vcsImpl=None):

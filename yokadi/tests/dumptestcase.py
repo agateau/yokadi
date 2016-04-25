@@ -8,8 +8,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync import dump, initDumpRepository
-from yokadi.sync.gitvcsimpl import GitVcsImpl
+from yokadi.sync.syncmanager import SyncManager
 
 
 def getTaskPath(dumpDir, task):
@@ -35,11 +34,11 @@ class DumpTestCase(unittest.TestCase):
         p1 = t1.project
         p2 = t3.project
 
-        vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            initDumpRepository(dumpDir, vcsImpl)
-            dump(dumpDir, vcsImpl)
+            syncManager = SyncManager(dumpDir)
+            syncManager.initDumpRepository()
+            syncManager.dump()
 
             for project in p1, p2:
                 projectFilePath = getProjectPath(dumpDir, project)
@@ -65,11 +64,11 @@ class DumpTestCase(unittest.TestCase):
         t2 = dbutils.addTask("prj1", "Bar", keywordDict=dict(kw1=2), interactive=False)
         t3 = dbutils.addTask("prj2", "Baz", interactive=False)
 
-        vcsImpl = GitVcsImpl()
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            initDumpRepository(dumpDir, vcsImpl)
-            dump(dumpDir, vcsImpl)
+            syncManager = SyncManager(dumpDir)
+            syncManager.initDumpRepository()
+            syncManager.dump()
 
             # Do some changes: update t3, add t4, remove t2, then dump again
             newTitle = "New T3 title"
@@ -83,7 +82,7 @@ class DumpTestCase(unittest.TestCase):
 
             self.session.commit()
 
-            dump(dumpDir, vcsImpl)
+            syncManager.dump()
 
             # Check t3 has been updated
             taskFilePath = getTaskPath(dumpDir, t3)

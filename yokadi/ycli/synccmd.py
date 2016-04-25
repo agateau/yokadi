@@ -2,10 +2,10 @@ import os
 from cmd import Cmd
 
 from yokadi.core import basepaths
-from yokadi import sync
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
+from yokadi.sync.syncmanager import SyncManager
 from yokadi.ycli import tui
 
 
@@ -82,24 +82,25 @@ class TextPullUi(PullUi):
 class SyncCmd(Cmd):
     def __init__(self):
         self.dumpDir = os.path.join(basepaths.getCacheDir(), 'db')
+        self.syncManager = SyncManager(self.dumpDir)
 
     def do_s_init(self, line):
-        sync.initDumpRepository(self.dumpDir)
-        sync.dump(self.dumpDir)
+        self.syncManager.initDumpRepository()
+        self.syncManager.dump()
         print('Synchronization initialized, repository is in {}'.format(self.dumpDir))
 
     def do_s_dump(self, line):
-        sync.dump(self.dumpDir)
+        self.syncManager.dump()
         print('Database dumped in {}'.format(self.dumpDir))
 
     def do_s_pull(self, line):
         pullUi = TextPullUi()
-        sync.pull(self.dumpDir, pullUi=pullUi)
-        sync.importSinceLastSync(self.dumpDir, pullUi=pullUi)
+        self.syncManager.pull(pullUi=pullUi)
+        self.syncManager.importSinceLastSync(pullUi=pullUi)
 
     def do_s_push(self, line):
         try:
-            sync.push(self.dumpDir)
+            self.syncManager.push()
         except NotFastForwardError:
             print("Remote has other changes, you need to run s_pull")
         except VcsImplError as exc:
