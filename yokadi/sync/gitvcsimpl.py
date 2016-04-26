@@ -34,6 +34,17 @@ Can happen if repositories for two identical database were created independently
 CONFLICT_STATES = set(["DD", "AU", "UD", "UA", "DU", "AA", "UU"])
 
 
+class GitSubprocessError(VcsImplError):
+    """
+    Wraps a subprocess.CalledProcessError to show stdout in the message.
+    """
+    def __init__(self, error):
+        output = error.output.decode('utf-8', 'replace')
+        Exception.__init__(self, "Command {} failed with error code {}. Output:\n{}" \
+            .format(error.cmd, error.returncode, output))
+        self.returncode = error.returncode
+
+
 class GitVcsImpl(VcsImpl):
     name = "Git"
 
@@ -77,20 +88,20 @@ class GitVcsImpl(VcsImpl):
                                "-m", commitMessage,
                                "FETCH_HEAD",)
             return True
-        except subprocess.CalledProcessError as exc:
+        except GitSubprocessError as exc:
             if exc.returncode == 1:
                 # Merge failed because of conflicts
                 return False
-            raise VcsImplError.fromSubprocessError(exc)
+            raise
 
     def push(self):
         try:
             self._run("push", "--quiet", "origin", "master:master")
-        except subprocess.CalledProcessError as exc:
+        except GitSubprocessError as exc:
             if exc.returncode == 1:
-                raise NotFastForwardError.fromSubprocessError(exc)
+                raise NotFastForwardError() from exc
             else:
-                raise VcsImplError.fromSubprocessError(exc)
+                raise
 
     def hasConflicts(self):
         for status, path in self._getStatus():
@@ -155,7 +166,10 @@ class GitVcsImpl(VcsImpl):
         cwd = kwargs.get("cwd", self._srcDir)
         cmd = ["git", "-C", cwd]
         cmd.extend(args)
-        return subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        try:
+            return subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as exc:
+            raise GitSubprocessError(exc) from exc
 
     def _ensureUserInfoIsSet(self):
         username = self._getConfig("user", "name")
@@ -176,11 +190,11 @@ class GitVcsImpl(VcsImpl):
     def _getConfig(self, section, key):
         try:
             return self._run("config", section + "." + key)
-        except subprocess.CalledProcessError as exc:
+        except GitSubprocessError as exc:
             if exc.returncode == 1:
                 # Key does not exist
                 return None
-            raise exc
+            raise
 
     def _setConfig(self, section, key, value):
         self._run("config", section + "." + key, value)
