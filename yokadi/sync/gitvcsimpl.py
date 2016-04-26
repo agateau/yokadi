@@ -68,7 +68,8 @@ class GitVcsImpl(VcsImpl):
     def commitAll(self, message=None):
         if message is None:
             message = "Synced"
-        self._run("add", ".")
+        # Use --all to keep Travis git (1.8.5.6) happy
+        self._run("add", "--all", ".")
         self._run("commit", "-m", message)
 
     def clone(self, remoteUrl):
@@ -129,11 +130,11 @@ class GitVcsImpl(VcsImpl):
     def closeConflict(self, path, content):
         fullPath = os.path.join(self._srcDir, path)
         if content is None:
-            os.remove(fullPath)
+            self._run("rm", "-f", path)
         else:
             with open(fullPath, "wb") as fp:
                 fp.write(content)
-        self._run("add", path)
+            self._run("add", path)
 
     def abortMerge(self):
         self._run("merge", "--abort")
