@@ -756,6 +756,8 @@ class TaskCmd(object):
                           metavar="<output>")
         parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
                           help="Decrypt task title and description")
+        parser.add_argument("--uuid", dest="uuid", default=False, action="store_true",
+                          help="Show task uuid")
         parser.add_argument("id")
         return parser
 
@@ -795,6 +797,9 @@ class TaskCmd(object):
 
             if task.status == "done":
                 fields.append(("Done", task.doneDate))
+
+            if args.uuid:
+                fields.append(("UUID", task.uuid))
 
             tui.renderFields(fields)
 
