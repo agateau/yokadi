@@ -232,7 +232,6 @@ def main():
     if args.createOnly:
         return
     db.setDefaultConfig()  # Set default config parameters
-    db.deleteInvalidTaskKeywordRows()
 
     cmd = YokadiCmd()
 

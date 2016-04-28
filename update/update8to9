@@ -13,15 +13,6 @@ import sys
 from sqlalchemy import create_engine
 
 
-# TODO: Current db version is 8, but this file has been created so that when we
-# create version 9, we can do the work which is currently done in
-# db.deleteInvalidTaskKeywordRows() and remove db.deleteInvalidTaskKeywordRows()
-#
-# The cleanup is done at startup for db version 8 because it is a fast,
-# data-only cleanup so it is not worth requiring users to update their database
-# schema.
-
-
 def deleteInvalidTaskKeywordRows(conn):
     conn.execute('delete from task_keyword where task_id is null or keyword_id is null')
 
