@@ -51,6 +51,14 @@ def migrateAliases(conn):
     conn.execute("delete from config where name = 'ALIASES'")
 
 
+def addUuidColumn(conn, tableName):
+    conn.execute("alter table {} add column uuid".format(tableName))
+    for row in conn.execute("select id from {}".format(tableName)):
+        id = row["id"]
+        uuid = str(uuid1())
+        conn.execute("update {} set uuid = ? where id = ?".format(tableName), uuid, id)
+
+
 def main():
     uri = 'sqlite:///' + sys.argv[1]
     engine = create_engine(uri)
@@ -58,6 +66,8 @@ def main():
         deleteInvalidTaskKeywordRows(conn)
         addAliasTable(conn)
         migrateAliases(conn)
+        addUuidColumn(conn, "project")
+        addUuidColumn(conn, "task")
 
 
 if __name__ == "__main__":
