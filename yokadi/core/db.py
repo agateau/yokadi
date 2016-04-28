@@ -10,6 +10,7 @@ import os
 import sys
 from pickle import loads, dumps
 from datetime import datetime
+from uuid import uuid1
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -51,6 +52,10 @@ Base = declarative_base()
 
 
 NOTE_KEYWORD = "_note"
+
+
+def uuidGenerator():
+    return str(uuid1())
 
 
 class Project(Base):
@@ -203,6 +208,30 @@ class TaskLock(Base):
     taskId = Column("task_id", Integer, ForeignKey("task.id"), unique=True, nullable=False)
     pid = Column(Integer, default=None)
     updateDate = Column("update_date", DateTime, default=None)
+
+
+class Alias(Base):
+    __tablename__ = "alias"
+    uuid = Column(Unicode, unique=True, default=uuidGenerator, nullable=False, primary_key=True)
+    name = Column(Unicode, unique=True, nullable=False)
+    command = Column(Unicode, nullable=False)
+
+    @staticmethod
+    def getAsDict(session):
+        dct = {}
+        for alias in session.query(Alias).all():
+            dct[alias.name] = alias.command
+        return dct
+
+    @staticmethod
+    def add(session, name, command):
+        alias = Alias(name=name, command=command)
+        session.add(alias)
+
+    @staticmethod
+    def update(session, name, command):
+        alias = session.query(Alias).filter_by(name=name).one()
+        alias.command = command
 
 
 def getConfigKey(name, environ=True):

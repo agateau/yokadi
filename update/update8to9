@@ -10,6 +10,8 @@ Update from version 8 to version 9 of Yokadi DB
 """
 import sys
 
+from uuid import uuid1
+
 from sqlalchemy import create_engine
 
 
@@ -17,11 +19,45 @@ def deleteInvalidTaskKeywordRows(conn):
     conn.execute('delete from task_keyword where task_id is null or keyword_id is null')
 
 
+def addAliasTable(conn):
+    conn.execute("""create table alias (
+        uuid varchar not null,
+        name varchar not null,
+        command varchar not null,
+        primary key(uuid),
+        unique(uuid),
+        unique(name)
+    )""")
+
+
+def migrateAliases(conn):
+    rows = conn.execute("select value from config where name = 'ALIASES'")
+    rows = list(rows)
+    if not rows:
+        return
+
+    aliasesString = rows[0]["value"]
+    try:
+        aliases = eval(aliasesString)
+    except Exception:
+        # Failed to parse aliases
+        print("Failed to parse v9 aliases: {}".format(aliasesString))
+        return
+    for name, command in aliases.items():
+        uuid = str(uuid1())
+        conn.execute("insert into alias(uuid, name, command) values(?, ?, ?)",
+                uuid, name, command)
+
+    conn.execute("delete from config where name = 'ALIASES'")
+
+
 def main():
     uri = 'sqlite:///' + sys.argv[1]
     engine = create_engine(uri)
     with engine.begin() as conn:
         deleteInvalidTaskKeywordRows(conn)
+        addAliasTable(conn)
+        migrateAliases(conn)
 
 
 if __name__ == "__main__":
