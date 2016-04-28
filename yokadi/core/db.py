@@ -212,6 +212,30 @@ class TaskLock(Base):
     updateDate = Column("update_date", DateTime, default=None)
 
 
+class Alias(Base):
+    __tablename__ = "alias"
+    uuid = Column(Unicode, unique=True, default=uuidGenerator, nullable=False, primary_key=True)
+    name = Column(Unicode, unique=True, nullable=False)
+    command = Column(Unicode, nullable=False)
+
+    @staticmethod
+    def getAsDict(session):
+        dct = {}
+        for alias in session.query(Alias).all():
+            dct[alias.name] = alias.command
+        return dct
+
+    @staticmethod
+    def add(session, name, command):
+        alias = Alias(name=name, command=command)
+        session.add(alias)
+
+    @staticmethod
+    def update(session, name, command):
+        alias = session.query(Alias).filter_by(name=name).one()
+        alias.command = command
+
+
 def getConfigKey(name, environ=True):
     session = getSession()
     if environ:

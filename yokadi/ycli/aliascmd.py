@@ -6,27 +6,20 @@ Alias related commands.
 @license: GPL v3 or later
 """
 from yokadi.core import db
-from yokadi.core.yokadiexception import BadUsageException
+from yokadi.core.yokadiexception import BadUsageException, YokadiException
 from yokadi.ycli import tui
 from yokadi.ycli import colors as C
-
-from sqlalchemy.orm.exc import NoResultFound
 
 
 class AliasCmd(object):
     def __init__(self):
-        try:
-            self.aliases = eval(db.getConfigKey("ALIASES", environ=False))
-        except NoResultFound:
-            self.aliases = {}
-        except Exception:
-            tui.error("Aliases syntax error. Ignored")
-            self.aliases = {}
+        self.aliases = db.Alias.getAsDict(db.getSession())
 
     def do_a_list(self, line):
         """List all aliases."""
         if self.aliases:
-            for name, command in list(self.aliases.items()):
+            lst = sorted(self.aliases.items(), key=lambda x: x[0])
+            for name, command in lst:
                 print(C.BOLD + name.ljust(10) + C.RESET + "=> " + command)
         else:
             print("No alias defined. Use a_add to create one")
@@ -35,21 +28,32 @@ class AliasCmd(object):
         """Add an alias on a command
         Ex. create an alias 'la' for 't_list -a':
         a_add la t_list -a"""
-        session = db.getSession()
         tokens = line.split()
         if len(tokens) < 2:
             raise BadUsageException("You should provide an alias name and a command")
         name = tokens[0]
+        if name in self.aliases:
+            raise YokadiException("There is already an alias named {}.".format(name))
         command = " ".join(tokens[1:])
-        self.aliases.update({name: command})
-        try:
-            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
-        except NoResultFound:
-            # Config entry does not exist. Create it.
-            aliases = db.Config(name="ALIASES", value="{}", system=True, desc="User command aliases")
 
-        aliases.value = str(repr(self.aliases))
-        session.add(aliases)
+        session = db.getSession()
+        self.aliases.update({name: command})
+        db.Alias.add(session, name, command)
+        session.commit()
+
+    def do_a_edit(self, line):
+        """Edit an alias.
+        a_edit <alias name>"""
+        session = db.getSession()
+        name = line
+        if not name in self.aliases:
+            raise YokadiException("There is no alias named {}".format(name))
+
+        command = tui.editLine(self.aliases[name])
+
+        session = db.getSession()
+        self.aliases.update({name: command})
+        db.Alias.update(session, name, command)
         session.commit()
 
     def do_a_remove(self, line):
@@ -57,9 +61,8 @@ class AliasCmd(object):
         if line in self.aliases:
             session = db.getSession()
             del self.aliases[line]
-            aliases = session.query(db.Config).filter_by(name="ALIASES").one()
-            aliases.value = str(repr(self.aliases))
-            session.add(aliases)
+            alias = session.query(db.Alias).filter_by(name=line).one()
+            session.delete(alias)
             session.commit()
         else:
             tui.error("No alias with that name. Use a_list to display all aliases")
