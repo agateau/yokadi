@@ -33,7 +33,7 @@ from yokadi.core import utils
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 10
+DB_VERSION = 9
 DB_VERSION_KEY = "DB_VERSION"
 
 # Task frequency
@@ -347,13 +347,4 @@ def setDefaultConfig():
     for name, value in defaultConfig.items():
         if session.query(Config).filter_by(name=name).count() == 0:
             session.add(Config(name=name, value=value[0], system=value[1], desc=value[2]))
-
-
-def deleteInvalidTaskKeywordRows():
-    # TODO: Remove this function when we migrate to database version 9. See
-    # update8to9.
-    session = getSession()
-    filters = or_(TaskKeyword.taskId == None, TaskKeyword.keywordId == None)
-    session.query(TaskKeyword).filter(filters).delete(synchronize_session=False)
-    session.commit()
 # vi: ts=4 sw=4 et

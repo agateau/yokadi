@@ -236,7 +236,6 @@ def main():
     if args.createOnly:
         return
     db.setDefaultConfig()  # Set default config parameters
-    db.deleteInvalidTaskKeywordRows()
 
     if args.dump:
         dump.dump(args.dump)
