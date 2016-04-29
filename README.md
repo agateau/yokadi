@@ -34,7 +34,6 @@ Here is an example of a short Yokadi session:
 Start Yokadi:
 
     ./bin/yokadi
-    Using default database (/home/me/.yokadi.db)
     Creating database
     Added keyword '_severity'
     Added keyword '_likelihood'
@@ -285,8 +284,8 @@ next version of Yokadi.
 
 ## Database location
 
-By default, Yokadi creates a database in `$HOME/.yokadi.db`, but you can
-specify an alternative location with the `--db` option.
+By default, Yokadi creates a database in `$HOME/.local/share/yokadi/yokadi.db`,
+but you can specify an alternative location with the `--db` option.
 
 A convenient way to start Yokadi is by creating an alias in your `.bashrc` file
 like this:
@@ -303,8 +302,8 @@ the `YOKADI_DB` environment variable to point to your database:
 
 ## History location
 
-By default, Yokadi will store input history in `$HOME/.yokadi_history`. This file
-stores commands used in Yokadi for future use and reference.
+By default, Yokadi will store input history in `$HOME/.cache/yokadi/history`.
+This file stores commands used in Yokadi for future use and reference.
 
 If you do now want to use the default history file location, you can define
 the `YOKADI_HISTORY` environment variable to point to your history file:
