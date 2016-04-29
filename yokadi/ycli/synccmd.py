@@ -2,6 +2,7 @@ import os
 from cmd import Cmd
 
 from yokadi.core import basepaths
+from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
@@ -121,9 +122,22 @@ class SyncCmd(Cmd):
         print('Database dumped in {}'.format(self.dumpDir))
 
     def do_s_pull(self, line):
+        parser = self.parser_s_pull()
+        args = parser.parse_args(line)
         pullUi = TextPullUi()
         self.syncManager.pull(pullUi=pullUi)
-        self.syncManager.importSinceLastSync(pullUi=pullUi)
+        if args.all:
+            self.syncManager.importAll(pullUi=pullUi)
+        else:
+            self.syncManager.importSinceLastSync(pullUi=pullUi)
+
+    def parser_s_pull(self):
+        parser = YokadiOptionParser()
+        parser.usage = "s_pull [options]"
+        parser.description = "Pull changes from a remote repository"
+        parser.add_argument("--all", dest="all", default=False, action="store_true",
+                            help="Import all changes, regardless of the current synchronization status")
+        return parser
 
     def do_s_push(self, line):
         try:
