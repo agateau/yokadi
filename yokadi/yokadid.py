@@ -16,6 +16,8 @@ from subprocess import Popen
 from argparse import ArgumentParser
 import imp
 
+from yokadi.core import fileutils
+
 try:
     import setproctitle
 except ImportError:
@@ -25,7 +27,7 @@ except ImportError:
     sys.exit(1)
 
 from yokadi.core.daemon import Daemon
-from yokadi.core import basedirs
+from yokadi.core import basepaths
 from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
@@ -158,13 +160,6 @@ def parseOptions(defaultPidFile, defaultLogFile):
     return parser.parse_args()
 
 
-def createDirForFile(name):
-    dirname = os.path.dirname(name)
-    if os.path.exists(dirname):
-        return
-    os.makedirs(dirname, 0o700)
-
-
 class YokadiDaemon(Daemon):
     def __init__(self, options):
         Daemon.__init__(self, options.pidFile, stdout=options.logFile, stderr=options.logFile)
@@ -173,7 +168,7 @@ class YokadiDaemon(Daemon):
     def run(self):
         filename = self.options.filename
         if not filename:
-            filename = os.path.join(os.path.expandvars("$HOME"), ".yokadi.db")
+            filename = basepaths.getDbPath()
             print("Using default database (%s)" % filename)
 
         db.connectDatabase(filename, createIfNeeded=False)
@@ -206,8 +201,8 @@ def main():
     # Make the event list global to allow communication with main event loop
     global event
 
-    defaultPidFile = os.path.join(basedirs.getRuntimeDir(), "yokadid.pid")
-    defaultLogFile = os.path.join(basedirs.getLogDir(), "yokadid.log")
+    defaultPidFile = os.path.join(basepaths.getRuntimeDir(), "yokadid.pid")
+    defaultLogFile = os.path.join(basepaths.getLogDir(), "yokadid.log")
     args = parseOptions(defaultPidFile, defaultLogFile)
 
     if args.kill:
@@ -215,10 +210,10 @@ def main():
         sys.exit(0)
 
     if args.pidFile == defaultPidFile:
-        createDirForFile(args.pidFile)
+        fileutils.createParentDirs(args.pidFile, mode=0o700)
 
     if args.logFile == defaultLogFile:
-        createDirForFile(args.logFile)
+        fileutils.createParentDirs(args.logFile, mode=0o700)
 
     signal(SIGTERM, sigTermHandler)
     signal(SIGHUP, sigHupHandler)

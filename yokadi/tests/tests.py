@@ -40,6 +40,7 @@ from tuitestcase import TuiTestCase
 from helptestcase import HelpTestCase
 from conftestcase import ConfTestCase
 from massedittestcase import MassEditTestCase
+from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase
 
 
 def main():
