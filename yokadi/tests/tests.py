@@ -41,6 +41,7 @@ from helptestcase import HelpTestCase
 from conftestcase import ConfTestCase
 from massedittestcase import MassEditTestCase
 from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase
+from keywordfiltertestcase import KeywordFilterTestCase
 
 
 def main():
