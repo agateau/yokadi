@@ -231,6 +231,10 @@ class KeywordFilter(object):
         self.value = value  # Keyword value
         self.valueOperator = valueOperator  # Operator to compare value
 
+    def __repr__(self):
+        return "<KeywordFilter name={} negative={} value={} valueOperator={}>".format(
+            self.name, self.negative, self.value, self.valueOperator)
+
     def apply(self, lst):
         """Apply keyword filters to lst
         @return: a new lst"""
