@@ -87,7 +87,7 @@ class GitVcsImpl(VcsImpl):
             self._run("merge", "--quiet", "--strategy", "recursive",
                                "--strategy-option", "rename-threshold=100%",
                                "-m", commitMessage,
-                               "FETCH_HEAD",)
+                               "origin/master",)
             return True
         except GitSubprocessError as exc:
             if exc.returncode == 1:
