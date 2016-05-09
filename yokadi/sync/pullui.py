@@ -9,7 +9,7 @@ class PullUi(object):
         """
         raise NotImplementedError()
 
-    def getMergeStrategy(self, localProjectDict, remoteProjectDict):
+    def getMergeStrategy(self, localProject, remoteProject):
         """
         Must return either MERGE, RENAME or CANCEL
         """

@@ -7,6 +7,7 @@ from yokadi.tests.pulltestcase import createBothModifiedConflictFixture
 from yokadi.tests.pulltestcase import createModifiedDeletedConflictFixture
 from yokadi.ycli import tui
 from yokadi.ycli.synccmd import TextPullUi
+from yokadi.sync.pullui import PullUi
 from yokadi.sync.syncmanager import SyncManager
 
 
@@ -39,3 +40,13 @@ class TextPullUiTestCase(unittest.TestCase):
             tui.addInputAnswers("1", "2")
             syncManager = SyncManager(tmpDir, fixture.vcsImpl)
             syncManager.pull(pullUi=TextPullUi())
+
+    def testGetMergeStrategy(self):
+        localProject = db.Project(name="local")
+        remoteProject = db.Project(name="remote")
+
+        textPullUi = TextPullUi()
+        for answer, expectedStrategy in (("1", PullUi.MERGE), ("2", PullUi.RENAME), ("3", PullUi.CANCEL)):
+            tui.addInputAnswers(answer)
+            strategy = textPullUi.getMergeStrategy(localProject, remoteProject)
+            self.assertEqual(strategy, expectedStrategy)

@@ -24,8 +24,8 @@ class TextPullUi(PullUi):
                 self.resolveModifiedDeletedObject(obj)
             assert obj.isResolved()
 
-    def getMergeStrategy(self, localProjectDict, remoteProjectDict):
-        name = localProjectDict["name"]
+    def getMergeStrategy(self, localProject, remoteProject):
+        name = localProject.name
         print("Remote and local databases contain a project named '{}'.".format(name))
         answers = (
             (1, "Merge them"),
@@ -36,7 +36,7 @@ class TextPullUi(PullUi):
         if answer == 1:
             return PullUi.MERGE
         elif answer == 2:
-            return PullUi.RESET
+            return PullUi.RENAME
         else:
             return PullUi.CANCEL
 
