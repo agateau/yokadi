@@ -70,3 +70,7 @@ def updateTaskFromDict(task, dct):
     dbutils.createMissingKeywords(keywords.keys(), interactive=False)
     task.setKeywordDict(keywords)
     # TODO: recurrence
+
+
+def dictFromAlias(alias):
+    return _dictFromRow(alias)

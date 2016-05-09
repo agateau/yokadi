@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 
 from yokadi.core import db
 from yokadi.core import dbutils
-from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.syncmanager import SyncManager
 
 
@@ -17,6 +17,10 @@ def getTaskPath(dumpDir, task):
 
 def getProjectPath(dumpDir, project):
     return os.path.join(dumpDir, PROJECTS_DIRNAME, project.uuid + ".json")
+
+
+def getAliasPath(dumpDir, alias):
+    return os.path.join(dumpDir, ALIASES_DIRNAME, alias.uuid + ".json")
 
 
 class DumpTestCase(unittest.TestCase):
@@ -33,6 +37,9 @@ class DumpTestCase(unittest.TestCase):
 
         p1 = t1.project
         p2 = t3.project
+
+        a1 = db.Alias.add(self.session, "a", "t_add")
+        a2 = db.Alias.add(self.session, "ls", "t_list")
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
@@ -58,6 +65,14 @@ class DumpTestCase(unittest.TestCase):
                 self.assertEqual(task.project.uuid, dct["projectUuid"])
                 if task.description:
                     self.assertEqual(task.description, dct["description"])
+
+            for alias in a1, a2:
+                aliasFilePath = getAliasPath(dumpDir, alias)
+                self.assertTrue(os.path.exists(aliasFilePath))
+                with open(aliasFilePath) as f:
+                    dct = json.load(f)
+                self.assertEqual(alias.name, dct["name"])
+                self.assertEqual(alias.command, dct["command"])
 
     def testUpdateDump(self):
         t1 = dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)

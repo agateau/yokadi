@@ -5,9 +5,9 @@ import shutil
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.core.db import Task, Project
+from yokadi.core.db import Task, Project, Alias
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync import VERSION, VERSION_FILENAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
+from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 
 
 def checkIsValidDumpDir(dstDir, vcsImpl):
@@ -27,7 +27,7 @@ def checkIsValidDumpDir(dstDir, vcsImpl):
 
 
 def rmPreviousDump(dstDir):
-    for dirname in PROJECTS_DIRNAME, TASKS_DIRNAME:
+    for dirname in ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME:
         path = os.path.join(dstDir, dirname)
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -51,6 +51,11 @@ def dumpTask(task, dumpDir):
     dumpObject(dct, dumpDir)
 
 
+def dumpAlias(alias, dumpDir):
+    dct = dbs13n.dictFromAlias(alias)
+    dumpObject(dct, dumpDir)
+
+
 def dump(dstDir, vcsImpl=None):
     assert os.path.exists(dstDir)
     if vcsImpl is None:
@@ -66,6 +71,9 @@ def dump(dstDir, vcsImpl=None):
     tasksDir = os.path.join(dstDir, TASKS_DIRNAME)
     for task in session.query(Task).all():
         dumpTask(task, tasksDir)
+    aliasesDir = os.path.join(dstDir, ALIASES_DIRNAME)
+    for alias in session.query(Alias).all():
+        dumpAlias(alias, aliasesDir)
 
     if not vcsImpl.isWorkTreeClean():
         vcsImpl.commitAll()

@@ -229,6 +229,7 @@ class Alias(Base):
     def add(session, name, command):
         alias = Alias(name=name, command=command)
         session.add(alias)
+        return alias
 
     @staticmethod
     def update(session, name, command):
