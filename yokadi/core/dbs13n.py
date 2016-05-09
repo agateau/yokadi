@@ -74,3 +74,7 @@ def updateTaskFromDict(task, dct):
 
 def dictFromAlias(alias):
     return _dictFromRow(alias)
+
+
+def updateAliasFromDict(alias, dct):
+    _updateRowFromDict(alias, dct)

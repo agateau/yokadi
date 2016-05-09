@@ -4,9 +4,9 @@ import os
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core import dbs13n
-from yokadi.core.db import Task, Project
+from yokadi.core.db import Alias, Project, Task
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.pullui import PullUi
@@ -136,6 +136,27 @@ class TaskChangeHandler(ChangeHandler):
         session.query(Task).filter_by(uuid=uuid).delete()
 
 
+class AliasChangeHandler(ChangeHandler):
+    domain = ALIASES_DIRNAME
+
+    def _add(self, session, dct):
+        # If a local alias exists, update it, otherwise create a new one.
+        # Updating an existing alias here can happen when importing all changes
+        alias = dbutils.getAlias(session, uuid=dct["uuid"], _allowNone=True)
+        if alias is None:
+            alias = Alias()
+        dbs13n.updateAliasFromDict(alias, dct)
+        session.add(alias)
+
+    def _update(self, session, dct):
+        alias = session.query(Alias).filter_by(uuid=dct["uuid"]).one()
+        session.add(alias)
+        dbs13n.updateAliasFromDict(alias, dct)
+
+    def _remove(self, session, uuid):
+        session.query(Alias).filter_by(uuid=uuid).delete()
+
+
 def autoResolveConflicts(objects):
     remainingObjects = []
     for obj in objects:
@@ -168,7 +189,8 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
     session = db.getSession()
     projectChangeHandler = ProjectChangeHandler(pullUi)
     taskChangeHandler = TaskChangeHandler()
-    for changeHandler in projectChangeHandler, taskChangeHandler:
+    aliasChangeHandler = AliasChangeHandler()
+    for changeHandler in projectChangeHandler, taskChangeHandler, aliasChangeHandler:
         changeHandler.handle(session, dumpDir, changes)
     session.commit()
 

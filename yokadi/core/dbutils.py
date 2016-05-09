@@ -15,7 +15,7 @@ from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 from yokadi.ycli import tui
 from yokadi.core import db
-from yokadi.core.db import Keyword, Project, Task, TaskKeyword, TaskLock
+from yokadi.core.db import Alias, Keyword, Project, Task, TaskKeyword, TaskLock
 from yokadi.core.yokadiexception import YokadiException
 
 
@@ -279,6 +279,10 @@ def getProject(session, **kwargs):
 
 def getTask(session, **kwargs):
     return getObject(session, Task, **kwargs)
+
+
+def getAlias(session, **kwargs):
+    return getObject(session, Alias, **kwargs)
 
 
 # vi: ts=4 sw=4 et

@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
-from yokadi.sync import PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
@@ -79,6 +79,21 @@ def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
     filePath = os.path.join(taskDir, uuid + ".json")
     with open(filePath, "wb") as fp:
         fp.write(createTaskJson(uuid, projectUuid, title, **kwargs))
+    return os.path.relpath(filePath, dirname)
+
+
+def createAliasFile(dirname, uuid, name, command):
+    aliasesDir = os.path.join(dirname, ALIASES_DIRNAME)
+    if not os.path.exists(aliasesDir):
+        os.mkdir(aliasesDir)
+    dct = {
+        "uuid": uuid,
+        "name": name,
+        "command": command,
+    }
+    filePath = os.path.join(aliasesDir, uuid + ".json")
+    with open(filePath, "wt") as fp:
+        json.dump(dct, fp)
     return os.path.relpath(filePath, dirname)
 
 
@@ -688,3 +703,22 @@ class PullTestCase(unittest.TestCase):
             modifiedTask2 = dbutils.getTask(self.session, uuid=modifiedTask.uuid)
             self.assertEqual(modifiedTask2.title, "modified")
             self.assertEqual(modifiedTask2.description, "new description")
+
+    def testImportAlias(self):
+        with TemporaryDirectory() as tmpDir:
+            aliasPath = createAliasFile(tmpDir, uuid="123", name="a", command="t_add")
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.added = {aliasPath}
+                    return changes
+
+            # Do the pull
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
+
+            # Check changes
+            dct = db.Alias.getAsDict(self.session)
+            self.assertEqual(dct, dict(a="t_add"))
