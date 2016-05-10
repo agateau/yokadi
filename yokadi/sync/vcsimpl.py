@@ -40,7 +40,7 @@ class VcsImpl(object):
 
     def pull(self):
         """
-        Pull changes from the remote repository.
+        Pull changes from the remote repository. Must *not* commit changes.
         Returns True on success, False in case of conflicts.
         """
         raise NotImplementedError()

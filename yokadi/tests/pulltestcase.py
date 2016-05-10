@@ -34,7 +34,7 @@ class StubVcsImpl(object):
     def closeConflict(self, path, content):
         pass
 
-    def commitAll(message=""):
+    def commitAll(self, message=None):
         pass
 
     def getChangesSince(self, commitId):

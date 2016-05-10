@@ -81,13 +81,11 @@ class GitVcsImpl(VcsImpl):
     def pull(self):
         self._run("fetch", "--quiet")
 
-        commitMessage = "Merged"
         # Force a high rename-threshold: we are not interested in finding renames
         try:
             self._run("merge", "--quiet", "--strategy", "recursive",
                                "--strategy-option", "rename-threshold=100%",
-                               "-m", commitMessage,
-                               "origin/master",)
+                               "--no-commit", "origin/master")
             return True
         except GitSubprocessError as exc:
             if exc.returncode == 1:

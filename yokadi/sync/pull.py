@@ -219,8 +219,9 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
                 return False
 
         assert not vcsImpl.hasConflicts()
-        assert not vcsImpl.isWorkTreeClean()
-        vcsImpl.commitAll("Merged after resolving conflicts")
+
+    if not vcsImpl.isWorkTreeClean():
+        vcsImpl.commitAll("Merged")
 
     assert vcsImpl.isWorkTreeClean()
     return True
