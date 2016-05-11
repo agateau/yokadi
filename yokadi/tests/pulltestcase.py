@@ -105,6 +105,10 @@ BothModifiedConflictFixture = namedtuple("BothModifiedConflictFixture",
 
 
 def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, remoteChanges):
+    os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
+    os.mkdir(os.path.join(tmpDir, PROJECTS_DIRNAME))
+    os.mkdir(os.path.join(tmpDir, ALIASES_DIRNAME))
+
     prj = dbutils.getOrCreateProject("prj", interactive=False)
 
     modifiedTask = dbutils.addTask("prj", "Local title", interactive=False)
@@ -112,7 +116,6 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
     session.add(modifiedTask)
 
     modifiedTaskPath = os.path.join(TASKS_DIRNAME, modifiedTask.uuid + ".json")
-    os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
 
     class MyVcsImpl(StubVcsImpl):
         def __init__(self):
@@ -180,6 +183,8 @@ ModifiedDeletedConflictFixture = namedtuple("ModifiedDeletedConflictFixture",
 
 def createModifiedDeletedConflictFixture(testCase, tmpDir):
     os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
+    os.mkdir(os.path.join(tmpDir, PROJECTS_DIRNAME))
+    os.mkdir(os.path.join(tmpDir, ALIASES_DIRNAME))
 
     prj = dbutils.getOrCreateProject("prj", interactive=False)
 
