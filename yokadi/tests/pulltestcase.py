@@ -19,6 +19,9 @@ class StubVcsImpl(object):
     def setDir(self, repoDir):
         pass
 
+    def isValidVcsDir(self):
+        return True
+
     def pull(self):
         pass
 
