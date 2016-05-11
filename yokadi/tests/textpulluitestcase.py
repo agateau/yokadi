@@ -8,6 +8,7 @@ from yokadi.tests.pulltestcase import createModifiedDeletedConflictFixture
 from yokadi.ycli import tui
 from yokadi.ycli.synccmd import TextPullUi
 from yokadi.sync.pullui import PullUi
+from yokadi.sync import ALIASES_DIRNAME
 from yokadi.sync.syncmanager import SyncManager
 
 
@@ -50,3 +51,13 @@ class TextPullUiTestCase(unittest.TestCase):
             tui.addInputAnswers(answer)
             strategy = textPullUi.getMergeStrategy(localProject, remoteProject)
             self.assertEqual(strategy, expectedStrategy)
+
+    def testAddRename(self):
+        textPullUi = TextPullUi()
+        textPullUi.addRename(ALIASES_DIRNAME, "a", "a_1")
+        textPullUi.addRename(ALIASES_DIRNAME, "b", "b_1")
+
+        renames = textPullUi.getRenames()
+        self.assertEqual(renames, {
+            ALIASES_DIRNAME: [("a", "a_1"), ("b", "b_1")]
+            })

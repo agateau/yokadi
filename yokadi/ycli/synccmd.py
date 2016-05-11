@@ -1,5 +1,6 @@
 import os
 from cmd import Cmd
+from collections import defaultdict
 
 from yokadi.core import basepaths
 from yokadi.core.yokadioptionparser import YokadiOptionParser
@@ -11,6 +12,9 @@ from yokadi.ycli import tui
 
 
 class TextPullUi(PullUi):
+    def __init__(self):
+        self._renames = defaultdict(list)
+
     def resolveConflicts(self, conflictingObjects):
         count = len(conflictingObjects)
         if count > 1:
@@ -79,6 +83,12 @@ class TextPullUi(PullUi):
         else:
             obj.selectRemote()
 
+    def addRename(self, domain, old, new):
+        self._renames[domain].append((old, new))
+
+    def getRenames(self):
+        return self._renames
+
 
 class SyncCmd(Cmd):
     def __init__(self):
@@ -101,16 +111,17 @@ class SyncCmd(Cmd):
                 print("No remote changes")
 
             if not self.syncManager.hasChangesToPush():
-                return
+                break
             print("Pushing local changes")
             try:
                 self.syncManager.push()
-                return
+                break
             except NotFastForwardError:
                 print("Remote has other changes, need to pull again")
             except VcsImplError as exc:
                 print("Failed to push: {}".format(exc))
-                return
+                break
+        self._printPullResults(pullUi)
 
     def do_s_init(self, line):
         self.syncManager.initDumpRepository()
@@ -130,6 +141,7 @@ class SyncCmd(Cmd):
             self.syncManager.importAll(pullUi=pullUi)
         else:
             self.syncManager.importSinceLastSync(pullUi=pullUi)
+        self._printPullResults(pullUi)
 
     def parser_s_pull(self):
         parser = YokadiOptionParser()
@@ -146,3 +158,11 @@ class SyncCmd(Cmd):
             print("Remote has other changes, you need to run s_pull")
         except VcsImplError as exc:
             print("Failed to push: {}".format(exc))
+
+    def _printPullResults(self, pullUi):
+        renameDict = pullUi.getRenames()
+        if not renameDict:
+            return
+        for domain, renames in renameDict.items():
+            print("Elements renamed in {}".format(domain))
+            print("- {} => {}".format(*renames))

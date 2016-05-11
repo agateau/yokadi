@@ -730,3 +730,118 @@ class PullTestCase(unittest.TestCase):
             # Check changes
             dct = db.Alias.getAsDict(self.session)
             self.assertEqual(dct, dict(a="t_add"))
+
+    def testImportAlias_removed(self):
+        db.Alias.add(self.session, "a", "t_add")
+        a2 = db.Alias.add(self.session, "a2", "t_add2")
+        self.session.flush()
+        with TemporaryDirectory() as tmpDir:
+            removedAliasPath = os.path.join(ALIASES_DIRNAME, a2.uuid + ".json")
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.removed = {removedAliasPath}
+                    return changes
+
+            # Do the pull
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
+
+            # Check changes
+            dct = db.Alias.getAsDict(self.session)
+            self.assertEqual(dct, dict(a="t_add"))
+
+    def testImportAlias_sameNameSameCommand(self):
+        with TemporaryDirectory() as tmpDir:
+            # Create an empty remote repo
+            remoteDir = os.path.join(tmpDir, "remote")
+            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager.initDumpRepository()
+
+            # Clone the remote repo
+            localDir = os.path.join(tmpDir, "local")
+            syncManager = SyncManager(localDir)
+            syncManager.vcsImpl.clone(remoteDir)
+            syncManager.pull(pullUi=None)
+
+            # Add an alias a => t_add to the remote repo
+            aliasPath = createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Init the local db with the same alias
+            alias = db.Alias.add(self.session, "a", "t_add")
+            self.session.commit()
+            syncManager.dump()
+
+            # Do the pull, conflict should be automatically solved
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
+
+            # Check changes
+            dct = db.Alias.getAsDict(self.session)
+            self.assertEqual(dct, dict(a="t_add"))
+
+    def testImportAlias_sameNameDifferentCommand(self):
+        with TemporaryDirectory() as tmpDir:
+            # Create an empty remote repo
+            remoteDir = os.path.join(tmpDir, "remote")
+            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager.initDumpRepository()
+
+            # Clone the remote repo
+            localDir = os.path.join(tmpDir, "local")
+            syncManager = SyncManager(localDir)
+            syncManager.vcsImpl.clone(remoteDir)
+            syncManager.pull(pullUi=None)
+
+            # Add an alias a => t_add to the remote repo
+            aliasPath = createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Init the local db with a different alias
+            alias = db.Alias.add(self.session, "a", "t_add -d")
+            self.session.commit()
+            syncManager.dump()
+
+            # Do the pull, conflict should be automatically solved
+            class MyPullUi(PullUi):
+                def __init__(self):
+                    self.renames = []
+
+                def addRename(self, domain, old, new):
+                    self.renames.append((domain, old, new))
+
+            pullUi = MyPullUi()
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importSinceLastSync(pullUi=None)
+
+            # Check changes
+            self.assertEqual(pullUi.renames, [(ALIASES_DIRNAME, "a", "a_1")])
+            dct = db.Alias.getAsDict(self.session)
+            self.assertEqual(set(dct.keys()), {"a", "a_1"})
+            self.assertEqual(set(dct.values()), {"t_add", "t_add -d"})
+
+    def testImportAlias_swapNames(self):
+        with TemporaryDirectory() as tmpDir:
+            alias1 = db.Alias.add(self.session, "a1", "a_one")
+            alias2 = db.Alias.add(self.session, "a2", "a_two")
+            self.session.flush()
+            alias1Path = createAliasFile(tmpDir, uuid=alias1.uuid, name=alias2.name, command=alias1.command)
+            alias2Path = createAliasFile(tmpDir, uuid=alias2.uuid, name=alias1.name, command=alias2.command)
+
+            class MyVcsImpl(StubVcsImpl):
+                def getChangesSince(self, commitId):
+                    changes = VcsChanges()
+                    changes.modified = {alias1Path, alias2Path}
+                    return changes
+
+            # Do the pull
+            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
+
+            # Check changes
+            dct = db.Alias.getAsDict(self.session)
+            self.assertEqual(dct, dict(a1="a_two", a2="a_one"))
