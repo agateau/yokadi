@@ -138,15 +138,11 @@ class TaskChangeHandler(ChangeHandler):
         task = dbutils.getTask(session, uuid=dct["uuid"], _allowNone=True)
         if task is None:
             task = Task()
-        dbs13n.updateTaskFromDict(task, dct)
-        session.add(task)
+        dbs13n.updateTaskFromDict(session, task, dct)
 
     def _update(self, session, dct):
         task = session.query(Task).filter_by(uuid=dct["uuid"]).one()
-        # Call session.add *before* updating, so that related objects like
-        # TaskKeywords can be added to the session.
-        session.add(task)
-        dbs13n.updateTaskFromDict(task, dct)
+        dbs13n.updateTaskFromDict(session, task, dct)
 
     def _remove(self, session, uuid):
         session.query(Task).filter_by(uuid=uuid).delete()

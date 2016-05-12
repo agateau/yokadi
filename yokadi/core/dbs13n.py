@@ -59,13 +59,14 @@ def dictFromTask(task):
     return dct
 
 
-def updateTaskFromDict(task, dct):
+def updateTaskFromDict(session, task, dct):
     projectUuid = dct.pop("projectUuid")
-    project = db.getSession().query(Project).filter_by(uuid=projectUuid).one()
+    project = session.query(Project).filter_by(uuid=projectUuid).one()
     dct["project"] = project
 
     _convertStringsToDates(dct, TASK_DATE_FIELDS)
     _updateRowFromDict(task, dct, skippedKeys={"recurrence", "keywords"})
+    session.add(task)
     keywords = dct["keywords"]
     dbutils.createMissingKeywords(keywords.keys(), interactive=False)
     task.setKeywordDict(keywords)
