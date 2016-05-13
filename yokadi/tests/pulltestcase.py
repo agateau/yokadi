@@ -697,7 +697,7 @@ class PullTestCase(unittest.TestCase):
             vcsImpl = GitVcsImpl()
             syncManager = SyncManager(dumpDir, vcsImpl)
             syncManager.initDumpRepository()
-            syncManager.dump()
+            syncManager.dump(pullUi=None)
 
             # Alter some files
             modifiedTaskPath = os.path.join(dumpDir, TASKS_DIRNAME, modifiedTask.uuid + ".json")
@@ -773,7 +773,7 @@ class PullTestCase(unittest.TestCase):
             # Init the local db with the same alias
             alias = db.Alias.add(self.session, "a", "t_add")
             self.session.commit()
-            syncManager.dump()
+            syncManager.dump(pullUi=None)
 
             # Do the pull, conflict should be automatically solved
             syncManager.pull(pullUi=None)
@@ -803,7 +803,7 @@ class PullTestCase(unittest.TestCase):
             # Init the local db with a different alias
             alias = db.Alias.add(self.session, "a", "t_add -d")
             self.session.commit()
-            syncManager.dump()
+            syncManager.dump(pullUi=None)
 
             # Do the pull, conflict should be automatically solved
             class MyPullUi(PullUi):

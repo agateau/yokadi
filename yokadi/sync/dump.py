@@ -2,6 +2,8 @@ import json
 import os
 import shutil
 
+from collections import defaultdict
+
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
@@ -60,7 +62,52 @@ def dumpAlias(alias, dumpDir):
     dumpObject(dct, dumpDir)
 
 
-def dump(dstDir, vcsImpl=None):
+def _findUniqueName(baseName, existingNames):
+    name = baseName
+    count = 0
+    while name in existingNames:
+        count += 1
+        name = "{}_{}".format(baseName, count)
+    return name
+
+
+def _enforceAliasConstraints(dumpDir, pullUi):
+    jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
+    dictForName = defaultdict(list)
+    for name in os.listdir(jsonDirPath):
+        dct = {}
+        jsonPath = os.path.join(jsonDirPath, name)
+        with open(jsonPath) as fp:
+            dct = json.load(fp)
+        dictForName[dct["name"]].append(dct)
+
+    names = set(dictForName.keys())
+    conflictLists = [x for x in dictForName.values() if len(x) > 1]
+    for conflictList in conflictLists:
+        ref = conflictList.pop()
+        for dct in conflictList:
+            if ref["command"] == dct["command"]:
+                # Same command, destroy the other alias. If it was the local one
+                # it will be recreated at import time.
+                path = os.path.join(jsonDirPath, dct["uuid"] + ".json")
+                os.remove(path)
+            else:
+                # Different command, rename one
+                old = dct["name"]
+                new = _findUniqueName(old, names)
+                dct["name"] = new
+                names.add(new)
+                pullUi.addRename(ALIASES_DIRNAME, old, new)
+                dumpObject(dct, jsonDirPath)
+
+
+def enforceDbConstraints(dumpDir, pullUi):
+    # TODO: Only enforce constraints if there have been changes in the concerned
+    # dir
+    _enforceAliasConstraints(dumpDir, pullUi)
+
+
+def dump(dstDir, vcsImpl=None, pullUi=None):
     assert os.path.exists(dstDir)
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
@@ -79,5 +126,6 @@ def dump(dstDir, vcsImpl=None):
         dumpAlias(alias, aliasesDir)
 
     if not vcsImpl.isWorkTreeClean():
+        enforceDbConstraints(dstDir, pullUi)
         vcsImpl.commitAll()
         vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")

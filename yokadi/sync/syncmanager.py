@@ -1,6 +1,5 @@
 import os
 
-from yokadi.sync import VERSION, VERSION_FILENAME, DB_SYNC_BRANCH
 from yokadi.sync import VERSION, VERSION_FILENAME, DB_SYNC_BRANCH, \
         ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
@@ -35,8 +34,8 @@ class SyncManager(object):
     def clearDump(self):
         clearDump(self.dumpDir)
 
-    def dump(self):
-        dump(self.dumpDir, vcsImpl=self.vcsImpl)
+    def dump(self, pullUi):
+        dump(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
 
     def pull(self, pullUi):
         pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)

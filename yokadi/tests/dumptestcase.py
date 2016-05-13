@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync.pullui import PullUi
 from yokadi.sync.syncmanager import SyncManager
 
 
@@ -45,7 +46,7 @@ class DumpTestCase(unittest.TestCase):
             dumpDir = os.path.join(tmpDir, "dump")
             syncManager = SyncManager(dumpDir)
             syncManager.initDumpRepository()
-            syncManager.dump()
+            syncManager.dump(pullUi=None)
 
             for project in p1, p2:
                 projectFilePath = getProjectPath(dumpDir, project)
@@ -83,7 +84,7 @@ class DumpTestCase(unittest.TestCase):
             dumpDir = os.path.join(tmpDir, "dump")
             syncManager = SyncManager(dumpDir)
             syncManager.initDumpRepository()
-            syncManager.dump()
+            syncManager.dump(pullUi=None)
 
             # Do some changes: update t3, add t4, remove t2, then dump again
             newTitle = "New T3 title"
@@ -98,7 +99,7 @@ class DumpTestCase(unittest.TestCase):
             self.session.commit()
 
             syncManager.clearDump()
-            syncManager.dump()
+            syncManager.dump(pullUi=None)
 
             # Check t3 has been updated
             taskFilePath = getTaskPath(dumpDir, t3)
