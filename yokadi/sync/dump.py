@@ -127,5 +127,5 @@ def dump(dstDir, vcsImpl=None, pullUi=None):
 
     if not vcsImpl.isWorkTreeClean():
         enforceDbConstraints(dstDir, pullUi)
-        vcsImpl.commitAll()
+        vcsImpl.commitAll("Dumped")
         vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
