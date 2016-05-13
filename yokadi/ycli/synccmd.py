@@ -102,7 +102,7 @@ class SyncCmd(Cmd):
 
         print("Dumping database")
         self.syncManager.clearDump()
-        self.syncManager.dump()
+        self.syncManager.dump(pullUi=pullUi)
 
         while True:
             print("Pulling remote changes")
