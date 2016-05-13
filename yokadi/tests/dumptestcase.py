@@ -97,6 +97,7 @@ class DumpTestCase(unittest.TestCase):
 
             self.session.commit()
 
+            syncManager.clearDump()
             syncManager.dump()
 
             # Check t3 has been updated

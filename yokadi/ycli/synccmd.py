@@ -99,6 +99,7 @@ class SyncCmd(Cmd):
         pullUi = TextPullUi()
 
         print("Dumping database")
+        self.syncManager.clearDump()
         self.syncManager.dump()
 
         while True:

@@ -26,7 +26,7 @@ def checkIsValidDumpDir(dstDir, vcsImpl):
     return
 
 
-def rmPreviousDump(dstDir):
+def clearDump(dstDir):
     for dirname in ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME:
         path = os.path.join(dstDir, dirname)
         if os.path.exists(path):
@@ -35,6 +35,10 @@ def rmPreviousDump(dstDir):
 
 
 def dumpObject(obj, dumpDir):
+    # dumpDir may not exist if we cloned a database which does not contain any
+    # object of the type of obj (for example, no aliases)
+    os.makedirs(dumpDir, exist_ok=True)
+
     uuid = obj["uuid"]
     path = os.path.join(dumpDir, uuid + ".json")
     with open(path, "wt") as fp:
@@ -63,7 +67,6 @@ def dump(dstDir, vcsImpl=None):
     vcsImpl.setDir(dstDir)
     checkIsValidDumpDir(dstDir, vcsImpl)
 
-    rmPreviousDump(dstDir)
     session = db.getSession()
     projectsDir = os.path.join(dstDir, PROJECTS_DIRNAME)
     for project in session.query(Project).all():
