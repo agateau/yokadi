@@ -52,7 +52,7 @@ class AliasCmd(object):
         if not name in self.aliases:
             raise YokadiException("There is no alias named {}".format(name))
 
-        newName = tui.editLine(self.aliases[name])
+        newName = tui.editLine(name)
         if newName in self.aliases:
             raise YokadiException("There is already an alias named {}.".format(newName))
 
