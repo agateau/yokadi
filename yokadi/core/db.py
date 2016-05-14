@@ -237,7 +237,12 @@ class Alias(Base):
         session.add(alias)
 
     @staticmethod
-    def update(session, name, command):
+    def rename(session, name, newName):
+        alias = session.query(Alias).filter_by(name=name).one()
+        alias.name = newName
+
+    @staticmethod
+    def setCommand(session, name, command):
         alias = session.query(Alias).filter_by(name=name).one()
         alias.command = command
 
