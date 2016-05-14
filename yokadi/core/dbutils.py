@@ -234,24 +234,28 @@ class KeywordFilter(object):
         self.value = value  # Keyword value
         self.valueOperator = valueOperator  # Operator to compare value
 
-    def apply(self, lst):
-        """Apply keyword filters to lst
-        @return: a new lst"""
-        keywordAlias = aliased(Keyword)
-        taskKeywordAlias = aliased(TaskKeyword)
-        lst = lst.outerjoin(taskKeywordAlias, Task.taskKeywords)
-        lst = lst.outerjoin(keywordAlias, taskKeywordAlias.keyword)
+    def __repr__(self):
+        return "<KeywordFilter name={} negative={} value={} valueOperator={}>".format(
+            self.name, self.negative, self.value, self.valueOperator)
 
+    def apply(self, query):
+        """Apply keyword filters to query
+        @return: a new query"""
         if self.negative:
-            filter = or_(keywordAlias.name == None, ~keywordAlias.name.like(self.name))
+            session = db.getSession()
+            excludedTaskIds = session.query(Task.id).join(TaskKeyword).join(Keyword).filter(Keyword.name.like(self.name))
+            return query.filter(~Task.id.in_(excludedTaskIds))
         else:
+            keywordAlias = aliased(Keyword)
+            taskKeywordAlias = aliased(TaskKeyword)
+            query = query.outerjoin(taskKeywordAlias, Task.taskKeywords)
+            query = query.outerjoin(keywordAlias, taskKeywordAlias.keyword)
             filter = keywordAlias.name.like(self.name)
             if self.valueOperator == "=":
                 filter = and_(filter, taskKeywordAlias.value == self.value)
             elif self.valueOperator == "!=":
                 filter = and_(filter, taskKeywordAlias.value != self.value)
-
-        return lst.filter(filter)
+            return query.filter(filter)
 
 
 def getObject(session, table, **kwargs):
