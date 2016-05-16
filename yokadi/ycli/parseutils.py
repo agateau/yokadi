@@ -39,13 +39,15 @@ def parseParameters(line):
     return (parameters, " ".join(text))
 
 
-def parseProjectName(line):
-    """Parse line, check it is a valid project name and return it
-    @return: the project name
+def parseOneWordName(line):
+    """Parse line, check it is a one word project name and return it
+    @return: the name
     """
     line = line.strip()
     if " " in line:
-        raise YokadiException("Project name cannot contain spaces")
+        raise YokadiException("Name cannot contain spaces")
+    if not line:
+        raise YokadiException("Name cannot be empty")
     return line
 
 
