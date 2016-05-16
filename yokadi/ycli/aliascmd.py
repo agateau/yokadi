@@ -44,9 +44,9 @@ class AliasCmd(object):
         session.commit()
         self._updateAliasDict()
 
-    def do_a_edit(self, line):
+    def do_a_edit_name(self, line):
         """Edit the name of an alias.
-        a_edit <alias name>"""
+        a_edit_name <alias name>"""
         session = db.getSession()
         name = line
         if not name in self.aliases:
