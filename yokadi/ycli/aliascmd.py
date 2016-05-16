@@ -7,6 +7,7 @@ Alias related commands.
 """
 from yokadi.core import db
 from yokadi.core.yokadiexception import BadUsageException, YokadiException
+from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli import colors as C
 
@@ -53,6 +54,8 @@ class AliasCmd(object):
             raise YokadiException("There is no alias named {}".format(name))
 
         newName = tui.editLine(name)
+        newName = parseutils.parseOneWordName(newName)
+
         if newName in self.aliases:
             raise YokadiException("There is already an alias named {}.".format(newName))
 
