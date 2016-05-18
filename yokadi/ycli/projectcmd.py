@@ -42,7 +42,7 @@ class ProjectCmd(object):
         if not line:
             print("Missing project name.")
             return
-        projectName = parseutils.parseProjectName(line)
+        projectName = parseutils.parseOneWordName(line)
         session = db.getSession()
         try:
             project = Project(name=projectName)
@@ -66,7 +66,7 @@ class ProjectCmd(object):
         line = tui.editLine(project.name)
 
         # Update project
-        projectName = parseutils.parseProjectName(line)
+        projectName = parseutils.parseOneWordName(line)
         try:
             project.name = projectName
             session.commit()

@@ -7,6 +7,7 @@ Alias related commands.
 """
 from yokadi.core import db
 from yokadi.core.yokadiexception import BadUsageException, YokadiException
+from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli import colors as C
 
@@ -44,15 +45,17 @@ class AliasCmd(object):
         session.commit()
         self._updateAliasDict()
 
-    def do_a_edit(self, line):
+    def do_a_edit_name(self, line):
         """Edit the name of an alias.
-        a_edit <alias name>"""
+        a_edit_name <alias name>"""
         session = db.getSession()
         name = line
         if not name in self.aliases:
             raise YokadiException("There is no alias named {}".format(name))
 
         newName = tui.editLine(name)
+        newName = parseutils.parseOneWordName(newName)
+
         if newName in self.aliases:
             raise YokadiException("There is already an alias named {}.".format(newName))
 
