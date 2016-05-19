@@ -73,6 +73,15 @@ class VcsImpl(object):
         """
         raise NotImplementedError()
 
+    def getWorkTreeChanges(self):
+        """
+        Returns an instance of VcsChanges listing all uncommitted changes
+
+        Considers unknown files as if they had been added because they would be
+        added by a call to commitAll().
+        """
+        raise NotImplementedError()
+
     def getChangesSince(self, commitId):
         """
         Returns an instance of VcsChanges listing all changes since `commitId`

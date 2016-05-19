@@ -45,6 +45,21 @@ class GitSubprocessError(VcsImplError):
         self.returncode = error.returncode
 
 
+def _parseStatusOutput(output):
+    changes = VcsChanges()
+    for line in output.splitlines():
+        status, filename = line.split()
+        if status == "M":
+            changes.modified.add(filename)
+        elif status == "A" or status == "??":
+            changes.added.add(filename)
+        elif status == "D":
+            changes.removed.add(filename)
+        else:
+            raise Exception("Unknown status {} in line '{}'".format(status, line))
+    return changes
+
+
 class GitVcsImpl(VcsImpl):
     name = "Git"
 
@@ -139,18 +154,11 @@ class GitVcsImpl(VcsImpl):
 
     def getChangesSince(self, commitId):
         output = self._run("diff", "--name-status", commitId + "..").decode("utf-8")
-        changes = VcsChanges()
-        for line in output.splitlines():
-            status, filename = line.split()
-            if status == "M":
-                changes.modified.add(filename)
-            elif status == "A":
-                changes.added.add(filename)
-            elif status == "D":
-                changes.removed.add(filename)
-            else:
-                raise Exception("Unknown status {} in line '{}'".format(status, line))
-        return changes
+        return _parseStatusOutput(output)
+
+    def getWorkTreeChanges(self):
+        output = self._run("status", "-s").decode("utf-8")
+        return _parseStatusOutput(output)
 
     def updateBranch(self, branchName, commitId):
         self._run("branch", "--force", branchName, commitId)

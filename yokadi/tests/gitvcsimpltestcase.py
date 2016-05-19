@@ -458,6 +458,38 @@ class GitVcsImplTestCase(unittest.TestCase):
             self.assertEqual(changes.added, {"added"})
             self.assertEqual(changes.removed, {"removed"})
 
+    def testGetWorkTreeChanges(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            # Create a repo with a removed, a modified and an added file
+            modifiedPath = touch(repoDir, "modified")
+            removedPath = touch(repoDir, "removed")
+            impl.commitAll()
+
+            addedPath = touch(repoDir, "added")
+
+            changes = impl.getWorkTreeChanges()
+            self.assertEqual(changes.modified, set())
+            self.assertEqual(changes.added, {"added"})
+            self.assertEqual(changes.removed, set())
+
+            os.unlink(removedPath)
+            changes = impl.getWorkTreeChanges()
+            self.assertEqual(changes.modified, set())
+            self.assertEqual(changes.added, {"added"})
+            self.assertEqual(changes.removed, {"removed"})
+
+            with open(modifiedPath, "w") as f:
+                f.write("Boo")
+
+            changes = impl.getWorkTreeChanges()
+            self.assertEqual(changes.modified, {"modified"})
+            self.assertEqual(changes.added, {"added"})
+            self.assertEqual(changes.removed, {"removed"})
+
     def testPushOK(self):
         with TemporaryDirectory() as tmpDir:
             srcRepoDir = createGitRepository(tmpDir, "src")
