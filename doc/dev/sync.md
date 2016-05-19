@@ -18,6 +18,52 @@ Configuration file
 - master contains all
 - `db-synced` contains all changes which are also in the database
 
+# Design decisions
+
+## Enforcing database constraints
+
+When objects are imported from the repository to the database, we must ensure
+database constraints are enforced. This applies to table columns with unique
+restrictions such as project.name or alias.name.
+
+There are some tricky corner cases which must be taken into account. They are
+described below.
+
+### "name swapping"
+
+This happens if for example two projects have swapped names remotely. Given
+project p1 (uuid=1234) and p2 (uuid=5678), the user did something like this:
+
+- renamed p1 to tmp
+- renamed p2 to p1
+- renamed tmp to p2
+
+When the database changes are dumped to the repository, we end up with one
+commit which atomically swaps p1 and p2 names.
+
+When importing this commit into another database, we can't simply do this:
+
+    update project set name=p2 where uuid=1234
+    update project set name=p1 where uuid=5678
+
+If we try to do so the first update will fail because project with uuid 5678
+still uses p2 as a project name.
+
+Instead what we do is that every time we have to rename a project, we first take
+note of the new name in a list, then change the name to a unique value (using an
+uuid). Once we are done with all the project changes, we go through our list of
+pending renames and set the final names. From the SQL side it looks like this:
+
+    update project set name=1234 where uuid=1234
+    update project set name=5678 where uuid=5678
+
+    -- And when we are all done:
+
+    update project set name=p2 where uuid=1234
+    update project set name=p1 where uuid=5678
+
+This is less efficient, but it supports swaps.
+
 # Commands
 ## s_dump
 
