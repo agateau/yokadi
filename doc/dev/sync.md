@@ -13,18 +13,59 @@ Configuration file
     [db ~/foo/bar/yokadi.db]
     gs_dump_dir=~/foo/bar/gsdump
 
-# Branches
-
-- master contains all
-- `db-synced` contains all changes which are also in the database
-
 # Design decisions
+
+## Repository layout
+
+The layout of the repository is designed so that the code using it is reliable
+and as simple as possible. It is not designed to be convenient to browse for a
+human.
+
+It looks like this:
+
+    repository/
+        version
+        (contains a single integer representing the repository version, currently 1)
+        projects/
+            $uuid.json
+            $uuid.json
+            ...
+        tasks/
+            $uuid.json
+            $uuid.json
+            ...
+        aliases/
+            $uuid.json
+            $uuid.json
+            ...
+
+`$uuid` matches the `uuid` field of the table.
+
+Each json file contains a dump of a row, excluding the `id` primary key, which
+cannot be reliably synchronized since its an auto-increment field.
+
+Rows of tables which have a unique "name" column like Project and Task could
+have been represented as $name.json. This would have enforced the uniqueness at
+the file system level, but I decided against this because it would have made it
+more complicated at import time to "replay" file system changes on database
+rows. A rename must be turned into an SQL UPDATE command, but if a file is
+renamed and modified it can be shown as a file removal followed by a file
+addition which would be turned into an SQL DELETE followed by an SQL INSERT. The
+cascading deletes of the Project table would cause the SQL DELETE to delete all
+its tasks, which is not what we want.
+
+Using UUIDs for all file names means the file names are immutable: a file can be
+created, modified and deleted but never moved or renamed.
 
 ## Enforcing database constraints
 
-When objects are imported from the repository to the database, we must ensure
+When files are imported from the repository to the database, we must ensure
 database constraints are enforced. This applies to table columns with unique
 restrictions such as project.name or alias.name.
+
+Database constraints are enforced right before importing so that even if the
+files in the repository are modified by external means, the files are in a
+coherent state.
 
 There are some tricky corner cases which must be taken into account. They are
 described below.
@@ -72,6 +113,14 @@ pending renames and set the final names. From the SQL side it looks like this:
     update project set name=p1 where uuid=5678
 
 This is less efficient, but it supports swaps.
+
+## Branches
+
+There are two branches:
+
+- master contains all changes
+- `db-synced` contains all changes which are also in the database. It is a local
+  branch: it should *never* be pushed
 
 # Commands
 ## s_dump
