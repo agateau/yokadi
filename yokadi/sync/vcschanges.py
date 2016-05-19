@@ -9,3 +9,12 @@ class VcsChanges(object):
 
     def __repr__(self):  # pragma: no cover
         return "<a={} m={} r={}>".format(self.added, self.modified, self.removed)
+
+    def update(self, other):
+        self.added.difference_update(other.removed)
+        self.modified.difference_update(other.removed)
+        self.removed.difference_update(other.added)
+
+        self.added.update(other.added)
+        self.modified.update(other.modified)
+        self.removed.update(other.removed)

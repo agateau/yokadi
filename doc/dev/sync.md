@@ -29,6 +29,15 @@ restrictions such as project.name or alias.name.
 There are some tricky corner cases which must be taken into account. They are
 described below.
 
+### Solving conflicts
+
+If two projects with the same name have been created independently, or if an
+existing project has been remotely renamed to the name of a local project, we
+automatically rename one of the projects.
+
+This is similar for aliases, except that if the two aliases refer to the same
+command then we can decide to delete one of them, since they are the same.
+
 ### "name swapping"
 
 This happens if for example two projects have swapped names remotely. Given

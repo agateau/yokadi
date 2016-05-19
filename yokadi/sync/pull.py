@@ -1,6 +1,8 @@
 import json
 import os
 
+from collections import defaultdict
+
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core import dbs13n
@@ -9,7 +11,7 @@ from yokadi.core.yokadiexception import YokadiException
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import enforceDbConstraints
+from yokadi.sync.dump import dumpObject
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.vcschanges import VcsChanges
 
@@ -183,6 +185,52 @@ def autoResolveConflicts(objects):
     return remainingObjects
 
 
+def _findUniqueName(baseName, existingNames):
+    name = baseName
+    count = 0
+    while name in existingNames:
+        count += 1
+        name = "{}_{}".format(baseName, count)
+    return name
+
+
+def _enforceAliasConstraints(dumpDir, vcsImpl, pullUi):
+    jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
+    if not os.path.exists(jsonDirPath):
+        return
+    dictForName = defaultdict(list)
+    for name in os.listdir(jsonDirPath):
+        jsonPath = os.path.join(jsonDirPath, name)
+        with open(jsonPath) as fp:
+            dct = json.load(fp)
+        dictForName[dct["name"]].append(dct)
+
+    names = set(dictForName.keys())
+    conflictLists = [x for x in dictForName.values() if len(x) > 1]
+    for conflictList in conflictLists:
+        ref = conflictList.pop()
+        for dct in conflictList:
+            if ref["command"] == dct["command"]:
+                # Same command, destroy the other alias. If it was the local one
+                # it will be recreated at import time.
+                path = os.path.join(jsonDirPath, dct["uuid"] + ".json")
+                os.remove(path)
+            else:
+                # Different command, rename one
+                old = dct["name"]
+                new = _findUniqueName(old, names)
+                dct["name"] = new
+                names.add(new)
+                pullUi.addRename(ALIASES_DIRNAME, old, new)
+                dumpObject(dct, jsonDirPath)
+
+
+def enforceDbConstraints(dumpDir, vcsImpl, pullUi):
+    # TODO: Only enforce constraints if there have been changes in the concerned
+    # dir
+    _enforceAliasConstraints(dumpDir, vcsImpl, pullUi)
+
+
 def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
@@ -204,6 +252,11 @@ def importAll(dumpDir, vcsImpl=None, pullUi=None):
 
 def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
     session = db.getSession()
+
+    enforceDbConstraints(dumpDir, vcsImpl, pullUi)
+    dbConstraintChanges = vcsImpl.getWorkTreeChanges()
+    changes.update(dbConstraintChanges)
+
     projectChangeHandler = ProjectChangeHandler(pullUi)
     taskChangeHandler = TaskChangeHandler()
     aliasChangeHandler = AliasChangeHandler()
@@ -213,6 +266,11 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
     for changeHandler in projectChangeHandler, taskChangeHandler, aliasChangeHandler:
         changeHandler.applyPostUpdateChanges()
     session.commit()
+
+    if dbConstraintChanges.hasChanges():
+        # Only commit after the DB session has been committed, to be able to
+        # rollback both the DB and the repository in case of error
+        vcsImpl.commitAll("Enforce DB constraints")
 
     vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
 
@@ -241,7 +299,6 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
         assert not vcsImpl.hasConflicts()
 
     if not vcsImpl.isWorkTreeClean():
-        enforceDbConstraints(dumpDir, pullUi)
         vcsImpl.commitAll("Merged")
 
     assert vcsImpl.isWorkTreeClean()

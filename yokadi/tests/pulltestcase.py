@@ -43,6 +43,9 @@ class StubVcsImpl(object):
     def getChangesSince(self, commitId):
         return VcsChanges()
 
+    def getWorkTreeChanges(self):
+        return VcsChanges()
+
     def updateBranch(self, branch, commitId):
         pass
 
@@ -697,7 +700,7 @@ class PullTestCase(unittest.TestCase):
             vcsImpl = GitVcsImpl()
             syncManager = SyncManager(dumpDir, vcsImpl)
             syncManager.initDumpRepository()
-            syncManager.dump(pullUi=None)
+            syncManager.dump()
 
             # Alter some files
             modifiedTaskPath = os.path.join(dumpDir, TASKS_DIRNAME, modifiedTask.uuid + ".json")
@@ -773,13 +776,14 @@ class PullTestCase(unittest.TestCase):
             # Init the local db with the same alias
             alias = db.Alias.add(self.session, "a", "t_add")
             self.session.commit()
-            syncManager.dump(pullUi=None)
+            syncManager.dump()
 
             # Do the pull, conflict should be automatically solved
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
+            self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
             dct = db.Alias.getAsDict(self.session)
             self.assertEqual(dct, dict(a="t_add"))
 
@@ -803,7 +807,7 @@ class PullTestCase(unittest.TestCase):
             # Init the local db with a different alias
             alias = db.Alias.add(self.session, "a", "t_add -d")
             self.session.commit()
-            syncManager.dump(pullUi=None)
+            syncManager.dump()
 
             # Do the pull, conflict should be automatically solved
             class MyPullUi(PullUi):
@@ -814,10 +818,11 @@ class PullTestCase(unittest.TestCase):
                     self.renames.append((domain, old, new))
 
             pullUi = MyPullUi()
-            syncManager.pull(pullUi=pullUi)
-            syncManager.importSinceLastSync(pullUi=None)
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # Check changes
+            self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
             self.assertEqual(pullUi.renames, [(ALIASES_DIRNAME, "a", "a_1")])
             dct = db.Alias.getAsDict(self.session)
             self.assertEqual(set(dct.keys()), {"a", "a_1"})

@@ -102,7 +102,7 @@ class SyncCmd(Cmd):
 
         print("Dumping database")
         self.syncManager.clearDump()
-        self.syncManager.dump(pullUi=pullUi)
+        self.syncManager.dump()
 
         while True:
             print("Pulling remote changes")
@@ -137,11 +137,9 @@ class SyncCmd(Cmd):
         args = parser.parse_args(line)
         if args.clear:
             self.syncManager.clearDump()
-        pullUi = TextPullUi()
-        self.syncManager.dump(pullUi)
+        self.syncManager.dump()
 
         print("Database dumped in {}".format(self.dumpDir))
-        self._printPullResults(pullUi)
 
     def parser__s_dump(self):
         parser = YokadiOptionParser()
@@ -166,6 +164,7 @@ class SyncCmd(Cmd):
             self.syncManager.importAll(pullUi=pullUi)
         else:
             self.syncManager.importSinceLastSync(pullUi=pullUi)
+        self._printPullResults(pullUi)
 
     def parser__s_import(self):
         parser = YokadiOptionParser()

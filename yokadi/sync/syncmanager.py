@@ -34,8 +34,8 @@ class SyncManager(object):
     def clearDump(self):
         clearDump(self.dumpDir)
 
-    def dump(self, pullUi):
-        dump(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+    def dump(self):
+        dump(self.dumpDir, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
         pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)

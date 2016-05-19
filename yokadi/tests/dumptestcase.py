@@ -46,7 +46,7 @@ class DumpTestCase(unittest.TestCase):
             dumpDir = os.path.join(tmpDir, "dump")
             syncManager = SyncManager(dumpDir)
             syncManager.initDumpRepository()
-            syncManager.dump(pullUi=None)
+            syncManager.dump()
 
             for project in p1, p2:
                 projectFilePath = getProjectPath(dumpDir, project)
@@ -84,7 +84,7 @@ class DumpTestCase(unittest.TestCase):
             dumpDir = os.path.join(tmpDir, "dump")
             syncManager = SyncManager(dumpDir)
             syncManager.initDumpRepository()
-            syncManager.dump(pullUi=None)
+            syncManager.dump()
 
             # Do some changes: update t3, add t4, remove t2, then dump again
             newTitle = "New T3 title"
@@ -99,7 +99,7 @@ class DumpTestCase(unittest.TestCase):
             self.session.commit()
 
             syncManager.clearDump()
-            syncManager.dump(pullUi=None)
+            syncManager.dump()
 
             # Check t3 has been updated
             taskFilePath = getTaskPath(dumpDir, t3)
