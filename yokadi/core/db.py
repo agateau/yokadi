@@ -88,6 +88,9 @@ class TaskKeyword(Base):
     keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
     value = Column(Integer, default=None)
 
+    def __repr__(self):
+        return "<TaskKeyword task={} keyword={} value={}>".format(self.task, self.keyword, self.value)
+
 
 class Task(Base):
     __tablename__ = "task"
@@ -163,6 +166,9 @@ class Task(Base):
         session = getSession()
         session.merge(self)
 
+    def __repr__(self):
+        return "<Task id={} title={}>".format(self.id, self.title)
+
 
 class Recurrence(Base):
     """Task recurrence definition"""
@@ -231,7 +237,12 @@ class Alias(Base):
         session.add(alias)
 
     @staticmethod
-    def update(session, name, command):
+    def rename(session, name, newName):
+        alias = session.query(Alias).filter_by(name=name).one()
+        alias.name = newName
+
+    @staticmethod
+    def setCommand(session, name, command):
         alias = session.query(Alias).filter_by(name=name).one()
         alias.command = command
 

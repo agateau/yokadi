@@ -52,11 +52,20 @@ class AliasTestCase(unittest.TestCase):
         aliases = Alias.getAsDict(self.session)
         self.assertEqual(aliases, {})
 
-    def testEdit(self):
+    def testEditName(self):
+        self.cmd.do_a_add("l t_list")
+
+        tui.addInputAnswers("ls")
+        self.cmd.do_a_edit_name("l")
+
+        aliases = Alias.getAsDict(self.session)
+        self.assertEqual(aliases["ls"], "t_list")
+
+    def testEditCommand(self):
         self.cmd.do_a_add("l t_list")
 
         tui.addInputAnswers("foo")
-        self.cmd.do_a_edit("l")
+        self.cmd.do_a_edit_command("l")
 
         aliases = Alias.getAsDict(self.session)
         self.assertEqual(aliases["l"], "foo")

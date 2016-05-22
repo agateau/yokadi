@@ -7,12 +7,16 @@ Alias related commands.
 """
 from yokadi.core import db
 from yokadi.core.yokadiexception import BadUsageException, YokadiException
+from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli import colors as C
 
 
 class AliasCmd(object):
     def __init__(self):
+        self._updateAliasDict()
+
+    def _updateAliasDict(self):
         self.aliases = db.Alias.getAsDict(db.getSession())
 
     def do_a_list(self, line):
@@ -37,13 +41,32 @@ class AliasCmd(object):
         command = " ".join(tokens[1:])
 
         session = db.getSession()
-        self.aliases.update({name: command})
         db.Alias.add(session, name, command)
         session.commit()
+        self._updateAliasDict()
 
-    def do_a_edit(self, line):
-        """Edit an alias.
-        a_edit <alias name>"""
+    def do_a_edit_name(self, line):
+        """Edit the name of an alias.
+        a_edit_name <alias name>"""
+        session = db.getSession()
+        name = line
+        if not name in self.aliases:
+            raise YokadiException("There is no alias named {}".format(name))
+
+        newName = tui.editLine(name)
+        newName = parseutils.parseOneWordName(newName)
+
+        if newName in self.aliases:
+            raise YokadiException("There is already an alias named {}.".format(newName))
+
+        session = db.getSession()
+        db.Alias.rename(session, name, newName)
+        session.commit()
+        self._updateAliasDict()
+
+    def do_a_edit_command(self, line):
+        """Edit the command of an alias.
+        a_edit_command <alias name>"""
         session = db.getSession()
         name = line
         if not name in self.aliases:
@@ -52,9 +75,9 @@ class AliasCmd(object):
         command = tui.editLine(self.aliases[name])
 
         session = db.getSession()
-        self.aliases.update({name: command})
-        db.Alias.update(session, name, command)
+        db.Alias.setCommand(session, name, command)
         session.commit()
+        self._updateAliasDict()
 
     def do_a_remove(self, line):
         """Remove an alias"""
