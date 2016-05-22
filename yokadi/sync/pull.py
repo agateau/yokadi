@@ -7,12 +7,10 @@ from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core import dbs13n
 from yokadi.core.db import Alias, Project, Task
-from yokadi.core.yokadiexception import YokadiException
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import dumpObject
-from yokadi.sync.pullui import PullUi
 from yokadi.sync.vcschanges import VcsChanges
 
 
@@ -75,10 +73,6 @@ class ChangeHandler(object):
 class ProjectChangeHandler(ChangeHandler):
     domain = PROJECTS_DIRNAME
 
-    def __init__(self, pullUi):
-        ChangeHandler.__init__(self)
-        self._pullUi = pullUi
-
     def _add(self, session, dct):
         # If a local project exists, update it. This will change its uuid to the
         # uuid of the remote project, resolving the conflict.
@@ -86,44 +80,20 @@ class ProjectChangeHandler(ChangeHandler):
         project = dbutils.getProject(session, name=dct["name"], _allowNone=True)
         if project is None:
             project = Project()
-        dbs13n.updateProjectFromDict(project, dct)
-        session.add(project)
+        self._doUpdate(session, project, dct)
 
     def _update(self, session, dct):
         project = dbutils.getProject(session, uuid=dct["uuid"])
-        existingProject = dbutils.getProject(session, name=dct["name"], _allowNone=True)
-        if existingProject is not None and existingProject is not project:
-            # There is already a project with this name in the database. What do
-            # we do? We can either merge or rename.
-            strategy = self._pullUi.getMergeStrategy(project, existingProject)
-            if strategy == PullUi.MERGE:
-                # Merge `project` into `existingProject`:
-                # - Assign `project` tasks to `existingProject`
-                # - Delete `project`
-                # - TODO Merge `project` fields into `existingProject`
-                for task in project.tasks:
-                    task.project = existingProject
+        self._doUpdate(session, project, dct)
 
-                # Flush after deleting `project` otherwise committing the
-                # session fails because `existingProject` has the same uuid as
-                # `project`, which is still in the session.
-                session.delete(project)
-                session.flush()
-                project = existingProject
-            elif strategy == PullUi.RENAME:
-                # Generate a new, unique, name
-                idx = 1
-                name = dct["name"]
-                while True:
-                    dct["name"] = name + "_" + str(idx)
-                    if dbutils.getProject(session, name=dct["name"], _allowNone=True) is None:
-                        break
-                    idx += 1
-            else:
-                raise YokadiException("Merge cancelled")
-        assert project
-        session.add(project)
+    def _doUpdate(self, session, project, dct):
+        if project.name != dct["name"]:
+            # Name changed, mangle it, we will set it later
+            self._schedulePostUpdateChange(project, dict(name=dct["name"]))
+            dct["name"] = dct["uuid"]
+
         dbs13n.updateProjectFromDict(project, dct)
+        session.add(project)
 
     def _remove(self, session, uuid):
         session.query(Project).filter_by(uuid=uuid).delete()
@@ -194,20 +164,47 @@ def _findUniqueName(baseName, existingNames):
     return name
 
 
-def _enforceAliasConstraints(dumpDir, vcsImpl, pullUi):
-    jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
+def _findConflicts(jsonDirPath, fieldName):
+    """
+    Returns a dict of the form
+            fieldValue => [{dct1}, {dct2}]
+    ],
+    """
     if not os.path.exists(jsonDirPath):
-        return
-    dictForName = defaultdict(list)
+        return {}
+    dictForField = defaultdict(list)
     for name in os.listdir(jsonDirPath):
         jsonPath = os.path.join(jsonDirPath, name)
         with open(jsonPath) as fp:
             dct = json.load(fp)
-        dictForName[dct["name"]].append(dct)
+        fieldValue = dct[fieldName]
+        dictForField[fieldValue].append(dct)
 
-    names = set(dictForName.keys())
-    conflictLists = [x for x in dictForName.values() if len(x) > 1]
-    for conflictList in conflictLists:
+    return {k: v for k, v in dictForField.items() if len(v) > 1}
+
+
+def _enforceProjectConstraints(dumpDir, pullUi):
+    jsonDirPath = os.path.join(dumpDir, PROJECTS_DIRNAME)
+    conflictDict = _findConflicts(jsonDirPath, "name")
+
+    names = set(conflictDict.keys())
+    for conflictList in conflictDict.values():
+        ref = conflictList.pop()
+        for dct in conflictList:
+            old = dct["name"]
+            new = _findUniqueName(old, names)
+            dct["name"] = new
+            names.add(new)
+            pullUi.addRename(PROJECTS_DIRNAME, old, new)
+            dumpObject(dct, jsonDirPath)
+
+
+def _enforceAliasConstraints(dumpDir, pullUi):
+    jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
+    conflictDict = _findConflicts(jsonDirPath, "name")
+
+    names = set(conflictDict.keys())
+    for conflictList in conflictDict.values():
         ref = conflictList.pop()
         for dct in conflictList:
             if ref["command"] == dct["command"]:
@@ -225,10 +222,11 @@ def _enforceAliasConstraints(dumpDir, vcsImpl, pullUi):
                 dumpObject(dct, jsonDirPath)
 
 
-def enforceDbConstraints(dumpDir, vcsImpl, pullUi):
+def enforceDbConstraints(dumpDir, pullUi):
     # TODO: Only enforce constraints if there have been changes in the concerned
     # dir
-    _enforceAliasConstraints(dumpDir, vcsImpl, pullUi)
+    _enforceProjectConstraints(dumpDir, pullUi)
+    _enforceAliasConstraints(dumpDir, pullUi)
 
 
 def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
@@ -253,11 +251,11 @@ def importAll(dumpDir, vcsImpl=None, pullUi=None):
 def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
     session = db.getSession()
 
-    enforceDbConstraints(dumpDir, vcsImpl, pullUi)
+    enforceDbConstraints(dumpDir, pullUi)
     dbConstraintChanges = vcsImpl.getWorkTreeChanges()
     changes.update(dbConstraintChanges)
 
-    projectChangeHandler = ProjectChangeHandler(pullUi)
+    projectChangeHandler = ProjectChangeHandler()
     taskChangeHandler = TaskChangeHandler()
     aliasChangeHandler = AliasChangeHandler()
     for changeHandler in projectChangeHandler, taskChangeHandler, aliasChangeHandler:

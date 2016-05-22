@@ -606,87 +606,62 @@ class PullTestCase(unittest.TestCase):
             self.assertEqual(tasks[0].project.uuid, prj.uuid)
             self.assertEqual(tasks[0].title, task1.title)
 
-    def testRemoteRenamedProjectLikeLocalProject_merge(self):
+    def testRemoteRenamedProjectLikeLocalProject(self):
         with TemporaryDirectory() as tmpDir:
-            prj = dbutils.getOrCreateProject("prj", interactive=False)
-            prj2 = dbutils.getOrCreateProject("prj2", interactive=False)
-            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
-            task2 = dbutils.addTask(prj2.name, "task2", interactive=False)
+            # Create a remote repo with project "remote" and a task task1
+            remoteDir = os.path.join(tmpDir, "remote")
+            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager.initDumpRepository()
+
+            createProjectFile(remoteDir, uuid="u-rprj", name="remote")
+            createTaskFile(remoteDir, uuid="u-rtask", projectUuid="u-rprj", title="rtask")
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Clone the remote repo
+            localDir = os.path.join(tmpDir, "local")
+            syncManager = SyncManager(localDir)
+            syncManager.vcsImpl.clone(remoteDir)
+            syncManager.pull(pullUi=None)
+            syncManager.importAll(pullUi=None)
+
+            # Create "local" project in local repo, with task ltask
+            localPrj = Project(uuid="u-lprj", name="local")
+            self.session.add(localPrj)
+            dbutils.addTask(localPrj.name, "ltask", interactive=False)
             self.session.commit()
+            syncManager.dump()
 
-            renamedProjectPath = createProjectFile(
-                    tmpDir,
-                    name="prj",
-                    uuid=prj2.uuid)
+            # Rename "remote" to "local" in remote repo
+            createProjectFile(remoteDir, uuid="u-rprj", name=localPrj.name)
+            remoteSyncManager.vcsImpl.commitAll()
 
+            # Do the pull, conflict should be automatically solved
             class MyPullUi(PullUi):
-                def getMergeStrategy(self, local, remote):
-                    return PullUi.MERGE
+                def __init__(self):
+                    self.renames = []
 
-            class MyVcsImpl(StubVcsImpl):
-                def getChangesSince(self, commitId):
-                    changes = VcsChanges()
-                    changes.modified = {renamedProjectPath}
-                    return changes
+                def addRename(self, domain, old, new):
+                    self.renames.append((domain, old, new))
 
-            # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
             pullUi = MyPullUi()
-            syncManager.pull(pullUi=pullUi)
+            syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=pullUi)
 
-            # There should be only project, task1 and task2 should be associated
-            # with it
-            projects = list(self.session.query(Project).all())
-            self.assertEqual(len(projects), 1)
-            self.assertEqual(projects[0].uuid, prj.uuid)
-            self.assertEqual(projects[0].name, prj.name)
+            # Check changes
+            self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
+            self.assertEqual(pullUi.renames, [(PROJECTS_DIRNAME, "local", "local_1")])
 
-            taskDict = { x.uuid: x for x in self.session.query(Task).all()}
-            self.assertEqual(len(taskDict), 2)
-            self.assertEqual(taskDict[task1.uuid].title, task1.title)
-            self.assertEqual(taskDict[task2.uuid].title, task2.title)
-            self.assertEqual(taskDict[task1.uuid].project.uuid, prj.uuid)
-            self.assertEqual(taskDict[task2.uuid].project.uuid, prj.uuid)
+            remoteProject = dbutils.getProject(self.session, uuid="u-rprj")
+            localProject = dbutils.getProject(self.session, uuid="u-lprj")
 
-    def testRemoteRenamedProjectLikeLocalProject_rename(self):
-        with TemporaryDirectory() as tmpDir:
-            prj = dbutils.getOrCreateProject("prj", interactive=False)
-            prj2 = dbutils.getOrCreateProject("prj2", interactive=False)
-            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
-            task2 = dbutils.addTask(prj2.name, "task2", interactive=False)
-            self.session.commit()
+            names = {localProject.name, remoteProject.name}
+            self.assertEqual(names, {"local", "local_1"})
 
-            renamedProjectPath = createProjectFile(
-                    tmpDir,
-                    name="prj",
-                    uuid=prj2.uuid)
+            task = dbutils.getTask(self.session, project=remoteProject)
+            self.assertEqual(task.title, "rtask")
 
-            class MyPullUi(PullUi):
-                def resolveConflicts(self, vcsImpl):
-                    return True
-
-                def getMergeStrategy(self, local, remote):
-                    return PullUi.RENAME
-
-            class MyVcsImpl(StubVcsImpl):
-                def getChangesSince(self, commitId):
-                    changes = VcsChanges()
-                    changes.modified = {renamedProjectPath}
-                    return changes
-
-            # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
-            pullUi = MyPullUi()
-            syncManager.pull(pullUi=pullUi)
-            syncManager.importSinceLastSync(pullUi=pullUi)
-
-            # prj2 should be renamed prj_1
-            projectDict = { x.uuid: x for x in self.session.query(Project).all()}
-            self.assertEqual(len(projectDict), 2)
-
-            self.assertEqual(projectDict[prj.uuid].name, prj.name)
-            self.assertEqual(projectDict[prj2.uuid].name, prj.name + "_1")
+            task = dbutils.getTask(self.session, project=localProject)
+            self.assertEqual(task.title, "ltask")
 
     def testImportAll(self):
         with TemporaryDirectory() as tmpDir:

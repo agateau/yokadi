@@ -28,22 +28,6 @@ class TextPullUi(PullUi):
                 self.resolveModifiedDeletedObject(obj)
             assert obj.isResolved()
 
-    def getMergeStrategy(self, localProject, remoteProject):
-        name = localProject.name
-        print("Remote and local databases contain a project named '{}'.".format(name))
-        answers = (
-            (1, "Merge them"),
-            (2, "Rename the local project"),
-            (3, "Cancel")
-        )
-        answer = tui.selectFromList("Select next action", answers, default=None)
-        if answer == 1:
-            return PullUi.MERGE
-        elif answer == 2:
-            return PullUi.RENAME
-        else:
-            return PullUi.CANCEL
-
     def resolveBothModifiedObject(self, obj):
         for key in set(obj.conflictingKeys):
             oldValue = obj.ancestor[key]
