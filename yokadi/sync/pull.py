@@ -57,7 +57,10 @@ class ChangeHandler(object):
 
     @classmethod
     def _shouldHandleFilePath(cls, filePath):
-        return os.path.dirname(filePath) == cls.domain
+        if filePath.endswith(".json"):
+            return os.path.dirname(filePath) == cls.domain
+        else:
+            return False
 
     @staticmethod
     def _loadJson(dumpDir, filePath):

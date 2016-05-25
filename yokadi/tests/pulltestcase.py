@@ -9,6 +9,7 @@ from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.dump import createVersionFile
+from yokadi.sync.pull import ChangeHandler
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
@@ -291,6 +292,13 @@ class PullTestCase(unittest.TestCase):
             syncManager = SyncManager(tmpDir, StubVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
+
+    def testOnlyImportOurFiles(self):
+        class FooChangeHandler(ChangeHandler):
+            domain = "foo"
+        self.assertTrue(FooChangeHandler._shouldHandleFilePath("foo/123.json"))
+        self.assertFalse(FooChangeHandler._shouldHandleFilePath("bar/123.json"))
+        self.assertFalse(FooChangeHandler._shouldHandleFilePath("foo/123.garbage"))
 
     def testRemoteChangesOnly(self):
         with TemporaryDirectory() as tmpDir:
