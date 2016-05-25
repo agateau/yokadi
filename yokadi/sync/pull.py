@@ -17,8 +17,17 @@ from yokadi.sync.vcschanges import VcsChanges
 class ChangeHandler(object):
     """
     Takes a VcsChange and apply all changes which concern `domain`
-    """
 
+    Inherited classes can decide to defer changes to after the update to avoid
+    breaking DB constraints. This can happen for example when changing project
+    or task names: if two project swap names, updating them one after the other
+    would cause a DB integrity failure.
+
+    To avoid the failure, we change names to temporary names and defer changing
+    names to their final value using _schedulePostUpdateChange().  Once all
+    updates have been handled, scheduled changes are applied with
+    applyPostUpdateChanges().
+    """
     domain = None
 
     def __init__(self):
