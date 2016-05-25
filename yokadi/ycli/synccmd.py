@@ -8,7 +8,28 @@ from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
 from yokadi.sync.syncmanager import SyncManager
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.ycli import tui
+
+
+# Keys are a tuple of (prompt, fieldName)
+HEADER_INFO = {
+    ALIASES_DIRNAME: ("Alias named \"{}\"", "name"),
+    PROJECTS_DIRNAME: ("Project named \"{}\"", "name"),
+    TASKS_DIRNAME: ("Task \"{}\"", "title"),
+}
+
+
+def printConflictObjectHeader(obj):
+    prompt, fieldName = HEADER_INFO[obj.domain]
+    value = "UNKNOWN"
+    for dictName in "ancestor", "local", "remote":
+        dct = getattr(obj, dictName)
+        if dct:
+            value = dct[fieldName]
+            break
+    prompt = prompt.format(value)
+    print("\n# {}".format(prompt))
 
 
 class TextPullUi(PullUi):
@@ -29,9 +50,10 @@ class TextPullUi(PullUi):
             assert obj.isResolved()
 
     def resolveBothModifiedObject(self, obj):
+        printConflictObjectHeader(obj)
         for key in set(obj.conflictingKeys):
             oldValue = obj.ancestor[key]
-            print("\n# Conflict on \"{}\" key. Old value was \"{}\".".format(key, oldValue))
+            print("\nConflict on \"{}\" key. Old value was \"{}\".\n".format(key, oldValue))
             answers = (
                 (1, "Local value: \"{}\"".format(obj.local[key])),
                 (2, "Remote value: \"{}\"".format(obj.remote[key]))
@@ -44,7 +66,7 @@ class TextPullUi(PullUi):
             obj.selectValue(key, value)
 
     def resolveModifiedDeletedObject(self, obj):
-        print()
+        printConflictObjectHeader(obj)
         if obj.remote is None:
             print("This object has been modified locally and deleted remotely")
             modified = obj.local
