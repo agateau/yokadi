@@ -10,6 +10,12 @@ from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 
 
+def createVersionFile(dstDir):
+    versionFile = os.path.join(dstDir, VERSION_FILENAME)
+    with open(versionFile, "w") as fp:
+        fp.write(str(VERSION))
+
+
 def checkIsValidDumpDir(dstDir, vcsImpl):
     if not vcsImpl.isValidVcsDir():
         raise YokadiException("{} is not handled by {}".format(dstDir, vcsImpl.name))
@@ -23,7 +29,6 @@ def checkIsValidDumpDir(dstDir, vcsImpl):
     if dumpVersion != VERSION:
         raise YokadiException("Cannot use a dump dir at version {}, expected version {}."
             .format(dumpVersion, VERSION))
-    return
 
 
 def clearDump(dstDir):

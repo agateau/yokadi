@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync.dump import createVersionFile
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
@@ -108,6 +109,7 @@ BothModifiedConflictFixture = namedtuple("BothModifiedConflictFixture",
 
 
 def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, remoteChanges):
+    createVersionFile(tmpDir)
     os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
     os.mkdir(os.path.join(tmpDir, PROJECTS_DIRNAME))
     os.mkdir(os.path.join(tmpDir, ALIASES_DIRNAME))
@@ -185,6 +187,7 @@ ModifiedDeletedConflictFixture = namedtuple("ModifiedDeletedConflictFixture",
 
 
 def createModifiedDeletedConflictFixture(testCase, tmpDir):
+    createVersionFile(tmpDir)
     os.mkdir(os.path.join(tmpDir, TASKS_DIRNAME))
     os.mkdir(os.path.join(tmpDir, PROJECTS_DIRNAME))
     os.mkdir(os.path.join(tmpDir, ALIASES_DIRNAME))
@@ -284,6 +287,7 @@ class PullTestCase(unittest.TestCase):
 
     def testNothingToDo(self):
         with TemporaryDirectory() as tmpDir:
+            createVersionFile(tmpDir)
             syncManager = SyncManager(tmpDir, StubVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
@@ -307,6 +311,7 @@ class PullTestCase(unittest.TestCase):
 
             # Prepare a fake vcs pull: create files which would result from the
             # pull and create a VcsImpl to fake it
+            createVersionFile(tmpDir)
             addedProjectPath = createProjectFile(
                     tmpDir,
                     name="prj2",
@@ -490,6 +495,7 @@ class PullTestCase(unittest.TestCase):
             prj = dbutils.getOrCreateProject("prj", interactive=False)
             self.session.commit()
 
+            createVersionFile(tmpDir)
             modifiedProjectPath = createProjectFile(
                     tmpDir,
                     name="prj2",
@@ -516,6 +522,7 @@ class PullTestCase(unittest.TestCase):
             task = dbutils.addTask(prj.name, "title", interactive=False)
             self.session.commit()
 
+            createVersionFile(tmpDir)
             removedProjectPath = os.path.join(PROJECTS_DIRNAME, prj.uuid + ".json")
             removedTaskPath = os.path.join(TASKS_DIRNAME, task.uuid + ".json")
 
@@ -542,6 +549,7 @@ class PullTestCase(unittest.TestCase):
             task1 = dbutils.addTask(prj.name, "task1", interactive=False)
             self.session.commit()
 
+            createVersionFile(tmpDir)
             addedProjectPath = createProjectFile(
                     tmpDir,
                     name="prj",
@@ -579,6 +587,7 @@ class PullTestCase(unittest.TestCase):
             task1 = dbutils.addTask(prj.name, "task1", interactive=False)
             self.session.commit()
 
+            createVersionFile(tmpDir)
             renamedProjectPath = createProjectFile(
                     tmpDir,
                     name="prj2",
@@ -735,6 +744,7 @@ class PullTestCase(unittest.TestCase):
 
     def testImportAlias(self):
         with TemporaryDirectory() as tmpDir:
+            createVersionFile(tmpDir)
             aliasPath = createAliasFile(tmpDir, uuid="123", name="a", command="t_add")
 
             class MyVcsImpl(StubVcsImpl):
@@ -757,6 +767,7 @@ class PullTestCase(unittest.TestCase):
         a2 = db.Alias.add(self.session, "a2", "t_add2")
         self.session.flush()
         with TemporaryDirectory() as tmpDir:
+            createVersionFile(tmpDir)
             removedAliasPath = os.path.join(ALIASES_DIRNAME, a2.uuid + ".json")
 
             class MyVcsImpl(StubVcsImpl):
@@ -851,6 +862,8 @@ class PullTestCase(unittest.TestCase):
             alias1 = db.Alias.add(self.session, "a1", "a_one")
             alias2 = db.Alias.add(self.session, "a2", "a_two")
             self.session.flush()
+
+            createVersionFile(tmpDir)
             alias1Path = createAliasFile(tmpDir, uuid=alias1.uuid, name=alias2.name, command=alias1.command)
             alias2Path = createAliasFile(tmpDir, uuid=alias2.uuid, name=alias1.name, command=alias2.command)
 

@@ -10,7 +10,7 @@ from yokadi.core.db import Alias, Project, Task
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import dumpObject
+from yokadi.sync.dump import dumpObject, checkIsValidDumpDir
 from yokadi.sync.vcschanges import VcsChanges
 
 
@@ -249,6 +249,8 @@ def importAll(dumpDir, vcsImpl=None, pullUi=None):
 
 
 def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
+    checkIsValidDumpDir(dumpDir, vcsImpl)
+
     session = db.getSession()
 
     enforceDbConstraints(dumpDir, pullUi)
