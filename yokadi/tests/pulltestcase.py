@@ -663,6 +663,49 @@ class PullTestCase(unittest.TestCase):
             task = dbutils.getTask(self.session, project=localProject)
             self.assertEqual(task.title, "ltask")
 
+    def testRemoteSwappedProjectNames(self):
+        with TemporaryDirectory() as tmpDir:
+            # Create a remote repo with project p1 (task task1) and p2 (task
+            # task2)
+            remoteDir = os.path.join(tmpDir, "remote")
+            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager.initDumpRepository()
+
+            createProjectFile(remoteDir, uuid="u-prj1", name="p1")
+            createProjectFile(remoteDir, uuid="u-prj2", name="p2")
+            createTaskFile(remoteDir, uuid="u-task1", projectUuid="u-prj1", title="task1")
+            createTaskFile(remoteDir, uuid="u-task2", projectUuid="u-prj2", title="task2")
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Clone the remote repo
+            localDir = os.path.join(tmpDir, "local")
+            syncManager = SyncManager(localDir)
+            syncManager.vcsImpl.clone(remoteDir)
+            syncManager.pull(pullUi=None)
+            syncManager.importAll(pullUi=None)
+
+            # Swap project names in remote repo
+            createProjectFile(remoteDir, uuid="u-prj1", name="p2")
+            createProjectFile(remoteDir, uuid="u-prj2", name="p1")
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Do the pull, conflict should be automatically solved
+            syncManager.pull(pullUi=None)
+            syncManager.importSinceLastSync(pullUi=None)
+
+            # Check changes, now p1 should have a task task2 and p2 a task task1
+            p1 = dbutils.getProject(self.session, uuid="u-prj2")
+            self.assertEqual(p1.name, "p1")
+
+            p2 = dbutils.getProject(self.session, uuid="u-prj1")
+            self.assertEqual(p2.name, "p2")
+
+            task = dbutils.getTask(self.session, project=p1)
+            self.assertEqual(task.title, "task2")
+
+            task = dbutils.getTask(self.session, project=p2)
+            self.assertEqual(task.title, "task1")
+
     def testImportAll(self):
         with TemporaryDirectory() as tmpDir:
             prj = dbutils.getOrCreateProject("prj", interactive=False)
