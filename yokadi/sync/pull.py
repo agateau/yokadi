@@ -257,13 +257,15 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
     dbConstraintChanges = vcsImpl.getWorkTreeChanges()
     changes.update(dbConstraintChanges)
 
-    projectChangeHandler = ProjectChangeHandler()
-    taskChangeHandler = TaskChangeHandler()
-    aliasChangeHandler = AliasChangeHandler()
-    for changeHandler in projectChangeHandler, taskChangeHandler, aliasChangeHandler:
+    handlers = (
+        ProjectChangeHandler(),
+        TaskChangeHandler(),
+        AliasChangeHandler()
+    )
+    for changeHandler in handlers:
         changeHandler.handle(session, dumpDir, changes)
     session.flush()
-    for changeHandler in projectChangeHandler, taskChangeHandler, aliasChangeHandler:
+    for changeHandler in handlers:
         changeHandler.applyPostUpdateChanges()
     session.commit()
 
