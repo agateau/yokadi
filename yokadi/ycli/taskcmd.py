@@ -705,7 +705,7 @@ class TaskCmd(object):
         """
         if not line:
             raise BadUsageException("Missing parameters")
-        projectName = parseutils.parseProjectName(line)
+        projectName = parseutils.parseOneWordName(line)
         projectName = self._realProjectName(projectName)
         project = dbutils.getOrCreateProject(projectName)
         if not project:
