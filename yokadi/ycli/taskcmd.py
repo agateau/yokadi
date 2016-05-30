@@ -878,12 +878,14 @@ class TaskCmd(object):
         tokens = parseutils.simplifySpaces(line).split(" ")
         if len(tokens) != 2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        task = self.getTaskFromId(tokens[0])
         projectName = tokens[1]
         projectName = self._realProjectName(projectName)
+        project = dbutils.getOrCreateProject(projectName)
+        if not project:
+            return
 
-        task.project = dbutils.getOrCreateProject(projectName)
-        self.session.merge(task)
+        task = self.getTaskFromId(tokens[0])
+        task.project = project
         self.session.commit()
         if task.project:
             print("Moved task '%s' to project '%s'" % (task.title, projectName))
