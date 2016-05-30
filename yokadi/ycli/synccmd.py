@@ -58,7 +58,7 @@ class TextPullUi(PullUi):
                 (1, "Local value: \"{}\"".format(obj.local[key])),
                 (2, "Remote value: \"{}\"".format(obj.remote[key]))
             )
-            answer = tui.selectFromList("Which version do you want to keep".format(key), answers, default=None)
+            answer = tui.selectFromList(answers, prompt="Which version do you want to keep".format(key), default=None)
             if answer == 1:
                 value = obj.local[key]
             else:
@@ -83,7 +83,7 @@ class TextPullUi(PullUi):
             (1, "Local"),
             (2, "Remote")
         )
-        answer = tui.selectFromList("Which version do you want to keep", answers, default=None)
+        answer = tui.selectFromList(answers, prompt="Which version do you want to keep", default=None)
         if answer == 1:
             obj.selectLocal()
         else:
