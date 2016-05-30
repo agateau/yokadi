@@ -154,17 +154,14 @@ def editLine(line, prompt="edit> ", echo=True):
 def selectFromList(prompt, lst, default):
     for score, caption in lst:
         print("%d: %s" % (score, caption))
-    minStr = str(lst[0][0])
-    maxStr = str(lst[-1][0])
-    if default is None:
-        line = ""
-    else:
-        line = str(default)
+    minValue = lst[0][0]
+    maxValue = lst[-1][0]
     while True:
-        answer = editLine(line, prompt=prompt + ": ")
-        if minStr <= answer and answer <= maxStr:
-            return int(answer)
-        error("Wrong value")
+        value = enterInt(prompt, default)
+        if minValue <= value <= maxValue:
+            return value
+        else:
+            error("Wrong value")
 
 
 def enterInt(prompt, default):
