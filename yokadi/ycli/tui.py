@@ -151,20 +151,32 @@ def editLine(line, prompt="edit> ", echo=True):
     return line
 
 
-def selectFromList(prompt, lst, default):
-    for score, caption in lst:
-        print("%d: %s" % (score, caption))
-    minValue = lst[0][0]
-    maxValue = lst[-1][0]
+def selectFromList(lst, default=None, prompt="Select", valueForString=int):
+    """
+    Takes a list of tuples (value, caption), returns the value of the selected
+    entry.
+    @param default indicates the default value and may be None
+    @param prompt customize the prompt
+    @param valueForString a function to turn a string into a valid value
+    """
+    possibleValues = {x[0] for x in lst}
+    for value, caption in lst:
+        print("{}: {}".format(value, caption))
     while True:
-        value = enterInt(prompt, default)
-        if minValue <= value <= maxValue:
+        line = editLine(default, prompt=prompt + ": ")
+        try:
+            value = valueForString(line)
+        except Exception:
+            error("Wrong value")
+            continue
+
+        if value in possibleValues:
             return value
         else:
             error("Wrong value")
 
 
-def enterInt(prompt, default):
+def enterInt(default=None, prompt="Enter a number"):
     if default is None:
         line = ""
     else:

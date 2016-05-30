@@ -43,9 +43,9 @@ def editBugKeywords(keywordDict):
     likelihood = keywordDict.get(LIKELIHOOD_PROPERTY_NAME, None)
     bug = keywordDict.get(BUG_PROPERTY_NAME, None)
 
-    severity = tui.selectFromList("Severity", SEVERITY_LIST, severity)
-    likelihood = tui.selectFromList("Likelihood", LIKELIHOOD_LIST, likelihood)
-    bug = tui.enterInt("bug", bug)
+    severity = tui.selectFromList(SEVERITY_LIST, prompt="Severity", default=severity)
+    likelihood = tui.selectFromList(LIKELIHOOD_LIST, prompt="Likelihood", default=likelihood)
+    bug = tui.enterInt(prompt="bug", default=bug)
 
     keywordDict[BUG_PROPERTY_NAME] = bug
 
