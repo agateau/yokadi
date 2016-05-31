@@ -160,16 +160,9 @@ class TaskCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        task = self._t_edit(line)
-        if not task:
-            return
-
-        keywordDict = task.getKeywordDict()
-        bugutils.editBugKeywords(keywordDict)
-        task.setKeywordDict(keywordDict)
-        task.urgency = bugutils.computeUrgency(keywordDict)
-        self.session.merge(task)
-        self.session.commit()
+        task = self._t_edit(line, keywordEditor=bugutils.editBugKeywords)
+        if task:
+            self.session.commit()
     complete_bug_edit = taskIdCompleter
 
     def getTaskFromId(self, tid):
@@ -805,8 +798,10 @@ class TaskCmd(object):
 
     complete_t_show = taskIdCompleter
 
-    def _t_edit(self, line):
-        """Code shared by t_edit and bug_edit."""
+    def _t_edit(self, line, keywordEditor=None):
+        """Code shared by t_edit and bug_edit.
+        if keywordEditor is not None it will be called after editing the task.
+        Returns the modified task if OK, None if cancelled"""
         def editComplete(text, state):
             """ Specific completer for the edit prompt.
             This subfunction should stay here because it needs to access to cmd members"""
@@ -832,32 +827,43 @@ class TaskCmd(object):
         title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
-        taskLine = parseutils.createLine("", title, task.getKeywordDict())
+        userKeywordDict = {k: v for k, v in task.getKeywordDict().items() if not k[0] == '_'}
+        taskLine = parseutils.createLine("", title, userKeywordDict)
 
         oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
         readline.set_completer(editComplete)  # Switch to specific completer
 
-        while True:
-            # Edit
-            print("(Press Ctrl+C to cancel)")
-            try:
-                line = tui.editLine(taskLine)
-                if not line.strip():
-                    tui.warning("Missing title")
-                    continue
-            except KeyboardInterrupt:
-                print()
-                print("Cancelled")
-                task = None
-                break
-            foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
-            if self.cryptoMgr.isEncrypted(task.title):
-                title = self.cryptoMgr.encrypt(title)
-            if dbutils.updateTask(task, task.project.name, title, keywordDict):
-                break
+        # Edit
+        try:
+            while True:
+                print("(Press Ctrl+C to cancel)")
+                try:
+                    line = tui.editLine(taskLine)
+                    if not line.strip():
+                        tui.warning("Missing title")
+                        continue
+                except KeyboardInterrupt:
+                    print()
+                    print("Cancelled")
+                    return None
+                _, title, userKeywordDict = parseutils.parseLine(task.project.name + " " + line)
+                if self.cryptoMgr.isEncrypted(task.title):
+                    title = self.cryptoMgr.encrypt(title)
 
-        readline.set_completer(oldCompleter)  # Restore standard completer
-        self.session.merge(task)
+                if dbutils.createMissingKeywords(userKeywordDict.keys()):
+                    # We were able to create missing keywords if there were any,
+                    # we can now exit the edit loop
+                    break
+        finally:
+            readline.set_completer(oldCompleter)
+
+        keywordDict = task.getKeywordDict()
+        keywordDict.update(userKeywordDict)
+        if keywordEditor:
+            keywordEditor(keywordDict)
+
+        task.title = title
+        task.setKeywordDict(keywordDict)
         return task
 
     def do_t_edit(self, line):
