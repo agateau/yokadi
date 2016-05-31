@@ -159,12 +159,14 @@ def selectFromList(lst, default=None, prompt="Select", valueForString=int):
     @param prompt customize the prompt
     @param valueForString a function to turn a string into a valid value
     """
+    if default is not None:
+        default = str(default)
     possibleValues = {x[0] for x in lst}
     for value, caption in lst:
         print("{}: {}".format(value, caption))
 
     while True:
-        line = editLine(str(default), prompt=prompt + ": ")
+        line = editLine(default, prompt=prompt + ": ")
         try:
             value = valueForString(line)
         except Exception:
