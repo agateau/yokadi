@@ -6,38 +6,30 @@ Database access layer using SQL Alchemy
 @license: GPL v3 or later
 """
 
+import json
 import os
 import sys
 from pickle import loads, dumps
 from datetime import datetime
 from uuid import uuid1
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
+from sqlalchemy.types import TypeDecorator, VARCHAR
 
-
-try:
-    from dateutil import rrule
-except ImportError:
-    print("You must install python-dateutil to use Yokadi")
-    print("This library is used for task recurrence")
-    print("Use 'pip install python-dateutil'")
-    sys.exit(1)
-
-from yokadi.core.yokadiexception import YokadiException
 from yokadi.core import utils
+from yokadi.core.ydateutils import RecurrenceRule
+from yokadi.core.yokadiexception import YokadiException
 
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 9
+DB_VERSION = 10
 DB_VERSION_KEY = "DB_VERSION"
-
-# Task frequency
-FREQUENCY = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
 
 class DbUserException(Exception):
@@ -92,6 +84,23 @@ class TaskKeyword(Base):
         return "<TaskKeyword task={} keyword={} value={}>".format(self.task, self.keyword, self.value)
 
 
+class RecurrenceRuleColumnType(TypeDecorator):
+    """Represents an ydateutils.RecurrenceRule column
+    """
+    impl = VARCHAR
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            value = json.dumps(value.toDict())
+        return value
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            dct = json.loads(value)
+            value = RecurrenceRule.fromDict(dct)
+        return value
+
+
 class Task(Base):
     __tablename__ = "task"
     id = Column(Integer, primary_key=True)
@@ -103,10 +112,9 @@ class Task(Base):
     description = Column(Unicode, default="", nullable=False)
     urgency = Column(Integer, default=0, nullable=False)
     status = Column(Enum("new", "started", "done"), default="new")
+    recurrence = Column(RecurrenceRuleColumnType, nullable=False, default=RecurrenceRule())
     projectId = Column("project_id", Integer, ForeignKey("project.id"), nullable=False)
     taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
-    recurrenceId = Column("recurrence_id", Integer, ForeignKey("recurrence.id"), default=None)
-    recurrence = relationship("Recurrence", cascade="all", backref="task")
     lock = relationship("TaskLock", cascade="all", backref="task")
 
     def setKeywordDict(self, dct):
@@ -166,38 +174,13 @@ class Task(Base):
         session = getSession()
         session.merge(self)
 
+    def setRecurrenceRule(self, rule):
+        """Set recurrence and update the due date accordingly"""
+        self.recurrence = rule
+        self.dueDate = rule.getNext()
+
     def __repr__(self):
         return "<Task id={} title={}>".format(self.id, self.title)
-
-
-class Recurrence(Base):
-    """Task recurrence definition"""
-    __tablename__ = "recurrence"
-    id = Column(Integer, primary_key=True)
-    rule = Column(Unicode, default="")
-
-    def getRrule(self):
-        """Create rrule object from its Recurrence representation
-        @return: dateutil.rrule.rrule instance"""
-        return loads(self.rule)
-
-    def setRrule(self, rule):
-        """Set Recurrence according to rule
-        @type rule: dateutil.rrule.rrule instance"""
-        self.rule = dumps(rule)
-
-    def getNext(self, refDate=None):
-        """Return next date of recurrence after given date
-        @param refDate: reference date used to compute the next occurence of recurrence
-        @type refDate: datetime
-        @return: next occurence (datetime)"""
-        rr = self.getRrule()
-        if refDate is None:
-            refDate = datetime.now().replace(second=0, microsecond=0)
-        return rr.after(refDate)
-
-    def __str__(self):
-        return "%s (next: %s)" % (FREQUENCY[self.getRrule()._freq], self.getNext())
 
 
 class Config(Base):

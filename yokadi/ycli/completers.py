@@ -5,12 +5,9 @@ Implementation of completers for various Yokadi objects.
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-from dateutil import rrule
-
 from yokadi.ycli import parseutils
 from yokadi.core import db
-from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY
+from yokadi.core.db import Config, Keyword, Project, Task
 from yokadi.core import ydateutils
 
 
@@ -79,13 +76,16 @@ def taskIdCompleter(cmd, text, line, begidx, endidx):
 
 
 def recurrenceCompleter(cmd, text, line, begidx, endidx):
+    frequencies = [x.lower() for x in ydateutils.FREQUENCIES.values()] + ["none"]
+    weekdays = [x.lower() for x in ydateutils.WEEKDAYS.keys()]
+
     position = computeCompleteParameterPosition(text, line, begidx, endidx)
     if position == 1:  # Task id
         return taskIdCompleter(cmd, text, line, begidx, endidx)
     elif position == 2:  # frequency
-        return [x for x in list(FREQUENCY.values()) + ["None"] if x.lower().startswith(text.lower())]
+        return [x for x in frequencies if x.startswith(text.lower())]
     elif position == 3 and "weekly" in line.lower():
-        return [str(x) for x in rrule.weekdays if str(x).lower().startswith(text.lower())]
+        return [x for x in weekdays if x.startswith(text.lower())]
 
 
 def dueDateCompleter(cmd, text, line, begidx, endidx):

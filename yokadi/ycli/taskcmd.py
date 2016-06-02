@@ -10,11 +10,10 @@ import os
 import readline
 import re
 from datetime import datetime, timedelta
-from dateutil import rrule
 from sqlalchemy import or_, and_, desc
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence, NOTE_KEYWORD
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, NOTE_KEYWORD
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
@@ -774,6 +773,15 @@ class TaskCmd(object):
                 keywordArray.append(txt)
                 keywordArray.sort()
             keywords = ", ".join(keywordArray)
+
+            if task.recurrence:
+                recurrence =  "{} (next: {})".format(
+                    task.recurrence.getFrequencyAsString(),
+                    task.recurrence.getNext()
+                )
+            else:
+                recurrence = ""
+
             fields = [
                 ("Project", task.project.name),
                 ("Title", title),
@@ -782,7 +790,7 @@ class TaskCmd(object):
                 ("Due", task.dueDate),
                 ("Status", task.status),
                 ("Urgency", task.urgency),
-                ("Recurrence", task.recurrence),
+                ("Recurrence", recurrence),
                 ("Keywords", keywords),
                 ]
 
@@ -978,70 +986,12 @@ class TaskCmd(object):
         t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
-        tokens = parseutils.simplifySpaces(line).split()
+        tokens = parseutils.simplifySpaces(line).split(" ", 1)
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = self.getTaskFromId(tokens[0])
-
-        # Define recurrence:
-        freq = byminute = byhour = byweekday = bymonthday = bymonth = None
-
-        tokens[1] = tokens[1].lower()
-
-        if tokens[1] == "none":
-            if task.recurrence:
-                self.session.delete(task.recurrence)
-                task.recurrence = None
-            return
-        elif tokens[1] == "daily":
-            if len(tokens) != 3:
-                raise YokadiException("You should give time for daily task")
-            freq = rrule.DAILY
-            byhour, byminute = ydateutils.getHourAndMinute(tokens[2])
-        elif tokens[1] == "weekly":
-            freq = rrule.WEEKLY
-            if len(tokens) != 4:
-                raise YokadiException("You should give day and time for weekly task")
-            byweekday = ydateutils.getWeekDayNumberFromDay(tokens[2].lower())
-            byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
-        elif tokens[1] in ("monthly", "quarterly"):
-            if tokens[1] == "monthly":
-                freq = rrule.MONTHLY
-            else:
-                # quarterly
-                freq = rrule.YEARLY
-                bymonth = [1, 4, 7, 10]
-            if len(tokens) < 4:
-                raise YokadiException("You should give day and time for %s task" % (tokens[1],))
-            try:
-                bymonthday = int(tokens[2])
-                byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
-            except ValueError:
-                POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
-                if tokens[2].lower() in list(POSITION.keys()) and len(tokens) == 5:
-                    byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
-                                              POSITION[tokens[2]])
-                    byhour, byminute = ydateutils.getHourAndMinute(tokens[4])
-                    bymonthday = None  # Default to current day number - need to be blanked
-                else:
-                    raise YokadiException("Unable to understand date. See help t_recurs for details")
-        elif tokens[1] == "yearly":
-            freq = rrule.YEARLY
-            rDate = ydateutils.parseHumaneDateTime(" ".join(tokens[2:]))
-            bymonth = rDate.month
-            bymonthday = rDate.day
-            byhour = rDate.hour
-            byminute = rDate.minute
-        else:
-            raise YokadiException("Unknown frequency. Available: daily, weekly, monthly and yearly")
-
-        if task.recurrence is None:
-            task.recurrence = Recurrence()
-        rr = rrule.rrule(freq, byhour=byhour, byminute=byminute, byweekday=byweekday,
-                         bymonthday=bymonthday, bymonth=bymonth)
-        task.recurrence.setRrule(rr)
-        task.dueDate = task.recurrence.getNext()
-        self.session.merge(task)
+        rule = ydateutils.RecurrenceRule.fromHumaneString(tokens[1])
+        task.setRecurrenceRule(rule)
         self.session.commit()
     complete_t_recurs = recurrenceCompleter
 
