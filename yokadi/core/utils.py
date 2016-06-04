@@ -13,7 +13,7 @@ def shareDirPath():
     sharePath = ""
     try:
         # TODO: handle windows case
-        if os.path.join("src", "yokadi") in __file__:
+        if os.path.join("yokadi", "core") in __file__:
             # We are in a source tree, look at source root
             sharePath = os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir, os.path.pardir)
         else:
@@ -23,6 +23,7 @@ def shareDirPath():
                    "/usr/local/share/yokadi",
                    "/usr/local/yokadi/share/yokadi",
                    "/opt/yokadi/share/yokadi"]
+            print(paths)
             for path in paths:
                 if os.path.exists(os.path.join(path, "version")):
                     sharePath = path
