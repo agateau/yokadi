@@ -309,13 +309,13 @@ class RecurrenceRule(object):
     - __eq__ operator
     - Readable name
     """
-    def __init__(self, frequency=None, **kwargs):
-        if frequency is None:
-            self._rr = None
-            return
-        args = dict(byhour=0, byminute=0, bysecond=0)
-        args.update(kwargs)
-        self._rr = rrule.rrule(frequency, **args)
+    def __init__(self, freq=None, bymonth=None, bymonthday=None, byweekday=None, byhour=0, byminute=0):
+        self._freq = freq
+        self._bymonth = bymonth
+        self._bymonthday = bymonthday
+        self._byweekday = byweekday
+        self._byhour = byhour
+        self._byminute = byminute
 
     @staticmethod
     def fromDict(dct):
@@ -359,7 +359,7 @@ class RecurrenceRule(object):
             else:
                 # quarterly
                 freq = rrule.YEARLY
-                bymonth = [1, 4, 7, 10]
+                bymonth = (1, 4, 7, 10)
             if len(tokens) < 3:
                 raise YokadiException("You should give day and time for %s task" % (tokens[0],))
             try:
@@ -393,40 +393,50 @@ class RecurrenceRule(object):
                 )
 
     def toDict(self):
-        if self._rr is None:
+        if not self._freq:
             return {}
 
         return dict(
-                freq=self._rr._freq,
-                bymonth=self._rr._bymonth,
-                bymonthday=self._rr._bymonthday,
-                byweekday=self._rr._byweekday,
-                byhour=self._rr._byhour,
-                byminute=self._rr._byminute
+                freq=self._freq,
+                bymonth=self._bymonth,
+                bymonthday=self._bymonthday,
+                byweekday=self._byweekday,
+                byhour=self._byhour,
+                byminute=self._byminute
             )
+
+    def _rrule(self):
+        return rrule.rrule(freq=self._freq,
+                bymonth=self._bymonth,
+                bymonthday=self._bymonthday,
+                byweekday=self._byweekday,
+                byhour=self._byhour,
+                byminute=self._byminute,
+                bysecond=0
+                )
 
     def getNext(self, refDate=None):
         """Return next date of recurrence after given date
         @param refDate: reference date used to compute the next occurence of recurrence
         @type refDate: datetime
         @return: next occurence (datetime)"""
-        if self._rr is None:
+        if not self._freq:
             return None
         if refDate is None:
             refDate = datetime.now().replace(second=0, microsecond=0)
-        return self._rr.after(refDate)
+        return self._rrule().after(refDate)
 
     def getFrequencyAsString(self):
         """Return a string for the frequency"""
-        if self._rr is None:
+        if not self._freq:
             return ""
-        return FREQUENCIES[self._rr._freq]
+        return FREQUENCIES[self._freq]
 
     def __eq__(self, other):
         return self.toDict() == other.toDict()
 
     def __bool__(self):
-        return bool(self.toDict())
+        return bool(self._freq)
 
     def __repr__(self):
         return repr(self.toDict())
