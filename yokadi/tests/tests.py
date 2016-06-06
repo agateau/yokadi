@@ -42,6 +42,7 @@ from conftestcase import ConfTestCase
 from massedittestcase import MassEditTestCase
 from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase
 from keywordfiltertestcase import KeywordFilterTestCase
+from recurrenceruletestcase import RecurrenceRuleTestCase
 
 
 def main():

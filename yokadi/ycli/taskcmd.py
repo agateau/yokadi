@@ -18,6 +18,7 @@ from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
 from yokadi.core import ydateutils
+from yokadi.core.recurrencerule import RecurrenceRule
 from yokadi.ycli import massedit
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
@@ -990,7 +991,7 @@ class TaskCmd(object):
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = self.getTaskFromId(tokens[0])
-        rule = ydateutils.RecurrenceRule.fromHumaneString(tokens[1])
+        rule = RecurrenceRule.fromHumaneString(tokens[1])
         task.setRecurrenceRule(rule)
         self.session.commit()
     complete_t_recurs = recurrenceCompleter

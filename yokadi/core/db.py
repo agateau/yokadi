@@ -22,7 +22,7 @@ from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, Foreig
 from sqlalchemy.types import TypeDecorator, VARCHAR
 
 from yokadi.core import utils
-from yokadi.core.ydateutils import RecurrenceRule
+from yokadi.core.recurrencerule import RecurrenceRule
 from yokadi.core.yokadiexception import YokadiException
 
 # Yokadi database version needed for this code
