@@ -138,7 +138,8 @@ class RecurrenceRule(object):
         if not self._freq:
             return None
         if refDate is None:
-            refDate = datetime.now().replace(second=0, microsecond=0)
+            refDate = datetime.now()
+        refDate.replace(second=0, microsecond=0)
         return self._rrule().after(refDate)
 
     def getFrequencyAsString(self):

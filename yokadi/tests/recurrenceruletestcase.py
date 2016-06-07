@@ -1,9 +1,11 @@
 import unittest
 
-from yokadi.core.recurrencerule import RecurrenceRule
-from yokadi.core.yokadiexception import YokadiException
+from datetime import datetime, timedelta
 
 from dateutil import rrule
+
+from yokadi.core.recurrencerule import RecurrenceRule
+from yokadi.core.yokadiexception import YokadiException
 
 
 class RecurrenceRuleTestCase(unittest.TestCase):
@@ -40,3 +42,16 @@ class RecurrenceRuleTestCase(unittest.TestCase):
                          "monthly foo 12:00",  # Bad date
                          ):
             self.assertRaises(YokadiException, RecurrenceRule.fromHumaneString, badInput)
+
+    def testGetNext(self):
+        # rrule after() does not work with dates in the past, so compute a refDate in the future
+        year = datetime.now().year + 1
+        refDate = datetime(year, 1, 1, 9, 10)
+
+        rule = RecurrenceRule(rrule.DAILY, byhour=10)
+        nextDate = rule.getNext(refDate=refDate)
+        self.assertEqual(nextDate, refDate.replace(hour=10, minute=0))
+
+        rule = RecurrenceRule(rrule.DAILY, byhour=9)
+        nextDate = rule.getNext(refDate=refDate)
+        self.assertEqual(nextDate, refDate.replace(day=2, hour=9, minute=0))
