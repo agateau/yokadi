@@ -1,6 +1,6 @@
 import unittest
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from dateutil import rrule
 
@@ -27,7 +27,7 @@ class RecurrenceRuleTestCase(unittest.TestCase):
         for text, expected in testData:
             output = RecurrenceRule.fromHumaneString(text)
             self.assertEqual(output, expected,
-                'input: {}\noutput  : {}\nexpected: {}'.format(text, output, expected)
+                '\ninput:    {}\noutput:   {}\nexpected: {}'.format(text, output, expected)
             )
 
     def testFromHumaneString_badInput(self):
@@ -43,6 +43,27 @@ class RecurrenceRuleTestCase(unittest.TestCase):
                          ):
             self.assertRaises(YokadiException, RecurrenceRule.fromHumaneString, badInput)
 
+    def testFromDict(self):
+        testData = [
+            (
+                {},
+                RecurrenceRule()
+            ),
+            (
+                {"bymonth": None, "byminute": (0,), "byhour": (10,), "byweekday": (0,), "bymonthday": (), "freq": rrule.WEEKLY},
+                RecurrenceRule(rrule.WEEKLY, byweekday=0, byhour=10)
+            ),
+            (
+                {"bymonth": (2,), "byminute": (27,), "byhour": (8,), "byweekday": None, "bymonthday": (23,), "freq": rrule.YEARLY},
+                RecurrenceRule(rrule.YEARLY, bymonth=2, bymonthday=23, byhour=8, byminute=27)
+            ),
+        ]
+        for dct, expected in testData:
+            output = RecurrenceRule.fromDict(dct)
+            self.assertEqual(output, expected,
+                '\ninput:    {}\noutput:   {}\nexpected: {}'.format(dct, output, expected)
+            )
+
     def testGetNext(self):
         # rrule after() does not work with dates in the past, so compute a refDate in the future
         year = datetime.now().year + 1
@@ -55,3 +76,7 @@ class RecurrenceRuleTestCase(unittest.TestCase):
         rule = RecurrenceRule(rrule.DAILY, byhour=9)
         nextDate = rule.getNext(refDate=refDate)
         self.assertEqual(nextDate, refDate.replace(day=2, hour=9, minute=0))
+
+        rule = RecurrenceRule(rrule.YEARLY, bymonth=2, bymonthday=23)
+        nextDate = rule.getNext(refDate=refDate)
+        self.assertEqual(nextDate, refDate.replace(month=2, day=23, hour=0, minute=0))

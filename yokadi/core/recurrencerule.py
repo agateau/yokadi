@@ -15,9 +15,17 @@ from yokadi.core.yokadiexception import YokadiException
 FREQUENCIES = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
 
+def _tuplify(value):
+    if value is None:
+        return ()
+    if isinstance(value, tuple):
+        return value
+    return (value,)
+
+
 class RecurrenceRule(object):
-    """Thin wrapper around dateutil.rrule
-    which brings:
+    """Thin wrapper around dateutil.rrule which brings:
+
     - Serialization to/from dict
     - Parsing methods
     - Sane defaults (byhour = byminute = bysecond = 0)
@@ -26,11 +34,11 @@ class RecurrenceRule(object):
     """
     def __init__(self, freq=None, bymonth=None, bymonthday=None, byweekday=None, byhour=0, byminute=0):
         self._freq = freq
-        self._bymonth = bymonth
-        self._bymonthday = bymonthday
-        self._byweekday = byweekday
-        self._byhour = byhour
-        self._byminute = byminute
+        self._bymonth = _tuplify(bymonth)
+        self._bymonthday = _tuplify(bymonthday)
+        self._byweekday = _tuplify(byweekday)
+        self._byhour = _tuplify(byhour)
+        self._byminute = _tuplify(byminute)
 
     @staticmethod
     def fromDict(dct):
@@ -108,7 +116,7 @@ class RecurrenceRule(object):
                 )
 
     def toDict(self):
-        if not self._freq:
+        if not self:
             return {}
 
         return dict(
@@ -135,7 +143,7 @@ class RecurrenceRule(object):
         @param refDate: reference date used to compute the next occurence of recurrence
         @type refDate: datetime
         @return: next occurence (datetime)"""
-        if not self._freq:
+        if not self:
             return None
         if refDate is None:
             refDate = datetime.now()
@@ -144,7 +152,7 @@ class RecurrenceRule(object):
 
     def getFrequencyAsString(self):
         """Return a string for the frequency"""
-        if not self._freq:
+        if not self:
             return ""
         return FREQUENCIES[self._freq]
 
@@ -152,7 +160,7 @@ class RecurrenceRule(object):
         return self.toDict() == other.toDict()
 
     def __bool__(self):
-        return bool(self._freq)
+        return self._freq is not None
 
     def __repr__(self):
         return repr(self.toDict())
