@@ -62,7 +62,7 @@ class RecurrenceRule(object):
 
     @staticmethod
     def fromHumaneString(line):
-        """Take a string following t_recurs format, returns a Rrule instance or None
+        """Take a string following t_recurs format, returns a RecurrenceRule instance or None
         """
         freq = byminute = byhour = byweekday = bymonthday = bymonth = None
 
