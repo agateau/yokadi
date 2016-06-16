@@ -781,7 +781,7 @@ class TaskCmd(object):
                     task.recurrence.getNext()
                 )
             else:
-                recurrence = ""
+                recurrence = "None"
 
             fields = [
                 ("Project", task.project.name),
