@@ -15,14 +15,6 @@ from yokadi.core.yokadiexception import YokadiException
 FREQUENCIES = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
 
-def _tuplify(value):
-    if value is None:
-        return ()
-    if isinstance(value, tuple):
-        return value
-    return (value,)
-
-
 class RecurrenceRule(object):
     """Thin wrapper around dateutil.rrule which brings:
 
@@ -31,26 +23,42 @@ class RecurrenceRule(object):
     - Sane defaults (byhour = byminute = bysecond = 0)
     - __eq__ operator
     - Readable name
+
+    Dict format:
+        freq: 0..3, see FREQUENCIES dict
+        bymonth: tuple<1..12>
+        bymonthday: tuple<1..31>
+        byweekday: tuple<0..6> or {pos: -1;1..4, weekday: 0..6}
+        byhour: tuple<0..23>
+        byminute: tuple<0..59>
+
+    Constructor arguments: same as dict format except tuples can be int or None
+    for convenience
     """
     def __init__(self, freq=None, bymonth=None, bymonthday=None, byweekday=None, byhour=0, byminute=0):
+        def tuplify(value):
+            if value is None:
+                return ()
+            if isinstance(value, int):
+                return (value,)
+            else:
+                return tuple(value)
+
         self._freq = freq
-        self._bymonth = _tuplify(bymonth)
-        self._bymonthday = _tuplify(bymonthday)
-        self._byweekday = _tuplify(byweekday)
-        self._byhour = _tuplify(byhour)
-        self._byminute = _tuplify(byminute)
+        self._bymonth = tuplify(bymonth)
+        self._bymonthday = tuplify(bymonthday)
+        if isinstance(byweekday, dict):
+            self._byweekday = byweekday
+        else:
+            self._byweekday = tuplify(byweekday)
+        self._byhour = tuplify(byhour)
+        self._byminute = tuplify(byminute)
 
     @staticmethod
     def fromDict(dct):
         if not dct:
             return RecurrenceRule()
-
-        return RecurrenceRule(dct["freq"],
-                bymonth=dct["bymonth"],
-                bymonthday=dct["bymonthday"],
-                byweekday=dct["byweekday"],
-                byhour=dct["byhour"],
-                byminute=dct["byminute"])
+        return RecurrenceRule(**dct)
 
     @staticmethod
     def fromHumaneString(line):
@@ -91,8 +99,9 @@ class RecurrenceRule(object):
             except ValueError:
                 POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
                 if tokens[1].lower() in POSITION and len(tokens) == 4:
-                    byweekday = rrule.weekday(getWeekDayNumberFromDay(tokens[2].lower()),
-                                              POSITION[tokens[1]])
+                    byweekday = RecurrenceRule.createWeekDay(
+                            weekday=getWeekDayNumberFromDay(tokens[2].lower()),
+                            pos=POSITION[tokens[1]])
                     byhour, byminute = getHourAndMinute(tokens[3])
                     bymonthday = None  # Default to current day number - need to be blanked
                 else:
@@ -129,10 +138,16 @@ class RecurrenceRule(object):
             )
 
     def _rrule(self):
+        if isinstance(self._byweekday, dict):
+            byweekday = rrule.weekday(n=self._byweekday["pos"],
+                                      weekday=self._byweekday["weekday"])
+        else:
+            byweekday = self._byweekday
+
         return rrule.rrule(freq=self._freq,
                 bymonth=self._bymonth,
                 bymonthday=self._bymonthday,
-                byweekday=self._byweekday,
+                byweekday=byweekday,
                 byhour=self._byhour,
                 byminute=self._byminute,
                 bysecond=0
@@ -155,6 +170,10 @@ class RecurrenceRule(object):
         if not self:
             return ""
         return FREQUENCIES[self._freq]
+
+    @staticmethod
+    def createWeekDay(pos, weekday):
+        return dict(pos=pos, weekday=weekday)
 
     def __eq__(self, other):
         return self.toDict() == other.toDict()
