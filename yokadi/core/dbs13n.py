@@ -3,9 +3,9 @@ from datetime import datetime
 
 import dateutil.parser
 
-from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core.db import Project
+from yokadi.core.recurrencerule import RecurrenceRule
 
 TASK_DATE_FIELDS = {"creationDate", "dueDate", "doneDate"}
 
@@ -52,10 +52,10 @@ def updateProjectFromDict(project, dct):
 
 
 def dictFromTask(task):
-    dct = _dictFromRow(task, skippedKeys={"recurrenceId", "project", "projectId", "taskKeywords"})
+    dct = _dictFromRow(task, skippedKeys={"recurrence", "project", "projectId", "taskKeywords"})
     dct["projectUuid"] = task.project.uuid
     dct["keywords"] = task.getKeywordDict()
-    # TODO: recurrence
+    dct["recurrence"] = task.recurrence.toDict()
     return dct
 
 
@@ -70,7 +70,9 @@ def updateTaskFromDict(session, task, dct):
     keywords = dct["keywords"]
     dbutils.createMissingKeywords(keywords.keys(), interactive=False)
     task.setKeywordDict(keywords)
-    # TODO: recurrence
+    # FIXME: dct.get("recurrence", {}) can be replaced with a dct["recurrence"]
+    # when all DBs of early adopters have been updated
+    task.recurrence = RecurrenceRule.fromDict(dct.get("recurrence", {}))
 
 
 def dictFromAlias(alias):
