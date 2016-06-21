@@ -46,6 +46,7 @@ from gitvcsimpltestcase import GitVcsImplTestCase
 from pulltestcase import PullTestCase
 from textpulluitestcase import TextPullUiTestCase
 from keywordfiltertestcase import KeywordFilterTestCase
+from recurrenceruletestcase import RecurrenceRuleTestCase
 
 
 def main():

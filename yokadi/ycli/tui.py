@@ -104,9 +104,10 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".
 
 
 def reinjectInRawInput(line):
-    """Next call to raw_input() will have line set as default text
+    """Next call to input() will have line set as default text
     @param line: The default text
     """
+    assert isinstance(line, str)
 
     # Set readline.pre_input_hook to feed it with our line
     # (Code copied from yagtd)
@@ -125,7 +126,6 @@ def editLine(line, prompt="edit> ", echo=True):
     """Edit a line using readline
     @param prompt: change prompt
     @param echo: whether to echo user text or not"""
-
     if line:
         reinjectInRawInput(line)
 
@@ -159,9 +159,12 @@ def selectFromList(lst, default=None, prompt="Select", valueForString=int):
     @param prompt customize the prompt
     @param valueForString a function to turn a string into a valid value
     """
+    if default is not None:
+        default = str(default)
     possibleValues = {x[0] for x in lst}
     for value, caption in lst:
         print("{}: {}".format(value, caption))
+
     while True:
         line = editLine(default, prompt=prompt + ": ")
         try:

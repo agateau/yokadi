@@ -8,7 +8,7 @@ Date utilities.
 import operator
 from datetime import date, datetime, timedelta
 
-from yokadi.ycli import parseutils
+from yokadi.ycli import basicparseutils
 from yokadi.core.yokadiexception import YokadiException
 
 WEEKDAYS = {"monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3, "friday": 4, "saturday": 5, "sunday": 6}
@@ -109,7 +109,7 @@ def parseHumaneDateTime(line, hint=None, today=None):
         else:
             raise Exception("Unknown hint %s" % hint)
 
-    line = parseutils.simplifySpaces(line).lower()
+    line = basicparseutils.simplifySpaces(line).lower()
     if not line:
         raise YokadiException("Date is empty")
 

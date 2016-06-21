@@ -5,13 +5,11 @@ Implementation of completers for various Yokadi objects.
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-from dateutil import rrule
-
 from yokadi.ycli import parseutils
 from yokadi.core import db
-from yokadi.core.db import Config, Keyword, Project, Task, FREQUENCY
-from yokadi.core import ydateutils
+from yokadi.core.db import Config, Keyword, Project, Task
+from yokadi.core.ydateutils import WEEKDAYS
+from yokadi.core.recurrencerule import FREQUENCIES
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
@@ -79,13 +77,16 @@ def taskIdCompleter(cmd, text, line, begidx, endidx):
 
 
 def recurrenceCompleter(cmd, text, line, begidx, endidx):
+    frequencies = [x.lower() for x in FREQUENCIES.values()] + ["none"]
+    weekdays = [x.lower() for x in WEEKDAYS.keys()]
+
     position = computeCompleteParameterPosition(text, line, begidx, endidx)
     if position == 1:  # Task id
         return taskIdCompleter(cmd, text, line, begidx, endidx)
     elif position == 2:  # frequency
-        return [x for x in list(FREQUENCY.values()) + ["None"] if x.lower().startswith(text.lower())]
+        return [x for x in frequencies if x.startswith(text.lower())]
     elif position == 3 and "weekly" in line.lower():
-        return [str(x) for x in rrule.weekdays if str(x).lower().startswith(text.lower())]
+        return [x for x in weekdays if x.startswith(text.lower())]
 
 
 def dueDateCompleter(cmd, text, line, begidx, endidx):
@@ -93,6 +94,6 @@ def dueDateCompleter(cmd, text, line, begidx, endidx):
     if position == 1:  # Task id
         return taskIdCompleter(cmd, text, line, begidx, endidx)
     elif position == 2 and not text.startswith("+"):  # week day
-        return [str(x) for x in list(ydateutils.WEEKDAYS.keys()) if str(x).lower().startswith(text.lower())]
+        return [str(x) for x in list(WEEKDAYS.keys()) if str(x).lower().startswith(text.lower())]
 
 # vi: ts=4 sw=4 et

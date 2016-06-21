@@ -216,9 +216,9 @@ class TextListRenderer(object):
 
         # Adjust titleColumn
         self.titleColumn.width = self.maxTitleWidth
-        totalWidth = sum([x.width for x in self.columns]) + len(self.columns)
+        totalWidth = sum([x.width for x in self.columns]) + len(self.columns) - 1
         if totalWidth >= self.termWidth:
-            self.titleColumn.width -= (totalWidth - self.termWidth) + len(self.columns)
+            self.titleColumn.width = self.termWidth - (totalWidth - self.titleColumn.width)
         self.titleColumn.formater = TitleFormater(self.titleColumn.width, self.cryptoMgr)
 
         # Print table

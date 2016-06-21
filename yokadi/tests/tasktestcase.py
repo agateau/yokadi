@@ -16,7 +16,7 @@ from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
 from yokadi.core import dbutils
-from yokadi.core.db import Task, TaskLock, Keyword, Recurrence, setDefaultConfig
+from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -163,22 +163,19 @@ class TaskTestCase(unittest.TestCase):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
         task = self.session.query(Task).get(1)
+
         self.cmd.do_t_recurs("1 daily 10:00")
-        desc = str(task.recurrence)
-        self.cmd.do_t_recurs("1 weekly FR 23:00")
-        self.cmd.do_t_recurs("1 none")
-        self.cmd.do_t_recurs("1 weekly fr 23:00")
-        self.cmd.do_t_recurs("1 weekly Fr 23:00")
-        self.cmd.do_t_recurs("1 weekly Friday 23:00")
-        self.cmd.do_t_recurs("1 monthly 3 13:00")
-        self.cmd.do_t_recurs("1 monthly second friday 13:00")
-        self.cmd.do_t_recurs("1 yearly 3/07 11:20")
-        self.cmd.do_t_recurs("1 quarterly 14 11:20")
-        self.cmd.do_t_recurs("1 quarterly first monday 23:20")
-        self.assertNotEqual(desc, str(task.recurrence))
+        self.assertTrue(task.recurrence)
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_done("1")
+
         self.assertEqual(task.status, "new")
+
+        self.cmd.do_t_recurs("1 none")
+        self.assertFalse(task.recurrence)
+
+        self.cmd.do_t_mark_done("1")
+        self.assertEqual(task.status, "done")
 
         for bad_input in ("",  # No task
                           "1",  # No recurence
