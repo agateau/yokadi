@@ -16,6 +16,13 @@ from yokadi.core.db import Task
 from yokadi.ycli import tui
 
 
+VLINE = "│"
+HLINE = "─"
+CROSS = "┼"
+
+LINE_COLOR = C.CYAN
+
+
 def colorizer(value, reverse=False):
     """Return a color according to value.
     @param value: value used to determine color. Low (0) value means not urgent/visible, high (100) value means important
@@ -247,17 +254,25 @@ class TextListRenderer(object):
         @type sectionName: unicode"""
 
         cells = [x.createHeader() for x in self.columns]
-        line = "|".join(cells)
-        width = len(line)
+        width = sum([len(x) for x in cells]) + len(cells) - 1
         if self.firstHeader:
             self.firstHeader = False
         else:
             print(file=self.out)
+
+        # section name
         print(C.CYAN + sectionName.center(width) + C.RESET, file=self.out)
-        print(C.BOLD + line + C.RESET, file=self.out)
-        print("-" * width, file=self.out)
+
+        # header titles
+        line = (LINE_COLOR + VLINE + C.RESET).join(cells)
+        print(line, file=self.out)
+
+        # header separator line
+        cells = [HLINE * len(x) for x in cells]
+        print(LINE_COLOR + CROSS.join(cells) + C.RESET, file=self.out)
 
     def _renderTaskListRow(self, task):
         cells = [column.createCell(task) for column in self.columns]
-        print("|".join(cells), file=self.out)
+        sep = LINE_COLOR + VLINE + C.RESET
+        print(sep.join(cells), file=self.out)
 # vi: ts=4 sw=4 et
