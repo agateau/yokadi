@@ -16,6 +16,7 @@ import unicodedata
 import re
 import locale
 import shutil
+from collections import namedtuple
 from getpass import getpass
 
 from yokadi.ycli import colors as C
@@ -259,4 +260,34 @@ def getTermWidth():
     size = shutil.get_terminal_size()
     return size.columns
 
+
+ColorBlock = namedtuple("ColorBlock", ("pos", "color"))
+
+
+class TextColorizer:
+    def __init__(self):
+        self._dct = {}
+
+    def setColorAt(self, pos, color):
+        self._dct[pos] = color
+
+    def setResetAt(self, pos):
+        self._dct[pos] = C.RESET
+
+    def crop(self, width):
+        self._dct = { pos: color for pos, color in self._dct.items() if pos < width }
+
+    def render(self, text):
+        """
+        Apply color blocks to text
+        """
+        start = 0
+        out = []
+        blockList = sorted(self._dct.items())
+        for pos, color in blockList:
+            out.append(text[start:pos] + color)
+            start = pos
+        # Add remaining text, if any
+        out.append(text[start:])
+        return "".join(out)
 # vi: ts=4 sw=4 et
