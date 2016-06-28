@@ -37,17 +37,18 @@ class TextListRendererTestCase(unittest.TestCase):
 
     def testTitleFormater(self):
         dbutils.getOrCreateProject("x", interactive=False)
-        dbutils.getOrCreateKeyword("k1", interactive=False)
-        dbutils.getOrCreateKeyword("k2", interactive=False)
+        dbutils.getOrCreateKeyword("key1", interactive=False)
+        dbutils.getOrCreateKeyword("key2", interactive=False)
         task = dbutils.addTask("x", "t1", {})
-        taskWithKeywords = dbutils.addTask("x", "t2", {"k1": None, "k2": 12})
+        taskWithKeywords = dbutils.addTask("x", "t2", {"key1": None, "key2": 12})
 
         longTask = dbutils.addTask("x", "01234567890123456789", {})
         longTask.description = "And it has a description"
 
         TEST_DATA = (
             (task, 20, "t1"),
-            (taskWithKeywords, 20, "t2 (k1, k2)"),
+            (taskWithKeywords, 20, "t2 (key1, key2)"),
+            (taskWithKeywords, 4, "t2 >"),
             (longTask, 10, longTask.title[:8] + ">*"),
             (longTask, len(longTask.title), longTask.title[:-2] + ">*"),
             (longTask, len(longTask.title) + 1, longTask.title + "*"),

@@ -72,34 +72,41 @@ def idFormater(task):
 
 
 class TitleFormater(object):
-    TITLE_WITH_KEYWORDS_TEMPLATE = "%s (%s)"
-
     def __init__(self, width, cryptoMgr):
         self.cryptoMgr = cryptoMgr
         self.width = width
 
     def __call__(self, task):
+        colorizer = tui.TextColorizer()
         keywords = task.getUserKeywordsNameAsString()
         hasDescription = task.description is not None and task.description != ""
-        title = self.cryptoMgr.decrypt(task.title)
-        # Compute title, titleWidth and colorWidth
+
         maxWidth = self.width
         if hasDescription:
             maxWidth -= 1
-        if keywords and len(task.title) < maxWidth:
-            title = self.TITLE_WITH_KEYWORDS_TEMPLATE % (title, C.BOLD + keywords)
-            colorWidth = len(C.BOLD)
-        else:
-            colorWidth = 0
 
-        # Adjust title to fit in self.width
-        titleWidth = len(title) - colorWidth
+        # Create title
+        title = self.cryptoMgr.decrypt(task.title)
+        if keywords and len(task.title) < maxWidth:
+            title += ' ('
+            colorizer.setColorAt(len(title), C.BOLD)
+            title += keywords
+            colorizer.setResetAt(len(title))
+            title += ')'
+
+        # Crop title to fit in self.width
+        titleWidth = len(title)
         if titleWidth > maxWidth:
-            title = title[:maxWidth - 1 + colorWidth] + C.RESET + ">"
+            title = title[:maxWidth - 1] + ">"
+            colorizer.crop(maxWidth - 1)
+            colorizer.setResetAt(maxWidth - 1)
         else:
-            title = title.ljust(maxWidth + colorWidth) + C.RESET
+            title = title.ljust(maxWidth)
+
         if hasDescription:
             title = title + "*"
+
+        title = colorizer.render(title)
 
         return title, None
 
@@ -209,7 +216,7 @@ class TextListRenderer(object):
             title = self.cryptoMgr.decrypt(task.title)
             keywords = task.getUserKeywordsNameAsString()
             if keywords:
-                title = TitleFormater.TITLE_WITH_KEYWORDS_TEMPLATE % (title, keywords)
+                title = "{} ({})".format(title, keywords)
             titleWidth = len(title)
             if task.description:
                 titleWidth += 1
