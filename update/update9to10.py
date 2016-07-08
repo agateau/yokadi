@@ -13,6 +13,8 @@ Update from version 9 to version 10 of Yokadi DB
 import json
 import pickle
 
+import updateutils
+
 
 def tuplify(value):
     if value is None:
@@ -66,31 +68,12 @@ def deleteRecurrenceTable(cursor):
     cursor.execute("drop table recurrence")
 
 
-def deleteTableColumn(cursor, table, columnsToKeep):
-    columns = ",".join(columnsToKeep)
-    sqlCommands = (
-        "create temporary table {table}_backup({columns})",
-        "insert into {table}_backup select {columns} from {table}",
-        "drop table {table}",
-        "create table {table}({columns})",
-        "insert into {table} select {columns} from {table}_backup",
-        "drop table {table}_backup",
-        )
-    for sql in sqlCommands:
-        cursor.execute(sql.format(table=table, columns=columns))
-
-
 def update(cursor):
-    taskColumnList = (
-        "id", "uuid", "title", "creation_date", "due_date", "done_date",
-        "description", "urgency", "status", "recurrence", "project_id",
-    )
     addRecurrenceColumn(cursor)
     deleteRecurrenceTable(cursor)
-    deleteTableColumn(cursor, "task", taskColumnList)
+    updateutils.deleteTableColumns(cursor, "task", ("recurrence_id",))
 
 
 if __name__ == "__main__":
-    import updateutils
     updateutils.main(update)
 # vi: ts=4 sw=4 et

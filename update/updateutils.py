@@ -47,6 +47,23 @@ def dumpDatabase(dbFileName, dumpFile):
         dumpTable(cursor, dbFileName, table, dumpFile)
 
 
+def deleteTableColumns(cursor, table, columnsToDelete):
+    columnList = getTableColumnList(cursor, table)
+    for column in columnsToDelete:
+        columnList.remove(column)
+    columns = ",".join(columnList)
+    sqlCommands = (
+        "create temporary table {table}_backup({columns})",
+        "insert into {table}_backup select {columns} from {table}",
+        "drop table {table}",
+        "create table {table}({columns})",
+        "insert into {table} select {columns} from {table}_backup",
+        "drop table {table}_backup",
+        )
+    for sql in sqlCommands:
+        cursor.execute(sql.format(table=table, columns=columns))
+
+
 def main(function):
     """
     Runs an update function on a database. Useful as a test main
