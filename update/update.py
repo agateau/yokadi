@@ -9,12 +9,24 @@ This script updates a Yokadi database to the latest version
 
 import os
 from os.path import abspath, dirname, join
+import sqlite3
 import subprocess
 import sys
 import shutil
 from argparse import ArgumentParser
 
 import dump
+
+import update1to2
+import update2to3
+import update3to4
+import update4to5
+import update5to6
+import update6to7
+import update7to8
+import update8to9
+import update9to10
+
 
 sys.path.append(join(dirname(__file__), ".."))
 from yokadi.core import db
@@ -83,12 +95,15 @@ def main():
 
     scriptDir = os.path.dirname(__file__) or "."
     oldVersion = getVersion(workDbFileName)
-    for version in range(oldVersion, db.DB_VERSION):
-        scriptFileName = join(scriptDir, "update%dto%d" % (version, version + 1))
-        print("Running %s" % scriptFileName)
-        err = subprocess.call([scriptFileName, workDbFileName])
-        if err != 0:
-            die("Update failed.")
+
+    with sqlite3.connect(workDbFileName) as conn:
+        cursor = conn.cursor()
+
+        for version in range(oldVersion, db.DB_VERSION):
+            moduleName = "update{}to{}".format(version, version + 1)
+            print("Updating to {}".format(version + 1))
+            function = globals()[moduleName].update
+            function(cursor)
 
     setVersion(workDbFileName, db.DB_VERSION)
     createFinalDb(workDbFileName, newDbFileName)

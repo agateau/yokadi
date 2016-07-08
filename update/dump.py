@@ -10,10 +10,9 @@ names.
 
 import os
 import re
+import sqlite3
 import subprocess
 import sys
-
-from sqlite3 import dbapi2 as sqlite
 
 
 def getTableList(cx):
@@ -45,7 +44,7 @@ def dumpTable(cx, dbFileName, table, fl):
 
 
 def dumpDatabase(dbFileName, dumpFile):
-    cx = sqlite.connect(os.path.abspath(dbFileName))
+    cx = sqlite3.connect(os.path.abspath(dbFileName))
     for table in getTableList(cx):
         dumpTable(cx, dbFileName, table, dumpFile)
 

@@ -1,10 +1,10 @@
-#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 """
 Update from version 9 to version 10 of Yokadi DB
 
-- Turn Table.recurrence into a text field
-- Fill it with recurrence info
+- Remove Task.recurrence_id column
+- Add Task.recurrence column
+- Import recurrence from the Recurrence table
 - Remove Recurrence table
 
 @author: Aurélien Gâteau <mail@agateau.com>
@@ -12,9 +12,6 @@ Update from version 9 to version 10 of Yokadi DB
 """
 import json
 import pickle
-import sys
-
-from sqlalchemy import create_engine
 
 
 def tuplify(value):
@@ -36,9 +33,6 @@ def createByweekdayValue(rule):
 
 
 def createDictFromRule(pickledRule):
-    if not pickledRule:
-        return {}
-
     rule = pickle.loads(pickledRule)
     dct = {}
     dct["freq"] = rule._freq
@@ -50,22 +44,29 @@ def createDictFromRule(pickledRule):
     return dct
 
 
-def addRecurrenceColumn(conn):
-    conn.execute("alter table task add column recurrence")
-    for row in conn.execute("select t.id, r.rule from task t left join recurrence r on t.recurrence_id = r.id"):
-        id = row["id"]
-        pickledRule = row["rule"]
-        dct = createDictFromRule(pickledRule)
+def addRecurrenceColumn(cursor):
+    cursor.execute("alter table task add column recurrence")
+    sql = "select t.id, r.rule from task t left join recurrence r on t.recurrence_id = r.id"
+    for row in cursor.execute(sql).fetchall():
+        id, pickledRule = row
+        if pickledRule:
+            try:
+                dct = createDictFromRule(bytes(pickledRule, "utf-8"))
+            except Exception as exc:
+                print("Failed to import recurrence for task {}: {}".format(id, exc))
+                dct = {}
+        else:
+            dct = {}
         ruleStr = json.dumps(dct)
 
-        conn.execute("update task set recurrence = ? where id = ?", ruleStr, id)
+        cursor.execute("update task set recurrence = ? where id = ?", (ruleStr, id))
 
 
-def deleteRecurrenceTable(conn):
-    conn.execute("drop table recurrence")
+def deleteRecurrenceTable(cursor):
+    cursor.execute("drop table recurrence")
 
 
-def deleteTableColumn(conn, table, columnsToKeep):
+def deleteTableColumn(cursor, table, columnsToKeep):
     columns = ",".join(columnsToKeep)
     sqlCommands = (
         "create temporary table {table}_backup({columns})",
@@ -76,22 +77,20 @@ def deleteTableColumn(conn, table, columnsToKeep):
         "drop table {table}_backup",
         )
     for sql in sqlCommands:
-        conn.execute(sql.format(table=table, columns=columns))
+        cursor.execute(sql.format(table=table, columns=columns))
 
 
-def main():
+def update(cursor):
     taskColumnList = (
         "id", "uuid", "title", "creation_date", "due_date", "done_date",
         "description", "urgency", "status", "recurrence", "project_id",
     )
-    uri = 'sqlite:///' + sys.argv[1]
-    engine = create_engine(uri)
-    with engine.begin() as conn:
-        addRecurrenceColumn(conn)
-        deleteRecurrenceTable(conn)
-        deleteTableColumn(conn, "task", taskColumnList)
+    addRecurrenceColumn(cursor)
+    deleteRecurrenceTable(cursor)
+    deleteTableColumn(cursor, "task", taskColumnList)
 
 
 if __name__ == "__main__":
-    main()
+    import updateutils
+    updateutils.main(update)
 # vi: ts=4 sw=4 et
