@@ -10,7 +10,6 @@ This script updates a Yokadi database to the latest version
 import os
 from os.path import abspath, dirname, join
 import sqlite3
-import subprocess
 import sys
 import shutil
 from argparse import ArgumentParser
@@ -47,18 +46,37 @@ def createWorkDb(fileName):
     return name
 
 
-def createFinalDb(workFileName, finalFileName):
-    dumpFileName = "dump.sql"
-    print("Dumping into %s" % dumpFileName)
-    dumpFile = open(dumpFileName, "w", encoding='utf-8')
-    updateutils.dumpDatabase(workFileName, dumpFile)
-    dumpFile.close()
+def importTable(dstCursor, srcCursor, table):
+    columns = updateutils.getTableColumnList(dstCursor, table)
+    columnString = ", ".join(columns)
+    sql = "select {} from {}".format(columnString, table)
 
-    database = db.Database(finalFileName, True, updateMode=True)
-    print("Restoring dump from %s into %s" % (dumpFileName, finalFileName))
-    err = subprocess.call(["sqlite3", finalFileName, ".read %s" % dumpFileName])
-    if err != 0:
-        raise Exception("Dump restoration failed")
+    placeHolders = ", ".join(["?"] * len(columns))
+    insertSql = "insert into {}({}) values({})".format(table, columnString, placeHolders)
+
+    query = srcCursor.execute(sql)
+    while True:
+        rows = query.fetchmany(size=100)
+        if not rows:
+            break
+        dstCursor.executemany(insertSql, rows)
+
+
+def createFinalDb(workFileName, finalFileName):
+    assert os.path.exists(workFileName)
+
+    print("Recreating the database")
+    database = db.Database(finalFileName, createIfNeeded=True, updateMode=True)
+
+    print("Importing content to the new database")
+    srcConn = sqlite3.connect(workFileName)
+    srcCursor = srcConn.cursor()
+    dstConn = sqlite3.connect(finalFileName)
+    dstCursor = dstConn.cursor()
+
+    for table in updateutils.getTableList(dstCursor):
+        importTable(dstCursor, srcCursor, table)
+    dstConn.commit()
 
 
 def die(message):
