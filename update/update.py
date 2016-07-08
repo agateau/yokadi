@@ -15,7 +15,7 @@ import sys
 import shutil
 from argparse import ArgumentParser
 
-import dump
+import updateutils
 
 import update1to2
 import update2to3
@@ -51,7 +51,7 @@ def createFinalDb(workFileName, finalFileName):
     dumpFileName = "dump.sql"
     print("Dumping into %s" % dumpFileName)
     dumpFile = open(dumpFileName, "w", encoding='utf-8')
-    dump.dumpDatabase(workFileName, dumpFile)
+    updateutils.dumpDatabase(workFileName, dumpFile)
     dumpFile.close()
 
     database = db.Database(finalFileName, True, updateMode=True)
