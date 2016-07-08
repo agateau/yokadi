@@ -34,7 +34,7 @@ def createByweekdayValue(rule):
     return tuplify(rule._byweekday)
 
 
-def createDictFromRule(pickledRule):
+def createJsonStringFromRule(pickledRule):
     rule = pickle.loads(pickledRule)
     dct = {}
     dct["freq"] = rule._freq
@@ -43,7 +43,7 @@ def createDictFromRule(pickledRule):
     dct["byweekday"] = createByweekdayValue(rule)
     dct["byhour"] = tuplify(rule._byhour)
     dct["byminute"] = tuplify(rule._byminute)
-    return dct
+    return json.dumps(dct)
 
 
 def addRecurrenceColumn(cursor):
@@ -51,15 +51,12 @@ def addRecurrenceColumn(cursor):
     sql = "select t.id, r.rule from task t left join recurrence r on t.recurrence_id = r.id"
     for row in cursor.execute(sql).fetchall():
         id, pickledRule = row
+        ruleStr = ""
         if pickledRule:
             try:
-                dct = createDictFromRule(bytes(pickledRule, "utf-8"))
+                ruleStr = createJsonStringFromRule(bytes(pickledRule, "utf-8"))
             except Exception as exc:
                 print("Failed to import recurrence for task {}: {}".format(id, exc))
-                dct = {}
-        else:
-            dct = {}
-        ruleStr = json.dumps(dct)
 
         cursor.execute("update task set recurrence = ? where id = ?", (ruleStr, id))
 

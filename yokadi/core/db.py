@@ -90,14 +90,18 @@ class RecurrenceRuleColumnType(TypeDecorator):
     impl = VARCHAR
 
     def process_bind_param(self, value, dialect):
-        if value is not None:
+        if value:
             value = json.dumps(value.toDict())
+        else:
+            value = ""
         return value
 
     def process_result_value(self, value, dialect):
-        if value is not None:
+        if value:
             dct = json.loads(value)
             value = RecurrenceRule.fromDict(dct)
+        else:
+            value = RecurrenceRule()
         return value
 
 
