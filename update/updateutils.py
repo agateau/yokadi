@@ -11,24 +11,22 @@ import subprocess
 import sys
 
 
-def getTableList(cx):
-    cursor = cx.cursor()
+def getTableList(cursor):
     cursor.execute("select name from sqlite_master where type='table' and name!='sqlite_sequence'")
     return [x[0] for x in cursor.fetchall()]
 
 
-def getTableColumnList(cx, table):
-    cursor = cx.cursor()
+def getTableColumnList(cursor, table):
     cursor.execute("select * from %s" % table)
     return [x[0] for x in cursor.description]
 
 
-def dumpTable(cx, dbFileName, table, fl):
+def dumpTable(cursor, dbFileName, table, fl):
     # Prepare a regeex to insert column names in the `insert` statement. This
     # ensures values are correctly inserted even if the columns are not in the
     # same order in the dumped and the restored table.
     rx = re.compile("^insert into %s values" % table, re.IGNORECASE)
-    columnList = getTableColumnList(cx, table)
+    columnList = getTableColumnList(cursor, table)
     newText = "insert into %s(%s) values" % (table, ",".join(columnList))
 
     # Tell sqlite3 to print `insert` statements for the table
@@ -43,9 +41,10 @@ def dumpTable(cx, dbFileName, table, fl):
 
 
 def dumpDatabase(dbFileName, dumpFile):
-    cx = sqlite3.connect(os.path.abspath(dbFileName))
-    for table in getTableList(cx):
-        dumpTable(cx, dbFileName, table, dumpFile)
+    conn = sqlite3.connect(os.path.abspath(dbFileName))
+    cursor = conn.cursor()
+    for table in getTableList(cursor):
+        dumpTable(cursor, dbFileName, table, dumpFile)
 
 
 def main(function):
