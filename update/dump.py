@@ -28,11 +28,14 @@ def getTableColumnList(cx, table):
 
 
 def dumpTable(cx, dbFileName, table, fl):
+    # Prepare a regeex to insert column names in the `insert` statement. This
+    # ensures values are correctly inserted even if the columns are not in the
+    # same order in the dumped and the restored table.
     rx = re.compile("^insert into %s values" % table, re.IGNORECASE)
-
     columnList = getTableColumnList(cx, table)
     newText = "insert into %s(%s) values" % (table, ",".join(columnList))
 
+    # Tell sqlite3 to print `insert` statements for the table
     child = subprocess.Popen(["sqlite3", dbFileName], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     child.stdin.write(bytes(".mode insert %s\nselect * from %s;\n" % (table, table), 'utf-8'))
     child.stdin.close()
