@@ -41,6 +41,7 @@ from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.core import utils
+from yokadi.update import update
 
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
@@ -199,6 +200,10 @@ def main():
                       dest="createOnly", default=False, action="store_true",
                       help="Just create an empty database")
 
+    parser.add_argument("-u", "--update",
+                      dest="update", action="store_true",
+                      help="Update database to the latest version")
+
     parser.add_argument("-v", "--version",
                       dest="version", action="store_true",
                       help="Display Yokadi current version")
@@ -221,6 +226,9 @@ def main():
     if not args.filename:
         args.filename = basepaths.getDbPath()
         fileutils.createParentDirs(args.filename)
+
+    if args.update:
+        return update.update(args.filename)
 
     try:
         db.connectDatabase(args.filename)

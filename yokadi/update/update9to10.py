@@ -13,7 +13,7 @@ Update from version 9 to version 10 of Yokadi DB
 import json
 import pickle
 
-import updateutils
+from yokadi.update import updateutils
 
 
 def tuplify(value):

@@ -12,23 +12,23 @@ from os.path import abspath, dirname, join
 import sqlite3
 import sys
 import shutil
+import time
 from argparse import ArgumentParser
+from tempfile import TemporaryDirectory
 
-import updateutils
-
-import update1to2
-import update2to3
-import update3to4
-import update4to5
-import update5to6
-import update6to7
-import update7to8
-import update8to9
-import update9to10
-
-
-sys.path.append(join(dirname(__file__), ".."))
 from yokadi.core import db
+
+from yokadi.update import updateutils
+
+from yokadi.update import update1to2
+from yokadi.update import update2to3
+from yokadi.update import update3to4
+from yokadi.update import update4to5
+from yokadi.update import update5to6
+from yokadi.update import update6to7
+from yokadi.update import update7to8
+from yokadi.update import update8to9
+from yokadi.update import update9to10
 
 def getVersion(fileName):
     database = db.Database(fileName, createIfNeeded=False, updateMode=True)
@@ -38,12 +38,6 @@ def getVersion(fileName):
 def setVersion(fileName, version):
     database = db.Database(fileName, createIfNeeded=False, updateMode=True)
     database.setVersion(version)
-
-
-def createWorkDb(fileName):
-    name = os.path.join(os.path.dirname(fileName), "work.db")
-    shutil.copy(fileName, name)
-    return name
 
 
 def importTable(dstCursor, srcCursor, table):
@@ -62,16 +56,16 @@ def importTable(dstCursor, srcCursor, table):
         dstCursor.executemany(insertSql, rows)
 
 
-def createFinalDb(workFileName, finalFileName):
-    assert os.path.exists(workFileName)
+def recreateDb(workPath, destPath):
+    assert os.path.exists(workPath)
 
     print("Recreating the database")
-    database = db.Database(finalFileName, createIfNeeded=True, updateMode=True)
+    database = db.Database(destPath, createIfNeeded=True, updateMode=True)
 
     print("Importing content to the new database")
-    srcConn = sqlite3.connect(workFileName)
+    srcConn = sqlite3.connect(workPath)
     srcCursor = srcConn.cursor()
-    dstConn = sqlite3.connect(finalFileName)
+    dstConn = sqlite3.connect(destPath)
     dstCursor = dstConn.cursor()
 
     for table in updateutils.getTableList(dstCursor):
@@ -79,54 +73,92 @@ def createFinalDb(workFileName, finalFileName):
     dstConn.commit()
 
 
-def die(message):
+def err(message):
     print("error: " + message, file=sys.stderr)
-    sys.exit(1)
 
 
-def main():
-    # Parse args
-    parser = ArgumentParser()
-    parser.add_argument('current', metavar='<path/to/current.db>')
-    parser.add_argument('updated', metavar='<path/to/updated.db>')
+def update(dbPath, newDbPath=None, inplace=True):
+    # Check paths
+    if not os.path.exists(dbPath):
+        err("'{}' does not exist.".format(dbPath))
+        return 1
 
-    args = parser.parse_args()
-
-    dbFileName = abspath(args.current)
-    newDbFileName = abspath(args.updated)
-    if not os.path.exists(dbFileName):
-        die("'%s' does not exist." % dbFileName)
-
-    if os.path.exists(newDbFileName):
-        die("'%s' already exists." % newDbFileName)
+    if not inplace and os.path.exists(newDbPath):
+        err("'{}' already exists.".format(newDbPath))
+        return 1
 
     # Check version
-    version = getVersion(dbFileName)
+    version = getVersion(dbPath)
     print("Found version %d" % version)
 
     if version == db.DB_VERSION:
         print("Nothing to do")
         return 0
 
-    # Start import
-    workDbFileName = createWorkDb(dbFileName)
+    if inplace:
+        destDir = os.path.dirname(dbPath)
+    else:
+        destDir = os.path.dirname(newDbPath)
 
-    scriptDir = os.path.dirname(__file__) or "."
-    oldVersion = getVersion(workDbFileName)
+    with TemporaryDirectory(prefix="yokadi-update-", dir=destDir) as tempDir:
+        # Copy the DB
+        workDbPath = os.path.join(tempDir, "work.db")
+        shutil.copy(dbPath, workDbPath)
 
-    with sqlite3.connect(workDbFileName) as conn:
-        cursor = conn.cursor()
+        # Start import
+        oldVersion = getVersion(workDbPath)
 
-        for version in range(oldVersion, db.DB_VERSION):
-            moduleName = "update{}to{}".format(version, version + 1)
-            print("Updating to {}".format(version + 1))
-            function = globals()[moduleName].update
-            function(cursor)
+        with sqlite3.connect(workDbPath) as conn:
+            cursor = conn.cursor()
 
-    setVersion(workDbFileName, db.DB_VERSION)
-    createFinalDb(workDbFileName, newDbFileName)
+            for version in range(oldVersion, db.DB_VERSION):
+                moduleName = "update{}to{}".format(version, version + 1)
+                print("Updating to {}".format(version + 1))
+                function = globals()[moduleName].update
+                function(cursor)
+
+        setVersion(workDbPath, db.DB_VERSION)
+
+        # Recreate the DB
+        recreatedDbPath = os.path.join(tempDir, "recreated.db")
+        recreateDb(workDbPath, recreatedDbPath)
+
+        # Move to final paths
+        if inplace:
+            base, ext = os.path.splitext(dbPath)
+            timestamp = time.strftime("%Y%m%d")
+            backupPath = base + "-v{}-{}".format(oldVersion, timestamp) + ext
+            os.rename(dbPath, backupPath)
+            print("Old database renamed to {}".format(backupPath))
+            os.rename(recreatedDbPath, dbPath)
+        else:
+            os.rename(recreatedDbPath, newDbPath)
 
     return 0
+
+
+def main():
+    # Parse args
+    parser = ArgumentParser()
+    parser.add_argument('current', metavar='<path/to/current.db>',
+            help="Path to the database to update.")
+    parser.add_argument('updated', metavar='<path/to/updated.db>',
+            help="Path to the destination database. Mandatory unless --inplace is used",
+            nargs="?")
+    parser.add_argument("-i", "--in-place",
+            dest="inplace", action="store_true",
+            help="Replace current file")
+
+    args = parser.parse_args()
+
+    dbPath = abspath(args.current)
+
+    if args.inplace:
+        newDbPath = None
+    else:
+        newDbPath = abspath(args.updated)
+
+    return update(dbPath, newDbPath, inplace=args.inplace)
 
 
 if __name__ == "__main__":
