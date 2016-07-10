@@ -209,14 +209,14 @@ def main():
 
     if args.version:
         print("Yokadi - %s" % utils.currentVersion())
-        return
+        return 0
 
     basepaths.migrateOldHistory()
     try:
         basepaths.migrateOldDb()
     except basepaths.MigrationException as exc:
         print(exc)
-        sys.exit(1)
+        return 1
 
     if not args.filename:
         args.filename = basepaths.getDbPath()
@@ -226,10 +226,10 @@ def main():
         db.connectDatabase(args.filename)
     except db.DbUserException as exc:
         print(exc)
-        sys.exit(1)
+        return 1
 
     if args.createOnly:
-        return
+        return 0
     db.setDefaultConfig()  # Set default config parameters
 
     cmd = YokadiCmd()
@@ -242,10 +242,11 @@ def main():
             cmd.cmdloop()
     except KeyboardInterrupt:
         print("\n\tBreak ! (the nice way to quit is 'quit' or 'EOF' (ctrl-d)")
-        sys.exit(1)
+        return 1
     # Save history
     cmd.writeHistory()
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 # vi: ts=4 sw=4 et
