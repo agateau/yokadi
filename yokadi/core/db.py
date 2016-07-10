@@ -21,7 +21,6 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
 from sqlalchemy.types import TypeDecorator, VARCHAR
 
-from yokadi.core import utils
 from yokadi.core.recurrencerule import RecurrenceRule
 from yokadi.core.yokadiexception import YokadiException
 
@@ -321,10 +320,8 @@ class Database(object):
         """Check version and exit if it is not suitable"""
         version = self.getVersion()
         if version != DB_VERSION:
-            sharePath = os.path.abspath(utils.shareDirPath())
-            msg = "Your database version is %d but Yokadi wants version %d.\n" % (version, DB_VERSION)
-            msg += "Please run the %s/update/update.py script to migrate your database prior to running Yokadi.\n" % sharePath
-            msg += "See %s/doc/update.md for details." % sharePath
+            msg = "Your database version is {} but Yokadi wants version {}.\n".format(version, DB_VERSION)
+            msg += "Please run Yokadi with the --update option to update your database."
             raise DbUserException(msg)
 
 
