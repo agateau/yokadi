@@ -13,8 +13,9 @@ import os
 from fnmatch import fnmatch
 from os.path import abspath, isdir, dirname, join
 
-# yokadi root path
-root = abspath(dirname(__file__))
+sys.path.insert(0, dirname(__file__))
+import yokadi
+
 
 def createFileList(sourceDir, *patterns):
     """
@@ -29,7 +30,7 @@ def createFileList(sourceDir, *patterns):
 # Additional files
 data_files = []
 data_files.append(["share/yokadi",
-                  ["version", "README.md", "NEWS", "LICENSE"]])
+                  ["README.md", "NEWS", "LICENSE"]])
 
 # Doc
 data_files.append(["share/yokadi/doc", createFileList("doc", "*.md")])
@@ -53,21 +54,13 @@ data_files.append(["share/applications", ["icon/yokadi.desktop"]])
 # Scripts
 scripts = ["bin/yokadi", "bin/yokadid"]
 
-# Version
-try:
-    version = open(join(root, "version"), encoding='utf-8').readline().rstrip().rstrip("\n")
-except Exception as e:
-    print("Warning, cannot read version file (%s)" % e)
-    print("Defaulting to 'snapshot'")
-    version = "snaphot"
-
 # Windows post install script
 if "win" in " ".join(sys.argv[1:]):
     scripts.append("w32_postinst.py")
 
 # Go for setup
 setup(name="yokadi",
-      version=version,
+      version=yokadi.__version__,
       description="Command line oriented todo list system",
       author="The Yokadi Team",
       author_email="ml-yokadi@sequanux.org",
