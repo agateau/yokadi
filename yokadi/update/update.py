@@ -8,18 +8,15 @@ This script updates a Yokadi database to the latest version
 """
 
 import os
-from os.path import abspath, dirname, join
+import shutil
 import sqlite3
 import sys
-import shutil
 import time
 from argparse import ArgumentParser
 from tempfile import TemporaryDirectory
 
 from yokadi.core import db
-
 from yokadi.update import updateutils
-
 from yokadi.update import update1to2
 from yokadi.update import update2to3
 from yokadi.update import update3to4
@@ -151,12 +148,12 @@ def main():
 
     args = parser.parse_args()
 
-    dbPath = abspath(args.current)
+    dbPath = os.path.abspath(args.current)
 
     if args.inplace:
         newDbPath = None
     else:
-        newDbPath = abspath(args.updated)
+        newDbPath = os.path.abspath(args.updated)
 
     return update(dbPath, newDbPath, inplace=args.inplace)
 
