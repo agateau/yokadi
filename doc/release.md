@@ -18,7 +18,7 @@ of yokadi.
 
 Update `NEWS` file (add changes, check release date)
 
-Ensure `version` file contains $version
+Ensure `yokadi/__init__.py` file contains $version
 
 Create branch:
 
