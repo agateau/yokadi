@@ -37,9 +37,6 @@ data_files.append(["share/yokadi/doc", createFileList("doc", "*.md")])
 # Man
 data_files.append(["share/man/man1", createFileList("man", "*.1")])
 
-# Update scripts
-data_files.append(["share/yokadi/update", createFileList("update", "*.py", "update*to*")])
-
 # Editor scripts
 data_files.append(["share/yokadi/editors/vim/ftdetect", ["editors/vim/ftdetect/yokadimedit.vim"]])
 data_files.append(["share/yokadi/editors/vim/syntax", ["editors/vim/syntax/yokadimedit.vim"]])
@@ -79,6 +76,7 @@ setup(name="yokadi",
         "yokadi",
         "yokadi.core",
         "yokadi.tests",
+        "yokadi.update",
         "yokadi.ycli",
         "yokadi.yical",
       ],
