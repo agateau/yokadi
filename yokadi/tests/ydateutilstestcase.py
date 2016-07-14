@@ -122,5 +122,4 @@ class YDateUtilsTestCase(unittest.TestCase):
             output = ydateutils.parseDateLimit(text, today=today)
             self.assertEqual(expectedOp, output[0])
             self.assertEqual(expectedDate, output[1])
-
 # vi: ts=4 sw=4 et

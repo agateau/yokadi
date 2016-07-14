@@ -10,15 +10,15 @@ import os
 import readline
 import re
 from datetime import datetime, timedelta
-from dateutil import rrule
 from sqlalchemy import or_, and_, desc
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
-from yokadi.core.db import Keyword, Project, Task, TaskKeyword, Recurrence, NOTE_KEYWORD
+from yokadi.core.db import Keyword, Project, Task, TaskKeyword, NOTE_KEYWORD
 from yokadi.core import bugutils
 from yokadi.core import dbutils
 from yokadi.core import db
 from yokadi.core import ydateutils
+from yokadi.core.recurrencerule import RecurrenceRule
 from yokadi.ycli import massedit
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
@@ -160,16 +160,9 @@ class TaskCmd(object):
     def do_bug_edit(self, line):
         """Edit a bug.
         bug_edit <id>"""
-        task = self._t_edit(line)
-        if not task:
-            return
-
-        keywordDict = task.getKeywordDict()
-        bugutils.editBugKeywords(keywordDict)
-        task.setKeywordDict(keywordDict)
-        task.urgency = bugutils.computeUrgency(keywordDict)
-        self.session.merge(task)
-        self.session.commit()
+        task = self._t_edit(line, keywordEditor=bugutils.editBugKeywords)
+        if task:
+            self.session.commit()
     complete_bug_edit = taskIdCompleter
 
     def getTaskFromId(self, tid):
@@ -781,6 +774,15 @@ class TaskCmd(object):
                 keywordArray.append(txt)
                 keywordArray.sort()
             keywords = ", ".join(keywordArray)
+
+            if task.recurrence:
+                recurrence =  "{} (next: {})".format(
+                    task.recurrence.getFrequencyAsString(),
+                    task.recurrence.getNext()
+                )
+            else:
+                recurrence = "None"
+
             fields = [
                 ("Project", task.project.name),
                 ("Title", title),
@@ -789,7 +791,7 @@ class TaskCmd(object):
                 ("Due", task.dueDate),
                 ("Status", task.status),
                 ("Urgency", task.urgency),
-                ("Recurrence", task.recurrence),
+                ("Recurrence", recurrence),
                 ("Keywords", keywords),
                 ]
 
@@ -805,8 +807,10 @@ class TaskCmd(object):
 
     complete_t_show = taskIdCompleter
 
-    def _t_edit(self, line):
-        """Code shared by t_edit and bug_edit."""
+    def _t_edit(self, line, keywordEditor=None):
+        """Code shared by t_edit and bug_edit.
+        if keywordEditor is not None it will be called after editing the task.
+        Returns the modified task if OK, None if cancelled"""
         def editComplete(text, state):
             """ Specific completer for the edit prompt.
             This subfunction should stay here because it needs to access to cmd members"""
@@ -832,32 +836,43 @@ class TaskCmd(object):
         title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
-        taskLine = parseutils.createLine("", title, task.getKeywordDict())
+        userKeywordDict = {k: v for k, v in task.getKeywordDict().items() if not k[0] == '_'}
+        taskLine = parseutils.createLine("", title, userKeywordDict)
 
         oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
         readline.set_completer(editComplete)  # Switch to specific completer
 
-        while True:
-            # Edit
-            print("(Press Ctrl+C to cancel)")
-            try:
-                line = tui.editLine(taskLine)
-                if not line.strip():
-                    tui.warning("Missing title")
-                    continue
-            except KeyboardInterrupt:
-                print()
-                print("Cancelled")
-                task = None
-                break
-            foo, title, keywordDict = parseutils.parseLine(task.project.name + " " + line)
-            if self.cryptoMgr.isEncrypted(task.title):
-                title = self.cryptoMgr.encrypt(title)
-            if dbutils.updateTask(task, task.project.name, title, keywordDict):
-                break
+        # Edit
+        try:
+            while True:
+                print("(Press Ctrl+C to cancel)")
+                try:
+                    line = tui.editLine(taskLine)
+                    if not line.strip():
+                        tui.warning("Missing title")
+                        continue
+                except KeyboardInterrupt:
+                    print()
+                    print("Cancelled")
+                    return None
+                _, title, userKeywordDict = parseutils.parseLine(task.project.name + " " + line)
+                if self.cryptoMgr.isEncrypted(task.title):
+                    title = self.cryptoMgr.encrypt(title)
 
-        readline.set_completer(oldCompleter)  # Restore standard completer
-        self.session.merge(task)
+                if dbutils.createMissingKeywords(userKeywordDict.keys()):
+                    # We were able to create missing keywords if there were any,
+                    # we can now exit the edit loop
+                    break
+        finally:
+            readline.set_completer(oldCompleter)
+
+        keywordDict = task.getKeywordDict()
+        keywordDict.update(userKeywordDict)
+        if keywordEditor:
+            keywordEditor(keywordDict)
+
+        task.title = title
+        task.setKeywordDict(keywordDict)
         return task
 
     def do_t_edit(self, line):
@@ -878,12 +893,14 @@ class TaskCmd(object):
         tokens = parseutils.simplifySpaces(line).split(" ")
         if len(tokens) != 2:
             raise YokadiException("You should give two arguments: <task id> <project>")
-        task = self.getTaskFromId(tokens[0])
         projectName = tokens[1]
         projectName = self._realProjectName(projectName)
+        project = dbutils.getOrCreateProject(projectName)
+        if not project:
+            return
 
-        task.project = dbutils.getOrCreateProject(projectName)
-        self.session.merge(task)
+        task = self.getTaskFromId(tokens[0])
+        task.project = project
         self.session.commit()
         if task.project:
             print("Moved task '%s' to project '%s'" % (task.title, projectName))
@@ -970,70 +987,12 @@ class TaskCmd(object):
         t_recurs <id> weekly <mo, tu, we, th, fr, sa, su> <hh:mm>
         t_recurs <id> daily <HH:MM>
         t_recurs <id> none (remove recurrence)"""
-        tokens = parseutils.simplifySpaces(line).split()
+        tokens = parseutils.simplifySpaces(line).split(" ", 1)
         if len(tokens) < 2:
             raise YokadiException("You should give at least two arguments: <task id> <recurrence>")
         task = self.getTaskFromId(tokens[0])
-
-        # Define recurrence:
-        freq = byminute = byhour = byweekday = bymonthday = bymonth = None
-
-        tokens[1] = tokens[1].lower()
-
-        if tokens[1] == "none":
-            if task.recurrence:
-                self.session.delete(task.recurrence)
-                task.recurrence = None
-            return
-        elif tokens[1] == "daily":
-            if len(tokens) != 3:
-                raise YokadiException("You should give time for daily task")
-            freq = rrule.DAILY
-            byhour, byminute = ydateutils.getHourAndMinute(tokens[2])
-        elif tokens[1] == "weekly":
-            freq = rrule.WEEKLY
-            if len(tokens) != 4:
-                raise YokadiException("You should give day and time for weekly task")
-            byweekday = ydateutils.getWeekDayNumberFromDay(tokens[2].lower())
-            byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
-        elif tokens[1] in ("monthly", "quarterly"):
-            if tokens[1] == "monthly":
-                freq = rrule.MONTHLY
-            else:
-                # quarterly
-                freq = rrule.YEARLY
-                bymonth = [1, 4, 7, 10]
-            if len(tokens) < 4:
-                raise YokadiException("You should give day and time for %s task" % (tokens[1],))
-            try:
-                bymonthday = int(tokens[2])
-                byhour, byminute = ydateutils.getHourAndMinute(tokens[3])
-            except ValueError:
-                POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
-                if tokens[2].lower() in list(POSITION.keys()) and len(tokens) == 5:
-                    byweekday = rrule.weekday(ydateutils.getWeekDayNumberFromDay(tokens[3].lower()),
-                                              POSITION[tokens[2]])
-                    byhour, byminute = ydateutils.getHourAndMinute(tokens[4])
-                    bymonthday = None  # Default to current day number - need to be blanked
-                else:
-                    raise YokadiException("Unable to understand date. See help t_recurs for details")
-        elif tokens[1] == "yearly":
-            freq = rrule.YEARLY
-            rDate = ydateutils.parseHumaneDateTime(" ".join(tokens[2:]))
-            bymonth = rDate.month
-            bymonthday = rDate.day
-            byhour = rDate.hour
-            byminute = rDate.minute
-        else:
-            raise YokadiException("Unknown frequency. Available: daily, weekly, monthly and yearly")
-
-        if task.recurrence is None:
-            task.recurrence = Recurrence()
-        rr = rrule.rrule(freq, byhour=byhour, byminute=byminute, byweekday=byweekday,
-                         bymonthday=bymonthday, bymonth=bymonth)
-        task.recurrence.setRrule(rr)
-        task.dueDate = task.recurrence.getNext()
-        self.session.merge(task)
+        rule = RecurrenceRule.fromHumaneString(tokens[1])
+        task.setRecurrenceRule(rule)
         self.session.commit()
     complete_t_recurs = recurrenceCompleter
 

@@ -13,9 +13,20 @@ from yokadi.core import dbutils
 import testutils
 
 from yokadi.ycli import tui
-from yokadi.ycli.textlistrenderer import TextListRenderer
+from yokadi.ycli.textlistrenderer import TextListRenderer, TitleFormater
 from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core import db
+
+
+def stripColor(text):
+    for colorcode in C.BOLD, C.RED, C.GREEN, C.ORANGE, C.PURPLE, C.CYAN, C.GREY, C.RESET:
+        text = text.replace(colorcode, '')
+    return text
+
+
+class StubCryptoMgr:
+    def decrypt(self, title):
+        return title
 
 
 class TextListRendererTestCase(unittest.TestCase):
@@ -26,53 +37,56 @@ class TextListRendererTestCase(unittest.TestCase):
 
     def testTitleFormater(self):
         dbutils.getOrCreateProject("x", interactive=False)
+        dbutils.getOrCreateKeyword("key1", interactive=False)
+        dbutils.getOrCreateKeyword("key2", interactive=False)
+        task = dbutils.addTask("x", "t1", {})
+        taskWithKeywords = dbutils.addTask("x", "t2", {"key1": None, "key2": 12})
+
+        longTask = dbutils.addTask("x", "01234567890123456789", {})
+        longTask.description = "And it has a description"
+
+        TEST_DATA = (
+            (task, 20, "t1"),
+            (taskWithKeywords, 20, "t2 (key1, key2)"),
+            (taskWithKeywords, 4, "t2 >"),
+            (longTask, 10, longTask.title[:8] + ">*"),
+            (longTask, len(longTask.title), longTask.title[:-2] + ">*"),
+            (longTask, len(longTask.title) + 1, longTask.title + "*"),
+            (longTask, 40, longTask.title.ljust(39) + "*"),
+        )
+
+        for task, width, expected in TEST_DATA:
+            with self.subTest(task=task, width=width):
+                formater = TitleFormater(width, StubCryptoMgr())
+                out = formater(task)[0]
+                out = stripColor(out)
+
+                expected = expected.ljust(width)
+                self.assertEqual(out, expected)
+
+    def testFullRendering(self):
+        dbutils.getOrCreateProject("x", interactive=False)
         dbutils.getOrCreateKeyword("k1", interactive=False)
         dbutils.getOrCreateKeyword("k2", interactive=False)
         t1 = dbutils.addTask("x", "t1", {})
         t2 = dbutils.addTask("x", "t2", {"k1": None, "k2": 12})
-        longerTask = dbutils.addTask("x", "A longer task name", {})
-        longerTask.description = "And it has a description"
+        longTask = dbutils.addTask("x", "A longer task name", {})
+        longTask.description = "And it has a description"
 
         out = StringIO()
         renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
-        renderer.addTaskList("Foo", [t1])
-        self.assertEqual(renderer.maxTitleWidth, 5)
+        renderer.addTaskList("Foo", [t2, longTask])
+        self.assertEqual(renderer.maxTitleWidth, len(longTask.title) + 1)
         renderer.end()
-        expected = str(\
-              "%(CYAN)s              Foo               %(RESET)s\n" \
-            + "%(BOLD)sID|Title|U  |S|Age     |Due date%(RESET)s\n" \
-            + "--------------------------------\n" \
-            + "1 |t1   %(RESET)s|0  |N|0m      |        \n" \
-            ) % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
-        testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
+        out = stripColor(out.getvalue())
 
-        out = StringIO()
-        renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
-        renderer.addTaskList("Foo", [t1, t2])
-        self.assertEqual(renderer.maxTitleWidth, 11)
-        renderer.end()
-        expected = str(\
-              "%(CYAN)s                 Foo                  %(RESET)s\n" \
-            + "%(BOLD)sID|Title      |U  |S|Age     |Due date%(RESET)s\n" \
-            + "--------------------------------------\n" \
-            + "1 |t1         %(RESET)s|0  |N|0m      |        \n" \
-            + "2 |t2 (%(BOLD)sk1, k2)%(RESET)s|0  |N|0m      |        \n" \
-            ) % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
-        testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
-
-        out = StringIO()
-        renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
-        renderer.addTaskList("Foo", [t2, longerTask])
-        self.assertEqual(renderer.maxTitleWidth, len(longerTask.title) + 1)
-        renderer.end()
-        expected = str(\
-              "%(CYAN)s                     Foo                      %(RESET)s\n" \
-            + "%(BOLD)sID|Title              |U  |S|Age     |Due date%(RESET)s\n" \
-            + "----------------------------------------------\n" \
-            + "2 |t2 (%(BOLD)sk1, k2)        %(RESET)s|0  |N|0m      |        \n" \
-            + "3 |A longer task name%(RESET)s*|0  |N|0m      |        \n" \
-            ) % dict(CYAN=C.CYAN, RESET=C.RESET, BOLD=C.BOLD)
-        testutils.multiLinesAssertEqual(self, out.getvalue(), expected)
+        expected = \
+              "                     Foo                      \n" \
+            + "ID│Title              │U  │S│Age     │Due date\n" \
+            + "──┼───────────────────┼───┼─┼────────┼────────\n" \
+            + "2 │t2 (k1, k2)        │0  │N│0m      │        \n" \
+            + "3 │A longer task name*│0  │N│0m      │        \n"
+        self.assertMultiLineEqual(out, expected)
 
 
 # vi: ts=4 sw=4 et

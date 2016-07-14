@@ -16,6 +16,7 @@ import unicodedata
 import re
 import locale
 import shutil
+from collections import namedtuple
 from getpass import getpass
 
 from yokadi.ycli import colors as C
@@ -104,9 +105,10 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".
 
 
 def reinjectInRawInput(line):
-    """Next call to raw_input() will have line set as default text
+    """Next call to input() will have line set as default text
     @param line: The default text
     """
+    assert isinstance(line, str)
 
     # Set readline.pre_input_hook to feed it with our line
     # (Code copied from yagtd)
@@ -125,7 +127,6 @@ def editLine(line, prompt="edit> ", echo=True):
     """Edit a line using readline
     @param prompt: change prompt
     @param echo: whether to echo user text or not"""
-
     if line:
         reinjectInRawInput(line)
 
@@ -151,23 +152,35 @@ def editLine(line, prompt="edit> ", echo=True):
     return line
 
 
-def selectFromList(prompt, lst, default):
-    for score, caption in lst:
-        print("%d: %s" % (score, caption))
-    minStr = str(lst[0][0])
-    maxStr = str(lst[-1][0])
-    if default is None:
-        line = ""
-    else:
-        line = str(default)
+def selectFromList(lst, default=None, prompt="Select", valueForString=int):
+    """
+    Takes a list of tuples (value, caption), returns the value of the selected
+    entry.
+    @param default indicates the default value and may be None
+    @param prompt customize the prompt
+    @param valueForString a function to turn a string into a valid value
+    """
+    if default is not None:
+        default = str(default)
+    possibleValues = {x[0] for x in lst}
+    for value, caption in lst:
+        print("{}: {}".format(value, caption))
+
     while True:
-        answer = editLine(line, prompt=prompt + ": ")
-        if minStr <= answer and answer <= maxStr:
-            return int(answer)
-        error("Wrong value")
+        line = editLine(default, prompt=prompt + ": ")
+        try:
+            value = valueForString(line)
+        except Exception:
+            error("Wrong value")
+            continue
+
+        if value in possibleValues:
+            return value
+        else:
+            error("Wrong value")
 
 
-def enterInt(prompt, default):
+def enterInt(default=None, prompt="Enter a number"):
     if default is None:
         line = ""
     else:
@@ -247,4 +260,34 @@ def getTermWidth():
     size = shutil.get_terminal_size()
     return size.columns
 
+
+ColorBlock = namedtuple("ColorBlock", ("pos", "color"))
+
+
+class TextColorizer:
+    def __init__(self):
+        self._dct = {}
+
+    def setColorAt(self, pos, color):
+        self._dct[pos] = color
+
+    def setResetAt(self, pos):
+        self._dct[pos] = C.RESET
+
+    def crop(self, width):
+        self._dct = { pos: color for pos, color in self._dct.items() if pos < width }
+
+    def render(self, text):
+        """
+        Apply color blocks to text
+        """
+        start = 0
+        out = []
+        blockList = sorted(self._dct.items())
+        for pos, color in blockList:
+            out.append(text[start:pos] + color)
+            start = pos
+        # Add remaining text, if any
+        out.append(text[start:])
+        return "".join(out)
 # vi: ts=4 sw=4 et
