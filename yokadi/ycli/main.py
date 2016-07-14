@@ -35,12 +35,13 @@ except ImportError:
     print("Or use 'pip install sqlalchemy'")
     sys.exit(1)
 
+import yokadi
+
 from yokadi.core import db
 from yokadi.ycli import tui
 from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
-from yokadi.core import utils
 from yokadi.update import update
 
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
@@ -136,7 +137,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             print("Python: %s" % sys.version.replace("\n", " "))
             print("SQL Alchemy: %s" % sqlalchemy.__version__)
             print("OS: %s (%s)" % os.uname()[0:3:2])
-            print("Yokadi: %s" % utils.currentVersion())
+            print("Yokadi: %s" % yokadi.__version__)
             print(cut)
             print()
 
@@ -213,7 +214,7 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print("Yokadi - %s" % utils.currentVersion())
+        print("Yokadi - %s" % yokadi.__version__)
         return 0
 
     basepaths.migrateOldHistory()
