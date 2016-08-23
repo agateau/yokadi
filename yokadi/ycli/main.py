@@ -35,12 +35,14 @@ except ImportError:
     print("Or use 'pip install sqlalchemy'")
     sys.exit(1)
 
+import yokadi
+
 from yokadi.core import db
 from yokadi.ycli import tui
 from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
-from yokadi.core import utils
+from yokadi.update import update
 
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
@@ -137,7 +139,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
             print("Python: %s" % sys.version.replace("\n", " "))
             print("SQL Alchemy: %s" % sqlalchemy.__version__)
             print("OS: %s (%s)" % os.uname()[0:3:2])
-            print("Yokadi: %s" % utils.currentVersion())
+            print("Yokadi: %s" % yokadi.__version__)
             print(cut)
             print()
 
@@ -201,6 +203,10 @@ def main():
                       dest="createOnly", default=False, action="store_true",
                       help="Just create an empty database")
 
+    parser.add_argument("-u", "--update",
+                      dest="update", action="store_true",
+                      help="Update database to the latest version")
+
     parser.add_argument("-v", "--version",
                       dest="version", action="store_true",
                       help="Display Yokadi current version")
@@ -213,28 +219,31 @@ def main():
     args = parser.parse_args()
 
     if args.version:
-        print("Yokadi - %s" % utils.currentVersion())
-        return
+        print("Yokadi - %s" % yokadi.__version__)
+        return 0
 
     basepaths.migrateOldHistory()
     try:
         basepaths.migrateOldDb()
     except basepaths.MigrationException as exc:
         print(exc)
-        sys.exit(1)
+        return 1
 
     if not args.filename:
         args.filename = basepaths.getDbPath()
         fileutils.createParentDirs(args.filename)
 
+    if args.update:
+        return update.update(args.filename)
+
     try:
         db.connectDatabase(args.filename)
     except db.DbUserException as exc:
         print(exc)
-        sys.exit(1)
+        return 1
 
     if args.createOnly:
-        return
+        return 0
     db.setDefaultConfig()  # Set default config parameters
 
     if args.dump:
@@ -251,10 +260,11 @@ def main():
             cmd.cmdloop()
     except KeyboardInterrupt:
         print("\n\tBreak ! (the nice way to quit is 'quit' or 'EOF' (ctrl-d)")
-        sys.exit(1)
+        return 1
     # Save history
     cmd.writeHistory()
+    return 0
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 # vi: ts=4 sw=4 et

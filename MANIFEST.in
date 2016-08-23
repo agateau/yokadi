@@ -1,6 +1,4 @@
 include bin/fromsrc.py
-include update/update*to*
-include update/*py
 include doc/*.md
 include man/*.1
 include icon/*
