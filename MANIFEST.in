@@ -1,5 +1,6 @@
 include bin/fromsrc.py
 include doc/*.md
+include doc/dev/*.md
 include man/*.1
 include icon/*
 include scripts/*

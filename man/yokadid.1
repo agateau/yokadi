@@ -11,10 +11,10 @@ is a Yokadi daemon that remind you due tasks. If you want to be automatically
 reminded of due tasks, you can use the Yokadi daemon. The Yokadi daemon can be
 launched via desktop autostart services.
 
-In KDE, you must create a symlink to yokadid (or a shell script that calls it)
-in $HOME/.kde/Autostart/.
+In most desktop environments, you just need to create a symbolic link to yokadid
+(or a shell script that calls it) in $HOME/.config/autostart/.
 
-ln \-s \`which yokadid\` $HOME/.kde/Autostart/
+ln \-s \`which yokadid\` $HOME/.config/autostart/
 
 .PP
 .SH OPTIONS
@@ -35,8 +35,7 @@ Don't fork background. Useful for debug.
 .B \-h, \-\-help
 Show summary of options and exit.
 .SH SEE ALSO
-.BR yokadi (1),
-.BR xyokadi (1).
+.BR yokadi (1).
 .br
 .SH SEE ALSO
 Website: http://yokadi.github.io

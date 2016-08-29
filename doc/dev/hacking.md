@@ -12,9 +12,6 @@ Classes use CamelCase. Functions use mixedCase. Here is an example:
         def anotherMethod(self, arg1, *args, **kwargs):
             pass
 
-(Why? Because `someLongAndPowerfulMethod` takes less horizontal space than
-`some_long_and_powerful_method`.)
-
 Exception: Classes which implement command methods should use underscores,
 since the name of the method is used to create the name of the command:
 
@@ -22,13 +19,16 @@ since the name of the method is used to create the name of the command:
         def do_t_cmd1(self, line):
             pass
 
-
         def parser_t_cmd1(self):
             return SomeParser
 
 
         def someMethod(self):
             pass
+
+Note: This naming convention is historic, we would like to switch to a more
+PEP-8 compliant coding style where words in function and variable names are
+separated with `_`. If you feel like doing the conversion, get in touch.
 
 Filenames are lowercase. If they contain a class they should match the name of
 the class they contain.
@@ -95,29 +95,5 @@ filename argument. The usage string should look like this:
 
 No need to detail the options in the usage string, they will be listed by the
 parser below the usage string.
-
-# Database schema changes
-
-If you want to modify the database schema (adding, removing, changing tables or
-fields). You should:
-
-- Present the changes on the mailing-list
-
-- Implement your changes in db.py
-
-- Increase the database version number (`DB_VERSION` in db.py)
-
-- Write an update script in update/
-
-- When the changes are merged in master, tag the merge commit using the tag
-  name `db-v<new-version-number>`, like this:
-
-      # Note the -a!
-      git tag -a db-v<version-number>
-      git push --tags
-
-Note: up to db-v4, `db-v*` have been created on the last commit before the
-update to a new version, so `db-v4` is on the last commit before `DB_VERSION`
-was bumped to 5.
 
 <!-- vim: set ts=4 sw=4 et: -->
