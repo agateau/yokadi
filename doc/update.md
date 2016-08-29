@@ -1,26 +1,20 @@
-# Updating your database
+# How the update system works
 
-## Summary
-
-To update your Yokadi database to the latest version, run this command:
-
-    <install-prefix>/share/yokadi/update/update.py <path/to/current.db> <path/to/updated.db>
-
-## Technical details: how the update system works
-
-Lets assume current version is x and target version is x+n, database version x
-is current.db and database version x+n is updated.db.
+Lets assume current version is x and target version is x+n.
 
 The update process goes like this:
 
-- Copy current.db to work.db
+- Copy yokadi.db to work.db
 - for each v between x and x + n - 1:
      - run `update<v>to<v+1>.update()`
-- Create a data-only SQL dump of work.db
-- Create an empty database in updated.db
-- Restore the dump in updated.db
+- Create an empty database in recreated.db
+- Fill recreated.db with the content of work.db
+- If we are updating the database in place, rename yokadi.db to yokadi-$date.db
+  and recreated.db to yokadi.db
+- If we are creating a new database (only possible by directly calling
+  update/update.py), rename recreated.db to the destination name;
 
-The final dump/restore steps ensure that:
+The recreation steps ensure that:
 
 - All fields are created in the same order (when adding a new column, you can't
   specify its position)
