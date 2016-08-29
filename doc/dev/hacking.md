@@ -12,9 +12,6 @@ Classes use CamelCase. Functions use mixedCase. Here is an example:
         def anotherMethod(self, arg1, *args, **kwargs):
             pass
 
-(Why? Because `someLongAndPowerfulMethod` takes less horizontal space than
-`some_long_and_powerful_method`.)
-
 Exception: Classes which implement command methods should use underscores,
 since the name of the method is used to create the name of the command:
 
@@ -22,13 +19,16 @@ since the name of the method is used to create the name of the command:
         def do_t_cmd1(self, line):
             pass
 
-
         def parser_t_cmd1(self):
             return SomeParser
 
 
         def someMethod(self):
             pass
+
+Note: This naming convention is historic, we would like to switch to a more
+PEP-8 compliant coding style where words in function and variable names are
+separated with `_`. If you feel like doing the conversion, get in touch.
 
 Filenames are lowercase. If they contain a class they should match the name of
 the class they contain.
