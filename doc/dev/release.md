@@ -29,7 +29,7 @@ The version in master should always be bigger than the version in release
 branches, so update version in master:
 
     git checkout master
-    vi version
+    vi yokadi/__init__.py
     git commit version -m "Bump version number"
     git push
     git checkout -
