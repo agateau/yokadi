@@ -1,17 +1,18 @@
-v1.1.0 2016/09/02
+v1.1.0 2016/09/03
 
 - New features & Improvements:
-    - New command: t_medit. t_medit lets you edit all tasks of a project in one go.
-    - Reworked alias commands: alias can now be modified. The name of the alias can be modified with a_edit_name and the command with a_edit_command.
-    - Improved update process: it's now much easier (just run `yokadi -u`) and faster to update your database.
-    - Task lists has been improved:
+    - A new command has been added: `t_medit`. `t_medit` lets you edit all tasks of a project in one go.
+    - Aliases can now be modified. The name of the alias can be modified with `a_edit_name` and the command with `a_edit_command`.
+    - Database format updates are now easier to run: just run `yokadi -u`, no more separate `update.py` command. Updates are also much faster.
+    - Task lists have been improved:
         - Borders look nicer.
         - Some bugs in the rendering of the title column have been fixed (wrong width, badly cropped text).
     - Yokadi now uses standard paths by default: the database is stored in ~/.local/share/yokadi/yokadi.db and non-essential data is in ~/.cache/yokadi/.
     - Reviewed and improved documentation. Moved developer documentation to a separate dir (doc/dev).
 - Bug fixes:
-    - The code handling rrecurrences has been made more robust and they are now stored in a more future proof way.
-    - Fixed bug_edit crash.
+    - The code handling recurrences has been made more robust.
+    - Recurrences are now stored in a more future proof way.
+    - Fixed `bug_edit` crash.
     - Fixed negative keyword filter: A task with two keywords k1 and k2 would not be excluded by a filter !k1.
 
 v1.0.2 2016/03/28
