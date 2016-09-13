@@ -2,8 +2,7 @@ import os
 
 from sqlalchemy import event
 
-from yokadi.sync import VERSION, VERSION_FILENAME, DB_SYNC_BRANCH, \
-        ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import clearDump, dump, createVersionFile, \
     commitChanges, deleteObjectDump
@@ -17,6 +16,8 @@ class SyncManager(object):
         self.vcsImpl = vcsImpl
         self.dumpDir = dumpDir
         self.vcsImpl.setDir(dumpDir)
+
+        self._deletedObjects = set()
 
         if session:
             event.listen(session, "after_flush", self._onFlushed)
@@ -66,9 +67,9 @@ class SyncManager(object):
         self._deletedObjects = set(session.deleted)
 
     def _onCommitted(self, session, *args):
-        for obj in self._deletedObjects:
-            deleteObjectDump(obj)
-        self._deletedObjects = set()
+        while self._deletedObjects:
+            obj = self._deletedObjects.pop()
+            deleteObjectDump(obj, self.dumpDir)
 
     def _onRollbacked(self, session, *args):
         self._deletedObjects = set()

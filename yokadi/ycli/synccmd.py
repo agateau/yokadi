@@ -4,6 +4,7 @@ from collections import defaultdict
 from difflib import Differ
 
 from yokadi.core import basepaths
+from yokadi.core import db
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
@@ -141,7 +142,7 @@ class TextPullUi(PullUi):
 class SyncCmd(Cmd):
     def __init__(self, dumpDir=None):
         self.dumpDir = dumpDir or os.path.join(basepaths.getCacheDir(), 'db')
-        self.syncManager = SyncManager(self.dumpDir)
+        self.syncManager = SyncManager(db.getSession(), self.dumpDir)
 
     def do_s_sync(self, line):
         """Synchronize the database with the remote one. Get the latest

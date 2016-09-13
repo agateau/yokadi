@@ -303,7 +303,7 @@ class PullTestCase(unittest.TestCase):
     def testNothingToDo(self):
         with TemporaryDirectory() as tmpDir:
             createVersionFile(tmpDir)
-            syncManager = SyncManager(tmpDir, StubVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, StubVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -360,7 +360,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -439,7 +439,7 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pullUi = MyPullUi()
-            syncManager = SyncManager(tmpDir, vcsImpl)
+            syncManager = SyncManager(self.session, tmpDir, vcsImpl)
             ok = syncManager.pull(pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
@@ -470,7 +470,7 @@ class PullTestCase(unittest.TestCase):
 
             # Do the pull
             pullUi = MyPullUi()
-            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(self.session, tmpDir, fixture.vcsImpl)
             syncManager.pull(pullUi=pullUi)
             syncManager.importSinceLastSync(pullUi=pullUi)
 
@@ -498,7 +498,7 @@ class PullTestCase(unittest.TestCase):
                     dct[fixture.modRemotelyTaskPath].selectRemote()
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(self.session, tmpDir, fixture.vcsImpl)
             pullUi = MyPullUi()
             syncManager.pull(pullUi=pullUi)
             syncManager.importSinceLastSync(pullUi=pullUi)
@@ -530,7 +530,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -555,7 +555,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -576,7 +576,7 @@ class PullTestCase(unittest.TestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(self.session, localDir)
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=None)
 
@@ -640,7 +640,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -659,7 +659,7 @@ class PullTestCase(unittest.TestCase):
         with TemporaryDirectory() as tmpDir:
             # Create a remote repo with project "remote" and a task task1
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(self.session, remoteDir)
             remoteSyncManager.initDumpRepository()
 
             createProjectFile(remoteDir, uuid="u-rprj", name="remote")
@@ -668,7 +668,7 @@ class PullTestCase(unittest.TestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(self.session, localDir)
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=None)
             syncManager.importAll(pullUi=None)
@@ -717,7 +717,7 @@ class PullTestCase(unittest.TestCase):
             # Create a remote repo with project p1 (task task1) and p2 (task
             # task2)
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(self.session, remoteDir)
             remoteSyncManager.initDumpRepository()
 
             createProjectFile(remoteDir, uuid="u-prj1", name="p1")
@@ -728,7 +728,7 @@ class PullTestCase(unittest.TestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(self.session, localDir)
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=None)
             syncManager.importAll(pullUi=None)
@@ -765,7 +765,7 @@ class PullTestCase(unittest.TestCase):
 
             dumpDir = os.path.join(tmpDir, "dump")
             vcsImpl = GitVcsImpl()
-            syncManager = SyncManager(dumpDir, vcsImpl)
+            syncManager = SyncManager(self.session, dumpDir, vcsImpl)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -794,7 +794,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -817,7 +817,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -829,12 +829,12 @@ class PullTestCase(unittest.TestCase):
         with TemporaryDirectory() as tmpDir:
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(self.session, remoteDir)
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(self.session, localDir)
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=None)
 
@@ -860,12 +860,12 @@ class PullTestCase(unittest.TestCase):
         with TemporaryDirectory() as tmpDir:
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(self.session, remoteDir)
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(self.session, localDir)
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=None)
 
@@ -914,7 +914,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(self.session, tmpDir, MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 

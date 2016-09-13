@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 
 from yokadi.core import db
 from yokadi.core import dbs13n
@@ -16,11 +17,13 @@ _TABLE_DIRNAME = (
 )
 
 
-def dirnameForTable(table):
-    for tbl, dirname in _TABLE_DIRNAME:
-        if tbl == table:
-            return dirname
-    return None
+_DIRNAME_FOR_TABLE = dict((x.__table__, y) for x, y in _TABLE_DIRNAME)
+
+
+def dirnameForObject(obj):
+    """Returns the dirname for obj. Can return None if this is not a serialized object,
+    such as a TaskKeyword object"""
+    return _DIRNAME_FOR_TABLE.get(obj.__table__)
 
 
 def createVersionFile(dstDir):
@@ -76,6 +79,15 @@ def dumpTask(task, dumpDir):
 def dumpAlias(alias, dumpDir):
     dct = dbs13n.dictFromAlias(alias)
     dumpObject(dct, dumpDir)
+
+
+def deleteObjectDump(obj, dumpDir):
+    dirname = dirnameForObject(obj)
+    if dirname is None:
+        return
+    objPath = os.path.join(dumpDir, dirname, obj.uuid + ".json")
+    if os.path.exists(objPath):
+        os.unlink(objPath)
 
 
 def dump(dumpDir, vcsImpl=None):
