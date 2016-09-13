@@ -2,6 +2,8 @@ import json
 import os
 import shutil
 
+from collections import namedtuple
+
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
@@ -10,20 +12,33 @@ from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 
 
-_TABLE_DIRNAME = (
-    (Task, TASKS_DIRNAME),
-    (Project, PROJECTS_DIRNAME),
-    (Alias, ALIASES_DIRNAME),
+TableInfo = namedtuple("TableInfo", ("table", "dirname", "dictFromObject"))
+
+
+_TABLE_INFO = (
+    TableInfo(Task, TASKS_DIRNAME, dbs13n.dictFromTask),
+    TableInfo(Project, PROJECTS_DIRNAME, dbs13n.dictFromProject),
+    TableInfo(Alias, ALIASES_DIRNAME, dbs13n.dictFromAlias),
 )
 
 
-_DIRNAME_FOR_TABLE = dict((x.__table__, y) for x, y in _TABLE_DIRNAME)
+_DIRNAME_FOR_TABLE = dict((x.table.__table__, x.dirname) for x in _TABLE_INFO)
+
+
+_DICT_FROM_TABLE = dict((x.table.__table__, x.dictFromObject) for x in _TABLE_INFO)
+
 
 
 def dirnameForObject(obj):
     """Returns the dirname for obj. Can return None if this is not a serialized object,
     such as a TaskKeyword object"""
     return _DIRNAME_FOR_TABLE.get(obj.__table__)
+
+
+def dictFromObject(obj):
+    """Returns a serializable dict version of an object"""
+    fcn = _DICT_FROM_TABLE[obj.__table__]
+    return fcn(obj)
 
 
 def createVersionFile(dstDir):
@@ -69,24 +84,10 @@ def dumpObjectDict(dct, dumpDictDir):
         json.dump(dct, fp, indent=2, sort_keys=True)
 
 
-def dumpProject(project, dumpDir):
-    dirname = dirnameForObject(project)
+def dumpObject(obj, dumpDir):
+    dirname = dirnameForObject(obj)
     dumpDictDir = os.path.join(dumpDir, dirname)
-    dct = dbs13n.dictFromProject(project)
-    dumpObjectDict(dct, dumpDictDir)
-
-
-def dumpTask(task, dumpDir):
-    dirname = dirnameForObject(task)
-    dumpDictDir = os.path.join(dumpDir, dirname)
-    dct = dbs13n.dictFromTask(task)
-    dumpObjectDict(dct, dumpDictDir)
-
-
-def dumpAlias(alias, dumpDir):
-    dirname = dirnameForObject(alias)
-    dumpDictDir = os.path.join(dumpDir, dirname)
-    dct = dbs13n.dictFromAlias(alias)
+    dct = dictFromObject(obj)
     dumpObjectDict(dct, dumpDictDir)
 
 
@@ -108,11 +109,11 @@ def dump(dumpDir, vcsImpl=None):
 
     session = db.getSession()
     for project in session.query(Project).all():
-        dumpProject(project, dumpDir)
+        dumpObject(project, dumpDir)
     for task in session.query(Task).all():
-        dumpTask(task, dumpDir)
+        dumpObject(task, dumpDir)
     for alias in session.query(Alias).all():
-        dumpAlias(alias, dumpDir)
+        dumpObject(alias, dumpDir)
 
     if not vcsImpl.isWorkTreeClean():
         commitChanges(dumpDir, "Dumped", vcsImpl=vcsImpl)
