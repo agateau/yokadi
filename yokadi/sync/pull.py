@@ -10,7 +10,7 @@ from yokadi.core.db import Alias, Project, Task
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import dumpObject, checkIsValidDumpDir
+from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
 from yokadi.sync.vcschanges import VcsChanges
 
 
@@ -189,7 +189,7 @@ def _enforceProjectConstraints(session, dumpDir, pullUi):
         dct["name"] = new
         names.add(new)
         pullUi.addRename(PROJECTS_DIRNAME, old, new)
-        dumpObject(dct, jsonDirPath)
+        dumpObjectDict(dct, jsonDirPath)
 
 
 def _enforceAliasConstraints(dumpDir, pullUi):
@@ -212,7 +212,7 @@ def _enforceAliasConstraints(dumpDir, pullUi):
                 dct["name"] = new
                 names.add(new)
                 pullUi.addRename(ALIASES_DIRNAME, old, new)
-                dumpObject(dct, jsonDirPath)
+                dumpObjectDict(dct, jsonDirPath)
 
 
 def enforceDbConstraints(session, dumpDir, pullUi):

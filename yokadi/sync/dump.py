@@ -55,30 +55,39 @@ def clearDump(dstDir):
         os.mkdir(path)
 
 
-def dumpObject(obj, dumpDir):
-    # dumpDir may not exist if we cloned a database which does not contain any
-    # object of the type of obj (for example, no aliases)
-    os.makedirs(dumpDir, exist_ok=True)
+def dumpObjectDict(dct, dumpDictDir):
+    """Given a dict representing an object and a complete dir where to dump
+    (dumpDir/$objdir), write the JSON file"""
 
-    uuid = obj["uuid"]
-    path = os.path.join(dumpDir, uuid + ".json")
+    # dumpDir may not exist if we cloned a database which does not contain any
+    # object of the type of dct (for example, no aliases)
+    os.makedirs(dumpDictDir, exist_ok=True)
+
+    uuid = dct["uuid"]
+    path = os.path.join(dumpDictDir, uuid + ".json")
     with open(path, "wt") as fp:
-        json.dump(obj, fp, indent=2, sort_keys=True)
+        json.dump(dct, fp, indent=2, sort_keys=True)
 
 
 def dumpProject(project, dumpDir):
+    dirname = dirnameForObject(project)
+    dumpDictDir = os.path.join(dumpDir, dirname)
     dct = dbs13n.dictFromProject(project)
-    dumpObject(dct, dumpDir)
+    dumpObjectDict(dct, dumpDictDir)
 
 
 def dumpTask(task, dumpDir):
+    dirname = dirnameForObject(task)
+    dumpDictDir = os.path.join(dumpDir, dirname)
     dct = dbs13n.dictFromTask(task)
-    dumpObject(dct, dumpDir)
+    dumpObjectDict(dct, dumpDictDir)
 
 
 def dumpAlias(alias, dumpDir):
+    dirname = dirnameForObject(alias)
+    dumpDictDir = os.path.join(dumpDir, dirname)
     dct = dbs13n.dictFromAlias(alias)
-    dumpObject(dct, dumpDir)
+    dumpObjectDict(dct, dumpDictDir)
 
 
 def deleteObjectDump(obj, dumpDir):
@@ -98,15 +107,12 @@ def dump(dumpDir, vcsImpl=None):
     checkIsValidDumpDir(dumpDir, vcsImpl)
 
     session = db.getSession()
-    projectsDir = os.path.join(dumpDir, PROJECTS_DIRNAME)
     for project in session.query(Project).all():
-        dumpProject(project, projectsDir)
-    tasksDir = os.path.join(dumpDir, TASKS_DIRNAME)
+        dumpProject(project, dumpDir)
     for task in session.query(Task).all():
-        dumpTask(task, tasksDir)
-    aliasesDir = os.path.join(dumpDir, ALIASES_DIRNAME)
+        dumpTask(task, dumpDir)
     for alias in session.query(Alias).all():
-        dumpAlias(alias, aliasesDir)
+        dumpAlias(alias, dumpDir)
 
     if not vcsImpl.isWorkTreeClean():
         commitChanges(dumpDir, "Dumped", vcsImpl=vcsImpl)
