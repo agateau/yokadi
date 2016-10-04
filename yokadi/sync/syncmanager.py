@@ -2,10 +2,13 @@ import os
 
 from sqlalchemy import event
 
-from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, \
+        TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import clearDump, dump, createVersionFile, \
-    commitChanges, deleteObjectDump
+        commitChanges, isDumpableObject, getLinkedObject, dumpObjectDict, \
+        pathForObject, dirnameForObject, dictFromObject
+
 from yokadi.sync.pull import pull, importSinceLastSync, importAll
 
 
@@ -17,7 +20,8 @@ class SyncManager(object):
         self.dumpDir = dumpDir
         self.vcsImpl.setDir(dumpDir)
 
-        self._deletedObjects = set()
+        self._pathsToDelete = set()
+        self._dictsToWrite = {}
 
         if session:
             event.listen(session, "after_flush", self._onFlushed)
@@ -64,12 +68,32 @@ class SyncManager(object):
         return changes.hasChanges()
 
     def _onFlushed(self, session, *args):
-        self._deletedObjects = set(session.deleted)
+        for obj in session.deleted:
+            if not isDumpableObject(obj):
+                continue
+            if getLinkedObject(obj):
+                continue
+            self._pathsToDelete.add(pathForObject(obj))
+        for obj in session.dirty | session.new:
+            if not isDumpableObject(obj):
+                continue
+            linkedObject = getLinkedObject(obj)
+            if linkedObject:
+                obj = linkedObject
+
+            key = (dirnameForObject(obj), obj.uuid)
+            dct = dictFromObject(obj)
+
+            self._dictsToWrite[key] = dct
 
     def _onCommitted(self, session, *args):
-        while self._deletedObjects:
-            obj = self._deletedObjects.pop()
-            deleteObjectDump(obj, self.dumpDir)
+        for path in self._pathsToDelete:
+            fullPath = os.path.join(self.dumpDir, path)
+            if os.path.exists(fullPath):
+                os.unlink(fullPath)
+
+        for (dirname, _), dct in self._dictsToWrite.items():
+            dumpObjectDict(dct, os.path.join(self.dumpDir, dirname))
 
     def _onRollbacked(self, session, *args):
-        self._deletedObjects = set()
+        self._pathsToDelete = set()

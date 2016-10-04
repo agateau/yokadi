@@ -7,7 +7,7 @@ from collections import namedtuple
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.core.db import Task, Project, Alias
+from yokadi.core.db import Task, Project, Alias, TaskKeyword
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 
@@ -25,8 +25,7 @@ _TABLE_INFO = (
 _DIRNAME_FOR_TABLE = dict((x.table.__table__, x.dirname) for x in _TABLE_INFO)
 
 
-_DICT_FROM_TABLE = dict((x.table.__table__, x.dictFromObject) for x in _TABLE_INFO)
-
+_DICT_FCN_FOR_TABLE = dict((x.table.__table__, x.dictFromObject) for x in _TABLE_INFO)
 
 
 def dirnameForObject(obj):
@@ -35,9 +34,14 @@ def dirnameForObject(obj):
     return _DIRNAME_FOR_TABLE.get(obj.__table__)
 
 
+def pathForObject(obj):
+    dirname = dirnameForObject(obj)
+    return os.path.join(dirname, obj.uuid + '.json')
+
+
 def dictFromObject(obj):
     """Returns a serializable dict version of an object"""
-    fcn = _DICT_FROM_TABLE[obj.__table__]
+    fcn = _DICT_FCN_FOR_TABLE[obj.__table__]
     return fcn(obj)
 
 
@@ -91,13 +95,20 @@ def dumpObject(obj, dumpDir):
     dumpObjectDict(dct, dumpDictDir)
 
 
-def deleteObjectDump(obj, dumpDir):
-    dirname = dirnameForObject(obj)
-    if dirname is None:
-        return
-    objPath = os.path.join(dumpDir, dirname, obj.uuid + ".json")
-    if os.path.exists(objPath):
-        os.unlink(objPath)
+def getLinkedObject(obj):
+    """If an object is dumped as part of another object, return this other
+    object or None if the object is supposed to be dumped as is"""
+    if obj.__table__ is TaskKeyword.__table__:
+        return obj.task
+    return None
+
+
+def isDumpableObject(obj):
+    """Returns True if the object can be dumped, either directly or via its
+    linked object"""
+    if getLinkedObject(obj):
+        return True
+    return obj.__table__ in _DIRNAME_FOR_TABLE
 
 
 def dump(dumpDir, vcsImpl=None):

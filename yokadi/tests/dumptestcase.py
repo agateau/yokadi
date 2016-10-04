@@ -138,3 +138,29 @@ class DumpTestCase(unittest.TestCase):
 
             self.assertFalse(os.path.exists(t1Path))
             self.assertTrue(os.path.exists(t2Path))
+
+    def testRemoveKeywords(self):
+        """Create a task with two keywords, remove one keyword. Check the dump has been updated."""
+
+        t1 = dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)
+
+        with TemporaryDirectory() as tmpDir:
+            dumpDir = os.path.join(tmpDir, "dump")
+            syncManager = SyncManager(self.session, dumpDir)
+            syncManager.initDumpRepository()
+            syncManager.dump()
+
+            t1Path = getTaskPath(dumpDir, t1)
+            self.assertTrue(os.path.exists(t1Path))
+
+            newKeywordDict = dict(kw1=1)
+            t1.setKeywordDict(newKeywordDict)
+            self.session.commit()
+
+            self.assertTrue(os.path.exists(t1Path))
+
+            with open(t1Path) as f:
+                dct = json.load(f)
+
+            keywordDict = dct["keywords"]
+            self.assertEqual(newKeywordDict, keywordDict)
