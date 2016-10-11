@@ -20,12 +20,12 @@ class ConflictingObject(object):
         domain = os.path.dirname(conflict.path)
         def _load_json(json_or_none):
             if json_or_none is None:
-                return None
+                return {}
             return json.loads(json_or_none.decode('utf-8'))
         ancestor = _load_json(conflict.ancestor)
         local = _load_json(conflict.local)
         remote = _load_json(conflict.remote)
-        if local is None or remote is None:
+        if not local or not remote:
             return ModifiedDeletedConflictingObject(
                     path=conflict.path,
                     domain=domain,

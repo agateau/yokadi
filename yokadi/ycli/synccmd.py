@@ -110,12 +110,12 @@ class TextPullUi(PullUi):
 
     def resolveModifiedDeletedObject(self, obj):
         printConflictObjectHeader(obj)
-        if obj.remote is None:
-            print("This object has been modified locally and deleted remotely")
-            modified = obj.local
-        else:
+        if obj.remote:
             print("This object has been modified remotely and deleted locally")
             modified = obj.remote
+        else:
+            print("This object has been modified locally and deleted remotely")
+            modified = obj.local
         for key, value in obj.ancestor.items():
             modifiedValue = modified[key]
             if value == modifiedValue:
