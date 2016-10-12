@@ -88,6 +88,9 @@ def createTaskJson(uuid, projectUuid, title, **kwargs):
         "creationDate": "2016-01-12T19:12:00",
         "keywords": {},
         "description": "",
+        "recurrence": {},
+        "status": "new",
+        "urgency": 0,
     }
     dct.update(kwargs)
     return jsonDumps(dct).encode("utf-8")
