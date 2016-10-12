@@ -28,6 +28,19 @@ _DIRNAME_FOR_TABLE = dict((x.table.__table__, x.dirname) for x in _TABLE_INFO)
 _DICT_FCN_FOR_TABLE = dict((x.table.__table__, x.dictFromObject) for x in _TABLE_INFO)
 
 
+_JSON_DUMP_ARGS = dict(indent=2, sort_keys=True)
+
+
+def jsonDumps(dct):
+    """Dump a dict to a string using Yokadi formatting"""
+    return json.dumps(dct, **_JSON_DUMP_ARGS)
+
+
+def jsonDump(dct, fp):
+    """Dump a dict to a file using Yokadi formatting"""
+    return json.dump(dct, fp, **_JSON_DUMP_ARGS)
+
+
 def dirnameForObject(obj):
     """Returns the dirname for obj. Can return None if this is not a serialized object,
     such as a TaskKeyword object"""

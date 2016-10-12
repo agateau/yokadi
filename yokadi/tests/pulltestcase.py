@@ -1,4 +1,3 @@
-import json
 import os
 import unittest
 
@@ -8,7 +7,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync.dump import createVersionFile
+from yokadi.sync.dump import createVersionFile, jsonDump, jsonDumps
 from yokadi.sync.pull import ChangeHandler
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.pullui import PullUi
@@ -77,7 +76,7 @@ def createProjectFile(dirname, uuid, name, active=True):
     }
     filePath = os.path.join(projectDir, uuid + ".json")
     with open(filePath, "wt") as fp:
-        json.dump(dct, fp)
+        jsonDump(dct, fp)
     return os.path.relpath(filePath, dirname)
 
 
@@ -91,7 +90,7 @@ def createTaskJson(uuid, projectUuid, title, **kwargs):
         "description": "",
     }
     dct.update(kwargs)
-    return json.dumps(dct).encode("utf-8")
+    return jsonDumps(dct).encode("utf-8")
 
 
 def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
@@ -115,7 +114,7 @@ def createAliasFile(dirname, uuid, name, command):
     }
     filePath = os.path.join(aliasesDir, uuid + ".json")
     with open(filePath, "wt") as fp:
-        json.dump(dct, fp)
+        jsonDump(dct, fp)
     return os.path.relpath(filePath, dirname)
 
 
