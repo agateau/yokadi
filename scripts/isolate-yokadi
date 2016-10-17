@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+# Runs Yokadi in a separated environment so that it has its own database and
+# dump dir
+
+absdir() {
+    local oldpwd=$PWD
+    cd "$1"
+    echo "$PWD"
+    cd "$oldpwd"
+}
+
+usage() {
+    echo "$(basename $0) [base-dir] <yokadi-arguments>"
+    exit 1
+}
+
+if [ $# -lt 1 ] ; then
+    usage
+fi
+
+yokadi_dir=$(absdir "$(dirname "$0")/..")
+root_dir=$(absdir "$1")
+shift
+
+export XDG_CACHE_HOME=$root_dir/cache
+mkdir -p "$XDG_CACHE_HOME"
+
+export XDG_DATA_HOME=$root_dir/data
+mkdir -p "$XDG_DATA_HOME"
+
+"$yokadi_dir/bin/yokadi" "$@"
