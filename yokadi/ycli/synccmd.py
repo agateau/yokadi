@@ -97,8 +97,8 @@ class TextPullUi(PullUi):
 
 
 class SyncCmd(Cmd):
-    def __init__(self):
-        self.dumpDir = os.path.join(basepaths.getCacheDir(), 'db')
+    def __init__(self, dumpDir=None):
+        self.dumpDir = dumpDir or os.path.join(basepaths.getCacheDir(), 'db')
         self.syncManager = SyncManager(self.dumpDir)
 
     def do_s_sync(self, line):
@@ -195,4 +195,5 @@ class SyncCmd(Cmd):
             return
         for domain, renames in renameDict.items():
             print("Elements renamed in {}".format(domain))
-            print("- {} => {}".format(*renames))
+            for old, new in renames:
+                print("- {} => {}".format(old, new))
