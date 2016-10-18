@@ -227,12 +227,40 @@ url can be either a `file:` or an `ssh:` url
 ## Merging an existing DB into an existing repo
 
     s_clone ssh://[<user>@]<hostname>/<path/to/repo>
-    s_dump
-    s_pull
-    s_push
+    s_sync
 
 ## Fetching latest changes
 
-    s_dump
-    s_pull
-    s_push
+    s_sync
+
+# WIP setup
+
+Create a first Yokadi setup
+
+    mkdir ~/sandbox/y1
+    isolate-yokadi ~/sandbox/y1
+    y> s_init
+
+Create remote repo
+
+    mkdir ~/sandbox/remote
+    cd ~/sandbox/remote
+    git init --bare
+
+Connect y1 to remote
+
+    cd ~/sandbox/y1/cache/yokadi/db
+    git remote add origin ~/sandbox/remote
+    git push -u origin master
+
+    isolate-yokadi ~/sandbox/y1
+    y> s_sync
+
+Create a second Yokadi setup
+
+    mkdir -p ~/sandbox/y2/cache/yokadi
+    cd ~/sandbox/y2/cache/yokadi
+    git clone ~/sandbox/remote db
+
+    isolate-yokadi ~/sandbox/y2
+    y> _s_import --all
