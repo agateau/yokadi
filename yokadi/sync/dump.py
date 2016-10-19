@@ -65,24 +65,28 @@ def dumpAlias(alias, dumpDir):
     dumpObject(dct, dumpDir)
 
 
-def dump(dstDir, vcsImpl=None):
-    assert os.path.exists(dstDir)
+def dump(dumpDir, vcsImpl=None):
+    assert os.path.exists(dumpDir)
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
-    vcsImpl.setDir(dstDir)
-    checkIsValidDumpDir(dstDir, vcsImpl)
+    vcsImpl.setDir(dumpDir)
+    checkIsValidDumpDir(dumpDir, vcsImpl)
 
     session = db.getSession()
-    projectsDir = os.path.join(dstDir, PROJECTS_DIRNAME)
+    projectsDir = os.path.join(dumpDir, PROJECTS_DIRNAME)
     for project in session.query(Project).all():
         dumpProject(project, projectsDir)
-    tasksDir = os.path.join(dstDir, TASKS_DIRNAME)
+    tasksDir = os.path.join(dumpDir, TASKS_DIRNAME)
     for task in session.query(Task).all():
         dumpTask(task, tasksDir)
-    aliasesDir = os.path.join(dstDir, ALIASES_DIRNAME)
+    aliasesDir = os.path.join(dumpDir, ALIASES_DIRNAME)
     for alias in session.query(Alias).all():
         dumpAlias(alias, aliasesDir)
 
     if not vcsImpl.isWorkTreeClean():
-        vcsImpl.commitAll("Dumped")
-        vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
+        commitChanges(dumpDir, "Dumped", vcsImpl=vcsImpl)
+
+
+def commitChanges(dumpDir, message, vcsImpl):
+    vcsImpl.commitAll(message)
+    vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
