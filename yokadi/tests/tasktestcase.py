@@ -57,6 +57,39 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_t_add("-c x encrypted t1")
         self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
 
+    def testEdit(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x txt @_note")
+
+        tui.addInputAnswers("newtxt")
+        self.cmd.do_t_edit("1")
+
+        task = self.session.query(Task).get(1)
+        self.assertEqual(task.title, "newtxt")
+        self.assertEqual(task.getKeywordDict(), {"_note": None})
+
+    def testEditAddKeyword(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x txt")
+
+        tui.addInputAnswers("txt @kw", "y")
+        self.cmd.do_t_edit("1")
+
+        task = self.session.query(Task).get(1)
+        self.assertEqual(task.title, "txt")
+        self.assertEqual(task.getKeywordDict(), {"kw": None})
+
+    def testEditRemoveKeyword(self):
+        tui.addInputAnswers("y", "y")
+        self.cmd.do_t_add("x txt @kw")
+
+        tui.addInputAnswers("txt")
+        self.cmd.do_t_edit("1")
+
+        task = self.session.query(Task).get(1)
+        self.assertEqual(task.title, "txt")
+        self.assertEqual(task.getKeywordDict(), {})
+
     def testRemove(self):
         # Create a recurrent task with one keyword
         tui.addInputAnswers("y", "y")

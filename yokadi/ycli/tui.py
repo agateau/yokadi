@@ -95,7 +95,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".
                     mtime = newMtime
                     onChanged(readFile(name))
         if proc.returncode != 0:
-            raise Exception()
+            raise Exception("The command {} failed. It exited with code {}.".format(proc.args, proc.returncode))
         return readFile(name)
     finally:
         os.close(fd)
