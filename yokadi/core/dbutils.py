@@ -138,6 +138,19 @@ def getKeywordFromName(name):
     return lst[0]
 
 
+def splitKeywordDict(dct):
+    """Take a keyword dict and return a tuple of the form (userDict,
+    reservedDict) """
+    userDict = {}
+    reservedDict = {}
+    for key, value in dct.items():
+        if key[0] == '_':
+            reservedDict[key] = value
+        else:
+            userDict[key] = value
+    return userDict, reservedDict
+
+
 class TaskLockManager:
     """Handle a lock to prevent concurrent editing of the same task"""
     def __init__(self, task):

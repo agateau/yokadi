@@ -836,7 +836,8 @@ class TaskCmd(object):
         title = self.cryptoMgr.decrypt(task.title)
 
         # Create task line
-        userKeywordDict = {k: v for k, v in task.getKeywordDict().items() if not k[0] == '_'}
+        keywordDict = task.getKeywordDict()
+        userKeywordDict, keywordDict = dbutils.splitKeywordDict(keywordDict)
         taskLine = parseutils.createLine("", title, userKeywordDict)
 
         oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
@@ -866,7 +867,6 @@ class TaskCmd(object):
         finally:
             readline.set_completer(oldCompleter)
 
-        keywordDict = task.getKeywordDict()
         keywordDict.update(userKeywordDict)
         if keywordEditor:
             keywordEditor(keywordDict)
