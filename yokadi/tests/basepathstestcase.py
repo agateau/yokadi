@@ -7,37 +7,22 @@ Basepaths test cases
 import os
 import shutil
 import tempfile
-import unittest
 
 from pathlib import Path
 
 from yokadi.core import basepaths
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-def saveEnv():
-    return dict(os.environ)
-
-
-def restoreEnv(env):
-    # Do not use `os.environ = env`: this would replace the special os.environ
-    # object with a plain dict. We must update the *existing* object.
-    os.environ.clear()
-    os.environ.update(env)
-
-
-class BasePathsUnixTestCase(unittest.TestCase):
+class BasePathsUnixTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         self._oldWindows = basepaths._WINDOWS
         basepaths._WINDOWS = False
 
-        self._oldEnv = saveEnv()
-        self.testHomeDir = tempfile.mkdtemp(prefix="yokadi-basepaths-testcase")
-        os.environ["HOME"] = self.testHomeDir
-
     def tearDown(self):
-        shutil.rmtree(self.testHomeDir)
-        restoreEnv(self._oldEnv)
         basepaths._WINDOWS = self._oldWindows
+        YokadiTestCase.tearDown(self)
 
     def testMigrateOldDb(self):
         oldDb = Path(self.testHomeDir) / '.yokadi.db'
@@ -102,10 +87,10 @@ class BasePathsUnixTestCase(unittest.TestCase):
         self.assertEqual(basepaths.getDbPath(), path)
 
 
-class BasePathsWindowsTestCase(unittest.TestCase):
+class BasePathsWindowsTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         self._oldWindows = basepaths._WINDOWS
-        self._oldEnv = saveEnv()
         basepaths._WINDOWS = True
         self.testAppDataDir = tempfile.mkdtemp(prefix="yokadi-basepaths-testcase")
         os.environ["APPDATA"] = self.testAppDataDir
@@ -113,7 +98,7 @@ class BasePathsWindowsTestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.testAppDataDir)
         basepaths._WINDOWS = self._oldWindows
-        restoreEnv(self._oldEnv)
+        YokadiTestCase.tearDown(self)
 
     def testGetCacheDir(self):
         expected = os.path.join(self.testAppDataDir, "yokadi", "cache")
