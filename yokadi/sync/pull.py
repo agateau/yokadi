@@ -29,6 +29,7 @@ class ChangeHandler(object):
     applyPostUpdateChanges().
     """
     domain = None
+    table = None
 
     def __init__(self):
         self._postUpdateChanges = []
@@ -36,8 +37,15 @@ class ChangeHandler(object):
     def handle(self, session, dumpDir, changes):
         for path in changes.added:
             if self._shouldHandleFilePath(path):
+                uuid = self._getUuidFromFilePath(path)
                 dct = self._loadJson(dumpDir, path)
-                self._add(session, dct)
+                if self._objectExists(session, uuid):
+                    # We are trying to add an object which already exists.
+                    # Update it instead. This can happen when importing a
+                    # complete dump in an existing database.
+                    self._update(session, dct)
+                else:
+                    self._add(session, dct)
         for path in changes.modified:
             if self._shouldHandleFilePath(path):
                 dct = self._loadJson(dumpDir, path)
@@ -81,17 +89,18 @@ class ChangeHandler(object):
         name = os.path.basename(filePath)
         return os.path.splitext(name)[0]
 
+    @classmethod
+    def _objectExists(cls, session, uuid):
+        assert cls.table
+        return dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True) is not None
+
 
 class ProjectChangeHandler(ChangeHandler):
     domain = PROJECTS_DIRNAME
+    table = Project
 
     def _add(self, session, dct):
-        # If a local project exists, update it. This will change its uuid to the
-        # uuid of the remote project, resolving the conflict.
-        # If there is no local project with this name, create a new one.
-        project = dbutils.getProject(session, name=dct["name"], _allowNone=True)
-        if project is None:
-            project = Project()
+        project = Project()
         self._doUpdate(session, project, dct)
 
     def _update(self, session, dct):
@@ -113,13 +122,10 @@ class ProjectChangeHandler(ChangeHandler):
 
 class TaskChangeHandler(ChangeHandler):
     domain = TASKS_DIRNAME
+    table = Task
 
     def _add(self, session, dct):
-        # If a local task exists, update it, otherwise create a new one.
-        # Updating an existing task here can happen when importing all changes
-        task = dbutils.getTask(session, uuid=dct["uuid"], _allowNone=True)
-        if task is None:
-            task = Task()
+        task = Task()
         dbs13n.updateTaskFromDict(session, task, dct)
 
     def _update(self, session, dct):
@@ -132,13 +138,10 @@ class TaskChangeHandler(ChangeHandler):
 
 class AliasChangeHandler(ChangeHandler):
     domain = ALIASES_DIRNAME
+    table = Alias
 
     def _add(self, session, dct):
-        # If a local alias exists, update it, otherwise create a new one.
-        # Updating an existing alias here can happen when importing all changes
-        alias = dbutils.getAlias(session, uuid=dct["uuid"], _allowNone=True)
-        if alias is None:
-            alias = Alias()
+        alias = Alias()
         self._doUpdate(session, alias, dct)
 
     def _update(self, session, dct):
@@ -195,20 +198,30 @@ def _findConflicts(jsonDirPath, fieldName):
     return {k: v for k, v in dictForField.items() if len(v) > 1}
 
 
-def _enforceProjectConstraints(dumpDir, pullUi):
+def _enforceProjectConstraints(session, dumpDir, pullUi):
     jsonDirPath = os.path.join(dumpDir, PROJECTS_DIRNAME)
     conflictDict = _findConflicts(jsonDirPath, "name")
 
-    names = set(conflictDict.keys())
-    for conflictList in conflictDict.values():
-        ref = conflictList.pop()
-        for dct in conflictList:
-            old = dct["name"]
-            new = _findUniqueName(old, names)
-            dct["name"] = new
-            names.add(new)
-            pullUi.addRename(PROJECTS_DIRNAME, old, new)
-            dumpObject(dct, jsonDirPath)
+    names = {x.name for x in session.query(db.Project).all()}
+    for name, conflictList in conflictDict.items():
+        assert len(conflictList) == 2
+
+        # Find local project
+        project = session.query(db.Project).filter_by(name=name).one()
+        localUuid = project.uuid
+
+        if conflictList[0]["uuid"] == localUuid:
+            dct = conflictList[0]
+        else:
+            dct = conflictList[1]
+
+        # Rename local project
+        old = dct["name"]
+        new = _findUniqueName(old, names)
+        dct["name"] = new
+        names.add(new)
+        pullUi.addRename(PROJECTS_DIRNAME, old, new)
+        dumpObject(dct, jsonDirPath)
 
 
 def _enforceAliasConstraints(dumpDir, pullUi):
@@ -234,10 +247,10 @@ def _enforceAliasConstraints(dumpDir, pullUi):
                 dumpObject(dct, jsonDirPath)
 
 
-def enforceDbConstraints(dumpDir, pullUi):
+def enforceDbConstraints(session, dumpDir, pullUi):
     # TODO: Only enforce constraints if there have been changes in the concerned
     # dir
-    _enforceProjectConstraints(dumpDir, pullUi)
+    _enforceProjectConstraints(session, dumpDir, pullUi)
     _enforceAliasConstraints(dumpDir, pullUi)
 
 
@@ -265,7 +278,7 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
 
     session = db.getSession()
 
-    enforceDbConstraints(dumpDir, pullUi)
+    enforceDbConstraints(session, dumpDir, pullUi)
     dbConstraintChanges = vcsImpl.getWorkTreeChanges()
     changes.update(dbConstraintChanges)
 
