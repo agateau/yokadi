@@ -24,6 +24,9 @@ class StubVcsImpl(object):
     def isValidVcsDir(self):
         return True
 
+    def init(self):
+        pass
+
     def pull(self):
         pass
 
@@ -50,6 +53,17 @@ class StubVcsImpl(object):
 
     def updateBranch(self, branch, commitId):
         pass
+
+
+class StubPullUi(PullUi):
+    def __init__(self):
+        self._renames = []
+
+    def resolveConflicts(self, conflictingObjects):
+        pass
+
+    def addRename(self, domain, old, new):
+        self._renames.append((domain, old, new))
 
 
 def createProjectFile(dirname, uuid, name, active=True):
@@ -553,41 +567,59 @@ class PullTestCase(unittest.TestCase):
 
     def testRemoteCreateSameProject(self):
         with TemporaryDirectory() as tmpDir:
-            prj = dbutils.getOrCreateProject("prj", interactive=False)
-            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
-            self.session.commit()
+            REMOTE_PROJECT_UUID = "r-5678-prj2"
 
-            createVersionFile(tmpDir)
-            addedProjectPath = createProjectFile(
-                    tmpDir,
-                    name="prj",
-                    uuid="5678-prj2")
-            addedTaskPath = createTaskFile(
-                    tmpDir,
-                    title="task2",
-                    projectUuid="5678-prj2",
-                    uuid="1234-task")
+            # Create an empty remote repo
+            remoteDir = os.path.join(tmpDir, "remote")
+            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager.initDumpRepository()
 
-            class MyVcsImpl(StubVcsImpl):
-                def getChangesSince(self, commitId):
-                    changes = VcsChanges()
-                    changes.added = {addedProjectPath, addedTaskPath}
-                    return changes
-
-            # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            # Clone the remote repo
+            localDir = os.path.join(tmpDir, "local")
+            syncManager = SyncManager(localDir)
+            syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
-            # The added project should not be there, task2 should be in prj
+            # Create prj in remote repo
+            createProjectFile(
+                    remoteDir,
+                    uuid=REMOTE_PROJECT_UUID,
+                    name="prj")
+            createTaskFile(
+                    remoteDir,
+                    title="r-task",
+                    projectUuid=REMOTE_PROJECT_UUID,
+                    uuid="r-1234-task")
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Create prj in local repo
+            prj = dbutils.getOrCreateProject("prj", interactive=False)
+            task = dbutils.addTask(prj.name, "l-task", interactive=False)
+            self.session.commit()
+            prjUuid = prj.uuid
+            syncManager.dump()
+
+            # Do the pull, conflict should be automatically solved
+            pullUi = StubPullUi()
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importSinceLastSync(pullUi=pullUi)
+
+            # Local project should be renamed prj_1
             projects = list(self.session.query(Project).all())
-            self.assertEqual(len(projects), 1)
-            self.assertEqual(projects[0].uuid, prj.uuid)
+            self.assertCountEqual(
+                    (x.uuid for x in projects),
+                    (prjUuid, REMOTE_PROJECT_UUID))
+            self.assertCountEqual(
+                    (x.name for x in projects),
+                    ("prj", "prj_1"))
 
             tasks = list(self.session.query(Task).all())
-            self.assertEqual(len(tasks), 2)
-            task2 = self.session.query(Task).filter_by(uuid="1234-task").one()
-            self.assertEqual(task2.project.uuid, prj.uuid)
+            self.assertCountEqual(
+                    (x.uuid for x in tasks),
+                    (task.uuid, "r-1234-task"))
+            self.assertCountEqual(
+                    (x.title for x in tasks),
+                    ("l-task", "r-task"))
 
     def testRemoteRenamedProject(self):
         with TemporaryDirectory() as tmpDir:
