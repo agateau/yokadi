@@ -23,13 +23,14 @@ def _dictFromRow(row, skippedKeys=None):
     return dct
 
 
-def _updateRowFromDict(row, dct, skippedKeys=None):
+def _updateRowFromDict(session, row, dct, skippedKeys=None):
     if skippedKeys is None:
         skippedKeys = set()
     for key, value in dct.items():
         if key in skippedKeys:
             continue
         setattr(row, key, value)
+    session.add(row)
 
 
 def _convertStringsToDates(dct, keys):
@@ -47,8 +48,8 @@ def dictFromProject(project):
     return _dictFromRow(project, skippedKeys={"tasks"})
 
 
-def updateProjectFromDict(project, dct):
-    _updateRowFromDict(project, dct)
+def updateProjectFromDict(session, project, dct):
+    _updateRowFromDict(session, project, dct)
 
 
 def dictFromTask(task):
@@ -65,8 +66,7 @@ def updateTaskFromDict(session, task, dct):
     dct["project"] = project
 
     _convertStringsToDates(dct, TASK_DATE_FIELDS)
-    _updateRowFromDict(task, dct, skippedKeys={"recurrence", "keywords"})
-    session.add(task)
+    _updateRowFromDict(session, task, dct, skippedKeys={"recurrence", "keywords"})
     keywords = dct["keywords"]
     dbutils.createMissingKeywords(keywords.keys(), interactive=False)
     task.setKeywordDict(keywords)
@@ -79,5 +79,5 @@ def dictFromAlias(alias):
     return _dictFromRow(alias)
 
 
-def updateAliasFromDict(alias, dct):
-    _updateRowFromDict(alias, dct)
+def updateAliasFromDict(session, alias, dct):
+    _updateRowFromDict(session, alias, dct)

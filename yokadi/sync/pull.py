@@ -105,8 +105,7 @@ class ProjectChangeHandler(ChangeHandler):
             self._schedulePostUpdateChange(project, dict(name=dct["name"]))
             dct["name"] = dct["uuid"]
 
-        dbs13n.updateProjectFromDict(project, dct)
-        session.add(project)
+        dbs13n.updateProjectFromDict(session, project, dct)
 
 
 class TaskChangeHandler(ChangeHandler):
@@ -127,8 +126,7 @@ class AliasChangeHandler(ChangeHandler):
             self._schedulePostUpdateChange(alias, dict(name=dct["name"]))
             dct["name"] = dct["uuid"]
 
-        dbs13n.updateAliasFromDict(alias, dct)
-        session.add(alias)
+        dbs13n.updateAliasFromDict(session, alias, dct)
 
 
 def autoResolveConflicts(objects):
