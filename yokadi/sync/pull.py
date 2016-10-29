@@ -70,7 +70,7 @@ class ChangeHandler(object):
         raise NotImplementedError()
 
     def _remove(self, session, uuid):
-        raise NotImplementedError()
+        session.query(self.table).filter_by(uuid=uuid).delete()
 
     @classmethod
     def _shouldHandleFilePath(cls, filePath):
@@ -116,9 +116,6 @@ class ProjectChangeHandler(ChangeHandler):
         dbs13n.updateProjectFromDict(project, dct)
         session.add(project)
 
-    def _remove(self, session, uuid):
-        session.query(Project).filter_by(uuid=uuid).delete()
-
 
 class TaskChangeHandler(ChangeHandler):
     domain = TASKS_DIRNAME
@@ -131,9 +128,6 @@ class TaskChangeHandler(ChangeHandler):
     def _update(self, session, dct):
         task = session.query(Task).filter_by(uuid=dct["uuid"]).one()
         dbs13n.updateTaskFromDict(session, task, dct)
-
-    def _remove(self, session, uuid):
-        session.query(Task).filter_by(uuid=uuid).delete()
 
 
 class AliasChangeHandler(ChangeHandler):
@@ -156,9 +150,6 @@ class AliasChangeHandler(ChangeHandler):
 
         dbs13n.updateAliasFromDict(alias, dct)
         session.add(alias)
-
-    def _remove(self, session, uuid):
-        session.query(Alias).filter_by(uuid=uuid).delete()
 
 
 def autoResolveConflicts(objects):
