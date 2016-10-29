@@ -20,8 +20,8 @@ class ChangeHandler(object):
 
     Inherited classes can decide to defer changes to after the update to avoid
     breaking DB constraints. This can happen for example when changing project
-    or task names: if two project swap names, updating them one after the other
-    would cause a DB integrity failure.
+    or alias names: if two project swap names, updating them one after the
+    other would cause a DB integrity failure.
 
     To avoid the failure, we change names to temporary names and defer changing
     names to their final value using _schedulePostUpdateChange().  Once all
@@ -37,19 +37,20 @@ class ChangeHandler(object):
     def handle(self, session, dumpDir, changes):
         for path in changes.added:
             if self._shouldHandleFilePath(path):
-                uuid = self._getUuidFromFilePath(path)
                 dct = self._loadJson(dumpDir, path)
-                if self._objectExists(session, uuid):
-                    # We are trying to add an object which already exists.
-                    # Update it instead. This can happen when importing a
-                    # complete dump in an existing database.
-                    self._update(session, dct)
-                else:
-                    self._add(session, dct)
+                obj = self._getObject(session, dct["uuid"])
+                if not obj:
+                    # In most cases, the object should not exist, since this is
+                    # an addition, but it can nevertheless happen when
+                    # importing a whole dump (in which cases all files are
+                    # marked as "added")
+                    obj = self.table()
+                self._update(session, obj, dct)
         for path in changes.modified:
             if self._shouldHandleFilePath(path):
                 dct = self._loadJson(dumpDir, path)
-                self._update(session, dct)
+                obj = self._getObject(session, dct["uuid"])
+                self._update(session, obj, dct)
         for path in changes.removed:
             if self._shouldHandleFilePath(path):
                 uuid = self._getUuidFromFilePath(path)
@@ -63,10 +64,9 @@ class ChangeHandler(object):
     def _schedulePostUpdateChange(self, obj, changeDict):
         self._postUpdateChanges.append((obj, changeDict))
 
-    def _add(self, session, dct):
-        raise NotImplementedError()
-
-    def _update(self, session, dct):
+    def _update(self, session, obj, dct):
+        """Must update the object `obj` with the values of dict `dct`
+        """
         raise NotImplementedError()
 
     def _remove(self, session, uuid):
@@ -90,24 +90,16 @@ class ChangeHandler(object):
         return os.path.splitext(name)[0]
 
     @classmethod
-    def _objectExists(cls, session, uuid):
+    def _getObject(cls, session, uuid):
         assert cls.table
-        return dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True) is not None
+        return dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True)
 
 
 class ProjectChangeHandler(ChangeHandler):
     domain = PROJECTS_DIRNAME
     table = Project
 
-    def _add(self, session, dct):
-        project = Project()
-        self._doUpdate(session, project, dct)
-
-    def _update(self, session, dct):
-        project = dbutils.getProject(session, uuid=dct["uuid"])
-        self._doUpdate(session, project, dct)
-
-    def _doUpdate(self, session, project, dct):
+    def _update(self, session, project, dct):
         if project.name != dct["name"]:
             # Name changed, mangle it, we will set it later
             self._schedulePostUpdateChange(project, dict(name=dct["name"]))
@@ -121,12 +113,7 @@ class TaskChangeHandler(ChangeHandler):
     domain = TASKS_DIRNAME
     table = Task
 
-    def _add(self, session, dct):
-        task = Task()
-        dbs13n.updateTaskFromDict(session, task, dct)
-
-    def _update(self, session, dct):
-        task = session.query(Task).filter_by(uuid=dct["uuid"]).one()
+    def _update(self, session, task, dct):
         dbs13n.updateTaskFromDict(session, task, dct)
 
 
@@ -134,15 +121,7 @@ class AliasChangeHandler(ChangeHandler):
     domain = ALIASES_DIRNAME
     table = Alias
 
-    def _add(self, session, dct):
-        alias = Alias()
-        self._doUpdate(session, alias, dct)
-
-    def _update(self, session, dct):
-        alias = session.query(Alias).filter_by(uuid=dct["uuid"]).one()
-        self._doUpdate(session, alias, dct)
-
-    def _doUpdate(self, session, alias, dct):
+    def _update(self, session, alias, dct):
         if alias.name != dct["name"]:
             # Name changed, mangle it, we will set it later
             self._schedulePostUpdateChange(alias, dict(name=dct["name"]))
