@@ -1,6 +1,5 @@
 import json
 import os
-import shutil
 
 from yokadi.core import db
 from yokadi.core import dbs13n
@@ -8,6 +7,20 @@ from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task, Project, Alias
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
+
+
+_TABLE_DIRNAME = (
+    (Task, TASKS_DIRNAME),
+    (Project, PROJECTS_DIRNAME),
+    (Alias, ALIASES_DIRNAME),
+)
+
+
+def dirnameForTable(table):
+    for tbl, dirname in _TABLE_DIRNAME:
+        if tbl == table:
+            return dirname
+    return None
 
 
 def createVersionFile(dstDir):

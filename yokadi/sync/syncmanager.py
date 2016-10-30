@@ -1,18 +1,27 @@
 import os
 
-from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from sqlalchemy import event
+
+from yokadi.sync import VERSION, VERSION_FILENAME, DB_SYNC_BRANCH, \
+        ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import clearDump, dump, createVersionFile, commitChanges
+from yokadi.sync.dump import clearDump, dump, createVersionFile, \
+    commitChanges, deleteObjectDump
 from yokadi.sync.pull import pull, importSinceLastSync, importAll
 
 
 class SyncManager(object):
-    def __init__(self, dumpDir, vcsImpl=None):
+    def __init__(self, session, dumpDir, vcsImpl=None):
         if vcsImpl is None:
             vcsImpl = GitVcsImpl()
         self.vcsImpl = vcsImpl
         self.dumpDir = dumpDir
         self.vcsImpl.setDir(dumpDir)
+
+        if session:
+            event.listen(session, "after_flush", self._onFlushed)
+            event.listen(session, "after_rollback", self._onRollbacked)
+            event.listen(session, "after_commit", self._onCommitted)
 
     def initDumpRepository(self):
         assert not os.path.exists(self.dumpDir)
@@ -52,3 +61,14 @@ class SyncManager(object):
     def hasChangesToPush(self):
         changes = self.vcsImpl.getChangesSince("origin/master")
         return changes.hasChanges()
+
+    def _onFlushed(self, session, *args):
+        self._deletedObjects = set(session.deleted)
+
+    def _onCommitted(self, session, *args):
+        for obj in self._deletedObjects:
+            deleteObjectDump(obj)
+        self._deletedObjects = set()
+
+    def _onRollbacked(self, session, *args):
+        self._deletedObjects = set()

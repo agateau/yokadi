@@ -571,7 +571,7 @@ class PullTestCase(unittest.TestCase):
 
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(None, remoteDir)
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
