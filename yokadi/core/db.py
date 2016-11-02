@@ -109,7 +109,7 @@ class Task(Base):
     id = Column(Integer, primary_key=True)
     uuid = Column(Unicode, unique=True, default=uuidGenerator, nullable=False)
     title = Column(Unicode)
-    creationDate = Column("creation_date", DateTime, nullable=False)
+    creationDate = Column("creation_date", DateTime, nullable=False, default=datetime.now)
     dueDate = Column("due_date", DateTime, default=None)
     doneDate = Column("done_date", DateTime, default=None)
     description = Column(Unicode, default="", nullable=False)
