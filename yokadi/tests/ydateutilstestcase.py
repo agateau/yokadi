@@ -129,8 +129,8 @@ class YDateUtilsTestCase(unittest.TestCase):
             self.assertIsNone(ydateutils.guessTime(invalidTime))
 
 
-        for text, expected_result in (('12:05:20', time(hour=12, minute=5, second=20)), ('10:00am', time(hour=10)), ('7:30pm', time(hour=19, minute=30))):
+        for text, expected in (('12:05:20', time(hour=12, minute=5, second=20)), ('10:00am', time(hour=10)), ('7:30pm', time(hour=19, minute=30))):
             output = ydateutils.guessTime(text)
-            self.assertEqual(expected_result, output)
+            self.assertEqual(expected, output)
 
 # vi: ts=4 sw=4 et
