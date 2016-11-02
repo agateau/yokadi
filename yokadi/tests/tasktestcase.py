@@ -98,22 +98,20 @@ class TaskTestCase(unittest.TestCase):
         keyword = self.session.query(Keyword).filter_by(name="kw").one()
         self.assertEqual(keyword.tasks, [task])
 
-        recurrence = self.session.query(Recurrence).one()
-
         # Pretend we edit the task description so that we have a TaskLock for
         # this task
         taskLockManager = dbutils.TaskLockManager(task)
         taskLockManager.acquire()
-        lock = self.session.query(TaskLock).one()
+        self.session.query(TaskLock).one()
+        self.assertEqual(self.session.query(TaskLock).count(), 1)
 
         # Remove it, the keyword should no longer be associated with any task,
-        # the recurrence and the lock should be gone
+        # the lock should be gone
         tui.addInputAnswers("y")
         self.cmd.do_t_remove(str(task.id))
 
         self.assertEqual(keyword.tasks, [])
-        self.assertEqual(list(self.session.query(Recurrence)), [])
-        self.assertEqual(list(self.session.query(TaskLock)), [])
+        self.assertEqual(self.session.query(TaskLock).count(), 0)
 
         # Should not crash
         taskLockManager.release()
@@ -303,13 +301,5 @@ class TaskTestCase(unittest.TestCase):
             self.cmd.do_t_due("1 %s" % valid_input)
         for bad_input in ("coucou", "+1s"):
             self.assertRaises(YokadiException, self.cmd.do_t_due, "1 %s" % bad_input)
-
-    def testRemove(self):
-        tui.addInputAnswers("y")
-        self.cmd.do_t_add("x t1")
-        self.assertEqual(self.session.query(Task).count(), 1)
-        tui.addInputAnswers("y")
-        self.cmd.do_t_remove("1")
-        self.assertEqual(self.session.query(Task).count(), 0)
 
 # vi: ts=4 sw=4 et
