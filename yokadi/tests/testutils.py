@@ -4,6 +4,7 @@ Utils for unit-test
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
+from collections import OrderedDict
 
 
 def multiLinesAssertEqual(test, str1, str2):
@@ -20,7 +21,7 @@ class TestRenderer(object):
     A fake renderer, which stores all rendered tasks in taskDict
     """
     def __init__(self):
-        self.taskDict = {}
+        self.taskDict = OrderedDict()
 
     def addTaskList(self, sectionName, taskList):
         self.taskDict[sectionName] = taskList

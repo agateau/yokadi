@@ -516,7 +516,9 @@ class TaskCmd(object):
         if groupKeyword:
             if groupKeyword.startswith("@"):
                 groupKeyword = groupKeyword[1:]
-            for keyword in self.session.query(Keyword).filter(Keyword.name.like(groupKeyword)):
+            keywords = self.session.query(Keyword).filter(Keyword.name.like(groupKeyword))
+
+            for keyword in sorted(keywords, key=lambda x: x.name.lower()):
                 if str(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
                     # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
                     continue
@@ -533,7 +535,7 @@ class TaskCmd(object):
             renderer.end()
         else:
             hiddenProjectNames = []
-            for project in projectList:
+            for project in sorted(projectList, key=lambda x: x.name.lower()):
                 if not project.active:
                     hiddenProjectNames.append(project.name)
                     continue

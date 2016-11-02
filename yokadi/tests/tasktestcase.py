@@ -14,7 +14,7 @@ from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
 from yokadi.core import dbutils
-from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig
+from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig, Project, TaskKeyword
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -217,6 +217,39 @@ class TaskTestCase(unittest.TestCase):
                           "1 monthly foo 12:00",  # Bad date
                           ):
             self.assertRaises(YokadiException, self.cmd.do_t_recurs, bad_input)
+
+    def testRenderListSectionOrder(self):
+        projectNames = "ccc", "aaa", "UPPER_CASE", "zzz", "mmm"
+        projectList = []
+        for name in projectNames:
+            prj = Project(name=name)
+            task = Task(project=prj, title="Hello")
+            self.session.add(prj)
+            self.session.add(task)
+            projectList.append(prj)
+        self.session.flush()
+
+        renderer = testutils.TestRenderer()
+        self.cmd._renderList(renderer, projectList, filters=[], order=[])
+
+        self.assertEqual(list(renderer.taskDict.keys()), sorted(projectNames, key=lambda x: x.lower()))
+
+    def testRenderListSectionOrderKeywords(self):
+        prj = Project(name="prj")
+        keywordNames = ["kw_" + x for x in ("ccc", "aaa", "UPPER_CASE", "zzz", "mmm")]
+        keywordList = []
+        for name in keywordNames:
+            keyword = Keyword(name=name)
+            task = Task(project=prj, title="Hello")
+            TaskKeyword(task=task, keyword=keyword)
+            self.session.add(task)
+            keywordList.append(prj)
+        self.session.flush()
+
+        renderer = testutils.TestRenderer()
+        self.cmd._renderList(renderer, [prj], filters=[], order=[], groupKeyword="kw_%")
+
+        self.assertEqual(list(renderer.taskDict.keys()), sorted(keywordNames, key=lambda x: x.lower()))
 
     def testTlist(self):
         tui.addInputAnswers("y")
