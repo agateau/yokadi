@@ -5,9 +5,7 @@ Task test cases
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-import sys
 import unittest
-from io import StringIO
 
 import testutils
 
