@@ -192,34 +192,42 @@ def _enforceProjectConstraints(session, dumpDir, pullUi):
         dumpObjectDict(dct, jsonDirPath)
 
 
-def _enforceAliasConstraints(dumpDir, pullUi):
+def _enforceAliasConstraints(session, dumpDir, pullUi):
     jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
     conflictDict = _findConflicts(jsonDirPath, "name")
 
-    names = set(conflictDict.keys())
-    for conflictList in conflictDict.values():
-        ref = conflictList.pop()
-        for dct in conflictList:
-            if ref["command"] == dct["command"]:
-                # Same command, destroy the other alias. If it was the local one
-                # it will be recreated at import time.
-                path = os.path.join(jsonDirPath, dct["uuid"] + ".json")
-                os.remove(path)
-            else:
-                # Different command, rename one
-                old = dct["name"]
-                new = _findUniqueName(old, names)
-                dct["name"] = new
-                names.add(new)
-                pullUi.addRename(ALIASES_DIRNAME, old, new)
-                dumpObjectDict(dct, jsonDirPath)
+    names = {x.name for x in session.query(db.Alias).all()}
+    for name, conflictList in conflictDict.items():
+        assert len(conflictList) == 2
+
+        # Find local alias
+        alias = session.query(db.Alias).filter_by(name=name).one()
+        localUuid = alias.uuid
+
+        if conflictList[0]["uuid"] == localUuid:
+            local, remote = conflictList[0], conflictList[1]
+        else:
+            local, remote = conflictList[1], conflictList[0]
+
+        if local["command"] == remote["command"]:
+            # Same command, destroy dump of local alias
+            objPath = os.path.join(jsonDirPath, localUuid + '.json')
+            assert os.path.exists(objPath)
+            os.unlink(objPath)
+        else:
+            # Different command, rename local alias
+            old = alias.name
+            new = _findUniqueName(old, names)
+            pullUi.addRename(ALIASES_DIRNAME, old, new)
+            local["name"] = new
+            dumpObjectDict(local, jsonDirPath)
 
 
 def enforceDbConstraints(session, dumpDir, pullUi):
     # TODO: Only enforce constraints if there have been changes in the concerned
     # dir
     _enforceProjectConstraints(session, dumpDir, pullUi)
-    _enforceAliasConstraints(dumpDir, pullUi)
+    _enforceAliasConstraints(session, dumpDir, pullUi)
 
 
 def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
@@ -262,7 +270,7 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
         changeHandler.applyPostUpdateChanges()
     session.commit()
 
-    if dbConstraintChanges.hasChanges():
+    if not vcsImpl.isWorkTreeClean():
         # Only commit after the DB session has been committed, to be able to
         # rollback both the DB and the repository in case of error
         vcsImpl.commitAll("Enforce DB constraints")

@@ -862,7 +862,7 @@ class PullTestCase(unittest.TestCase):
         with TemporaryDirectory() as tmpDir:
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(self.session, remoteDir)
+            remoteSyncManager = SyncManager(None, remoteDir)
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
@@ -896,8 +896,7 @@ class PullTestCase(unittest.TestCase):
             self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
             self.assertEqual(pullUi.renames, [(ALIASES_DIRNAME, "a", "a_1")])
             dct = db.Alias.getAsDict(self.session)
-            self.assertEqual(set(dct.keys()), {"a", "a_1"})
-            self.assertEqual(set(dct.values()), {"t_add", "t_add -d"})
+            self.assertEqual(dct, {"a_1": "t_add -d", "a": "t_add"})
 
     def testImportAlias_swapNames(self):
         with TemporaryDirectory() as tmpDir:
