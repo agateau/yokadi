@@ -59,6 +59,9 @@ class SyncManager(object):
     def push(self):
         self.vcsImpl.push()
 
+    def hasChangesToCommit(self):
+        return not self.vcsImpl.isWorkTreeClean()
+
     def hasChangesToImport(self):
         changes = self.vcsImpl.getChangesSince(DB_SYNC_BRANCH)
         return changes.hasChanges()

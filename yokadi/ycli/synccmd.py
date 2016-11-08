@@ -149,9 +149,9 @@ class SyncCmd(Cmd):
         changes, import them in the database and push local changes"""
         pullUi = TextPullUi()
 
-        print("Dumping database")
-        self.syncManager.clearDump()
-        self.syncManager.dump()
+        if self.syncManager.hasChangesToCommit():
+            print("Committing local changes")
+            self.syncManager.commitChanges("s_sync")
 
         while True:
             print("Pulling remote changes")
