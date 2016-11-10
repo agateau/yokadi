@@ -1,3 +1,4 @@
+import textwrap
 import unittest
 
 from tempfile import TemporaryDirectory
@@ -6,7 +7,8 @@ from yokadi.core import db
 from yokadi.tests.pulltestcase import createBothModifiedConflictFixture
 from yokadi.tests.pulltestcase import createModifiedDeletedConflictFixture
 from yokadi.ycli import tui
-from yokadi.ycli.synccmd import TextPullUi
+from yokadi.ycli.synccmd import TextPullUi, prepareConflictText, shortenText, SHORTENED_SUFFIX, \
+        SHORTENED_TEXT_MAX_LENGTH
 from yokadi.sync import ALIASES_DIRNAME
 from yokadi.sync.syncmanager import SyncManager
 
@@ -50,3 +52,60 @@ class TextPullUiTestCase(unittest.TestCase):
         self.assertEqual(renames, {
             ALIASES_DIRNAME: [("a", "a_1"), ("b", "b_1")]
             })
+
+    def testPrepareConflictText(self):
+        data = (
+            ("foo", "bar", "L> foo\nR> bar\n"),
+            (
+                textwrap.dedent("""\
+                    Common
+                    Local1
+                    More common
+                    Local2
+                    Local3
+                    Even more common"""),
+                textwrap.dedent("""\
+                    Common
+                    Remote1
+                    More common
+                    Remote2
+                    Even more common"""),
+                textwrap.dedent("""\
+                    Common
+                    L> Local1
+                    R> Remote1
+                    More common
+                    R> Remote2
+                    L> Local2
+                    L> Local3
+                    Even more common
+                    """),
+            )
+        )
+
+        for local, remote, expected in data:
+            output = prepareConflictText(local, remote)
+            self.assertEqual(output, expected)
+
+    def testShortenText(self):
+        data = (
+            ("foo", "foo"),
+            (
+                textwrap.dedent("""\
+                    Common
+                    Local1
+                    More common
+                    Local2
+                    Local3
+                    Even more common"""),
+                "Common" + SHORTENED_SUFFIX
+            ),
+            (
+                "a" * 160,
+                "a" * (SHORTENED_TEXT_MAX_LENGTH - len(SHORTENED_SUFFIX)) + SHORTENED_SUFFIX
+            )
+        )
+
+        for src, expected in data:
+            output = shortenText(src)
+            self.assertEqual(output, expected)

@@ -1,6 +1,7 @@
 import os
 from cmd import Cmd
 from collections import defaultdict
+from difflib import Differ
 
 from yokadi.core import basepaths
 from yokadi.core.yokadioptionparser import YokadiOptionParser
@@ -11,6 +12,12 @@ from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.ycli import tui
 
+
+LOCAL_PREFIX = "L> "
+REMOTE_PREFIX = "R> "
+
+SHORTENED_SUFFIX = " (...)"
+SHORTENED_TEXT_MAX_LENGTH = 40
 
 # Keys are a tuple of (prompt, fieldName)
 HEADER_INFO = {
@@ -30,6 +37,37 @@ def printConflictObjectHeader(obj):
             break
     prompt = prompt.format(value)
     print("\n# {}".format(prompt))
+
+
+def prepareConflictText(local, remote):
+    differ = Differ()
+    diff = differ.compare(local.splitlines(keepends=True),
+                          remote.splitlines(keepends=True))
+    lines = []
+    for line in diff:
+        code = line[0]
+        rest = line[2:]
+        if rest[-1] != "\n":
+            rest += "\n"
+        if code == "?":
+            continue
+        if code == "-":
+            lines.append(LOCAL_PREFIX + rest)
+        elif code == "+":
+            lines.append(REMOTE_PREFIX + rest)
+        else:
+            lines.append(rest)
+    return "".join(lines)
+
+
+def shortenText(text):
+    """Takes a potentially multi-line text and returns a one-line, shortened version of it"""
+    cr = text.find("\n")
+    if cr >= 0:
+        text = text[:cr]
+    if cr >= 0 or len(text) > SHORTENED_TEXT_MAX_LENGTH:
+        text = text[:SHORTENED_TEXT_MAX_LENGTH - len(SHORTENED_SUFFIX)] + SHORTENED_SUFFIX
+    return text
 
 
 class TextPullUi(PullUi):
@@ -53,16 +91,20 @@ class TextPullUi(PullUi):
         printConflictObjectHeader(obj)
         for key in set(obj.conflictingKeys):
             oldValue = obj.ancestor[key]
-            print("\nConflict on \"{}\" key. Old value was \"{}\".\n".format(key, oldValue))
+            print("\nConflict on \"{}\" key. Old value was \"{}\".\n".format(key, shortenText(oldValue)))
             answers = (
-                (1, "Local value: \"{}\"".format(obj.local[key])),
-                (2, "Remote value: \"{}\"".format(obj.remote[key]))
+                (1, "Local value: \"{}\"".format(shortenText(obj.local[key]))),
+                (2, "Remote value: \"{}\"".format(shortenText(obj.remote[key]))),
+                (3, "Edit"),
             )
             answer = tui.selectFromList(answers, prompt="Which version do you want to keep".format(key), default=None)
             if answer == 1:
                 value = obj.local[key]
-            else:
+            elif answer == 2:
                 value = obj.remote[key]
+            else:
+                conflictText = prepareConflictText(obj.local[key], obj.remote[key])
+                value = tui.editText(conflictText)
             obj.selectValue(key, value)
 
     def resolveModifiedDeletedObject(self, obj):
