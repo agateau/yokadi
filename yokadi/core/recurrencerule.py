@@ -14,6 +14,8 @@ from yokadi.core.yokadiexception import YokadiException
 
 FREQUENCIES = {0: "Yearly", 1: "Monthly", 2: "Weekly", 3: "Daily"}
 
+ALL_DAYS = (rrule.MO, rrule.TU, rrule.WE, rrule.TH, rrule.FR, rrule.SA, rrule.SU)
+
 
 class RecurrenceRule(object):
     """Thin wrapper around dateutil.rrule which brings:
@@ -139,8 +141,8 @@ class RecurrenceRule(object):
 
     def _rrule(self):
         if isinstance(self._byweekday, dict):
-            byweekday = rrule.weekday(n=self._byweekday["pos"],
-                                      weekday=self._byweekday["weekday"])
+            day = ALL_DAYS[self._byweekday["weekday"]]
+            byweekday = day(self._byweekday["pos"])
         else:
             byweekday = self._byweekday
 
