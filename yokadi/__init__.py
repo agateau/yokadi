@@ -6,4 +6,4 @@ Yokadi main package
 @license:GPL v3 or later
 """
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
