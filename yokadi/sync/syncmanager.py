@@ -1,3 +1,4 @@
+import json
 import os
 
 from sqlalchemy import event
@@ -9,7 +10,7 @@ from yokadi.sync.dump import clearDump, dump, createVersionFile, \
         commitChanges, isDumpableObject, getLinkedObject, dumpObjectDict, \
         pathForObject, dirnameForObject, dictFromObject
 
-from yokadi.sync.pull import pull, importSinceLastSync, importAll
+from yokadi.sync.pull import pull, importSinceLastSync, importAll, findConflicts
 
 
 class SyncManager(object):
@@ -58,6 +59,38 @@ class SyncManager(object):
 
     def push(self):
         self.vcsImpl.push()
+
+    def checkDumpIntegrity(self):
+        self._checkUnicity(PROJECTS_DIRNAME)
+        self._checkUnicity(ALIASES_DIRNAME)
+        self._checkTaskProjects()
+
+    def _checkUnicity(self, dirname):
+        print("# Checking {} unicity".format(dirname))
+        jsonDirPath = os.path.join(self.dumpDir, dirname)
+        conflicts = findConflicts(jsonDirPath, "name")
+        for name, conflictList in conflicts.items():
+            print("## {} exists {} times".format(name, len(conflictList)))
+            for conflict in conflictList:
+                path = os.path.join(jsonDirPath, conflictList["uuid"] + ".json")
+                print(path)
+
+    def _checkTaskProjects(self):
+        print("# Checking all tasks have an existing project")
+        projectDir = os.path.join(self.dumpDir, PROJECTS_DIRNAME)
+        taskDir = os.path.join(self.dumpDir, TASKS_DIRNAME)
+        projectUuids = {os.path.splitext(x)[0] for x in os.listdir(projectDir)}
+
+        first = True
+        for taskName in os.listdir(taskDir):
+            taskPath = os.path.join(taskDir, taskName)
+            with open(taskPath) as fp:
+                dct = json.load(fp)
+            if dct["projectUuid"] not in projectUuids:
+                if first:
+                    print("These tasks point to a non existing project")
+                    first = False
+                print(taskPath)
 
     def hasChangesToCommit(self):
         return not self.vcsImpl.isWorkTreeClean()

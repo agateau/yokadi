@@ -160,7 +160,7 @@ def _findUniqueName(baseName, existingNames):
     return name
 
 
-def _findConflicts(jsonDirPath, fieldName):
+def findConflicts(jsonDirPath, fieldName):
     """
     Returns a dict of the form
             fieldValue => [{dct1}, {dct2}]
@@ -181,7 +181,7 @@ def _findConflicts(jsonDirPath, fieldName):
 
 def _enforceProjectConstraints(session, dumpDir, pullUi):
     jsonDirPath = os.path.join(dumpDir, PROJECTS_DIRNAME)
-    conflictDict = _findConflicts(jsonDirPath, "name")
+    conflictDict = findConflicts(jsonDirPath, "name")
 
     names = {x.name for x in session.query(db.Project).all()}
     for name, conflictList in conflictDict.items():
@@ -207,7 +207,7 @@ def _enforceProjectConstraints(session, dumpDir, pullUi):
 
 def _enforceAliasConstraints(session, dumpDir, pullUi):
     jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
-    conflictDict = _findConflicts(jsonDirPath, "name")
+    conflictDict = findConflicts(jsonDirPath, "name")
 
     names = {x.name for x in session.query(db.Alias).all()}
     for name, conflictList in conflictDict.items():

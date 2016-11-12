@@ -232,6 +232,10 @@ class SyncCmd(Cmd):
         except VcsImplError as exc:
             print("Failed to push: {}".format(exc))
 
+    def do__s_check(self, line):
+        """Check the dump integrity, report any error."""
+        self.syncManager.checkDumpIntegrity()
+
     def _printPullResults(self, pullUi):
         renameDict = pullUi.getRenames()
         if not renameDict:
