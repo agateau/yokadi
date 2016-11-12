@@ -32,7 +32,7 @@ class TextPullUiTestCase(unittest.TestCase):
                 ))
 
             tui.addInputAnswers("1", "2")
-            syncManager = SyncManager(self.session, tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=TextPullUi())
 
     def testModifiedDeletedConflict(self):
@@ -40,7 +40,7 @@ class TextPullUiTestCase(unittest.TestCase):
             fixture = createModifiedDeletedConflictFixture(self, tmpDir)
 
             tui.addInputAnswers("1", "2")
-            syncManager = SyncManager(self.session, tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=TextPullUi())
 
     def testAddRename(self):

@@ -14,7 +14,7 @@ from yokadi.sync.pull import pull, importSinceLastSync, importAll, findConflicts
 
 
 class SyncManager(object):
-    def __init__(self, session, dumpDir, vcsImpl=None):
+    def __init__(self, dumpDir, *, session=None, vcsImpl=None):
         if vcsImpl is None:
             vcsImpl = GitVcsImpl()
         self.vcsImpl = vcsImpl

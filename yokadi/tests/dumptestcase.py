@@ -44,7 +44,7 @@ class DumpTestCase(unittest.TestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(self.session, dumpDir)
+            syncManager = SyncManager(dumpDir)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -82,7 +82,7 @@ class DumpTestCase(unittest.TestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(self.session, dumpDir)
+            syncManager = SyncManager(dumpDir)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -124,7 +124,7 @@ class DumpTestCase(unittest.TestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(self.session, dumpDir)
+            syncManager = SyncManager(dumpDir, session=self.session)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -146,7 +146,7 @@ class DumpTestCase(unittest.TestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(self.session, dumpDir)
+            syncManager = SyncManager(dumpDir, session=self.session)
             syncManager.initDumpRepository()
             syncManager.dump()
 

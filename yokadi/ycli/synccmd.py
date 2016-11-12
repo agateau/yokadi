@@ -142,7 +142,7 @@ class TextPullUi(PullUi):
 class SyncCmd(Cmd):
     def __init__(self, dumpDir=None):
         self.dumpDir = dumpDir or os.path.join(basepaths.getCacheDir(), 'db')
-        self.syncManager = SyncManager(db.getSession(), self.dumpDir)
+        self.syncManager = SyncManager(self.dumpDir, session=db.getSession())
 
     def do_s_sync(self, line):
         """Synchronize the database with the remote one. Get the latest
