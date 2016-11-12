@@ -185,7 +185,8 @@ def _enforceProjectConstraints(session, dumpDir, pullUi):
 
     names = {x.name for x in session.query(db.Project).all()}
     for name, conflictList in conflictDict.items():
-        assert len(conflictList) == 2
+        assert len(conflictList) == 2, "More than 2 projects are named '{}', this should not happen! (uuids: {})" \
+                                       .format(name, [x["uuid"] for x in conflictList])
 
         # Find local project
         project = session.query(db.Project).filter_by(name=name).one()
@@ -211,7 +212,8 @@ def _enforceAliasConstraints(session, dumpDir, pullUi):
 
     names = {x.name for x in session.query(db.Alias).all()}
     for name, conflictList in conflictDict.items():
-        assert len(conflictList) == 2
+        assert len(conflictList) == 2, "More than 2 aliases are named '{}', this should not happen! (uuids: {})" \
+                                       .format(name, [x["uuid"] for x in conflictList])
 
         # Find local alias
         alias = session.query(db.Alias).filter_by(name=name).one()
