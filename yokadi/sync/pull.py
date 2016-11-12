@@ -14,6 +14,10 @@ from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
 from yokadi.sync.vcschanges import VcsChanges
 
 
+class PullError(Exception):
+    pass
+
+
 class ChangeHandler(object):
     """
     Takes a VcsChange and apply all changes which concern `domain`
@@ -45,16 +49,25 @@ class ChangeHandler(object):
                     # importing a whole dump (in which cases all files are
                     # marked as "added")
                     obj = self.table()
-                self._update(session, obj, dct)
+                try:
+                    self._update(session, obj, dct)
+                except Exception as exc:
+                    raise PullError("Error while adding {}".format(path)) from exc
         for path in changes.modified:
             if self._shouldHandleFilePath(path):
                 dct = self._loadJson(dumpDir, path)
                 obj = self._getObject(session, dct["uuid"])
-                self._update(session, obj, dct)
+                try:
+                    self._update(session, obj, dct)
+                except Exception as exc:
+                    raise PullError("Error while updating {}".format(path)) from exc
         for path in changes.removed:
             if self._shouldHandleFilePath(path):
                 uuid = self._getUuidFromFilePath(path)
-                self._remove(session, uuid)
+                try:
+                    self._remove(session, uuid)
+                except Exception as exc:
+                    raise PullError("Error while removing {}".format(path)) from exc
 
     def applyPostUpdateChanges(self):
         for obj, changeDict in self._postUpdateChanges:
