@@ -63,6 +63,8 @@ def prepareConflictText(local, remote):
 
 def shortenText(text):
     """Takes a potentially multi-line text and returns a one-line, shortened version of it"""
+    if text is None:
+        return None
     cr = text.find("\n")
     if cr >= 0:
         text = text[:cr]

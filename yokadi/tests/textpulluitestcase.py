@@ -103,7 +103,8 @@ class TextPullUiTestCase(unittest.TestCase):
             (
                 "a" * 160,
                 "a" * (SHORTENED_TEXT_MAX_LENGTH - len(SHORTENED_SUFFIX)) + SHORTENED_SUFFIX
-            )
+            ),
+            (None, None),
         )
 
         for src, expected in data:
