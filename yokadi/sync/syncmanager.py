@@ -84,13 +84,16 @@ class SyncManager(object):
         first = True
         for taskName in os.listdir(taskDir):
             taskPath = os.path.join(taskDir, taskName)
-            with open(taskPath) as fp:
-                dct = json.load(fp)
-            if dct["projectUuid"] not in projectUuids:
-                if first:
-                    print("These tasks point to a non existing project")
-                    first = False
-                print(taskPath)
+            try:
+                with open(taskPath) as fp:
+                    dct = json.load(fp)
+                if dct["projectUuid"] not in projectUuids:
+                    if first:
+                        print("These tasks point to a non existing project")
+                        first = False
+                    print(taskPath)
+            except Exception as exc:
+                raise Exception("Error in {}".format(taskPath)) from exc
 
     def hasChangesToCommit(self):
         return not self.vcsImpl.isWorkTreeClean()
