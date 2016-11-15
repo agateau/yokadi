@@ -7,7 +7,7 @@ Date utilities test cases
 
 import unittest
 import operator
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 from yokadi.core import ydateutils
 from yokadi.core.yokadiexception import YokadiException
@@ -122,4 +122,15 @@ class YDateUtilsTestCase(unittest.TestCase):
             output = ydateutils.parseDateLimit(text, today=today)
             self.assertEqual(expectedOp, output[0])
             self.assertEqual(expectedDate, output[1])
+
+    def testGuessTime(self):
+        for invalidTime in ("+5M", "+1m", "+2H", "+3h", "+9D", "+14d", "+432W", "+0w",
+                     "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
+            self.assertIsNone(ydateutils.guessTime(invalidTime))
+
+
+        for text, expected in (('12:05:20', time(hour=12, minute=5, second=20)), ('10:00am', time(hour=10)), ('7:30pm', time(hour=19, minute=30))):
+            output = ydateutils.guessTime(text)
+            self.assertEqual(expected, output)
+
 # vi: ts=4 sw=4 et
