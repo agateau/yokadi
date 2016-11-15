@@ -6,7 +6,7 @@ Task test cases
 """
 from yokadi.core import dbutils
 from yokadi.ycli import tui
-from yokadi.ycli.keywordcmd import KeywordCmd
+from yokadi.ycli.keywordcmd import KeywordCmd, _listKeywords
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core import db
 from yokadi.tests.yokaditestcase import YokadiTestCase
@@ -67,4 +67,15 @@ class KeywordTestCase(YokadiTestCase):
         self.assertTrue("k2" in kwDict)
         taskKeyword = self.session.query(db.TaskKeyword).filter_by(taskId=t1.id).one()
         self.assertEqual(taskKeyword.keyword.name, "k2")
+
+    def testKList(self):
+        t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive=False)
+        t2 = dbutils.addTask("x", "t2", dict(k1=None, k3=None), interactive=False)
+
+        lst = list(_listKeywords(self.session))
+        lst = [(name, list(ids)) for name, ids in lst]
+        self.assertEqual(lst, [("k1", [t1.id, t2.id]),
+                               ("k2", [t1.id]),
+                               ("k3", [t2.id]),
+                               ])
 # vi: ts=4 sw=4 et

@@ -1,3 +1,12 @@
+v1.1.1 2016/11/11
+
+- Improvements:
+    - When listing multiple projects, order them alphabetically.
+- Bug fixes:
+    - Fixed parse error if the user sets a time of "17m".
+    - When the user edits a tasks with t_edit and removes a keyword, remove the keyword from the task.
+    - Made recurrence code work with dateutil 2.6.0.
+
 v1.1.0 2016/09/03
 
 - New features & Improvements:

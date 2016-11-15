@@ -17,12 +17,21 @@ from yokadi.core.yokadiexception import BadUsageException
 from yokadi.ycli.completers import KeywordCompleter
 
 
+def _listKeywords(session):
+    for keyword in sorted(session.query(Keyword).all(), key=lambda x: x.name.lower()):
+        taskIds = sorted([x.id for x in keyword.tasks if x])
+        yield keyword.name, taskIds
+
+
 class KeywordCmd(object):
     def do_k_list(self, line):
         """List all keywords."""
-        for keyword in db.getSession().query(Keyword).all():
-            tasks = ", ".join(str(task.id) for task in keyword.tasks)
-            print("%s (tasks: %s)" % (keyword.name, tasks))
+        for name, taskIds in _listKeywords(db.getSession()):
+            if taskIds:
+                tasks = ", ".join([str(x) for x in taskIds])
+            else:
+                tasks = "none"
+            print("{} (tasks: {})".format(name, tasks))
 
     def do_k_add(self, line):
         """Add a keyword
