@@ -5,9 +5,7 @@ Task test cases
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-import sys
 import unittest
-from io import StringIO
 
 import testutils
 
@@ -16,7 +14,7 @@ from yokadi.ycli.main import YokadiCmd
 from yokadi.core import cryptutils
 from yokadi.core import db
 from yokadi.core import dbutils
-from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig
+from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig, Project, TaskKeyword
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
@@ -100,22 +98,20 @@ class TaskTestCase(unittest.TestCase):
         keyword = self.session.query(Keyword).filter_by(name="kw").one()
         self.assertEqual(keyword.tasks, [task])
 
-        recurrence = self.session.query(Recurrence).one()
-
         # Pretend we edit the task description so that we have a TaskLock for
         # this task
         taskLockManager = dbutils.TaskLockManager(task)
         taskLockManager.acquire()
-        lock = self.session.query(TaskLock).one()
+        self.session.query(TaskLock).one()
+        self.assertEqual(self.session.query(TaskLock).count(), 1)
 
         # Remove it, the keyword should no longer be associated with any task,
-        # the recurrence and the lock should be gone
+        # the lock should be gone
         tui.addInputAnswers("y")
         self.cmd.do_t_remove(str(task.id))
 
         self.assertEqual(keyword.tasks, [])
-        self.assertEqual(list(self.session.query(Recurrence)), [])
-        self.assertEqual(list(self.session.query(TaskLock)), [])
+        self.assertEqual(self.session.query(TaskLock).count(), 0)
 
         # Should not crash
         taskLockManager.release()
@@ -224,6 +220,39 @@ class TaskTestCase(unittest.TestCase):
                           ):
             self.assertRaises(YokadiException, self.cmd.do_t_recurs, bad_input)
 
+    def testRenderListSectionOrder(self):
+        projectNames = "ccc", "aaa", "UPPER_CASE", "zzz", "mmm"
+        projectList = []
+        for name in projectNames:
+            prj = Project(name=name)
+            task = Task(project=prj, title="Hello")
+            self.session.add(prj)
+            self.session.add(task)
+            projectList.append(prj)
+        self.session.flush()
+
+        renderer = testutils.TestRenderer()
+        self.cmd._renderList(renderer, projectList, filters=[], order=[])
+
+        self.assertEqual(list(renderer.taskDict.keys()), sorted(projectNames, key=lambda x: x.lower()))
+
+    def testRenderListSectionOrderKeywords(self):
+        prj = Project(name="prj")
+        keywordNames = ["kw_" + x for x in ("ccc", "aaa", "UPPER_CASE", "zzz", "mmm")]
+        keywordList = []
+        for name in keywordNames:
+            keyword = Keyword(name=name)
+            task = Task(project=prj, title="Hello")
+            TaskKeyword(task=task, keyword=keyword)
+            self.session.add(task)
+            keywordList.append(prj)
+        self.session.flush()
+
+        renderer = testutils.TestRenderer()
+        self.cmd._renderList(renderer, [prj], filters=[], order=[], groupKeyword="kw_%")
+
+        self.assertEqual(list(renderer.taskDict.keys()), sorted(keywordNames, key=lambda x: x.lower()))
+
     def testTlist(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
@@ -305,13 +334,5 @@ class TaskTestCase(unittest.TestCase):
             self.cmd.do_t_due("1 %s" % valid_input)
         for bad_input in ("coucou", "+1s"):
             self.assertRaises(YokadiException, self.cmd.do_t_due, "1 %s" % bad_input)
-
-    def testRemove(self):
-        tui.addInputAnswers("y")
-        self.cmd.do_t_add("x t1")
-        self.assertEqual(self.session.query(Task).count(), 1)
-        tui.addInputAnswers("y")
-        self.cmd.do_t_remove("1")
-        self.assertEqual(self.session.query(Task).count(), 0)
 
 # vi: ts=4 sw=4 et
