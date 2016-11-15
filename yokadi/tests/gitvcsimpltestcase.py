@@ -1,15 +1,12 @@
 import os
-import shutil
 import subprocess
-import tempfile
-import unittest
 
 from os.path import join
 from tempfile import TemporaryDirectory
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
-from yokadi.tests.testutils import EnvironSaver
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 def createGitRepository(repoParentDir, name):
@@ -99,16 +96,10 @@ def createGitRepositoryWithConflict(tmpDir, path, ancestorContent="", localConte
     return impl
 
 
-class GitVcsImplTestCase(unittest.TestCase):
+class GitVcsImplTestCase(YokadiTestCase):
     def setUp(self):
-        self._envSaver = EnvironSaver()
-        self.testHomeDir = tempfile.mkdtemp(prefix="yokadi-basepaths-testcase")
-        os.environ["HOME"] = self.testHomeDir
+        YokadiTestCase.setUp(self)
         createGitConfig()
-
-    def tearDown(self):
-        shutil.rmtree(self.testHomeDir)
-        self._envSaver.restore()
 
     def _deleteGitConfig(self):
         os.remove(join(self.testHomeDir, ".gitconfig"))

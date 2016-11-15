@@ -1,5 +1,4 @@
 import textwrap
-import unittest
 
 from contextlib import redirect_stdout
 from io import StringIO
@@ -7,10 +6,12 @@ from tempfile import TemporaryDirectory
 
 from yokadi.core import db
 from yokadi.ycli.synccmd import SyncCmd, TextPullUi
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class SyncCmdTestCase(unittest.TestCase):
+class SyncCmdTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()

@@ -1,4 +1,4 @@
-import unittest
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 from collections import namedtuple
 from datetime import datetime
@@ -68,7 +68,7 @@ TEST_DATA = [
 ]
 
 
-class RecurrenceRuleTestCase(unittest.TestCase):
+class RecurrenceRuleTestCase(YokadiTestCase):
     def testFromHumaneString(self):
         testData = [
             ("daily 10:00", RecurrenceRule(rrule.DAILY, byhour=10)),

@@ -6,15 +6,13 @@ Help test cases
 """
 import os
 import sys
-import unittest
 
 from cmd import Cmd
 from contextlib import contextmanager
 
-import testutils
-
 from yokadi.core import db
 from yokadi.ycli.main import YokadiCmd
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 @contextmanager
@@ -31,12 +29,13 @@ def to_devnull(out):
             os.dup2(copied.fileno(), out_fd)
 
 
-class HelpTestCase(unittest.TestCase):
+class HelpTestCase(YokadiTestCase):
     """
     A basic test for the command helps: it just execute 'help <cmd>' on all
     commands. This catches invalid format characters in the help strings.
     """
     def setUp(self):
+        YokadiTestCase.setUp(self)
         # Some help commands look into the db for default values
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()

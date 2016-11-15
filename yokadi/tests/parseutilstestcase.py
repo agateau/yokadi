@@ -5,7 +5,7 @@ Parser utilities test cases
 @license: GPL v3 or later
 """
 
-import unittest
+from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.ycli import parseutils
 
 gTaskLineToParsedStructList = [
@@ -16,7 +16,7 @@ gTaskLineToParsedStructList = [
     ]
 
 
-class ParseUtilsTestCase(unittest.TestCase):
+class ParseUtilsTestCase(YokadiTestCase):
     def testExtractKeywords(self):
         for src, dst in gTaskLineToParsedStructList:
             result = parseutils.parseLine(src)

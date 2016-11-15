@@ -4,9 +4,6 @@ Mass edit test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
-
 from yokadi.core import db
 from yokadi.core.db import NOTE_KEYWORD
 from yokadi.core import dbutils
@@ -14,10 +11,12 @@ from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli import massedit
 from yokadi.ycli import tui
 from yokadi.ycli.massedit import MEditEntry, parseMEditText, ParseError
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class MassEditTestCase(unittest.TestCase):
+class MassEditTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         # FIXME: Do this in db
         dbutils.getOrCreateKeyword(NOTE_KEYWORD, interactive=False)

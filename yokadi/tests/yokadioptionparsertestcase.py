@@ -4,14 +4,12 @@ Yokadi parser test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
-
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class YokadiOptionParserTestCase(unittest.TestCase):
+class YokadiOptionParserTestCase(YokadiTestCase):
 
     def testQuote(self):
         parser = YokadiOptionParser()

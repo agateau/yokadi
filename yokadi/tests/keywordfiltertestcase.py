@@ -4,15 +4,14 @@ Keyword filter test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
-
 from yokadi.core import db, dbutils
 from yokadi.core.dbutils import KeywordFilter
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class KeywordFilterTestCase(unittest.TestCase):
+class KeywordFilterTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
 

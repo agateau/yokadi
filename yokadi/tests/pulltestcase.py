@@ -1,5 +1,4 @@
 import os
-import unittest
 
 from collections import namedtuple
 from tempfile import TemporaryDirectory
@@ -14,6 +13,7 @@ from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 class StubVcsImpl(object):
@@ -296,8 +296,9 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
     )
 
 
-class PullTestCase(unittest.TestCase):
+class PullTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()

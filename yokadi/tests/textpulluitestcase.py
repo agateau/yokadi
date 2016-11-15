@@ -1,5 +1,4 @@
 import textwrap
-import unittest
 
 from tempfile import TemporaryDirectory
 
@@ -11,10 +10,12 @@ from yokadi.ycli.synccmd import TextPullUi, prepareConflictText, shortenText, SH
         SHORTENED_TEXT_MAX_LENGTH
 from yokadi.sync import ALIASES_DIRNAME
 from yokadi.sync.syncmanager import SyncManager
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class TextPullUiTestCase(unittest.TestCase):
+class TextPullUiTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()

@@ -5,9 +5,7 @@ Task test cases
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-import sys
-import unittest
-from io import StringIO
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 import testutils
 
@@ -20,8 +18,9 @@ from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 
 
-class TaskTestCase(unittest.TestCase):
+class TaskTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = db.getSession()

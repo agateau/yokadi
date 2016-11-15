@@ -4,20 +4,20 @@ Alias test cases
 @author: Benjamin Port <benjamin.port@ben2367.fr>
 @license: GPL v3 or later
 """
-
-import unittest
 import sys
 from io import StringIO
 
 from yokadi.core import db
 from yokadi.core.db import setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 
 
-class ConfTestCase(unittest.TestCase):
+class ConfTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = db.getSession()

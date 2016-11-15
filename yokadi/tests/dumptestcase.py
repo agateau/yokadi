@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-import unittest
 
 from tempfile import TemporaryDirectory
 
@@ -10,6 +9,7 @@ from yokadi.core import dbutils
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.syncmanager import SyncManager
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 def getTaskPath(dumpDir, task):
@@ -24,8 +24,9 @@ def getAliasPath(dumpDir, alias):
     return os.path.join(dumpDir, ALIASES_DIRNAME, alias.uuid + ".json")
 
 
-class DumpTestCase(unittest.TestCase):
+class DumpTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()
