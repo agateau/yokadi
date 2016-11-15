@@ -125,7 +125,7 @@ def isDumpableObject(obj):
 
 
 def dump(dumpDir, vcsImpl=None):
-    assert os.path.exists(dumpDir)
+    assert os.path.exists(dumpDir), "dumpDir {} does not exist".format(dumpDir)
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)

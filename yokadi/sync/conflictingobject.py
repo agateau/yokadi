@@ -47,7 +47,7 @@ class ConflictingObject(object):
         raise NotImplementedError()
 
     def close(self, vcsImpl):
-        assert self.isResolved()
+        assert self.isResolved(), "Conflict {} has not been resolved".format(self._path)
         if self.final is None:
             content = None
         else:
@@ -85,7 +85,8 @@ class BothModifiedConflictingObject(ConflictingObject):
                 self.selectValue(key, local)
 
     def selectValue(self, key, value):
-        assert key in self.conflictingKeys
+        assert key in self.conflictingKeys, "Key {} is not in conflicting keys {} for {}" \
+                                            .format(key, self.conflictingKeys, self._path)
         self.final[key] = value
         self.conflictingKeys.remove(key)
 

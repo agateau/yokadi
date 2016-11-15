@@ -30,7 +30,7 @@ class SyncManager(object):
             event.listen(session, "after_commit", self._onCommitted)
 
     def initDumpRepository(self):
-        assert not os.path.exists(self.dumpDir)
+        assert not os.path.exists(self.dumpDir), "Dump dir {} should not already exist".format(self.dumpDir)
         os.makedirs(self.dumpDir)
         self.vcsImpl.init()
         createVersionFile(self.dumpDir)

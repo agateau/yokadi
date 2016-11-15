@@ -227,7 +227,7 @@ def _enforceAliasConstraints(session, dumpDir, pullUi):
         if local["command"] == remote["command"]:
             # Same command, destroy dump of local alias
             objPath = os.path.join(jsonDirPath, localUuid + '.json')
-            assert os.path.exists(objPath)
+            assert os.path.exists(objPath), "{} does not exist".format(objPath)
             os.unlink(objPath)
         else:
             # Different command, rename local alias
@@ -249,7 +249,7 @@ def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
     _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
 
@@ -258,7 +258,7 @@ def importAll(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = VcsChanges()
     changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
     _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
@@ -298,7 +298,7 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
         vcsImpl = GitVcsImpl()
 
     vcsImpl.setDir(dumpDir)
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     vcsImpl.pull()
 
     if vcsImpl.hasConflicts():
@@ -314,10 +314,10 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
                 vcsImpl.abortMerge()
                 return False
 
-        assert not vcsImpl.hasConflicts()
+        assert not vcsImpl.hasConflicts(), "There are still conflicts in {}".format(dumpDir)
 
     if not vcsImpl.isWorkTreeClean():
         vcsImpl.commitAll("Merged")
 
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     return True
