@@ -1,3 +1,8 @@
+"""
+SyncCmd test cases
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import textwrap
 
 from contextlib import redirect_stdout
