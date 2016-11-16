@@ -144,7 +144,14 @@ class TextPullUi(PullUi):
 class SyncCmd(Cmd):
     def __init__(self, dumpDir=None):
         self.dumpDir = dumpDir or os.path.join(basepaths.getCacheDir(), 'db')
-        self.syncManager = SyncManager(self.dumpDir, session=db.getSession())
+        # As soon as we create a SyncManager, it monitors SQL events and start
+        # dumping objects. We don't want this to happen if the user has not
+        # initialized sync, so do not create a SyncManager if the dump dir does
+        # not exist.
+        if os.path.exists(self.dumpDir):
+            self._createSyncManager()
+        else:
+            self.syncManager = None
 
     def do_s_sync(self, line):
         """Synchronize the database with the remote one. Get the latest
@@ -179,6 +186,7 @@ class SyncCmd(Cmd):
 
     def do_s_init(self, line):
         """Create a dump directory."""
+        self._createSyncManager()
         self.syncManager.initDumpRepository()
         self.syncManager.dump()
         print('Synchronization initialized, dump directory is in {}'.format(self.dumpDir))
@@ -246,3 +254,6 @@ class SyncCmd(Cmd):
             print("Elements renamed in {}".format(domain))
             for old, new in renames:
                 print("- {} => {}".format(old, new))
+
+    def _createSyncManager(self):
+        self.syncManager = SyncManager(self.dumpDir, session=db.getSession())
