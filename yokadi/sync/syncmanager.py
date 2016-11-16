@@ -3,6 +3,7 @@ import os
 
 from sqlalchemy import event
 
+from yokadi.core import db
 from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, \
         TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
@@ -28,6 +29,7 @@ class SyncManager(object):
             event.listen(session, "after_flush", self._onFlushed)
             event.listen(session, "after_rollback", self._onRollbacked)
             event.listen(session, "after_commit", self._onCommitted)
+            self.session = session
 
     def initDumpRepository(self):
         assert not os.path.exists(self.dumpDir), "Dump dir {} should not already exist".format(self.dumpDir)
@@ -61,9 +63,35 @@ class SyncManager(object):
         self.vcsImpl.push()
 
     def checkDumpIntegrity(self):
+        self._checkItems(PROJECTS_DIRNAME, db.Project)
+        self._checkItems(TASKS_DIRNAME, db.Task)
+        self._checkItems(ALIASES_DIRNAME, db.Alias)
         self._checkUnicity(PROJECTS_DIRNAME)
         self._checkUnicity(ALIASES_DIRNAME)
         self._checkTaskProjects()
+
+    def _checkItems(self, dirname, table):
+        print("# Checking all items of {} are there".format(dirname))
+        objectDir = os.path.join(self.dumpDir, dirname)
+        dumpUuids = set()
+        for name in os.listdir(objectDir):
+            if not name.endswith(".json"):
+                continue
+            objectPath = os.path.join(objectDir, name)
+            with open(objectPath) as fp:
+                dct = json.load(fp)
+            dumpUuids.add(dct["uuid"])
+
+        query = self.session.query(table).all()
+        dbUuids = set(x.uuid for x in query)
+
+        if dbUuids != dumpUuids:
+            missing = dumpUuids - dbUuids
+            if missing:
+                print("## Missing DB items:\n{}\n".format(missing))
+            missing = dbUuids - dumpUuids
+            if missing:
+                print("## Missing dump items:\n{}\n".format(missing))
 
     def _checkUnicity(self, dirname):
         print("# Checking {} unicity".format(dirname))
