@@ -71,7 +71,7 @@ class SyncManager(object):
         self._checkTaskProjects()
 
     def _checkItems(self, dirname, table):
-        print("# Checking all items of {} are there".format(dirname))
+        print("# Checking all {} are there".format(dirname))
         objectDir = os.path.join(self.dumpDir, dirname)
         dumpUuids = set()
         for name in os.listdir(objectDir):
@@ -88,9 +88,11 @@ class SyncManager(object):
         if dbUuids != dumpUuids:
             missing = dumpUuids - dbUuids
             if missing:
+                missing = '\n'.join(missing)
                 print("## Missing DB items:\n{}\n".format(missing))
             missing = dbUuids - dumpUuids
             if missing:
+                missing = '\n'.join(missing)
                 print("## Missing dump items:\n{}\n".format(missing))
 
     def _checkUnicity(self, dirname):
