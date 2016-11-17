@@ -4,6 +4,8 @@ Task test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
+from sqlalchemy.orm.exc import NoResultFound
+
 from yokadi.core import dbutils
 from yokadi.ycli import tui
 from yokadi.ycli.keywordcmd import KeywordCmd, _listKeywords
@@ -67,6 +69,12 @@ class KeywordTestCase(YokadiTestCase):
         self.assertTrue("k2" in kwDict)
         taskKeyword = self.session.query(db.TaskKeyword).filter_by(taskId=t1.id).one()
         self.assertEqual(taskKeyword.keyword.name, "k2")
+
+    def testKRemove_unused(self):
+        self.cmd.do_k_add("kw")
+        self.session.query(db.Keyword).filter_by(name="kw").one()
+        self.cmd.do_k_remove("kw")
+        self.assertRaises(NoResultFound, self.session.query(db.Keyword).filter_by(name="kw").one)
 
     def testKList(self):
         t1 = dbutils.addTask("x", "t1", dict(k1=12, k2=None), interactive=False)
