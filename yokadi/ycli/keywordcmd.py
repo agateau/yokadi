@@ -55,12 +55,13 @@ class KeywordCmd(object):
         keyword = dbutils.getKeywordFromName(line)
 
         if keyword.tasks:
-            print("The keyword %s is used by the following tasks: %s" % (keyword.name,
-                                                                         ", ".join(str(task.id) for task in keyword.tasks)))
-            if tui.confirm("Do you really want to remove this keyword"):
-                session.delete(keyword)
-                session.commit()
-                print("Keyword %s has been removed" % keyword.name)
+            taskList = ", ".join(str(task.id) for task in keyword.tasks)
+            print("The keyword {} is used by the following tasks: {}".format(keyword.name, taskList))
+            if not tui.confirm("Do you really want to remove this keyword"):
+                return
+        session.delete(keyword)
+        session.commit()
+        print("Keyword {} has been removed".format(keyword.name))
 
     complete_k_remove = KeywordCompleter(1)
 
