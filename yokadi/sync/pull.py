@@ -39,28 +39,14 @@ class ChangeHandler(object):
         self._postUpdateChanges = []
 
     def handle(self, session, dumpDir, changes):
-        for path in changes.added:
+        for path in changes.added | changes.modified:
             if self._shouldHandleFilePath(path):
                 dct = self._loadJson(dumpDir, path)
-                obj = self._getObject(session, dct["uuid"])
-                if not obj:
-                    # In most cases, the object should not exist, since this is
-                    # an addition, but it can nevertheless happen when
-                    # importing a whole dump (in which cases all files are
-                    # marked as "added")
-                    obj = self.table()
+                obj = self._loadObject(session, dct["uuid"])
                 try:
                     self._update(session, obj, dct)
                 except Exception as exc:
                     raise PullError("Error while adding {}".format(path)) from exc
-        for path in changes.modified:
-            if self._shouldHandleFilePath(path):
-                dct = self._loadJson(dumpDir, path)
-                obj = self._getObject(session, dct["uuid"])
-                try:
-                    self._update(session, obj, dct)
-                except Exception as exc:
-                    raise PullError("Error while updating {}".format(path)) from exc
         for path in changes.removed:
             if self._shouldHandleFilePath(path):
                 uuid = self._getUuidFromFilePath(path)
@@ -103,9 +89,12 @@ class ChangeHandler(object):
         return os.path.splitext(name)[0]
 
     @classmethod
-    def _getObject(cls, session, uuid):
+    def _loadObject(cls, session, uuid):
         assert cls.table
-        return dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True)
+        obj = dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True)
+        if not obj:
+            obj = cls.table()
+        return obj
 
 
 class ProjectChangeHandler(ChangeHandler):
