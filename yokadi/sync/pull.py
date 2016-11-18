@@ -41,9 +41,9 @@ class ChangeHandler(object):
     def handle(self, session, dumpDir, changes):
         for path in changes.added | changes.modified:
             if self._shouldHandleFilePath(path):
-                dct = self._loadJson(dumpDir, path)
-                obj = self._loadObject(session, dct["uuid"])
                 try:
+                    dct = self._loadJson(dumpDir, path)
+                    obj = self._loadObject(session, dct["uuid"])
                     self._update(session, obj, dct)
                 except Exception as exc:
                     raise PullError("Error while adding {}".format(path)) from exc
