@@ -48,6 +48,7 @@ from textpulluitestcase import TextPullUiTestCase
 from keywordfiltertestcase import KeywordFilterTestCase
 from recurrenceruletestcase import RecurrenceRuleTestCase
 from synccmdtestcase import SyncCmdTestCase
+from conflictingobjecttestcase import ConflictingObjectTestCase
 
 
 def main():

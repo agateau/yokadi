@@ -20,7 +20,7 @@ class ConflictingObject(object):
         domain = os.path.dirname(conflict.path)
         def _load_json(json_or_none):
             if json_or_none is None:
-                return {}
+                return None
             return json.loads(json_or_none.decode('utf-8'))
         ancestor = _load_json(conflict.ancestor)
         local = _load_json(conflict.local)
@@ -51,8 +51,8 @@ class ConflictingObject(object):
         if self.final is None:
             content = None
         else:
-            content = json.dumps(self.final)
-        vcsImpl.closeConflict(self._path, content.encode('utf-8'))
+            content = json.dumps(self.final).encode("utf-8")
+        vcsImpl.closeConflict(self._path, content)
 
 
 class BothModifiedConflictingObject(ConflictingObject):
@@ -65,6 +65,10 @@ class BothModifiedConflictingObject(ConflictingObject):
     selectValue() to set the value for the conflicting keys.
     """
     def __init__(self, path, domain, ancestor, local, remote):
+        if ancestor is None:
+            # For BothModifiedConflictingObject no ancestor can be handled the
+            # same way an empty ancestor would be handled
+            ancestor = {}
         ConflictingObject.__init__(self, path, domain, ancestor, local, remote)
         self.conflictingKeys = set(self.ancestor.keys()) | set(self.local.keys()) | set(self.remote.keys())
         self.final = {}
