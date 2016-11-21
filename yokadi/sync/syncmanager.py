@@ -1,3 +1,8 @@
+"""
+SyncManager
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import json
 import os
 
@@ -150,10 +155,8 @@ class SyncManager(object):
             if linkedObject:
                 obj = linkedObject
 
-            key = (dirnameForObject(obj), obj.uuid)
             dct = dictFromObject(obj)
-
-            self._dictsToWrite[key] = dct
+            self._dictsToWrite[pathForObject(obj)] = dct
 
     def _onCommitted(self, session, *args):
         for path in self._pathsToDelete:
@@ -161,8 +164,10 @@ class SyncManager(object):
             if os.path.exists(fullPath):
                 os.unlink(fullPath)
 
-        for (dirname, _), dct in self._dictsToWrite.items():
-            dumpObjectDict(dct, os.path.join(self.dumpDir, dirname))
+        for path, dct in self._dictsToWrite.items():
+            if path in self._pathsToDelete:
+                continue
+            dumpObjectDict(dct, os.path.join(self.dumpDir, os.path.dirname(path)))
 
     def _onRollbacked(self, session, *args):
         self._pathsToDelete = set()

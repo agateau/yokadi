@@ -49,6 +49,7 @@ from keywordfiltertestcase import KeywordFilterTestCase
 from recurrenceruletestcase import RecurrenceRuleTestCase
 from synccmdtestcase import SyncCmdTestCase
 from conflictingobjecttestcase import ConflictingObjectTestCase
+from syncmanagertestcase import SyncManagerTestCase
 
 
 def main():
