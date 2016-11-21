@@ -6,16 +6,13 @@ SyncManager
 import json
 import os
 
-from sqlalchemy import event
-
 from yokadi.core import db
 from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, \
         TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import clearDump, dump, createVersionFile, \
-        commitChanges, isDumpableObject, getLinkedObject, dumpObjectDict, \
-        pathForObject, dirnameForObject, dictFromObject
+from yokadi.sync.dump import clearDump, dump, createVersionFile, commitChanges
 
+from yokadi.sync.dbreplicator import DbReplicator
 from yokadi.sync.pull import pull, importSinceLastSync, importAll, findConflicts
 
 
@@ -31,9 +28,7 @@ class SyncManager(object):
         self._dictsToWrite = {}
 
         if session:
-            event.listen(session, "after_flush", self._onFlushed)
-            event.listen(session, "after_rollback", self._onRollbacked)
-            event.listen(session, "after_commit", self._onCommitted)
+            self._dbReplicator = DbReplicator(dumpDir, session)
             self.session = session
 
     def initDumpRepository(self):
@@ -140,35 +135,3 @@ class SyncManager(object):
     def hasChangesToPush(self):
         changes = self.vcsImpl.getChangesSince("origin/master")
         return changes.hasChanges()
-
-    def _onFlushed(self, session, *args):
-        for obj in session.deleted:
-            if not isDumpableObject(obj):
-                continue
-            if getLinkedObject(obj):
-                continue
-            self._pathsToDelete.add(pathForObject(obj))
-        for obj in session.dirty | session.new:
-            if not isDumpableObject(obj):
-                continue
-            linkedObject = getLinkedObject(obj)
-            if linkedObject:
-                obj = linkedObject
-
-            dct = dictFromObject(obj)
-            self._dictsToWrite[pathForObject(obj)] = dct
-
-    def _onCommitted(self, session, *args):
-        for path in self._pathsToDelete:
-            fullPath = os.path.join(self.dumpDir, path)
-            if os.path.exists(fullPath):
-                os.unlink(fullPath)
-
-        for path, dct in self._dictsToWrite.items():
-            if path in self._pathsToDelete:
-                continue
-            dumpObjectDict(dct, os.path.join(self.dumpDir, os.path.dirname(path)))
-
-    def _onRollbacked(self, session, *args):
-        self._pathsToDelete = set()
-        self._dictsToWrite = dict()
