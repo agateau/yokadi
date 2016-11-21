@@ -171,3 +171,4 @@ class SyncManager(object):
 
     def _onRollbacked(self, session, *args):
         self._pathsToDelete = set()
+        self._dictsToWrite = dict()
