@@ -1,6 +1,4 @@
-import json
 import os
-import unittest
 
 from collections import namedtuple
 from tempfile import TemporaryDirectory
@@ -8,13 +6,14 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync.dump import createVersionFile
+from yokadi.sync.dump import createVersionFile, jsonDump, jsonDumps
 from yokadi.sync.pull import ChangeHandler
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 class StubVcsImpl(object):
@@ -77,7 +76,7 @@ def createProjectFile(dirname, uuid, name, active=True):
     }
     filePath = os.path.join(projectDir, uuid + ".json")
     with open(filePath, "wt") as fp:
-        json.dump(dct, fp)
+        jsonDump(dct, fp)
     return os.path.relpath(filePath, dirname)
 
 
@@ -89,9 +88,12 @@ def createTaskJson(uuid, projectUuid, title, **kwargs):
         "creationDate": "2016-01-12T19:12:00",
         "keywords": {},
         "description": "",
+        "recurrence": {},
+        "status": "new",
+        "urgency": 0,
     }
     dct.update(kwargs)
-    return json.dumps(dct).encode("utf-8")
+    return jsonDumps(dct).encode("utf-8")
 
 
 def createTaskFile(dirname, uuid, projectUuid, title, **kwargs):
@@ -115,7 +117,7 @@ def createAliasFile(dirname, uuid, name, command):
     }
     filePath = os.path.join(aliasesDir, uuid + ".json")
     with open(filePath, "wt") as fp:
-        json.dump(dct, fp)
+        jsonDump(dct, fp)
     return os.path.relpath(filePath, dirname)
 
 
@@ -294,8 +296,9 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
     )
 
 
-class PullTestCase(unittest.TestCase):
+class PullTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()
@@ -303,7 +306,7 @@ class PullTestCase(unittest.TestCase):
     def testNothingToDo(self):
         with TemporaryDirectory() as tmpDir:
             createVersionFile(tmpDir)
-            syncManager = SyncManager(tmpDir, StubVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=StubVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -360,7 +363,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -439,7 +442,7 @@ class PullTestCase(unittest.TestCase):
             # Do the pull
             vcsImpl = MyVcsImpl()
             pullUi = MyPullUi()
-            syncManager = SyncManager(tmpDir, vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=vcsImpl)
             ok = syncManager.pull(pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
@@ -470,7 +473,7 @@ class PullTestCase(unittest.TestCase):
 
             # Do the pull
             pullUi = MyPullUi()
-            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=pullUi)
             syncManager.importSinceLastSync(pullUi=pullUi)
 
@@ -498,7 +501,7 @@ class PullTestCase(unittest.TestCase):
                     dct[fixture.modRemotelyTaskPath].selectRemote()
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             pullUi = MyPullUi()
             syncManager.pull(pullUi=pullUi)
             syncManager.importSinceLastSync(pullUi=pullUi)
@@ -530,7 +533,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -555,7 +558,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -640,7 +643,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -765,7 +768,7 @@ class PullTestCase(unittest.TestCase):
 
             dumpDir = os.path.join(tmpDir, "dump")
             vcsImpl = GitVcsImpl()
-            syncManager = SyncManager(dumpDir, vcsImpl)
+            syncManager = SyncManager(dumpDir, vcsImpl=vcsImpl)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -794,7 +797,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -817,7 +820,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 
@@ -894,8 +897,7 @@ class PullTestCase(unittest.TestCase):
             self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
             self.assertEqual(pullUi.renames, [(ALIASES_DIRNAME, "a", "a_1")])
             dct = db.Alias.getAsDict(self.session)
-            self.assertEqual(set(dct.keys()), {"a", "a_1"})
-            self.assertEqual(set(dct.values()), {"t_add", "t_add -d"})
+            self.assertEqual(dct, {"a_1": "t_add -d", "a": "t_add"})
 
     def testImportAlias_swapNames(self):
         with TemporaryDirectory() as tmpDir:
@@ -914,7 +916,7 @@ class PullTestCase(unittest.TestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, MyVcsImpl())
+            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
             syncManager.importSinceLastSync(pullUi=None)
 

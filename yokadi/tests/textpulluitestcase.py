@@ -1,5 +1,4 @@
 import textwrap
-import unittest
 
 from tempfile import TemporaryDirectory
 
@@ -11,10 +10,12 @@ from yokadi.ycli.synccmd import TextPullUi, prepareConflictText, shortenText, SH
         SHORTENED_TEXT_MAX_LENGTH
 from yokadi.sync import ALIASES_DIRNAME
 from yokadi.sync.syncmanager import SyncManager
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class TextPullUiTestCase(unittest.TestCase):
+class TextPullUiTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()
@@ -32,7 +33,7 @@ class TextPullUiTestCase(unittest.TestCase):
                 ))
 
             tui.addInputAnswers("1", "2")
-            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=TextPullUi())
 
     def testModifiedDeletedConflict(self):
@@ -40,7 +41,7 @@ class TextPullUiTestCase(unittest.TestCase):
             fixture = createModifiedDeletedConflictFixture(self, tmpDir)
 
             tui.addInputAnswers("1", "2")
-            syncManager = SyncManager(tmpDir, fixture.vcsImpl)
+            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=TextPullUi())
 
     def testAddRename(self):
@@ -103,7 +104,8 @@ class TextPullUiTestCase(unittest.TestCase):
             (
                 "a" * 160,
                 "a" * (SHORTENED_TEXT_MAX_LENGTH - len(SHORTENED_SUFFIX)) + SHORTENED_SUFFIX
-            )
+            ),
+            (None, None),
         )
 
         for src, expected in data:

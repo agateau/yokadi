@@ -5,17 +5,15 @@ Project test cases
 @license: GPL v3 or later
 """
 
-import unittest
-
-import testutils
-
 from yokadi.core import db
 from yokadi.core.db import Project, setDefaultConfig
+from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.ycli import completers
 
 
-class CompletersTestCase(unittest.TestCase):
+class CompletersTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = db.getSession()

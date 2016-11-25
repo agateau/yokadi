@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import json
-import unittest
 
 from tempfile import TemporaryDirectory
 
@@ -10,6 +9,7 @@ from yokadi.core import dbutils
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.syncmanager import SyncManager
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 def getTaskPath(dumpDir, task):
@@ -24,8 +24,9 @@ def getAliasPath(dumpDir, alias):
     return os.path.join(dumpDir, ALIASES_DIRNAME, alias.uuid + ".json")
 
 
-class DumpTestCase(unittest.TestCase):
+class DumpTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         db.setDefaultConfig()
         self.session = db.getSession()
@@ -115,3 +116,52 @@ class DumpTestCase(unittest.TestCase):
             # Check t2 file has been removed
             taskFilePath = getTaskPath(dumpDir, t2)
             self.assertFalse(os.path.exists(taskFilePath))
+
+    def testRemove(self):
+        """Create t1 & t2. Dump the DB. Remove t1 from the DB. t1 dump should be removed,
+        t2 dump should remain"""
+        t1 = dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)
+        t2 = dbutils.addTask("prj1", "Bar", keywordDict=dict(kw1=2), interactive=False)
+
+        with TemporaryDirectory() as tmpDir:
+            dumpDir = os.path.join(tmpDir, "dump")
+            syncManager = SyncManager(dumpDir, session=self.session)
+            syncManager.initDumpRepository()
+            syncManager.dump()
+
+            t1Path = getTaskPath(dumpDir, t1)
+            t2Path = getTaskPath(dumpDir, t2)
+            self.assertTrue(os.path.exists(t1Path))
+            self.assertTrue(os.path.exists(t2Path))
+
+            self.session.delete(t1)
+            self.session.commit()
+
+            self.assertFalse(os.path.exists(t1Path))
+            self.assertTrue(os.path.exists(t2Path))
+
+    def testRemoveKeywords(self):
+        """Create a task with two keywords, remove one keyword. Check the dump has been updated."""
+
+        t1 = dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)
+
+        with TemporaryDirectory() as tmpDir:
+            dumpDir = os.path.join(tmpDir, "dump")
+            syncManager = SyncManager(dumpDir, session=self.session)
+            syncManager.initDumpRepository()
+            syncManager.dump()
+
+            t1Path = getTaskPath(dumpDir, t1)
+            self.assertTrue(os.path.exists(t1Path))
+
+            newKeywordDict = dict(kw1=1)
+            t1.setKeywordDict(newKeywordDict)
+            self.session.commit()
+
+            self.assertTrue(os.path.exists(t1Path))
+
+            with open(t1Path) as f:
+                dct = json.load(f)
+
+            keywordDict = dct["keywords"]
+            self.assertEqual(newKeywordDict, keywordDict)

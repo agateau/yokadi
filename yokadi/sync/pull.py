@@ -10,8 +10,12 @@ from yokadi.core.db import Alias, Project, Task
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import dumpObject, checkIsValidDumpDir
+from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
 from yokadi.sync.vcschanges import VcsChanges
+
+
+class PullError(Exception):
+    pass
 
 
 class ChangeHandler(object):
@@ -35,26 +39,21 @@ class ChangeHandler(object):
         self._postUpdateChanges = []
 
     def handle(self, session, dumpDir, changes):
-        for path in changes.added:
+        for path in changes.added | changes.modified:
             if self._shouldHandleFilePath(path):
-                dct = self._loadJson(dumpDir, path)
-                obj = self._getObject(session, dct["uuid"])
-                if not obj:
-                    # In most cases, the object should not exist, since this is
-                    # an addition, but it can nevertheless happen when
-                    # importing a whole dump (in which cases all files are
-                    # marked as "added")
-                    obj = self.table()
-                self._update(session, obj, dct)
-        for path in changes.modified:
-            if self._shouldHandleFilePath(path):
-                dct = self._loadJson(dumpDir, path)
-                obj = self._getObject(session, dct["uuid"])
-                self._update(session, obj, dct)
+                try:
+                    dct = self._loadJson(dumpDir, path)
+                    obj = self._loadObject(session, dct["uuid"])
+                    self._update(session, obj, dct)
+                except Exception as exc:
+                    raise PullError("Error while adding {}".format(path)) from exc
         for path in changes.removed:
             if self._shouldHandleFilePath(path):
                 uuid = self._getUuidFromFilePath(path)
-                self._remove(session, uuid)
+                try:
+                    self._remove(session, uuid)
+                except Exception as exc:
+                    raise PullError("Error while removing {}".format(path)) from exc
 
     def applyPostUpdateChanges(self):
         for obj, changeDict in self._postUpdateChanges:
@@ -90,9 +89,12 @@ class ChangeHandler(object):
         return os.path.splitext(name)[0]
 
     @classmethod
-    def _getObject(cls, session, uuid):
+    def _loadObject(cls, session, uuid):
         assert cls.table
-        return dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True)
+        obj = dbutils.getObject(session, cls.table, uuid=uuid, _allowNone=True)
+        if not obj:
+            obj = cls.table()
+        return obj
 
 
 class ProjectChangeHandler(ChangeHandler):
@@ -147,7 +149,7 @@ def _findUniqueName(baseName, existingNames):
     return name
 
 
-def _findConflicts(jsonDirPath, fieldName):
+def findConflicts(jsonDirPath, fieldName):
     """
     Returns a dict of the form
             fieldValue => [{dct1}, {dct2}]
@@ -168,11 +170,12 @@ def _findConflicts(jsonDirPath, fieldName):
 
 def _enforceProjectConstraints(session, dumpDir, pullUi):
     jsonDirPath = os.path.join(dumpDir, PROJECTS_DIRNAME)
-    conflictDict = _findConflicts(jsonDirPath, "name")
+    conflictDict = findConflicts(jsonDirPath, "name")
 
     names = {x.name for x in session.query(db.Project).all()}
     for name, conflictList in conflictDict.items():
-        assert len(conflictList) == 2
+        assert len(conflictList) == 2, "More than 2 projects are named '{}', this should not happen! (uuids: {})" \
+                                       .format(name, [x["uuid"] for x in conflictList])
 
         # Find local project
         project = session.query(db.Project).filter_by(name=name).one()
@@ -189,44 +192,53 @@ def _enforceProjectConstraints(session, dumpDir, pullUi):
         dct["name"] = new
         names.add(new)
         pullUi.addRename(PROJECTS_DIRNAME, old, new)
-        dumpObject(dct, jsonDirPath)
+        dumpObjectDict(dct, jsonDirPath)
 
 
-def _enforceAliasConstraints(dumpDir, pullUi):
+def _enforceAliasConstraints(session, dumpDir, pullUi):
     jsonDirPath = os.path.join(dumpDir, ALIASES_DIRNAME)
-    conflictDict = _findConflicts(jsonDirPath, "name")
+    conflictDict = findConflicts(jsonDirPath, "name")
 
-    names = set(conflictDict.keys())
-    for conflictList in conflictDict.values():
-        ref = conflictList.pop()
-        for dct in conflictList:
-            if ref["command"] == dct["command"]:
-                # Same command, destroy the other alias. If it was the local one
-                # it will be recreated at import time.
-                path = os.path.join(jsonDirPath, dct["uuid"] + ".json")
-                os.remove(path)
-            else:
-                # Different command, rename one
-                old = dct["name"]
-                new = _findUniqueName(old, names)
-                dct["name"] = new
-                names.add(new)
-                pullUi.addRename(ALIASES_DIRNAME, old, new)
-                dumpObject(dct, jsonDirPath)
+    names = {x.name for x in session.query(db.Alias).all()}
+    for name, conflictList in conflictDict.items():
+        assert len(conflictList) == 2, "More than 2 aliases are named '{}', this should not happen! (uuids: {})" \
+                                       .format(name, [x["uuid"] for x in conflictList])
+
+        # Find local alias
+        alias = session.query(db.Alias).filter_by(name=name).one()
+        localUuid = alias.uuid
+
+        if conflictList[0]["uuid"] == localUuid:
+            local, remote = conflictList[0], conflictList[1]
+        else:
+            local, remote = conflictList[1], conflictList[0]
+
+        if local["command"] == remote["command"]:
+            # Same command, destroy dump of local alias
+            objPath = os.path.join(jsonDirPath, localUuid + '.json')
+            assert os.path.exists(objPath), "{} does not exist".format(objPath)
+            os.unlink(objPath)
+        else:
+            # Different command, rename local alias
+            old = alias.name
+            new = _findUniqueName(old, names)
+            pullUi.addRename(ALIASES_DIRNAME, old, new)
+            local["name"] = new
+            dumpObjectDict(local, jsonDirPath)
 
 
 def enforceDbConstraints(session, dumpDir, pullUi):
     # TODO: Only enforce constraints if there have been changes in the concerned
     # dir
     _enforceProjectConstraints(session, dumpDir, pullUi)
-    _enforceAliasConstraints(dumpDir, pullUi)
+    _enforceAliasConstraints(session, dumpDir, pullUi)
 
 
 def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
     _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
 
@@ -235,7 +247,7 @@ def importAll(dumpDir, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = VcsChanges()
     changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
     _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
@@ -262,7 +274,7 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
         changeHandler.applyPostUpdateChanges()
     session.commit()
 
-    if dbConstraintChanges.hasChanges():
+    if not vcsImpl.isWorkTreeClean():
         # Only commit after the DB session has been committed, to be able to
         # rollback both the DB and the repository in case of error
         vcsImpl.commitAll("Enforce DB constraints")
@@ -275,7 +287,7 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
         vcsImpl = GitVcsImpl()
 
     vcsImpl.setDir(dumpDir)
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     vcsImpl.pull()
 
     if vcsImpl.hasConflicts():
@@ -291,10 +303,10 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
                 vcsImpl.abortMerge()
                 return False
 
-        assert not vcsImpl.hasConflicts()
+        assert not vcsImpl.hasConflicts(), "There are still conflicts in {}".format(dumpDir)
 
     if not vcsImpl.isWorkTreeClean():
         vcsImpl.commitAll("Merged")
 
-    assert vcsImpl.isWorkTreeClean()
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     return True

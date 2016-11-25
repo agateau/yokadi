@@ -4,6 +4,7 @@ from collections import defaultdict
 from difflib import Differ
 
 from yokadi.core import basepaths
+from yokadi.core import db
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
@@ -62,6 +63,8 @@ def prepareConflictText(local, remote):
 
 def shortenText(text):
     """Takes a potentially multi-line text and returns a one-line, shortened version of it"""
+    if text is None:
+        return None
     cr = text.find("\n")
     if cr >= 0:
         text = text[:cr]
@@ -109,12 +112,12 @@ class TextPullUi(PullUi):
 
     def resolveModifiedDeletedObject(self, obj):
         printConflictObjectHeader(obj)
-        if obj.remote is None:
-            print("This object has been modified locally and deleted remotely")
-            modified = obj.local
-        else:
+        if obj.remote:
             print("This object has been modified remotely and deleted locally")
             modified = obj.remote
+        else:
+            print("This object has been modified locally and deleted remotely")
+            modified = obj.local
         for key, value in obj.ancestor.items():
             modifiedValue = modified[key]
             if value == modifiedValue:
@@ -141,16 +144,23 @@ class TextPullUi(PullUi):
 class SyncCmd(Cmd):
     def __init__(self, dumpDir=None):
         self.dumpDir = dumpDir or os.path.join(basepaths.getCacheDir(), 'db')
-        self.syncManager = SyncManager(self.dumpDir)
+        # As soon as we create a SyncManager, it monitors SQL events and start
+        # dumping objects. We don't want this to happen if the user has not
+        # initialized sync, so do not create a SyncManager if the dump dir does
+        # not exist.
+        if os.path.exists(self.dumpDir):
+            self._createSyncManager()
+        else:
+            self.syncManager = None
 
     def do_s_sync(self, line):
         """Synchronize the database with the remote one. Get the latest
         changes, import them in the database and push local changes"""
         pullUi = TextPullUi()
 
-        print("Dumping database")
-        self.syncManager.clearDump()
-        self.syncManager.dump()
+        if self.syncManager.hasChangesToCommit():
+            print("Committing local changes")
+            self.syncManager.commitChanges("s_sync")
 
         while True:
             print("Pulling remote changes")
@@ -176,6 +186,7 @@ class SyncCmd(Cmd):
 
     def do_s_init(self, line):
         """Create a dump directory."""
+        self._createSyncManager()
         self.syncManager.initDumpRepository()
         self.syncManager.dump()
         print('Synchronization initialized, dump directory is in {}'.format(self.dumpDir))
@@ -231,6 +242,10 @@ class SyncCmd(Cmd):
         except VcsImplError as exc:
             print("Failed to push: {}".format(exc))
 
+    def do__s_check(self, line):
+        """Check the dump integrity, report any error."""
+        self.syncManager.checkDumpIntegrity()
+
     def _printPullResults(self, pullUi):
         renameDict = pullUi.getRenames()
         if not renameDict:
@@ -239,3 +254,6 @@ class SyncCmd(Cmd):
             print("Elements renamed in {}".format(domain))
             for old, new in renames:
                 print("- {} => {}".format(old, new))
+
+    def _createSyncManager(self):
+        self.syncManager = SyncManager(self.dumpDir, session=db.getSession())

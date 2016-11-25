@@ -4,20 +4,17 @@ Crypto functions test cases
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-
-import unittest
-
-import testutils
-
 from yokadi.ycli import tui
 from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core import db
 from yokadi.core.db import setDefaultConfig
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class CryptoTestCase(unittest.TestCase):
+class CryptoTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         setDefaultConfig()
         self.session = db.getSession()

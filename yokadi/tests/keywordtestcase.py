@@ -4,21 +4,19 @@ Task test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-import unittest
-
 from sqlalchemy.orm.exc import NoResultFound
-
-import testutils
 
 from yokadi.core import dbutils
 from yokadi.ycli import tui
 from yokadi.ycli.keywordcmd import KeywordCmd, _listKeywords
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core import db
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class KeywordTestCase(unittest.TestCase):
+class KeywordTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         tui.clearInputAnswers()

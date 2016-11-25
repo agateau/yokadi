@@ -25,7 +25,7 @@ class ConflictingObject(object):
         ancestor = _load_json(conflict.ancestor)
         local = _load_json(conflict.local)
         remote = _load_json(conflict.remote)
-        if local is None or remote is None:
+        if not local or not remote:
             return ModifiedDeletedConflictingObject(
                     path=conflict.path,
                     domain=domain,
@@ -47,12 +47,12 @@ class ConflictingObject(object):
         raise NotImplementedError()
 
     def close(self, vcsImpl):
-        assert self.isResolved()
+        assert self.isResolved(), "Conflict {} has not been resolved".format(self._path)
         if self.final is None:
             content = None
         else:
-            content = json.dumps(self.final)
-        vcsImpl.closeConflict(self._path, content.encode('utf-8'))
+            content = json.dumps(self.final).encode("utf-8")
+        vcsImpl.closeConflict(self._path, content)
 
 
 class BothModifiedConflictingObject(ConflictingObject):
@@ -65,6 +65,10 @@ class BothModifiedConflictingObject(ConflictingObject):
     selectValue() to set the value for the conflicting keys.
     """
     def __init__(self, path, domain, ancestor, local, remote):
+        if ancestor is None:
+            # For BothModifiedConflictingObject no ancestor can be handled the
+            # same way an empty ancestor would be handled
+            ancestor = {}
         ConflictingObject.__init__(self, path, domain, ancestor, local, remote)
         self.conflictingKeys = set(self.ancestor.keys()) | set(self.local.keys()) | set(self.remote.keys())
         self.final = {}
@@ -85,7 +89,8 @@ class BothModifiedConflictingObject(ConflictingObject):
                 self.selectValue(key, local)
 
     def selectValue(self, key, value):
-        assert key in self.conflictingKeys
+        assert key in self.conflictingKeys, "Key {} is not in conflicting keys {} for {}" \
+                                            .format(key, self.conflictingKeys, self._path)
         self.final[key] = value
         self.conflictingKeys.remove(key)
 

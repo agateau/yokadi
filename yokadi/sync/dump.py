@@ -2,12 +2,60 @@ import json
 import os
 import shutil
 
+from collections import namedtuple
+
 from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
-from yokadi.core.db import Task, Project, Alias
+from yokadi.core.db import Task, Project, Alias, TaskKeyword
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
+
+
+TableInfo = namedtuple("TableInfo", ("table", "dirname", "dictFromObject"))
+
+
+_TABLE_INFO = (
+    TableInfo(Task, TASKS_DIRNAME, dbs13n.dictFromTask),
+    TableInfo(Project, PROJECTS_DIRNAME, dbs13n.dictFromProject),
+    TableInfo(Alias, ALIASES_DIRNAME, dbs13n.dictFromAlias),
+)
+
+
+_DIRNAME_FOR_TABLE = dict((x.table.__table__, x.dirname) for x in _TABLE_INFO)
+
+
+_DICT_FCN_FOR_TABLE = dict((x.table.__table__, x.dictFromObject) for x in _TABLE_INFO)
+
+
+_JSON_DUMP_ARGS = dict(indent=2, sort_keys=True)
+
+
+def jsonDumps(dct):
+    """Dump a dict to a string using Yokadi formatting"""
+    return json.dumps(dct, **_JSON_DUMP_ARGS)
+
+
+def jsonDump(dct, fp):
+    """Dump a dict to a file using Yokadi formatting"""
+    return json.dump(dct, fp, **_JSON_DUMP_ARGS)
+
+
+def dirnameForObject(obj):
+    """Returns the dirname for obj. Can return None if this is not a serialized object,
+    such as a TaskKeyword object"""
+    return _DIRNAME_FOR_TABLE.get(obj.__table__)
+
+
+def pathForObject(obj):
+    dirname = dirnameForObject(obj)
+    return os.path.join(dirname, obj.uuid + '.json')
+
+
+def dictFromObject(obj):
+    """Returns a serializable dict version of an object"""
+    fcn = _DICT_FCN_FOR_TABLE[obj.__table__]
+    return fcn(obj)
 
 
 def createVersionFile(dstDir):
@@ -39,49 +87,57 @@ def clearDump(dstDir):
         os.mkdir(path)
 
 
-def dumpObject(obj, dumpDir):
+def dumpObjectDict(dct, dumpDictDir):
+    """Given a dict representing an object and a complete dir where to dump
+    (dumpDir/$objdir), write the JSON file"""
+
     # dumpDir may not exist if we cloned a database which does not contain any
-    # object of the type of obj (for example, no aliases)
-    os.makedirs(dumpDir, exist_ok=True)
+    # object of the type of dct (for example, no aliases)
+    os.makedirs(dumpDictDir, exist_ok=True)
 
-    uuid = obj["uuid"]
-    path = os.path.join(dumpDir, uuid + ".json")
+    uuid = dct["uuid"]
+    path = os.path.join(dumpDictDir, uuid + ".json")
     with open(path, "wt") as fp:
-        json.dump(obj, fp, indent=2, sort_keys=True)
+        json.dump(dct, fp, indent=2, sort_keys=True)
 
 
-def dumpProject(project, dumpDir):
-    dct = dbs13n.dictFromProject(project)
-    dumpObject(dct, dumpDir)
+def dumpObject(obj, dumpDir):
+    dirname = dirnameForObject(obj)
+    dumpDictDir = os.path.join(dumpDir, dirname)
+    dct = dictFromObject(obj)
+    dumpObjectDict(dct, dumpDictDir)
 
 
-def dumpTask(task, dumpDir):
-    dct = dbs13n.dictFromTask(task)
-    dumpObject(dct, dumpDir)
+def getLinkedObject(obj):
+    """If an object is dumped as part of another object, return this other
+    object or None if the object is supposed to be dumped as is"""
+    if obj.__table__ is TaskKeyword.__table__:
+        return obj.task
+    return None
 
 
-def dumpAlias(alias, dumpDir):
-    dct = dbs13n.dictFromAlias(alias)
-    dumpObject(dct, dumpDir)
+def isDumpableObject(obj):
+    """Returns True if the object can be dumped, either directly or via its
+    linked object"""
+    if getLinkedObject(obj):
+        return True
+    return obj.__table__ in _DIRNAME_FOR_TABLE
 
 
 def dump(dumpDir, vcsImpl=None):
-    assert os.path.exists(dumpDir)
+    assert os.path.exists(dumpDir), "dumpDir {} does not exist".format(dumpDir)
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
     checkIsValidDumpDir(dumpDir, vcsImpl)
 
     session = db.getSession()
-    projectsDir = os.path.join(dumpDir, PROJECTS_DIRNAME)
     for project in session.query(Project).all():
-        dumpProject(project, projectsDir)
-    tasksDir = os.path.join(dumpDir, TASKS_DIRNAME)
+        dumpObject(project, dumpDir)
     for task in session.query(Task).all():
-        dumpTask(task, tasksDir)
-    aliasesDir = os.path.join(dumpDir, ALIASES_DIRNAME)
+        dumpObject(task, dumpDir)
     for alias in session.query(Alias).all():
-        dumpAlias(alias, aliasesDir)
+        dumpObject(alias, dumpDir)
 
     if not vcsImpl.isWorkTreeClean():
         commitChanges(dumpDir, "Dumped", vcsImpl=vcsImpl)

@@ -4,21 +4,16 @@ Ical features test cases
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-
-
-import unittest
-import testutils
-import datetime
-
 from yokadi.ycli import tui
 from yokadi.yical import yical
 from yokadi.core import dbutils
 from yokadi.core import db
-from yokadi.core.db import Task
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class IcalTestCase(unittest.TestCase):
+class IcalTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         tui.clearInputAnswers()

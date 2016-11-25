@@ -139,7 +139,10 @@ class Task(Base):
         keywordName => value
         """
         dct = {}
-        for taskKeyword in self.taskKeywords:
+        session = getSession()
+        # Do not use self.taskKeywords here: its output is outdated when called
+        # from a function connected to SQLAlchemy events
+        for taskKeyword in session.query(TaskKeyword).filter_by(task=self):
             dct[taskKeyword.keyword.name] = taskKeyword.value
         return dct
 

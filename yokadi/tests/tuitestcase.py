@@ -6,13 +6,14 @@ TUI module test cases
 """
 
 import os
-import unittest
 
 from yokadi.ycli import tui
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class TuiTestCase(unittest.TestCase):
+class TuiTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         tui.clearInputAnswers()
 
     def testEditEmptyText(self):

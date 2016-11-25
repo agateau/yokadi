@@ -4,21 +4,18 @@ Date utilities test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
-
 from datetime import datetime
-
-import testutils
 
 from yokadi.core import dbutils, db
 from yokadi.ycli import tui
 from yokadi.core.db import Keyword, Project
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class DbUtilsTestCase(unittest.TestCase):
+class DbUtilsTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         tui.clearInputAnswers()

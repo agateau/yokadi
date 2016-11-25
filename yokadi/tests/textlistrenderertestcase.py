@@ -4,18 +4,16 @@ TextListRenderer test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
 from io import StringIO
 
 import yokadi.ycli.colors as C
 from yokadi.core import dbutils
-import testutils
 
 from yokadi.ycli import tui
 from yokadi.ycli.textlistrenderer import TextListRenderer, TitleFormater
 from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core import db
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 def stripColor(text):
@@ -29,8 +27,9 @@ class StubCryptoMgr:
         return title
 
 
-class TextListRendererTestCase(unittest.TestCase):
+class TextListRendererTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         tui.clearInputAnswers()

@@ -4,20 +4,17 @@ Project test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
-
-import testutils
-
 from yokadi.core import db, dbutils
-from yokadi.core.db import Project, Keyword, Task
+from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli.main import YokadiCmd
 from yokadi.ycli import tui
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class ProjectTestCase(unittest.TestCase):
+class ProjectTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         tui.clearInputAnswers()

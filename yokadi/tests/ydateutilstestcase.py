@@ -4,16 +4,15 @@ Date utilities test cases
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-
-import unittest
 import operator
 from datetime import datetime, timedelta, time
 
 from yokadi.core import ydateutils
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class YDateUtilsTestCase(unittest.TestCase):
+class YDateUtilsTestCase(YokadiTestCase):
     def testParseDateTimeDelta(self):
         testData = [
             ("1m", timedelta(minutes=1)),

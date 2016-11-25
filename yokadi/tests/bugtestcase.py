@@ -4,20 +4,17 @@ Bug test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
-import unittest
-
-import testutils
-
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, setDefaultConfig
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class BugTestCase(unittest.TestCase):
+class BugTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         setDefaultConfig()

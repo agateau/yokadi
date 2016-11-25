@@ -44,7 +44,7 @@ from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.update import update
 
-from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
+from yokadi.ycli.aliascmd import AliasCmd, resolveAlias, getAliasesStartingWith
 from yokadi.ycli.confcmd import ConfCmd
 from yokadi.ycli.keywordcmd import KeywordCmd
 from yokadi.ycli.projectcmd import ProjectCmd
@@ -74,7 +74,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         return
 
     def default(self, line):
-        nline = resolveAlias(line, self.aliases)
+        nline = resolveAlias(db.getSession(), line)
         if nline != line:
             return self.onecmd(nline)
         elif nline.isdigit():
@@ -88,7 +88,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         """Default completion command.
         Try to see if command is an alias and find the
         appropriate complete function if it exists"""
-        nline = resolveAlias(line, self.aliases)
+        nline = resolveAlias(db.getSession(), line)
         compfunc = getattr(self, 'complete_' + nline.split()[0])
         matches = compfunc(text, line, begidx, endidx)
         return matches
@@ -173,9 +173,10 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         YokadiOptionParser for the do_foo() method and show the help of the
         parser, instead of do_foo() docstring.
         """
-        if arg in self.aliases:
+        aliases = db.Alias.getAsDict(db.getSession())
+        if arg in aliases:
             # If arg is an alias, get help on the underlying command
-            arg = self.aliases[arg].split()[0]
+            arg = aliases[arg].split()[0]
         if hasattr(self, "parser_" + arg):
             parserMethod = getattr(self, "parser_" + arg)
             parserMethod().print_help(sys.stderr)
@@ -187,9 +188,9 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         """Complete commands names. Same as Cmd.cmd one but with support
         for command aliases. Code kindly borrowed to Pysql"""
         dotext = 'do_' + text
-        names = [a[3:] for a in self.get_names() if a.startswith(dotext)]
-        names.extend([a for a in list(self.aliases.keys()) if a.startswith(text)])
-        return names
+        commandNames = [a[3:] for a in self.get_names() if a.startswith(dotext)]
+        aliasNames = getAliasesStartingWith(db.getSession(), text)
+        return sorted(commandNames + aliasNames)
 
 
 def main():

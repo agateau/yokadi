@@ -4,21 +4,21 @@ Alias test cases
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
-import unittest
-
 from contextlib import redirect_stdout
 from io import StringIO
 
 
 from yokadi.core import db
 from yokadi.core.db import Alias
-from yokadi.ycli.aliascmd import AliasCmd
+from yokadi.tests.yokaditestcase import YokadiTestCase
+from yokadi.ycli.aliascmd import AliasCmd, resolveAlias, getAliasesStartingWith
 from yokadi.ycli import colors as C
 from yokadi.ycli import tui
 
 
-class AliasTestCase(unittest.TestCase):
+class AliasTestCase(YokadiTestCase):
     def setUp(self):
+        YokadiTestCase.setUp(self)
         db.connectDatabase("", memoryDatabase=True)
         self.session = db.getSession()
         self.cmd = AliasCmd()
@@ -69,3 +69,31 @@ class AliasTestCase(unittest.TestCase):
 
         aliases = Alias.getAsDict(self.session)
         self.assertEqual(aliases["l"], "foo")
+
+    def testResolveAlias(self):
+        self.cmd.do_a_add("ll t_list")
+        self.cmd.do_a_add("la t_list -a")
+
+        data = (
+            ("ll", "t_list"),
+            ("ll foo bar", "t_list foo bar"),
+            ("la", "t_list -a"),
+            ("", ""),
+            ("zog zog", "zog zog"),
+        )
+        for text, expected in data:
+            self.assertEqual(resolveAlias(self.session, text), expected)
+
+    def testGetAliasesStartingWith(self):
+        self.cmd.do_a_add("ll t_list")
+        self.cmd.do_a_add("la t_list -a")
+
+        data = (
+            ("", ["la", "ll"]),
+            ("l", ["la", "ll"]),
+            ("la", ["la"]),
+            ("zog", []),
+        )
+        for text, expected in data:
+            output = getAliasesStartingWith(self.session, text)
+            self.assertEqual(output, expected)
