@@ -5,7 +5,7 @@ import subprocess
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
 from yokadi.sync.vcsimpl import VcsImpl
-from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError
+from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError, CantCommitWithConflictsError
 
 
 """
@@ -83,6 +83,8 @@ class GitVcsImpl(VcsImpl):
     def commitAll(self, message=None):
         if message is None:
             message = "Synced"
+        if self.hasConflicts():
+            raise CantCommitWithConflictsError()
         # Use --all to keep Travis git (1.8.5.6) happy
         self._run("add", "--all", ".")
         self._run("commit", "-m", message)

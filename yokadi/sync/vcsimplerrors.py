@@ -7,3 +7,7 @@ class VcsImplError(YokadiException):
 
 class NotFastForwardError(VcsImplError):
     pass
+
+
+class CantCommitWithConflictsError(VcsImplError):
+    pass

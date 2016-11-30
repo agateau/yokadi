@@ -28,7 +28,8 @@ class VcsImpl(object):
 
     def commitAll(self, message=None):
         """
-        Commit all changes, using `message` as a commit message
+        Commit all changes, using `message` as a commit message. Must raise
+        CantCommitWithConflictsError if there are conflicts in the work tree.
         """
         raise NotImplementedError()
 

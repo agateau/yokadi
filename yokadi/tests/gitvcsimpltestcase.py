@@ -5,7 +5,7 @@ from os.path import join
 from tempfile import TemporaryDirectory
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
+from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError, CantCommitWithConflictsError
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
@@ -150,6 +150,11 @@ class GitVcsImplTestCase(YokadiTestCase):
             self.assertFalse(impl.isWorkTreeClean())
             impl.commitAll()
             self.assertTrue(impl.isWorkTreeClean())
+
+    def testCommitAll_conflicts(self):
+        with TemporaryDirectory() as tmpDir:
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent=None, remoteContent="remote")
+            self.assertRaises(CantCommitWithConflictsError, impl.commitAll)
 
     def testInitNoGitUserInfo(self):
         # If there is no user info, init() should set some default info so that
