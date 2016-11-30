@@ -1,3 +1,11 @@
+"""
+Base class for VCS implementations used by the synchronization code
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
+
+
 class VcsImpl(object):
     """
     An abstract class representing a VCS

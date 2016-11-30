@@ -1,3 +1,9 @@
+"""
+Functions to import changes from the dump dir to the database
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import json
 import os
 

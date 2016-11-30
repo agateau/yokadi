@@ -1,3 +1,9 @@
+"""
+Implementation of VcsImpl using Git
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import os
 import platform
 import subprocess

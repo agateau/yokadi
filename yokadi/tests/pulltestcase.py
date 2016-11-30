@@ -1,3 +1,9 @@
+"""
+Test cases for pull functions
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import os
 
 from collections import namedtuple

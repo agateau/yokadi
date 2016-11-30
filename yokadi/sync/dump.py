@@ -1,3 +1,9 @@
+"""
+Functions to dump a database to a dir handled by a VcsImpl
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import json
 import os
 import shutil

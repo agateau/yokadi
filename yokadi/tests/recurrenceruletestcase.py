@@ -1,3 +1,9 @@
+"""
+Test cases for RecurrenceRule
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 from collections import namedtuple

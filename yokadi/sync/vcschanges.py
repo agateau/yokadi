@@ -1,3 +1,11 @@
+"""
+Represents changes recorded by a VCS.
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
+
+
 class VcsChanges(object):
     def __init__(self):
         self.added = set()

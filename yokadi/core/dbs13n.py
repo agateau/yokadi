@@ -1,4 +1,9 @@
-# dbs13n: Database Serialization
+"""
+dbs13n: Database Serialization
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 from datetime import datetime
 
 import dateutil.parser

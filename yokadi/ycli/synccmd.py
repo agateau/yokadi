@@ -1,3 +1,9 @@
+"""
+Synchronization commands
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import os
 from cmd import Cmd
 from collections import defaultdict

@@ -1,4 +1,9 @@
-#!/usr/bin/env python3
+"""
+Test cases for dump functions
+
+@author: Aurélien Gâteau <mail@agateau.com>
+@license: GPL v3 or later
+"""
 import os
 import json
 
