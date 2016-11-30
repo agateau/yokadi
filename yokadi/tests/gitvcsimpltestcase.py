@@ -19,7 +19,7 @@ def createGitRepository(repoParentDir, name):
     repoDir = join(repoParentDir, name)
     os.mkdir(repoDir)
     subprocess.check_call(("git", "init", "--quiet"), cwd=repoDir)
-    emptyPath = touch(repoDir, "EMPTY")
+    touch(repoDir, "EMPTY")
     subprocess.check_call(("git", "add", "EMPTY"), cwd=repoDir)
     subprocess.check_call(("git", "commit", "--quiet", "--message", "Init"), cwd=repoDir)
     return repoDir
@@ -75,7 +75,7 @@ def createGitRepositoryWithConflict(tmpDir, path, ancestorContent="", localConte
         remoteImpl.commitAll()
 
     # Clone it
-    repoDir = join(tmpDir,path)
+    repoDir = join(tmpDir, path)
     impl = GitVcsImpl()
     impl.setDir(repoDir)
     impl.clone(remoteRepoDir)
@@ -213,7 +213,6 @@ class GitVcsImplTestCase(YokadiTestCase):
             touch(repoDir, "bar")
             impl.commitAll()
 
-
     def testPull(self):
         with TemporaryDirectory() as tmpDir:
             remoteRepoDir = createGitRepository(tmpDir, "remote")
@@ -248,16 +247,12 @@ class GitVcsImplTestCase(YokadiTestCase):
 
     def testHasConflicts_conflicts(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    localContent="local",
-                    remoteContent="remote")
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent="local", remoteContent="remote")
             self.assertTrue(impl.hasConflicts())
 
     def testGetConflicts(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    localContent="local",
-                    remoteContent="remote")
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent="local", remoteContent="remote")
 
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
@@ -269,9 +264,7 @@ class GitVcsImplTestCase(YokadiTestCase):
 
     def testGetConflictsRemovedLocally(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    localContent=None,
-                    remoteContent="remote")
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent=None, remoteContent="remote")
 
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
@@ -283,9 +276,7 @@ class GitVcsImplTestCase(YokadiTestCase):
 
     def testGetConflictsRemovedRemotely(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    localContent="local",
-                    remoteContent=None)
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent="local", remoteContent=None)
 
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
@@ -298,9 +289,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testGetConflictsBothAdded(self):
         with TemporaryDirectory() as tmpDir:
             impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    ancestorContent=None,
-                    localContent="local",
-                    remoteContent="remote")
+                                                   ancestorContent=None, localContent="local", remoteContent="remote")
 
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
@@ -312,9 +301,7 @@ class GitVcsImplTestCase(YokadiTestCase):
 
     def testCloseConflict_withContent(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    localContent="local",
-                    remoteContent=None)
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent="local", remoteContent=None)
 
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
@@ -329,9 +316,7 @@ class GitVcsImplTestCase(YokadiTestCase):
 
     def testCloseConflict_withoutContent(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    localContent="local",
-                    remoteContent=None)
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", localContent="local", remoteContent=None)
 
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
@@ -346,9 +331,7 @@ class GitVcsImplTestCase(YokadiTestCase):
 
     def testAbortMerge(self):
         with TemporaryDirectory() as tmpDir:
-            impl = createGitRepositoryWithConflict(tmpDir, "repo",
-                    remoteContent="hello",
-                    localContent="world")
+            impl = createGitRepositoryWithConflict(tmpDir, "repo", remoteContent="hello", localContent="world")
             conflicts = set(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
             impl.abortMerge()
@@ -471,7 +454,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             removedPath = touch(repoDir, "removed")
             impl.commitAll()
 
-            addedPath = touch(repoDir, "added")
+            touch(repoDir, "added")
 
             changes = impl.getWorkTreeChanges()
             self.assertEqual(changes.modified, set())
@@ -503,7 +486,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             impl.clone(remoteRepoDir)
 
             # Make a change
-            fooPath = touch(repoDir, "foo")
+            touch(repoDir, "foo")
             impl.commitAll()
 
             # Push
@@ -516,7 +499,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             impl.setDir(repoDir)
 
             # Make a change
-            fooPath = touch(repoDir, "foo")
+            touch(repoDir, "foo")
             impl.commitAll()
 
             # Push
