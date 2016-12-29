@@ -212,9 +212,6 @@ def main():
                       dest="version", action="store_true",
                       help="Display Yokadi current version")
 
-    parser.add_argument("--dump",
-                      help="Dump database to DIR", metavar="DIR")
-
     parser.add_argument('cmd', nargs='*')
 
     args = parser.parse_args()
@@ -246,10 +243,6 @@ def main():
     if args.createOnly:
         return 0
     db.setDefaultConfig()  # Set default config parameters
-
-    if args.dump:
-        dump.dump(args.dump)
-        return
 
     cmd = YokadiCmd()
 
