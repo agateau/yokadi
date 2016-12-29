@@ -19,10 +19,14 @@ from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
+from yokadi.sync.vcsimplerrors import VcsImplError
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 class StubVcsImpl(object):
+    def __init__(self):
+        self._tags = set()
+
     def setDir(self, repoDir):
         pass
 
@@ -58,6 +62,20 @@ class StubVcsImpl(object):
 
     def updateBranch(self, branch, commitId):
         pass
+
+    def hasTag(self, tag):
+        return tag in self._tags
+
+    def createTag(self, tag):
+        if tag in self._tags:
+            raise VcsImplError("tag {} already exists".format(tag))
+        self._tags.add(tag)
+
+    def deleteTag(self, tag):
+        try:
+            self._tags.remove(tag)
+        except KeyError:
+            raise VcsImplError("tag {} does not exist".format(tag))
 
 
 class StubPullUi(PullUi):
@@ -147,6 +165,7 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
 
     class MyVcsImpl(StubVcsImpl):
         def __init__(self):
+            StubVcsImpl.__init__(self)
             self.abortMergeCallCount = 0
             self.commitAllCallCount = 0
             self.pullCalled = False
@@ -229,6 +248,7 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
 
     class MyVcsImpl(StubVcsImpl):
         def __init__(self):
+            StubVcsImpl.__init__(self)
             self.abortMergeCallCount = 0
             self.commitAllCallCount = 0
             self.pullCalled = False
@@ -401,6 +421,7 @@ class PullTestCase(YokadiTestCase):
 
             class MyVcsImpl(StubVcsImpl):
                 def __init__(self):
+                    StubVcsImpl.__init__(self)
                     self.abortMergeCallCount = 0
                     self.commitAllCallCount = 0
                     self.pullCalled = False

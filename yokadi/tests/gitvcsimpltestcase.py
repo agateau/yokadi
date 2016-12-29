@@ -12,6 +12,7 @@ from tempfile import TemporaryDirectory
 
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError, CantCommitWithConflictsError
+from yokadi.sync.vcschanges import VcsChanges
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
@@ -552,3 +553,53 @@ class GitVcsImplTestCase(YokadiTestCase):
 
             files = impl.getTrackedFiles()
             self.assertEqual(set(files), {"EMPTY", "foo", "bar"})
+
+    def testCreateTag(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            touch(repoDir, "foo")
+            impl.commitAll()
+            impl.createTag("t1")
+
+            touch(repoDir, "bar")
+            impl.commitAll()
+
+            changes = impl.getChangesSince("t1")
+            self.assertEqual(changes, VcsChanges(added={"bar"}))
+
+    def testCreateTagTwiceFails(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            touch(repoDir, "foo")
+            impl.commitAll()
+            impl.createTag("t1")
+            self.assertRaises(VcsImplError, impl.createTag, "t1")
+
+    def testDeleteTag(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            touch(repoDir, "foo")
+            impl.commitAll()
+            impl.createTag("t1")
+
+            self.assertTrue(impl.hasTag("t1"))
+            impl.deleteTag("t1")
+            self.assertFalse(impl.hasTag("t1"))
+
+    def testDeleteUnknownTagFails(self):
+        with TemporaryDirectory() as tmpDir:
+            repoDir = createGitRepository(tmpDir, "repo")
+            impl = GitVcsImpl()
+            impl.setDir(repoDir)
+
+            touch(repoDir, "foo")
+            self.assertRaises(VcsImplError, impl.deleteTag, "t1")

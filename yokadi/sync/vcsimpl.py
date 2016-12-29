@@ -114,3 +114,21 @@ class VcsImpl(object):
         Returns a list of all tracked files
         """
         raise NotImplementedError()
+
+    def hasTag(self, tag):
+        """
+        Returns True if `tag` exists
+        """
+        raise NotImplementedError()
+
+    def createTag(self, tag):
+        """
+        Creates the tag `tag`. Raises VcsImplError if the tag already exists
+        """
+        raise NotImplementedError()
+
+    def deleteTag(self, tag):
+        """
+        Deletes the tag `tag`. Raises VcsImplError if the tag does not exist
+        """
+        raise NotImplementedError()

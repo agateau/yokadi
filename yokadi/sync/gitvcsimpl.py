@@ -177,6 +177,17 @@ class GitVcsImpl(VcsImpl):
     def getTrackedFiles(self):
         return [x for x in self._run("ls-files").decode("utf-8").split("\n") if x]
 
+    def createTag(self, tag):
+        self._run("tag", tag)
+
+    def deleteTag(self, tag):
+        self._run("tag", "--delete", tag)
+
+    def hasTag(self, tag):
+        # We want this to be very fast, so we avoid forking a git process
+        tagPath = os.path.join(self._srcDir, ".git", "refs", "tags", tag)
+        return os.path.exists(tagPath)
+
     def _run(self, *args, **kwargs):
         cwd = kwargs.get("cwd", self._srcDir)
         cmd = ["git", "-C", cwd]
