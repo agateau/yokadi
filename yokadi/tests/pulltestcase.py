@@ -334,7 +334,6 @@ class PullTestCase(YokadiTestCase):
             createVersionFile(tmpDir)
             syncManager = SyncManager(tmpDir, vcsImpl=StubVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
     def testOnlyImportOurFiles(self):
         class FooChangeHandler(ChangeHandler):
@@ -391,7 +390,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
@@ -502,7 +500,6 @@ class PullTestCase(YokadiTestCase):
             pullUi = MyPullUi()
             syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=pullUi)
-            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
@@ -531,7 +528,6 @@ class PullTestCase(YokadiTestCase):
             syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
             pullUi = MyPullUi()
             syncManager.pull(pullUi=pullUi)
-            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
             self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
@@ -562,7 +558,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             prj2 = self.session.query(Project).filter_by(id=prj.id).one()
@@ -587,7 +582,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # DB should be empty
             projects = self.session.query(Project).all()
@@ -632,7 +626,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull, conflict should be automatically solved
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
-            syncManager.importSinceLastSync(pullUi=pullUi)
 
             # Local project should be renamed prj_1
             projects = list(self.session.query(Project).all())
@@ -672,7 +665,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # The project should have a new name, task1 should still be there
             projects = list(self.session.query(Project).all())
@@ -723,8 +715,7 @@ class PullTestCase(YokadiTestCase):
                     self.renames.append((domain, old, new))
 
             pullUi = MyPullUi()
-            syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=pullUi)
+            syncManager.pull(pullUi=pullUi)
 
             # Check changes
             self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
@@ -770,7 +761,6 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull, conflict should be automatically solved
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes, now p1 should have a task task2 and p2 a task task1
             p1 = dbutils.getProject(self.session, uuid="u-prj2")
@@ -826,7 +816,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             dct = db.Alias.getAsDict(self.session)
@@ -849,7 +838,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             dct = db.Alias.getAsDict(self.session)
@@ -879,7 +867,6 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull, conflict should be automatically solved
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
@@ -917,8 +904,7 @@ class PullTestCase(YokadiTestCase):
                     self.renames.append((domain, old, new))
 
             pullUi = MyPullUi()
-            syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=pullUi)
+            syncManager.pull(pullUi=pullUi)
 
             # Check changes
             self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
@@ -945,7 +931,6 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
             syncManager.pull(pullUi=None)
-            syncManager.importSinceLastSync(pullUi=None)
 
             # Check changes
             dct = db.Alias.getAsDict(self.session)

@@ -106,6 +106,13 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
     def onecmd(self, line):
         """This method is subclassed just to be
         able to encapsulate it with a try/except bloc"""
+
+        # Make sure we cannot run any command if another process is
+        # synchronizing
+        if self.isSyncInProgress():
+            tui.error("Sync is in progress")
+            return
+
         try:
             # Decode user input
             line = line

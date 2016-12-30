@@ -159,35 +159,16 @@ class SyncCmd(Cmd):
         else:
             self.syncManager = None
 
+    def isSyncInProgress(self):
+        return self.syncManager and self.syncManager.isSyncInProgress()
+
     def do_s_sync(self, line):
         """Synchronize the database with the remote one. Get the latest
         changes, import them in the database and push local changes"""
         pullUi = TextPullUi()
 
-        if self.syncManager.hasChangesToCommit():
-            print("Committing local changes")
-            self.syncManager.commitChanges("s_sync")
-
-        while True:
-            print("Pulling remote changes")
-            self.syncManager.pull(pullUi=pullUi)
-            if self.syncManager.hasChangesToImport():
-                print("Importing changes")
-                self.syncManager.importSinceLastSync(pullUi=pullUi)
-            else:
-                print("No remote changes")
-
-            if not self.syncManager.hasChangesToPush():
-                break
-            print("Pushing local changes")
-            try:
-                self.syncManager.push()
-                break
-            except NotFastForwardError:
-                print("Remote has other changes, need to pull again")
-            except VcsImplError as exc:
-                print("Failed to push: {}".format(exc))
-                break
+        if not self.syncManager.sync(pullUi=pullUi):
+            return
         self._printPullResults(pullUi)
 
     def do_s_init(self, line):
@@ -215,29 +196,16 @@ class SyncCmd(Cmd):
         return parser
 
     def do__s_pull(self, line):
-        """Pull the changes from a remote repository in the dump directory.
-        This command does *not* import the changes in the database. You need to call _s_import to do so."""
+        """Pull the changes from a remote repository and merge them in the database."""
         pullUi = TextPullUi()
         self.syncManager.pull(pullUi=pullUi)
         self._printPullResults(pullUi)
 
-    def do__s_import(self, line):
-        parser = self.parser__s_import()
-        args = parser.parse_args(line)
+    def do__s_import_all(self, line):
+        """Import all data from the repository in the database."""
         pullUi = TextPullUi()
-        if args.all:
-            self.syncManager.importAll(pullUi=pullUi)
-        else:
-            self.syncManager.importSinceLastSync(pullUi=pullUi)
+        self.syncManager.importAll(pullUi=pullUi)
         self._printPullResults(pullUi)
-
-    def parser__s_import(self):
-        parser = YokadiOptionParser()
-        parser.usage = "_s_import [options]"
-        parser.description = "Import changes from the dump directory in the database."
-        parser.add_argument("--all", dest="all", default=False, action="store_true",
-                            help="Import all changes, regardless of the current synchronization status")
-        return parser
 
     def do_s_push(self, line):
         """Push changes from the dump directory to the remote repository."""

@@ -240,12 +240,12 @@ def enforceDbConstraints(session, dumpDir, pullUi):
     _enforceAliasConstraints(session, dumpDir, pullUi)
 
 
-def importSinceLastSync(dumpDir, vcsImpl=None, pullUi=None):
+def importSince(dumpDir, commitId, vcsImpl=None, pullUi=None):
     if vcsImpl is None:
         vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
-    changes = vcsImpl.getChangesSince(DB_SYNC_BRANCH)
+    changes = vcsImpl.getChangesSince(commitId)
     _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
 
 

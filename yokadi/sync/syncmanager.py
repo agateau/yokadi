@@ -6,14 +6,18 @@ SyncManager
 import json
 import os
 
+from contextlib import contextmanager
+
 from yokadi.core import db
-from yokadi.sync import DB_SYNC_BRANCH, ALIASES_DIRNAME, PROJECTS_DIRNAME, \
-        TASKS_DIRNAME
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import clearDump, dump, createVersionFile, commitChanges
 
 from yokadi.sync.dbreplicator import DbReplicator
-from yokadi.sync.pull import pull, importSinceLastSync, importAll, findConflicts
+from yokadi.sync.pull import pull, importSince, importAll, findConflicts
+
+
+BEFORE_MERGE_TAG = "before-merge"
 
 
 class SyncManager(object):
@@ -31,6 +35,12 @@ class SyncManager(object):
             self._dbReplicator = DbReplicator(dumpDir, session)
             self.session = session
 
+    @contextmanager
+    def _mergeOperation(self):
+        self.vcsImpl.createTag(BEFORE_MERGE_TAG)
+        yield
+        self.vcsImpl.deleteTag(BEFORE_MERGE_TAG)
+
     def initDumpRepository(self):
         assert not os.path.exists(self.dumpDir), "Dump dir {} should not already exist".format(self.dumpDir)
         os.makedirs(self.dumpDir)
@@ -40,6 +50,37 @@ class SyncManager(object):
             path = os.path.join(self.dumpDir, dirname)
             os.mkdir(path)
         self.commitChanges("Created")
+
+    def isSyncInProgress(self):
+        return self.vcsImpl.hasTag(BEFORE_MERGE_TAG)
+
+    def sync(self, pullUi):
+        if self.hasChangesToCommit():
+            print("Committing local changes")
+            self.commitChanges("s_sync")
+
+        while True:
+            with self._mergeOperation():
+                print("Pulling remote changes")
+                pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+                if self.hasChangesToImport():
+                    print("Importing changes")
+                    importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
+                else:
+                    print("No remote changes")
+
+            if not self.hasChangesToPush():
+                break
+            print("Pushing local changes")
+            try:
+                self.push()
+                break
+            except NotFastForwardError:
+                print("Remote has other changes, need to pull again")
+            except VcsImplError as exc:
+                print("Failed to push: {}".format(exc))
+                return False
+        return True
 
     def clearDump(self):
         clearDump(self.dumpDir)
@@ -51,13 +92,14 @@ class SyncManager(object):
         commitChanges(self.dumpDir, message, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
-        pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
-
-    def importSinceLastSync(self, pullUi):
-        importSinceLastSync(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+        with self._mergeOperation():
+            if not pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi):
+                return
+            importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
 
     def importAll(self, pullUi):
-        importAll(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+        with self._mergeOperation():
+            importAll(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
 
     def push(self):
         self.vcsImpl.push()
@@ -129,7 +171,7 @@ class SyncManager(object):
         return not self.vcsImpl.isWorkTreeClean()
 
     def hasChangesToImport(self):
-        changes = self.vcsImpl.getChangesSince(DB_SYNC_BRANCH)
+        changes = self.vcsImpl.getChangesSince(BEFORE_MERGE_TAG)
         return changes.hasChanges()
 
     def hasChangesToPush(self):
