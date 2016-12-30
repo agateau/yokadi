@@ -7,6 +7,8 @@ Classes representing conflicts
 import json
 import os
 
+from yokadi.sync.dump import jsonDumps
+
 
 class ConflictingObject(object):
     """
@@ -57,7 +59,7 @@ class ConflictingObject(object):
         if self.final is None:
             content = None
         else:
-            content = json.dumps(self.final).encode("utf-8")
+            content = jsonDumps(self.final).encode("utf-8")
         vcsImpl.closeConflict(self._path, content)
 
 
