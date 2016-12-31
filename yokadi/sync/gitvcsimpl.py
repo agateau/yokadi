@@ -157,8 +157,8 @@ class GitVcsImpl(VcsImpl):
                 fp.write(content)
             self._run("add", path)
 
-    def abortMerge(self):
-        self._run("merge", "--abort")
+    def resetTo(self, commitId):
+        self._run("reset", "--hard", commitId)
 
     def getChangesSince(self, commitId):
         output = self._run("diff", "--name-status", commitId + "..").decode("utf-8")

@@ -51,8 +51,12 @@ class SyncManager(object):
             os.mkdir(path)
         self.commitChanges("Created")
 
-    def isSyncInProgress(self):
+    def isMergeInProgress(self):
         return self.vcsImpl.hasTag(BEFORE_MERGE_TAG)
+
+    def abortMerge(self):
+        self.vcsImpl.resetTo(BEFORE_MERGE_TAG)
+        self.vcsImpl.deleteTag(BEFORE_MERGE_TAG)
 
     def sync(self, pullUi):
         if self.hasChangesToCommit():
@@ -60,15 +64,7 @@ class SyncManager(object):
             self.commitChanges("s_sync")
 
         while True:
-            with self._mergeOperation():
-                print("Pulling remote changes")
-                pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
-                if self.hasChangesToImport():
-                    print("Importing changes")
-                    importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
-                else:
-                    print("No remote changes")
-
+            self.pull(pullUi=pullUi)
             if not self.hasChangesToPush():
                 break
             print("Pushing local changes")
@@ -93,9 +89,13 @@ class SyncManager(object):
 
     def pull(self, pullUi):
         with self._mergeOperation():
-            if not pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi):
-                return
-            importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
+            print("Pulling remote changes")
+            pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+            if self.hasChangesToImport():
+                print("Importing changes")
+                importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
+            else:
+                print("No remote changes")
 
     def importAll(self, pullUi):
         with self._mergeOperation():

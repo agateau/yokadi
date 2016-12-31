@@ -75,10 +75,9 @@ class VcsImpl(object):
         """
         raise NotImplementedError()
 
-    def abortMerge(self):
+    def resetTo(self, commitId):
         """
-        Should be called after a pull which failed with conflicts, to abort
-        changes
+        Resets current branch to `commitId`
         """
         raise NotImplementedError()
 

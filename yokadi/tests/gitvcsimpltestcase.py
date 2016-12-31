@@ -330,12 +330,12 @@ class GitVcsImplTestCase(YokadiTestCase):
             self.assertFalse(impl.hasConflicts())
             self.assertFalse(os.path.exists(fullPath))
 
-    def testAbortMerge(self):
+    def testResetTo(self):
         with TemporaryDirectory() as tmpDir:
             impl = createGitRepositoryWithConflict(tmpDir, "repo", remoteContent="hello", localContent="world")
             conflicts = set(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
-            impl.abortMerge()
+            impl.resetTo("HEAD^")
             conflicts = set(impl.getConflicts())
             self.assertEqual(len(conflicts), 0)
 

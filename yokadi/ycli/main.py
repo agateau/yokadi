@@ -108,10 +108,9 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         able to encapsulate it with a try/except bloc"""
 
         # Make sure we cannot run any command if another process is
-        # synchronizing
-        if self.isSyncInProgress():
-            tui.error("Sync is in progress")
-            return
+        # merging remote changes
+        if not self.checkMergeFinished():
+            return True
 
         try:
             # Decode user input

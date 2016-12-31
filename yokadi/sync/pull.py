@@ -17,6 +17,7 @@ from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYN
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
+from yokadi.sync.syncerrors import MergeError
 from yokadi.sync.vcschanges import VcsChanges
 
 
@@ -306,8 +307,7 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
             if obj.isResolved():
                 obj.close(vcsImpl)
             else:
-                vcsImpl.abortMerge()
-                return False
+                raise MergeError("Unsolved conflict on {}".format(obj))
 
         assert not vcsImpl.hasConflicts(), "There are still conflicts in {}".format(dumpDir)
 
@@ -315,4 +315,3 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
         vcsImpl.commitAll("Merged")
 
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
-    return True

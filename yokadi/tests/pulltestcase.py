@@ -20,6 +20,7 @@ from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
 from yokadi.sync.vcsimplerrors import VcsImplError
+from yokadi.sync.syncerrors import MergeError
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
@@ -166,7 +167,6 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
     class MyVcsImpl(StubVcsImpl):
         def __init__(self):
             StubVcsImpl.__init__(self)
-            self.abortMergeCallCount = 0
             self.commitAllCallCount = 0
             self.pullCalled = False
             self.conflicts = [VcsConflict(
@@ -213,9 +213,6 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
         def getConflicts(self):
             return self.conflicts
 
-        def abortMerge(self):
-            self.abortMergeCallCount += 1
-
         def commitAll(self, message=""):
             self.commitAllCallCount += 1
 
@@ -249,7 +246,6 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
     class MyVcsImpl(StubVcsImpl):
         def __init__(self):
             StubVcsImpl.__init__(self)
-            self.abortMergeCallCount = 0
             self.commitAllCallCount = 0
             self.pullCalled = False
             self.conflicts = [VcsConflict(
@@ -306,9 +302,6 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
 
         def getConflicts(self):
             return self.conflicts
-
-        def abortMerge(self):
-            self.abortMergeCallCount += 1
 
         def commitAll(self, message=""):
             self.commitAllCallCount += 1
@@ -420,7 +413,6 @@ class PullTestCase(YokadiTestCase):
             class MyVcsImpl(StubVcsImpl):
                 def __init__(self):
                     StubVcsImpl.__init__(self)
-                    self.abortMergeCallCount = 0
                     self.commitAllCallCount = 0
                     self.pullCalled = False
 
@@ -458,9 +450,6 @@ class PullTestCase(YokadiTestCase):
                         )
                     )]
 
-                def abortMerge(self):
-                    self.abortMergeCallCount += 1
-
                 def commitAll(self, message=""):
                     self.commitAllCallCount += 1
 
@@ -468,12 +457,10 @@ class PullTestCase(YokadiTestCase):
             vcsImpl = MyVcsImpl()
             pullUi = MyPullUi()
             syncManager = SyncManager(tmpDir, vcsImpl=vcsImpl)
-            ok = syncManager.pull(pullUi=pullUi)
+            self.assertRaises(MergeError, syncManager.pull, pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
             # commit.
-            self.assertFalse(ok)
-            self.assertEqual(vcsImpl.abortMergeCallCount, 1)
             self.assertEqual(vcsImpl.commitAllCallCount, 0)
 
     def testBothModifiedConflictSolved(self):
@@ -502,7 +489,6 @@ class PullTestCase(YokadiTestCase):
             syncManager.pull(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
-            self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
             self.assertEqual(fixture.vcsImpl.commitAllCallCount, 1)
 
             modifiedTask2 = dbutils.getTask(self.session, id=fixture.modifiedTask.id)
@@ -530,7 +516,6 @@ class PullTestCase(YokadiTestCase):
             syncManager.pull(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
-            self.assertEqual(fixture.vcsImpl.abortMergeCallCount, 0)
             self.assertEqual(fixture.vcsImpl.commitAllCallCount, 1)
 
             keptTask = dbutils.getTask(self.session, id=fixture.modLocallyTask.id)

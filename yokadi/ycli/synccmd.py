@@ -159,8 +159,37 @@ class SyncCmd(Cmd):
         else:
             self.syncManager = None
 
-    def isSyncInProgress(self):
-        return self.syncManager and self.syncManager.isSyncInProgress()
+    def checkMergeFinished(self):
+        """
+        Check if any merge is running. If there is one, try to finish it.
+        Returns True if no merge is running.
+        """
+        if not self.syncManager:
+            return True
+
+        if not self.syncManager.isMergeInProgress():
+            return True
+        tui.error("A merge is in progress")
+        print("This can happen if another Yokadi process is currently running a"
+              " s_sync or s_pull command, or if Yokadi has crashed while running a merge.")
+        while True:
+            lst = (
+                ("q", "quit"),
+                ("r", "retry"),
+                ("a", "abort merge"),
+            )
+            answer = tui.selectFromList(lst, valueForString=str)
+            if answer == "q":
+                return False
+            if answer == "a":
+                self.syncManager.abortMerge()
+                break
+
+            # Retry
+            if not self.syncManager.isMergeInProgress():
+                break
+            tui.error("A merge is still in progress")
+        return True
 
     def do_s_sync(self, line):
         """Synchronize the database with the remote one. Get the latest

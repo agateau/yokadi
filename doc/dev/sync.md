@@ -114,14 +114,6 @@ pending renames and set the final names. From the SQL side it looks like this:
 
 This is less efficient, but it supports swaps.
 
-## Branches
-
-There are two branches:
-
-- master contains all changes
-- `db-synced` contains all changes which are also in the database. It is a local
-  branch: it should *never* be pushed
-
 # Commands
 ## s_dump
 
@@ -133,7 +125,6 @@ There are two branches:
 
 - Make DB read-only
 - sync.pull()
-- sync.importSinceLastSync()
 - Make DB read-write
 
 ## s_push
@@ -165,7 +156,6 @@ There are two branches:
 
 ## s_sync
 
-- s_dump
 - s_pull
 - s_push
 
@@ -187,18 +177,13 @@ url can be either a `file:` or an `ssh:` url
 ## sync.dump()
 
 - Dump all db
-- Update `db-synced` branch to HEAD
 
 ## sync.pull()
 
 - Assert Git repository is clean
 - git pull. If conflicts, handle them
 - Commit changes
-
-## sync.importSinceLastSync
-
-- get changes since `db-synced`
-- `_importChanges`
+- import changes
 
 ## sync.importAll
 
@@ -211,7 +196,6 @@ url can be either a `file:` or an `ssh:` url
     - for all new files: create task
     - for all modified files: update task
     - for all removed files: remove task
-- Update `db-synced` branch to HEAD
 
 # Use cases
 
@@ -263,4 +247,4 @@ Create a second Yokadi setup
     git clone ~/sandbox/remote db
 
     isolate-yokadi ~/sandbox/y2
-    y> _s_import --all
+    y> _s_import_all
