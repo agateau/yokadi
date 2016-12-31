@@ -15,7 +15,7 @@ from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task, Project, Alias, TaskKeyword
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
+from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 
 
 TableInfo = namedtuple("TableInfo", ("table", "dirname", "dictFromObject"))
@@ -151,4 +151,3 @@ def dump(dumpDir, vcsImpl=None):
 
 def commitChanges(dumpDir, message, vcsImpl):
     vcsImpl.commitAll(message)
-    vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")

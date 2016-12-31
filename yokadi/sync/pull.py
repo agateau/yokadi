@@ -13,7 +13,7 @@ from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core import dbs13n
 from yokadi.core.db import Alias, Project, Task
-from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, DB_SYNC_BRANCH
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
@@ -285,8 +285,6 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
         # Only commit after the DB session has been committed, to be able to
         # rollback both the DB and the repository in case of error
         vcsImpl.commitAll("Enforce DB constraints")
-
-    vcsImpl.updateBranch(DB_SYNC_BRANCH, "master")
 
 
 def pull(dumpDir, vcsImpl=None, pullUi=None):
