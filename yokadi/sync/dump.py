@@ -146,8 +146,4 @@ def dump(dumpDir, vcsImpl=None):
         dumpObject(alias, dumpDir)
 
     if not vcsImpl.isWorkTreeClean():
-        commitChanges(dumpDir, "Dumped", vcsImpl=vcsImpl)
-
-
-def commitChanges(dumpDir, message, vcsImpl):
-    vcsImpl.commitAll(message)
+        vcsImpl.commitAll("Dumped")

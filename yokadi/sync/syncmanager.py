@@ -11,7 +11,7 @@ from contextlib import contextmanager
 from yokadi.core import db
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
-from yokadi.sync.dump import clearDump, dump, createVersionFile, commitChanges
+from yokadi.sync.dump import clearDump, dump, createVersionFile
 
 from yokadi.sync.dbreplicator import DbReplicator
 from yokadi.sync.pull import pull, importSince, importAll, findConflicts
@@ -49,7 +49,7 @@ class SyncManager(object):
         for dirname in ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME:
             path = os.path.join(self.dumpDir, dirname)
             os.mkdir(path)
-        self.commitChanges("Created")
+        self.vcsImpl.commitAll("Created")
 
     def isMergeInProgress(self):
         return self.vcsImpl.hasTag(BEFORE_MERGE_TAG)
@@ -61,7 +61,7 @@ class SyncManager(object):
     def sync(self, pullUi):
         if self.hasChangesToCommit():
             print("Committing local changes")
-            self.commitChanges("s_sync")
+            self.vcsImpl.commitAll("s_sync")
 
         while True:
             self.pull(pullUi=pullUi)
@@ -83,9 +83,6 @@ class SyncManager(object):
 
     def dump(self):
         dump(self.dumpDir, vcsImpl=self.vcsImpl)
-
-    def commitChanges(self, message):
-        commitChanges(self.dumpDir, message, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
         with self._mergeOperation():
