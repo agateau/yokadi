@@ -1,17 +1,8 @@
 # Configuration
 
-- Local configuration in ~/.config/yokadi/yokadi.conf
 - Default DB in ~/.local/share/yokadi/yokadi.db
 - Default DB dump in ~/.cache/yokadi/db/
 - History in ~/.cache/yokadi/history
-
-Configuration file
-
-    [db ~/.local/share/yokadi/yokadi.db]
-    gs_dump_dir=~/.cache/yokadi/gsdump
-
-    [db ~/foo/bar/yokadi.db]
-    gs_dump_dir=~/foo/bar/gsdump
 
 # Design decisions
 
@@ -149,24 +140,15 @@ This is less efficient, but it supports swaps.
     confirm it must be deleted
     delete it
 - git clone <url>
-- sync.importAll()
 - If db was not empty:
-    sync.dump()
+    dump db (do this before import all to avoid conflicts on project names)
+- sync.importAll()
 - Make DB read-write
 
 ## s_sync
 
 - s_pull
 - s_push
-
-## s_create_remote_repo <url>
-
-url can be either a `file:` or an `ssh:` url
-
-- Creates a bare repo
-- If url is an ssh url, uploads the created repository using `scp -r` (or `rsync`?)
-- Define url as the `origin` remote of the dump repo
-- Make origin/master the upstream branch of master
 
 ## s_set_remote_url <url>
 
@@ -202,7 +184,8 @@ url can be either a `file:` or an `ssh:` url
 ## Publishing an existing DB
 
     s_init
-    s_create_remote_repo ssh://[<user>@]<hostname>/<path/to/repo>
+    Create a new git repo somewhere
+    s_set_remote_url ssh://[<user>@]<hostname>/<path/to/repo>
 
 ## Setting up a new Yokadi DB to track an existing repo
 
