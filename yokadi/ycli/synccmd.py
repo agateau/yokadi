@@ -146,6 +146,12 @@ class TextPullUi(PullUi):
     def getRenames(self):
         return self._renames
 
+    def reportProgress(self, message):
+        print(message)
+
+    def reportError(self, message):
+        tui.error(message)
+
 
 class SyncCmd(Cmd):
     def __init__(self, dumpDir=None):

@@ -60,21 +60,21 @@ class SyncManager(object):
 
     def sync(self, pullUi):
         if self.hasChangesToCommit():
-            print("Committing local changes")
+            pullUi.reportProgress("Committing local changes")
             self.vcsImpl.commitAll("s_sync")
 
         while True:
             self.pull(pullUi=pullUi)
             if not self.hasChangesToPush():
                 break
-            print("Pushing local changes")
+            pullUi.reportProgress("Pushing local changes")
             try:
                 self.push()
                 break
             except NotFastForwardError:
-                print("Remote has other changes, need to pull again")
+                pullUi.reportProgress("Remote has other changes, need to pull again")
             except VcsImplError as exc:
-                print("Failed to push: {}".format(exc))
+                pullUi.reportError("Failed to push: {}".format(exc))
                 return False
         return True
 
@@ -86,13 +86,13 @@ class SyncManager(object):
 
     def pull(self, pullUi):
         with self._mergeOperation():
-            print("Pulling remote changes")
+            pullUi.reportProgress("Pulling remote changes")
             pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
             if self.hasChangesToImport():
-                print("Importing changes")
+                pullUi.reportProgress("Importing changes")
                 importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
             else:
-                print("No remote changes")
+                pullUi.reportProgress("No remote changes")
 
     def importAll(self, pullUi):
         with self._mergeOperation():

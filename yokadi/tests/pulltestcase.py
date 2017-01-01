@@ -89,6 +89,12 @@ class StubPullUi(PullUi):
     def addRename(self, domain, old, new):
         self._renames.append((domain, old, new))
 
+    def reportProgress(self, message):
+        pass
+
+    def reportError(self, message):
+        pass
+
 
 def createProjectFile(dirname, uuid, name, active=True):
     projectDir = os.path.join(dirname, PROJECTS_DIRNAME)
@@ -326,7 +332,7 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             createVersionFile(tmpDir)
             syncManager = SyncManager(tmpDir, vcsImpl=StubVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
     def testOnlyImportOurFiles(self):
         class FooChangeHandler(ChangeHandler):
@@ -382,7 +388,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
             modifiedTask2 = dbutils.getTask(self.session, id=modifiedTask.id)
@@ -405,10 +411,6 @@ class PullTestCase(YokadiTestCase):
             self.session.add(modifiedTask)
 
             modifiedTaskPath = os.path.join(TASKS_DIRNAME, modifiedTask.uuid + ".json")
-
-            class MyPullUi(PullUi):
-                def resolveConflicts(self, conflictingObjects):
-                    pass
 
             class MyVcsImpl(StubVcsImpl):
                 def __init__(self):
@@ -455,7 +457,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             vcsImpl = MyVcsImpl()
-            pullUi = MyPullUi()
+            pullUi = StubPullUi()
             syncManager = SyncManager(tmpDir, vcsImpl=vcsImpl)
             self.assertRaises(MergeError, syncManager.pull, pullUi=pullUi)
 
@@ -476,7 +478,7 @@ class PullTestCase(YokadiTestCase):
                     keywords={"remotekw": 1}
                 ))
 
-            class MyPullUi(PullUi):
+            class MyPullUi(StubPullUi):
                 def resolveConflicts(self, conflictingObjects):
                     testCase.assertEqual(len(conflictingObjects), 1)
                     obj = conflictingObjects[0]
@@ -503,7 +505,7 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             fixture = createModifiedDeletedConflictFixture(testCase,tmpDir)
 
-            class MyPullUi(PullUi):
+            class MyPullUi(StubPullUi):
                 def resolveConflicts(self, conflictingObjects):
                     testCase.assertEqual(len(conflictingObjects), 2)
                     dct = dict((x._path, x) for x in conflictingObjects)
@@ -541,8 +543,9 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
+            pullUi = StubPullUi()
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=pullUi)
 
             # Check changes
             prj2 = self.session.query(Project).filter_by(id=prj.id).one()
@@ -565,8 +568,9 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
+            pullUi = StubPullUi()
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=pullUi)
 
             # DB should be empty
             projects = self.session.query(Project).all()
@@ -577,6 +581,7 @@ class PullTestCase(YokadiTestCase):
     def testRemoteCreateSameProject(self):
         with TemporaryDirectory() as tmpDir:
             REMOTE_PROJECT_UUID = "r-5678-prj2"
+            pullUi = StubPullUi()
 
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
@@ -587,7 +592,7 @@ class PullTestCase(YokadiTestCase):
             localDir = os.path.join(tmpDir, "local")
             syncManager = SyncManager(localDir)
             syncManager.vcsImpl.clone(remoteDir)
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=pullUi)
 
             # Create prj in remote repo
             createProjectFile(
@@ -609,7 +614,6 @@ class PullTestCase(YokadiTestCase):
             syncManager.dump()
 
             # Do the pull, conflict should be automatically solved
-            pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
 
             # Local project should be renamed prj_1
@@ -649,7 +653,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
             # The project should have a new name, task1 should still be there
             projects = list(self.session.query(Project).all())
@@ -677,8 +681,9 @@ class PullTestCase(YokadiTestCase):
             localDir = os.path.join(tmpDir, "local")
             syncManager = SyncManager(localDir)
             syncManager.vcsImpl.clone(remoteDir)
-            syncManager.pull(pullUi=None)
-            syncManager.importAll(pullUi=None)
+            pullUi = StubPullUi()
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importAll(pullUi=pullUi)
 
             # Create "local" project in local repo, with task ltask
             localPrj = Project(uuid="u-lprj", name="local")
@@ -692,8 +697,9 @@ class PullTestCase(YokadiTestCase):
             remoteSyncManager.vcsImpl.commitAll()
 
             # Do the pull, conflict should be automatically solved
-            class MyPullUi(PullUi):
+            class MyPullUi(StubPullUi):
                 def __init__(self):
+                    StubPullUi.__init__(self)
                     self.renames = []
 
                 def addRename(self, domain, old, new):
@@ -736,8 +742,9 @@ class PullTestCase(YokadiTestCase):
             localDir = os.path.join(tmpDir, "local")
             syncManager = SyncManager(localDir)
             syncManager.vcsImpl.clone(remoteDir)
-            syncManager.pull(pullUi=None)
-            syncManager.importAll(pullUi=None)
+            pullUi = StubPullUi()
+            syncManager.pull(pullUi=pullUi)
+            syncManager.importAll(pullUi=pullUi)
 
             # Swap project names in remote repo
             createProjectFile(remoteDir, uuid="u-prj1", name="p2")
@@ -745,7 +752,7 @@ class PullTestCase(YokadiTestCase):
             remoteSyncManager.vcsImpl.commitAll()
 
             # Do the pull, conflict should be automatically solved
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=pullUi)
 
             # Check changes, now p1 should have a task task2 and p2 a task task1
             p1 = dbutils.getProject(self.session, uuid="u-prj2")
@@ -781,7 +788,7 @@ class PullTestCase(YokadiTestCase):
             vcsImpl.commitAll()
 
             # Import all
-            syncManager.importAll(pullUi=None)
+            syncManager.importAll(pullUi=StubPullUi())
 
             modifiedTask2 = dbutils.getTask(self.session, uuid=modifiedTask.uuid)
             self.assertEqual(modifiedTask2.title, "modified")
@@ -800,7 +807,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
             dct = db.Alias.getAsDict(self.session)
@@ -822,7 +829,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
             dct = db.Alias.getAsDict(self.session)
@@ -830,6 +837,7 @@ class PullTestCase(YokadiTestCase):
 
     def testImportAlias_sameNameSameCommand(self):
         with TemporaryDirectory() as tmpDir:
+            pullUi = StubPullUi()
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
             remoteSyncManager = SyncManager(remoteDir)
@@ -839,7 +847,7 @@ class PullTestCase(YokadiTestCase):
             localDir = os.path.join(tmpDir, "local")
             syncManager = SyncManager(localDir)
             syncManager.vcsImpl.clone(remoteDir)
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=pullUi)
 
             # Add an alias a => t_add to the remote repo
             aliasPath = createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
@@ -851,7 +859,7 @@ class PullTestCase(YokadiTestCase):
             syncManager.dump()
 
             # Do the pull, conflict should be automatically solved
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=pullUi)
 
             # Check changes
             self.assertTrue(syncManager.vcsImpl.isWorkTreeClean())
@@ -869,7 +877,7 @@ class PullTestCase(YokadiTestCase):
             localDir = os.path.join(tmpDir, "local")
             syncManager = SyncManager(localDir)
             syncManager.vcsImpl.clone(remoteDir)
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
             # Add an alias a => t_add to the remote repo
             aliasPath = createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
@@ -881,8 +889,9 @@ class PullTestCase(YokadiTestCase):
             syncManager.dump()
 
             # Do the pull, conflict should be automatically solved
-            class MyPullUi(PullUi):
+            class MyPullUi(StubPullUi):
                 def __init__(self):
+                    StubPullUi.__init__(self)
                     self.renames = []
 
                 def addRename(self, domain, old, new):
@@ -915,7 +924,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
-            syncManager.pull(pullUi=None)
+            syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
             dct = db.Alias.getAsDict(self.session)

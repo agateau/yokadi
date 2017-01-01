@@ -23,3 +23,15 @@ class PullUi(object):
         @param new The new name
         """
         raise NotImplementedError()
+
+    def reportProgress(self, message):
+        """
+        Called when meaningful progress on synchronisation has been done
+        """
+        raise NotImplementedError()
+
+    def reportError(self, message):
+        """
+        Called when an error happened
+        """
+        raise NotImplementedError()
