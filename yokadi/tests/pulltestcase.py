@@ -81,13 +81,13 @@ class StubVcsImpl(object):
 
 class StubPullUi(PullUi):
     def __init__(self):
-        self._renames = []
+        self.renames = []
 
     def resolveConflicts(self, conflictingObjects):
         pass
 
     def addRename(self, domain, old, new):
-        self._renames.append((domain, old, new))
+        self.renames.append((domain, old, new))
 
     def reportProgress(self, message):
         pass
@@ -697,15 +697,7 @@ class PullTestCase(YokadiTestCase):
             remoteSyncManager.vcsImpl.commitAll()
 
             # Do the pull, conflict should be automatically solved
-            class MyPullUi(StubPullUi):
-                def __init__(self):
-                    StubPullUi.__init__(self)
-                    self.renames = []
-
-                def addRename(self, domain, old, new):
-                    self.renames.append((domain, old, new))
-
-            pullUi = MyPullUi()
+            pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
 
             # Check changes
@@ -889,15 +881,7 @@ class PullTestCase(YokadiTestCase):
             syncManager.dump()
 
             # Do the pull, conflict should be automatically solved
-            class MyPullUi(StubPullUi):
-                def __init__(self):
-                    StubPullUi.__init__(self)
-                    self.renames = []
-
-                def addRename(self, domain, old, new):
-                    self.renames.append((domain, old, new))
-
-            pullUi = MyPullUi()
+            pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
 
             # Check changes
