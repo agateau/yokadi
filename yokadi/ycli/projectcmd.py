@@ -10,7 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
 from yokadi.ycli import tui
-from yokadi.ycli.completers import ProjectCompleter
+from yokadi.ycli.completers import MultiCompleter, ProjectCompleter
 from yokadi.ycli import parseutils
 from yokadi.core import db
 from yokadi.core.db import Project, Task
@@ -126,5 +126,30 @@ class ProjectCmd(object):
         session.commit()
         print("Project removed")
     complete_p_remove = ProjectCompleter(1)
+
+    def parser_p_merge(self):
+        parser = YokadiOptionParser()
+        parser.usage = "p_remove <source_project> <destination_project>"
+        parser.description = "Merge <source_project> into <destination_project>."
+        parser.add_argument("source_project")
+        parser.add_argument("destination_project")
+        parser.add_argument("-f", dest="force", default=False, action="store_true",
+                            help="Skip confirmation prompt")
+        return parser
+
+    def do_p_merge(self, line):
+        session = db.getSession()
+        parser = self.parser_p_merge()
+        args = parser.parse_args(line)
+
+        src = getProjectFromName(args.source_project)
+        dst = getProjectFromName(args.destination_project)
+        if not args.force:
+            if not tui.confirm("Merge project '{}' into '{}'".format(src.name, dst.name)):
+                return
+        dst.merge(session, src)
+        session.commit()
+        print("Project '{}' merged into '{}'".format(src.name, dst.name))
+    complete_p_merge = MultiCompleter(ProjectCompleter(1), ProjectCompleter(2))
 
 # vi: ts=4 sw=4 et

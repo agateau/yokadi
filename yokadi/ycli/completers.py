@@ -49,6 +49,21 @@ class KeywordCompleter(object):
             return []
 
 
+class MultiCompleter(object):
+    """A completer which takes multiple completers and apply them in turn,
+    according to their position"""
+    def __init__(self, *completers):
+        self.completers = completers
+
+    def __call__(self, text, line, begidx, endidx):
+        for completer in self.completers:
+            lst = completer(text, line, begidx, endidx)
+            if lst:
+                return lst
+        else:
+            return []
+
+
 def projectAndKeywordCompleter(cmd, text, line, begidx, endidx, shift=0):
     """@param shift: argument position shift. Used when command is omitted (t_edit usecase)"""
     position = computeCompleteParameterPosition(text, line, begidx, endidx)

@@ -60,6 +60,14 @@ class Project(Base):
     def __repr__(self):
         return self.name
 
+    def merge(self, session, other):
+        """Merge other into us"""
+        if self is other:
+            raise YokadiException("Cannot merge a project into itself")
+        for task in other.tasks:
+            task.project = self
+        session.delete(other)
+
 
 class Keyword(Base):
     __tablename__ = "keyword"
