@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 
 from yokadi.ycli import tui
 from yokadi.ycli.completers import MultiCompleter, ProjectCompleter
-from yokadi.ycli import parseutils
+from yokadi.ycli.basicparseutils import parseOneWordName
 from yokadi.core import db
 from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
@@ -42,7 +42,7 @@ class ProjectCmd(object):
         if not line:
             print("Missing project name.")
             return
-        projectName = parseutils.parseOneWordName(line)
+        projectName = parseOneWordName(line)
         session = db.getSession()
         try:
             project = Project(name=projectName)
@@ -66,7 +66,7 @@ class ProjectCmd(object):
         line = tui.editLine(project.name)
 
         # Update project
-        projectName = parseutils.parseOneWordName(line)
+        projectName = parseOneWordName(line)
         try:
             project.name = projectName
             session.commit()
