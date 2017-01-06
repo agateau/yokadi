@@ -10,7 +10,7 @@ import os
 import readline
 import re
 from datetime import datetime, timedelta
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import or_, desc
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 
 from yokadi.core.db import Keyword, Project, Task, TaskKeyword, NOTE_KEYWORD
@@ -61,9 +61,9 @@ class TaskCmd(object):
         parser.usage = "%s [options] <projectName> [@<keyword1>] [@<keyword2>] <title>" % cmd
         parser.description = "Add new %s. Will prompt to create keywords if they do not exist." % cmd
         parser.add_argument("-c", dest="crypt", default=False, action="store_true",
-                          help="Encrypt title")
+                            help="Encrypt title")
         parser.add_argument("-d", "--describe", dest="describe", default=False, action="store_true",
-                          help="Directly open editor to describe task")
+                            help="Directly open editor to describe task")
         parser.add_argument('cmd', nargs='*')
         return parser
 
@@ -84,8 +84,8 @@ class TaskCmd(object):
             # Obfuscate line in history
             length = readline.get_current_history_length()
             if length > 0:  # Ensure history is positive to avoid crash with bad readline setup
-                readline.replace_history_item(length - 1, "%s %s " % (cmd,
-                                                                  line.replace(title, "<...encrypted...>")))
+                obfuscatedLine = line.replace(title, "<...encrypted...>")
+                readline.replace_history_item(length - 1, "%s %s " % (cmd, obfuscatedLine))
             # Encrypt title
             title = self.cryptoMgr.encrypt(title)
 
@@ -263,7 +263,8 @@ class TaskCmd(object):
         self.session.commit()
         if task.recurrence and status == "done":
             print("Task '%s' next occurrence is scheduled at %s" % (task.title, task.dueDate))
-            print("To *really* mark this task done and forget it, remove its recurrence first with t_recurs %s none" % task.id)
+            print("To *really* mark this task done and forget it, remove its recurrence first"
+                  " with t_recurs %s none" % task.id)
         else:
             print("Task '%s' marked as %s" % (task.title, status))
 
@@ -316,7 +317,7 @@ class TaskCmd(object):
         parser.usage = "t_remove [options] <id>"
         parser.description = "Delete a task."
         parser.add_argument("-f", dest="force", default=False, action="store_true",
-                          help="Skip confirmation prompt")
+                            help="Skip confirmation prompt")
         parser.add_argument("id")
         return parser
 
@@ -342,10 +343,11 @@ class TaskCmd(object):
         parser.usage = "t_purge [options]"
         parser.description = "Remove old done tasks from all projects."
         parser.add_argument("-f", "--force", dest="force", default=False, action="store_true",
-                          help="Skip confirmation prompt")
+                            help="Skip confirmation prompt")
         delay = int(db.getConfigKey("PURGE_DELAY", environ=False))
         parser.add_argument("-d", "--delay", dest="delay", default=delay,
-                          type=int, help="Delay (in days) after which done tasks are destroyed. Default is %d." % delay)
+                            type=int, help="Delay (in days) after which done tasks are destroyed."
+                                           " Default is %d." % delay)
         return parser
 
     def do_t_purge(self, line):
@@ -377,63 +379,65 @@ class TaskCmd(object):
                              "t_list @home, t_list @_bug=2394"
 
         parser.add_argument("-a", "--all", dest="status",
-                          action="store_const", const="all",
-                          help="all tasks (done and to be done)")
+                            action="store_const", const="all",
+                            help="all tasks (done and to be done)")
 
         parser.add_argument("--started", dest="status",
-                          action="store_const", const="started",
-                          help="only started tasks")
+                            action="store_const", const="started",
+                            help="only started tasks")
 
         rangeList = ["today", "thisweek", "thismonth", "all"]
         parser.add_argument("-d", "--done", dest="done",
-                          help="only done tasks. <range> must be either one of %s or a date using the same format as t_due" % ", ".join(rangeList),
-                          metavar="<range>")
+                            help="only done tasks. <range> must be either one of %s or a date using the same format"
+                                 " as t_due" % ", ".join(rangeList),
+                            metavar="<range>")
 
         parser.add_argument("-u", "--urgency", dest="urgency",
-                          type=int,
-                          help="tasks with urgency greater or equal than <urgency>",
-                          metavar="<urgency>")
+                            type=int,
+                            help="tasks with urgency greater or equal than <urgency>",
+                            metavar="<urgency>")
 
         parser.add_argument("-t", "--top-due", dest="topDue",
-                          default=False, action="store_true",
-                          help="top 5 urgent tasks of each project based on due date")
+                            default=False, action="store_true",
+                            help="top 5 urgent tasks of each project based on due date")
 
         parser.add_argument("--overdue", dest="due",
-                          action="append_const", const="now",
-                          help="all overdue tasks")
+                            action="append_const", const="now",
+                            help="all overdue tasks")
 
         parser.add_argument("--due", dest="due",
-                          action="append",
-                          help="""only list tasks due before/after <limit>. <limit> is a
-                          date optionaly prefixed with a comparison operator.
-                          Valid operators are: <, <=, >=, and >.
-                          Example of valid limits:
+                            action="append",
+                            help="""only list tasks due before/after <limit>. <limit> is a
+                            date optionaly prefixed with a comparison operator.
+                            Valid operators are: <, <=, >=, and >.
+                            Example of valid limits:
 
-                          - tomorrow: due date <= tomorrow, 23:59:59
-                          - today: due date <= today, 23:59:59
-                          - >today: due date > today: 23:59:59
-                          """,
-                          metavar="<limit>")
+                            - tomorrow: due date <= tomorrow, 23:59:59
+                            - today: due date <= today, 23:59:59
+                            - >today: due date > today: 23:59:59
+                            """,
+                            metavar="<limit>")
 
         parser.add_argument("-k", "--keyword", dest="keyword",
-                          help="Group tasks by given keyword instead of project. The %% wildcard can be used.",
-                          metavar="<keyword>")
+                            help="Group tasks by given keyword instead of project. The %% wildcard can be used.",
+                            metavar="<keyword>")
 
         parser.add_argument("-s", "--search", dest="search",
-                          action="append",
-                          help="only list tasks whose title or description match <value>. You can repeat this option to search on multiple words.",
-                          metavar="<value>")
+                            action="append",
+                            help="only list tasks whose title or description match <value>. You can repeat this"
+                                 " option to search on multiple words.",
+                            metavar="<value>")
 
         formatList = ["auto"] + list(gRendererClassDict.keys())
         parser.add_argument("-f", "--format", dest="format",
-                          default="auto", choices=formatList,
-                          help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
-                          metavar="<format>")
+                            default="auto", choices=formatList,
+                            help="how should the task list be formated. <format> can be %s" % ", ".join(formatList),
+                            metavar="<format>")
         parser.add_argument("-o", "--output", dest="output",
-                          help="Output task list to <file>",
-                          metavar="<file>")
+                            help="Output task list to <file>",
+                            metavar="<file>")
         parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
-                          help="Decrypt task title and description")
+                            help="Decrypt task title and description")
 
         parser.add_argument("filter", nargs="*", metavar="<project_or_keyword_filter>")
 
@@ -520,7 +524,9 @@ class TaskCmd(object):
 
             for keyword in sorted(keywords, key=lambda x: x.name.lower()):
                 if str(keyword.name).startswith("_") and not groupKeyword.startswith("_"):
-                    # BUG: cannot filter on db side because sqlobject does not understand ESCAPE needed with _. Need to test it with sqlalchemy
+                    # BUG: cannot filter on db side because sqlobject does not
+                    # understand ESCAPE needed with _. Need to test it with
+                    # sqlalchemy
                     continue
                 taskList = self.session.query(Task).filter(TaskKeyword.keywordId == keyword.id)
                 taskList = taskList.outerjoin(TaskKeyword, Task.taskKeywords)
@@ -595,7 +601,7 @@ class TaskCmd(object):
             order = [desc(Task.urgency), ]
             filters.append(DbFilter(Task.urgency >= args.urgency))
         if args.topDue:
-            filters.append(DbFilter(Task.dueDate != None))
+            filters.append(DbFilter(Task.dueDate is not None))
             order = [Task.dueDate, ]
             limit = 5
         if args.due:
@@ -625,21 +631,22 @@ class TaskCmd(object):
         parser = YokadiOptionParser()
         parser.usage = "n_list [options] <project_or_keyword_filter>"
         parser.description = "List notes filtered by project and/or keywords. " \
-                                 "'%' can be used as a wildcard in the project name: " \
-                                 "to list projects starting with 'foo', use 'foo%'. " \
-                                 "Keyword filtering is achieved with '@'. Ex.: " \
-                                 "n_list @home, n_list @_bug=2394"
+            "'%' can be used as a wildcard in the project name: " \
+            "to list projects starting with 'foo', use 'foo%'. " \
+            "Keyword filtering is achieved with '@'. Ex.: " \
+            "n_list @home, n_list @_bug=2394"
 
         parser.add_argument("-s", "--search", dest="search",
-                          action="append",
-                          help="only list notes whose title or description match <value>. You can repeat this option to search on multiple words.",
-                          metavar="<value>")
+                            action="append",
+                            help="only list notes whose title or description match <value>."
+                                 " You can repeat this option to search on multiple words.",
+                            metavar="<value>")
 
         parser.add_argument("-k", "--keyword", dest="keyword",
-                          help="Group tasks by given keyword instead of project. The '%%' wildcard can be used.",
-                          metavar="<keyword>")
+                            help="Group tasks by given keyword instead of project. The '%%' wildcard can be used.",
+                            metavar="<keyword>")
         parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
-                          help="Decrypt note title and description")
+                            help="Decrypt note title and description")
         parser.add_argument("filter", nargs="*", metavar="<project_or_keyword_filter>")
 
         return parser
@@ -675,7 +682,7 @@ class TaskCmd(object):
         ids = []
         for line in text.split("\n"):
             line = line.strip()
-            if not "," in line:
+            if "," not in line:
                 continue
             ids.append(int(line.split(",")[0]))
 
@@ -745,12 +752,12 @@ class TaskCmd(object):
         parser.description = "Display details of a task."
         choices = ["all", "summary", "description"]
         parser.add_argument("--output", dest="output",
-                          choices=choices,
-                          default="all",
-                          help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
-                          metavar="<output>")
+                            choices=choices,
+                            default="all",
+                            help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
+                            metavar="<output>")
         parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
-                          help="Decrypt task title and description")
+                            help="Decrypt task title and description")
         parser.add_argument("id")
         return parser
 
@@ -778,7 +785,7 @@ class TaskCmd(object):
             keywords = ", ".join(keywordArray)
 
             if task.recurrence:
-                recurrence =  "{} (next: {})".format(
+                recurrence = "{} (next: {})".format(
                     task.recurrence.getFrequencyAsString(),
                     task.recurrence.getNext()
                 )
@@ -967,7 +974,7 @@ class TaskCmd(object):
         newKwDict = parseutils.keywordFiltersToDict(keywordFilters)
         if garbage:
             raise YokadiException("Cannot parse line, got garbage (%s). Maybe you forgot to add @ before keyword ?"
-                                   % garbage)
+                                  % garbage)
 
         if not dbutils.createMissingKeywords(list(newKwDict.keys())):
             # User cancel keyword creation

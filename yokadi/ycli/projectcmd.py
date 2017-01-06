@@ -84,7 +84,8 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print("%s %s %s" % (project.name.ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active))
+            taskCount = session.query(Task).filter_by(project=project).count()
+            print("{:20} {:>4} {}".format(project.name, taskCount, active))
 
     def do_p_set_active(self, line):
         """Activate the given project"""
@@ -109,7 +110,7 @@ class ProjectCmd(object):
         parser.usage = "p_remove [options] <project_name>"
         parser.description = "Remove a project and all its associated tasks."
         parser.add_argument("-f", dest="force", default=False, action="store_true",
-                          help="Skip confirmation prompt")
+                            help="Skip confirmation prompt")
         parser.add_argument("project")
         return parser
 

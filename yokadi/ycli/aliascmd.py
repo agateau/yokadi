@@ -50,7 +50,7 @@ class AliasCmd(object):
         a_edit_name <alias name>"""
         session = db.getSession()
         name = line
-        if not name in self.aliases:
+        if name not in self.aliases:
             raise YokadiException("There is no alias named {}".format(name))
 
         newName = tui.editLine(name)
@@ -69,7 +69,7 @@ class AliasCmd(object):
         a_edit_command <alias name>"""
         session = db.getSession()
         name = line
-        if not name in self.aliases:
+        if name not in self.aliases:
             raise YokadiException("There is no alias named {}".format(name))
 
         command = tui.editLine(self.aliases[name])

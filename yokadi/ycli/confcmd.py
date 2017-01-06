@@ -19,7 +19,7 @@ class ConfCmd(object):
         parser = YokadiOptionParser(prog="c_get")
         parser.description = "Display the value of a configuration key. If no key is given, all keys are shown."
         parser.add_argument("-s", dest="system", default=False, action="store_true",
-                          help="Display value of system keys instead of user ones")
+                            help="Display value of system keys instead of user ones")
         parser.add_argument("key", nargs='?')
         return parser
 

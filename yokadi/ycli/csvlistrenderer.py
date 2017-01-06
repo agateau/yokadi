@@ -8,9 +8,8 @@ Csv rendering of t_list output
 """
 import csv
 
-from yokadi.ycli import tui
-
-TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "project", "keywords"]
+TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description",
+               "urgency", "status", "project", "keywords"]
 
 
 class CsvListRenderer(object):
