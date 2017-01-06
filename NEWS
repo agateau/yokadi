@@ -1,3 +1,8 @@
+v1.x.y unreleased
+
+- New features:
+    - A new command has been added: `p_merge`, to merge a project into another.
+
 v1.1.1 2016/11/11
 
 - Improvements:
