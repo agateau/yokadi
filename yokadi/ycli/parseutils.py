@@ -6,10 +6,8 @@ Parse utilities. Used to manipulate command line text.
 @author: Sébastien Renard <sebastien.renard@digitalfox.org>
 @license: GPL v3 or later
 """
-import re
-
 from yokadi.ycli import tui
-from yokadi.ycli.basicparseutils import simplifySpaces, parseParameters, parseOneWordName
+from yokadi.ycli.basicparseutils import simplifySpaces
 from yokadi.core import db
 from yokadi.core.db import Keyword
 from yokadi.core.dbutils import KeywordFilter

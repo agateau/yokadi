@@ -99,7 +99,8 @@ class KeywordCmd(object):
 
         if len(conflictingTasks) > 0:
             # We cannot merge
-            tui.error("Cannot merge keywords %s and %s because they are both used with different values in these tasks:" % (oldName, newName))
+            tui.error("Cannot merge keywords %s and %s because they are both"
+                      " used with different values in these tasks:" % (oldName, newName))
             for task in conflictingTasks:
                 print("- %d, %s" % (task.id, task.title))
             print("Edit these tasks and try again")
@@ -108,7 +109,7 @@ class KeywordCmd(object):
         # Merge
         for task in keyword.tasks:
             kwDict = task.getKeywordDict()
-            if not newName in kwDict:
+            if newName not in kwDict:
                 kwDict[newName] = kwDict[oldName]
             del kwDict[oldName]
             task.setKeywordDict(kwDict)

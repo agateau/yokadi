@@ -104,7 +104,7 @@ def parseMEditLine(line):
         status = "started"
     elif statusChar == "d":
         status = "done"
-    elif id == None:
+    elif id is None:
         # Special case: if this is a new task, then statusChar is actually a
         # one-letter word starting the task title
         status = "new"

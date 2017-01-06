@@ -18,6 +18,11 @@ def multiLinesAssertEqual(test, str1, str2):
     test.assertEqual(len(lst1), len(lst2))
 
 
+def assertQueryEmpty(test, query):
+    lst = list(query)
+    test.assertEqual(lst, [])
+
+
 class TestRenderer(object):
     """
     A fake renderer, which stores all rendered tasks in taskDict

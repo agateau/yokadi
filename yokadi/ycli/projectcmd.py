@@ -10,8 +10,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 
 from yokadi.ycli import tui
-from yokadi.ycli.completers import ProjectCompleter
-from yokadi.ycli import parseutils
+from yokadi.ycli.completers import MultiCompleter, ProjectCompleter
+from yokadi.ycli.basicparseutils import parseOneWordName
 from yokadi.core import db
 from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
@@ -42,7 +42,7 @@ class ProjectCmd(object):
         if not line:
             print("Missing project name.")
             return
-        projectName = parseutils.parseOneWordName(line)
+        projectName = parseOneWordName(line)
         session = db.getSession()
         try:
             project = Project(name=projectName)
@@ -66,7 +66,7 @@ class ProjectCmd(object):
         line = tui.editLine(project.name)
 
         # Update project
-        projectName = parseutils.parseOneWordName(line)
+        projectName = parseOneWordName(line)
         try:
             project.name = projectName
             session.commit()
@@ -84,7 +84,8 @@ class ProjectCmd(object):
                 active = ""
             else:
                 active = "(inactive)"
-            print("%s %s %s" % (project.name.ljust(20), str(session.query(Task).filter_by(project=project).count()).rjust(4), active))
+            taskCount = session.query(Task).filter_by(project=project).count()
+            print("{:20} {:>4} {}".format(project.name, taskCount, active))
 
     def do_p_set_active(self, line):
         """Activate the given project"""
@@ -109,7 +110,7 @@ class ProjectCmd(object):
         parser.usage = "p_remove [options] <project_name>"
         parser.description = "Remove a project and all its associated tasks."
         parser.add_argument("-f", dest="force", default=False, action="store_true",
-                          help="Skip confirmation prompt")
+                            help="Skip confirmation prompt")
         parser.add_argument("project")
         return parser
 
@@ -126,5 +127,30 @@ class ProjectCmd(object):
         session.commit()
         print("Project removed")
     complete_p_remove = ProjectCompleter(1)
+
+    def parser_p_merge(self):
+        parser = YokadiOptionParser()
+        parser.usage = "p_remove <source_project> <destination_project>"
+        parser.description = "Merge <source_project> into <destination_project>."
+        parser.add_argument("source_project")
+        parser.add_argument("destination_project")
+        parser.add_argument("-f", dest="force", default=False, action="store_true",
+                            help="Skip confirmation prompt")
+        return parser
+
+    def do_p_merge(self, line):
+        session = db.getSession()
+        parser = self.parser_p_merge()
+        args = parser.parse_args(line)
+
+        src = getProjectFromName(args.source_project)
+        dst = getProjectFromName(args.destination_project)
+        if not args.force:
+            if not tui.confirm("Merge project '{}' into '{}'".format(src.name, dst.name)):
+                return
+        dst.merge(session, src)
+        session.commit()
+        print("Project '{}' merged into '{}'".format(src.name, dst.name))
+    complete_p_merge = MultiCompleter(ProjectCompleter(1), ProjectCompleter(2))
 
 # vi: ts=4 sw=4 et

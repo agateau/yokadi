@@ -8,8 +8,6 @@ Xml rendering of t_list output
 """
 from xml.dom import minidom as dom
 
-from yokadi.ycli import tui
-
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "urgency", "status", "keywords"]
 
 

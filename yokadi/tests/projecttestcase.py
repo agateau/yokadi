@@ -4,6 +4,8 @@ Project test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
+import testutils
+
 from yokadi.core import db, dbutils
 from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException
@@ -74,5 +76,29 @@ class ProjectTestCase(YokadiTestCase):
         self.assertEqual(project.active, False)
         self.cmd.do_p_set_active("p1")
         self.assertEqual(project.active, True)
+
+    def testMerge(self):
+        # Create project p1 with one associated task
+        dbutils.addTask("p1", "t1", interactive=False)
+
+        # Create project p2 with one associated task
+        dbutils.addTask("p2", "t2", interactive=False)
+
+        # Merge p1 into p2
+        tui.addInputAnswers("y")
+        self.cmd.do_p_merge("p1 p2")
+
+        # p2 should have two tasks now
+        project = self.session.query(Project).filter_by(name="p2").one()
+        tasks = set([x.title for x in project.tasks])
+        self.assertEquals(tasks, {"t1", "t2"})
+
+        # p1 should be gone
+        testutils.assertQueryEmpty(self, self.session.query(Project).filter_by(name="p1"))
+
+    def testMergeItselfFails(self):
+        project = Project(name="p1")
+        self.assertRaises(YokadiException, project.merge, self.session, project)
+
 
 # vi: ts=4 sw=4 et
