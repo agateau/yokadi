@@ -12,6 +12,7 @@ from yokadi.core import db
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import clearDump, dump, createVersionFile
+from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError
 
 from yokadi.sync.dbreplicator import DbReplicator
 from yokadi.sync.pull import pull, importSince, importAll, findConflicts
