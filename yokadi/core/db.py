@@ -289,7 +289,8 @@ class Database(object):
         if memoryDatabase:
             connectionString = "sqlite:///:memory:"
 
-        self.engine = create_engine(connectionString)
+        echo = os.environ.get("YOKADI_SQL_DEBUG", "0") != "0"
+        self.engine = create_engine(connectionString, echo=echo)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
