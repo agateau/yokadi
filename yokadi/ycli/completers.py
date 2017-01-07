@@ -5,7 +5,7 @@ Implementation of completers for various Yokadi objects.
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-from yokadi.ycli import parseutils
+from yokadi.ycli.basicparseutils import parseParameters, simplifySpaces
 from yokadi.core import db
 from yokadi.core.db import Config, Keyword, Project, Task
 from yokadi.core.ydateutils import WEEKDAYS
@@ -13,7 +13,7 @@ from yokadi.core.recurrencerule import FREQUENCIES
 
 
 def computeCompleteParameterPosition(text, line, begidx, endidx):
-    before = parseutils.simplifySpaces(line[:begidx].strip())
+    before = simplifySpaces(line[:begidx].strip())
     return before.count(" ") + 1
 
 
@@ -67,7 +67,7 @@ class MultiCompleter(object):
 def projectAndKeywordCompleter(cmd, text, line, begidx, endidx, shift=0):
     """@param shift: argument position shift. Used when command is omitted (t_edit usecase)"""
     position = computeCompleteParameterPosition(text, line, begidx, endidx)
-    position -= len(parseutils.parseParameters(line)[0])  # remove arguments from position count
+    position -= len(parseParameters(line)[0])  # remove arguments from position count
     position += shift  # Apply argument shift
     if position == 1:  # Projects
         return ["%s" % x for x in getItemPropertiesStartingWith(Project, Project.name, text)]
