@@ -20,6 +20,7 @@ from yokadi.core import db
 from yokadi.core import ydateutils
 from yokadi.core.recurrencerule import RecurrenceRule
 from yokadi.ycli import massedit
+from yokadi.ycli.basicparseutils import parseOneWordName
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
@@ -707,7 +708,7 @@ class TaskCmd(object):
         """
         if not line:
             raise BadUsageException("Missing parameters")
-        projectName = parseutils.parseOneWordName(line)
+        projectName = parseOneWordName(line)
         projectName = self._realProjectName(projectName)
         project = dbutils.getOrCreateProject(projectName)
         if not project:
