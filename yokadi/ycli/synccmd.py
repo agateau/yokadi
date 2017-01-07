@@ -106,7 +106,7 @@ class TextPullUi(PullUi):
                 (2, "Remote value: \"{}\"".format(shortenText(obj.remote[key]))),
                 (3, "Edit"),
             )
-            answer = tui.selectFromList(answers, prompt="Which version do you want to keep".format(key), default=None)
+            answer = tui.selectFromList(answers, prompt="Which version do you want to keep", default=None)
             if answer == 1:
                 value = obj.local[key]
             elif answer == 2:
