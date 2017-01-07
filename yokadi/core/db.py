@@ -64,8 +64,12 @@ class Project(Base):
         """Merge other into us"""
         if self is other:
             raise YokadiException("Cannot merge a project into itself")
-        for task in other.tasks:
-            task.project = self
+        # Do a bulk-update: it's faster than updating each task individually
+        session.query(Task).filter_by(projectId=other.id).update({Task.projectId: self.id})
+
+        # Tell SQLAlchemy to forget everything it knows about `other`,
+        # otherwise it will delete the tasks which were once attached to it
+        session.expire(other)
         session.delete(other)
 
 
@@ -289,7 +293,8 @@ class Database(object):
         if memoryDatabase:
             connectionString = "sqlite:///:memory:"
 
-        self.engine = create_engine(connectionString)
+        echo = os.environ.get("YOKADI_SQL_DEBUG", "0") != "0"
+        self.engine = create_engine(connectionString, echo=echo)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 

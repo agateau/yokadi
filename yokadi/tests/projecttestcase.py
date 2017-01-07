@@ -78,20 +78,24 @@ class ProjectTestCase(YokadiTestCase):
         self.assertEqual(project.active, True)
 
     def testMerge(self):
-        # Create project p1 with one associated task
-        dbutils.addTask("p1", "t1", interactive=False)
-
-        # Create project p2 with one associated task
-        dbutils.addTask("p2", "t2", interactive=False)
+        COUNT = 4
+        for x in range(COUNT):
+            dbutils.addTask('p1', 'p1-t{}'.format(x), interactive=False)
+            dbutils.addTask('p2', 'p2-t{}'.format(x), interactive=False)
 
         # Merge p1 into p2
         tui.addInputAnswers("y")
         self.cmd.do_p_merge("p1 p2")
 
-        # p2 should have two tasks now
+        # p2 should have both its tasks and all p1 tasks now
         project = self.session.query(Project).filter_by(name="p2").one()
         tasks = set([x.title for x in project.tasks])
-        self.assertEquals(tasks, {"t1", "t2"})
+
+        expected = set()
+        for x in range(COUNT):
+            expected.add('p1-t{}'.format(x))
+            expected.add('p2-t{}'.format(x))
+        self.assertEqual(tasks, expected)
 
         # p1 should be gone
         testutils.assertQueryEmpty(self, self.session.query(Project).filter_by(name="p1"))
