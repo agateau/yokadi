@@ -139,7 +139,6 @@ class ProjectCmd(object):
         return parser
 
     def do_p_merge(self, line):
-        raise Exception("Broken for now, going to fix it")
         session = db.getSession()
         parser = self.parser_p_merge()
         args = parser.parse_args(line)
