@@ -149,7 +149,6 @@ class ProjectCmd(object):
             if not tui.confirm("Merge project '{}' into '{}'".format(src.name, dst.name)):
                 return
         dst.merge(session, src)
-        session.commit()
         print("Project '{}' merged into '{}'".format(src.name, dst.name))
     complete_p_merge = MultiCompleter(ProjectCompleter(1), ProjectCompleter(2))
 

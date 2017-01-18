@@ -61,16 +61,22 @@ class Project(Base):
         return self.name
 
     def merge(self, session, other):
-        """Merge other into us"""
+        """Merge other into us
+
+        This function calls session.commit() itself: we have to commit after
+        moving the tasks but *before* deleting `other` otherwise when we delete
+        `other` SQLAlchemy deletes its former tasks as well because it thinks
+        they are still attached to `other`"""
         if self is other:
             raise YokadiException("Cannot merge a project into itself")
-        # Do a bulk-update: it's faster than updating each task individually
-        session.query(Task).filter_by(projectId=other.id).update({Task.projectId: self.id})
 
-        # Tell SQLAlchemy to forget everything it knows about `other`,
-        # otherwise it will delete the tasks which were once attached to it
-        session.expire(other)
+        for task in other.tasks:
+            task.projectId = self.id
+
+        session.commit()
+
         session.delete(other)
+        session.commit()
 
 
 class Keyword(Base):
