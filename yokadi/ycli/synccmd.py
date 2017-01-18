@@ -7,7 +7,6 @@ Synchronization commands
 import os
 from cmd import Cmd
 from collections import defaultdict
-from difflib import Differ
 
 from yokadi.core import basepaths
 from yokadi.core import db
@@ -18,10 +17,8 @@ from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.ycli import tui
+from yokadi.ycli import conflictutils
 
-
-LOCAL_PREFIX = "L> "
-REMOTE_PREFIX = "R> "
 
 SHORTENED_SUFFIX = " (...)"
 SHORTENED_TEXT_MAX_LENGTH = 40
@@ -44,27 +41,6 @@ def printConflictObjectHeader(obj):
             break
     prompt = prompt.format(value)
     print("\n# {}".format(prompt))
-
-
-def prepareConflictText(local, remote):
-    differ = Differ()
-    diff = differ.compare(local.splitlines(keepends=True),
-                          remote.splitlines(keepends=True))
-    lines = []
-    for line in diff:
-        code = line[0]
-        rest = line[2:]
-        if rest[-1] != "\n":
-            rest += "\n"
-        if code == "?":
-            continue
-        if code == "-":
-            lines.append(LOCAL_PREFIX + rest)
-        elif code == "+":
-            lines.append(REMOTE_PREFIX + rest)
-        else:
-            lines.append(rest)
-    return "".join(lines)
 
 
 def shortenText(text):
@@ -112,7 +88,7 @@ class TextPullUi(PullUi):
             elif answer == 2:
                 value = obj.remote[key]
             else:
-                conflictText = prepareConflictText(obj.local[key], obj.remote[key])
+                conflictText = conflictutils.prepareConflictText(obj.local[key], obj.remote[key])
                 value = tui.editText(conflictText)
             obj.selectValue(key, value)
 
