@@ -4,11 +4,15 @@ Project test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
+import os
+import json
+
 import testutils
 
 from yokadi.core import db, dbutils
 from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException
+from yokadi.sync import dump
 from yokadi.ycli.main import YokadiCmd
 from yokadi.ycli import tui
 from yokadi.tests.yokaditestcase import YokadiTestCase
@@ -103,6 +107,28 @@ class ProjectTestCase(YokadiTestCase):
     def testMergeItselfFails(self):
         project = Project(name="p1")
         self.assertRaises(YokadiException, project.merge, self.session, project)
+
+    def testProjectMergeUpdatesDump(self):
+        self.cmd.do_s_init("")
+        t1 = dbutils.addTask("p1", "t1", interactive=False)
+        t2 = dbutils.addTask("p2", "t2", interactive=False)
+        self.session.commit()
+
+        # Merge p1 into p2
+        p1 = dbutils.getProject(self.session, name="p1")
+        p2 = dbutils.getProject(self.session, name="p2")
+        p2.merge(self.session, p1)
+        self.session.commit()
+
+        # Check dumps
+        for task in t1, t2:
+            path = os.path.join(self.cmd.dumpDir, dump.pathForObject(task))
+            with open(path) as fp:
+                dct = json.load(fp)
+            self.assertEqual(dct["projectUuid"], p2.uuid)
+
+        p1path = os.path.join(self.cmd.dumpDir, dump.pathForObject(p1))
+        self.assertFalse(os.path.exists(p1path), "dump file for porject p1 should be gone")
 
 
 # vi: ts=4 sw=4 et
