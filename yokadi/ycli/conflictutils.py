@@ -7,26 +7,42 @@ Functions to deal with conflicts
 from difflib import Differ
 
 
-LOCAL_PREFIX = "L> "
-REMOTE_PREFIX = "R> "
+CONFLICT_BEGIN = "<<< LOCAL"
+CONFLICT_MIDDLE = "==="
+CONFLICT_END = ">>> REMOTE"
+
+_TRANSITIONS = {
+    (" ", "-"): [CONFLICT_BEGIN],
+    (" ", "+"): [CONFLICT_BEGIN, CONFLICT_MIDDLE],
+    ("-", " "): [CONFLICT_MIDDLE, CONFLICT_END],
+    ("-", "+"): [CONFLICT_MIDDLE],
+    ("+", " "): [CONFLICT_END],
+    ("+", "-"): [CONFLICT_END, CONFLICT_BEGIN],
+}
+
+
+def _switchToState(state, newState):
+    if state == newState:
+        return []
+    return [x + "\n" for x in _TRANSITIONS[(state, newState)]]
 
 
 def prepareConflictText(local, remote):
     differ = Differ()
     diff = differ.compare(local.splitlines(keepends=True),
                           remote.splitlines(keepends=True))
+    state = " "
     lines = []
     for line in diff:
-        code = line[0]
+        newState = line[0]
         rest = line[2:]
         if rest[-1] != "\n":
             rest += "\n"
-        if code == "?":
+        if newState == "?":
             continue
-        if code == "-":
-            lines.append(LOCAL_PREFIX + rest)
-        elif code == "+":
-            lines.append(REMOTE_PREFIX + rest)
         else:
+            lines.extend(_switchToState(state, newState))
+            state = newState
             lines.append(rest)
+    lines.extend(_switchToState(state, " "))
     return "".join(lines)

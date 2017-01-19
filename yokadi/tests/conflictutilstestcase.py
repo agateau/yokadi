@@ -6,14 +6,24 @@ Test cases for conflictutils
 """
 import textwrap
 
-from yokadi.ycli.conflictutils import prepareConflictText
+from yokadi.ycli.conflictutils import prepareConflictText, CONFLICT_BEGIN, CONFLICT_MIDDLE, CONFLICT_END
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 class ConflictUtilsTestCase(YokadiTestCase):
     def testPrepareConflictText(self):
         data = (
-            ("foo", "bar", "L> foo\nR> bar\n"),
+            (
+                "foo",
+                "bar",
+                textwrap.dedent("""\
+                    {begin}
+                    foo
+                    {mid}
+                    bar
+                    {end}
+                    """.format(begin=CONFLICT_BEGIN, mid=CONFLICT_MIDDLE, end=CONFLICT_END)),
+            ),
             (
                 textwrap.dedent("""\
                     Common
@@ -30,15 +40,24 @@ class ConflictUtilsTestCase(YokadiTestCase):
                     Even more common"""),
                 textwrap.dedent("""\
                     Common
-                    L> Local1
-                    R> Remote1
+                    {begin}
+                    Local1
+                    {mid}
+                    Remote1
+                    {end}
                     More common
-                    R> Remote2
-                    L> Local2
-                    L> Local3
+                    {begin}
+                    {mid}
+                    Remote2
+                    {end}
+                    {begin}
+                    Local2
+                    Local3
+                    {mid}
+                    {end}
                     Even more common
-                    """),
-            )
+                    """.format(begin=CONFLICT_BEGIN, mid=CONFLICT_MIDDLE, end=CONFLICT_END)),
+            ),
         )
 
         for local, remote, expected in data:
