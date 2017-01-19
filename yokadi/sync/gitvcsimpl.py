@@ -101,9 +101,10 @@ class GitVcsImpl(VcsImpl):
         self._run("clone", "--quiet", remoteUrl, cloneDir, cwd=parentDir)
         self._ensureUserInfoIsSet()
 
-    def pull(self):
+    def fetch(self):
         self._run("fetch", "--quiet")
 
+    def merge(self):
         # Force a high rename-threshold: we are not interested in finding renames
         try:
             self._run("merge", "--quiet", "--strategy", "recursive",

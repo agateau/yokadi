@@ -99,7 +99,8 @@ def createGitRepositoryWithConflict(tmpDir, path, ancestorContent="", localConte
     impl.commitAll()
 
     # Pull => conflict
-    impl.pull()
+    impl.fetch()
+    impl.merge()
     return impl
 
 
@@ -214,7 +215,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             touch(repoDir, "bar")
             impl.commitAll()
 
-    def testPull(self):
+    def testFetchMerge(self):
         with TemporaryDirectory() as tmpDir:
             remoteRepoDir = createGitRepository(tmpDir, "remote")
             remoteImpl = GitVcsImpl()
@@ -233,7 +234,8 @@ class GitVcsImplTestCase(YokadiTestCase):
             touch(remoteRepoDir, "foo")
             remoteImpl.commitAll()
 
-            ok = impl.pull()
+            impl.fetch()
+            ok = impl.merge()
             self.assertTrue(ok)
             self.assertTrue(os.path.exists(fooPath))
 

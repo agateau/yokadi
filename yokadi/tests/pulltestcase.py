@@ -19,12 +19,13 @@ from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
+from yokadi.sync.vcsimpl import VcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError
 from yokadi.sync.syncerrors import MergeError
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
-class StubVcsImpl(object):
+class StubVcsImpl(VcsImpl):
     def __init__(self):
         self._tags = set()
 
@@ -37,7 +38,10 @@ class StubVcsImpl(object):
     def init(self):
         pass
 
-    def pull(self):
+    def fetch(self):
+        pass
+
+    def merge(self):
         pass
 
     def hasConflicts(self):
@@ -174,7 +178,7 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
         def __init__(self):
             StubVcsImpl.__init__(self)
             self.commitAllCallCount = 0
-            self.pullCalled = False
+            self.mergeCalled = False
             self.conflicts = [VcsConflict(
                 path=modifiedTaskPath,
                 ancestor=createTaskJson(
@@ -194,8 +198,8 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
                 )
             )]
 
-        def pull(self):
-            self.pullCalled = True
+        def merge(self):
+            self.mergeCalled = True
 
         def getChangesSince(self, commitId):
             # This is called after the conflict has been resolved, so it
@@ -212,7 +216,7 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
             self.conflicts = []
 
         def isWorkTreeClean(self):
-            if not self.pullCalled:
+            if not self.mergeCalled:
                 return True
             return not self.hasConflicts() and self.commitAllCallCount > 0
 
@@ -253,7 +257,7 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
         def __init__(self):
             StubVcsImpl.__init__(self)
             self.commitAllCallCount = 0
-            self.pullCalled = False
+            self.mergeCalled = False
             self.conflicts = [VcsConflict(
                 path=modLocallyTaskPath,
                 ancestor=createTaskJson(
@@ -283,8 +287,8 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
                 )
             )]
 
-        def pull(self):
-            self.pullCalled = True
+        def merge(self):
+            self.mergeCalled = True
 
         def getChangesSince(self, commitId):
             # This is called after the conflict has been resolved
@@ -302,7 +306,7 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
             self.conflicts = []
 
         def isWorkTreeClean(self):
-            if not self.pullCalled:
+            if not self.mergeCalled:
                 return True
             return not self.hasConflicts() and self.commitAllCallCount > 0
 
@@ -416,10 +420,10 @@ class PullTestCase(YokadiTestCase):
                 def __init__(self):
                     StubVcsImpl.__init__(self)
                     self.commitAllCallCount = 0
-                    self.pullCalled = False
+                    self.mergeCalled = False
 
-                def pull(self):
-                    self.pullCalled = True
+                def merge(self):
+                    self.mergeCalled = True
 
                 def getChangesSince(self, commitId):
                     changes = VcsChanges()
@@ -427,10 +431,10 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
                 def isWorkTreeClean(self):
-                    return not self.pullCalled
+                    return not self.mergeCalled
 
                 def hasConflicts(self):
-                    return self.pullCalled
+                    return self.mergeCalled
 
                 def getConflicts(self):
                     return [VcsConflict(

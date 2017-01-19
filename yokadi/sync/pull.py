@@ -293,7 +293,8 @@ def pull(dumpDir, vcsImpl=None, pullUi=None):
 
     vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
-    vcsImpl.pull()
+    vcsImpl.fetch()
+    vcsImpl.merge()
 
     if vcsImpl.hasConflicts():
         objects = [ConflictingObject.fromVcsConflict(x) for x in vcsImpl.getConflicts()]

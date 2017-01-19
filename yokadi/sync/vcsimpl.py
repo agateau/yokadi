@@ -47,9 +47,16 @@ class VcsImpl(object):
         """
         raise NotImplementedError()
 
-    def pull(self):
+    def fetch(self):
         """
-        Pull changes from the remote repository. Must *not* commit changes.
+        Download changes from the remote repository. Must *not* apply them to
+        the local copy.
+        """
+        raise NotImplementedError()
+
+    def merge(self):
+        """
+        Merge remote branch with local branch. Must *not* commit changes.
         Returns True on success, False in case of conflicts.
         """
         raise NotImplementedError()
