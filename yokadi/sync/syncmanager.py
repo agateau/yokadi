@@ -15,7 +15,7 @@ from yokadi.sync.dump import clearDump, dump, createVersionFile
 from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError
 
 from yokadi.sync.dbreplicator import DbReplicator
-from yokadi.sync.pull import pull, importSince, importAll, findConflicts
+from yokadi.sync.pull import fetch, merge, importSince, importAll, findConflicts
 
 
 BEFORE_MERGE_TAG = "before-merge"
@@ -86,9 +86,11 @@ class SyncManager(object):
         dump(self.dumpDir, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
+        fetch(self.dumpDir, vcsImpl=self.vcsImpl)
+
         with self._mergeOperation():
             pullUi.reportProgress("Pulling remote changes")
-            pull(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+            merge(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
             if self.hasChangesToImport():
                 pullUi.reportProgress("Importing changes")
                 importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
