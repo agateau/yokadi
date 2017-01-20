@@ -280,11 +280,8 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
         vcsImpl.commitAll("Enforce DB constraints")
 
 
-def fetch(dumpDir, vcsImpl=None):
-    vcsImpl.fetch()
-
-
-def merge(dumpDir, vcsImpl=None, pullUi=None):
+def merge(vcsImpl, pullUi=None):
+    dumpDir = vcsImpl.srcDir
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     vcsImpl.merge()
 
