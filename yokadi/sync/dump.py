@@ -69,13 +69,14 @@ def createVersionFile(dstDir):
         fp.write(str(VERSION))
 
 
-def checkIsValidDumpDir(dstDir, vcsImpl):
+def checkIsValidDumpDir(vcsImpl):
+    dumpDir = vcsImpl.srcDir
     if not vcsImpl.isValidVcsDir():
-        raise YokadiException("{} is not handled by {}".format(dstDir, vcsImpl.name))
+        raise YokadiException("{} is not handled by {}".format(dumpDir, vcsImpl.name))
 
-    versionFile = os.path.join(dstDir, VERSION_FILENAME)
+    versionFile = os.path.join(dumpDir, VERSION_FILENAME)
     if not os.path.exists(versionFile):
-        raise YokadiException("{} does not contain a `{}` file".format(dstDir, VERSION_FILENAME))
+        raise YokadiException("{} does not contain a `{}` file".format(dumpDir, VERSION_FILENAME))
 
     with open(versionFile) as fp:
         dumpVersion = int(fp.read())
@@ -129,9 +130,10 @@ def isDumpableObject(obj):
     return obj.__table__ in _DIRNAME_FOR_TABLE
 
 
-def dump(dumpDir, vcsImpl=None):
+def dump(vcsImpl):
+    dumpDir = vcsImpl.srcDir
     assert os.path.exists(dumpDir), "dumpDir {} does not exist".format(dumpDir)
-    checkIsValidDumpDir(dumpDir, vcsImpl)
+    checkIsValidDumpDir(vcsImpl)
 
     session = db.getSession()
     for project in session.query(Project).all():

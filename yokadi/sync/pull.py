@@ -254,7 +254,7 @@ def importAll(dumpDir, vcsImpl=None, pullUi=None):
 
 
 def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
-    checkIsValidDumpDir(dumpDir, vcsImpl)
+    checkIsValidDumpDir(vcsImpl)
 
     session = db.getSession()
 
