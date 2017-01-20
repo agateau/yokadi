@@ -90,13 +90,13 @@ class SyncManager(object):
             merge(self.vcsImpl, pullUi=pullUi)
             if self.hasChangesToImport():
                 pullUi.reportProgress("Importing changes")
-                importSince(self.dumpDir, BEFORE_MERGE_TAG, vcsImpl=self.vcsImpl, pullUi=pullUi)
+                importSince(self.vcsImpl, BEFORE_MERGE_TAG, pullUi=pullUi)
             else:
                 pullUi.reportProgress("No remote changes")
 
     def importAll(self, pullUi):
         with self._mergeOperation():
-            importAll(self.dumpDir, vcsImpl=self.vcsImpl, pullUi=pullUi)
+            importAll(self.vcsImpl, pullUi=pullUi)
 
     def push(self):
         self.vcsImpl.push()

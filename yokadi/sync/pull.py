@@ -240,25 +240,25 @@ def enforceDbConstraints(session, dumpDir, pullUi):
     _enforceAliasConstraints(session, dumpDir, pullUi)
 
 
-def importSince(dumpDir, commitId, vcsImpl=None, pullUi=None):
-    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
+def importSince(vcsImpl, commitId, pullUi=None):
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(vcsImpl.srcDir)
     changes = vcsImpl.getChangesSince(commitId)
-    _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
+    _importChanges(vcsImpl, changes, pullUi=pullUi)
 
 
-def importAll(dumpDir, vcsImpl=None, pullUi=None):
-    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
+def importAll(vcsImpl, pullUi=None):
+    assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(vcsImpl.srcDir)
     changes = VcsChanges()
     changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
-    _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
+    _importChanges(vcsImpl, changes, pullUi=pullUi)
 
 
-def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
+def _importChanges(vcsImpl, changes, pullUi=None):
     checkIsValidDumpDir(vcsImpl)
 
     session = db.getSession()
 
-    enforceDbConstraints(session, dumpDir, pullUi)
+    enforceDbConstraints(session, vcsImpl.srcDir, pullUi)
     dbConstraintChanges = vcsImpl.getWorkTreeChanges()
     changes.update(dbConstraintChanges)
 
@@ -268,7 +268,7 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
         AliasChangeHandler()
     )
     for changeHandler in handlers:
-        changeHandler.handle(session, dumpDir, changes)
+        changeHandler.handle(session, vcsImpl.srcDir, changes)
     session.flush()
     for changeHandler in handlers:
         changeHandler.applyPostUpdateChanges()
