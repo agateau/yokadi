@@ -26,11 +26,13 @@ from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 class StubVcsImpl(VcsImpl):
-    def __init__(self):
+    def __init__(self, srcDir):
         self._tags = set()
+        self._srcDir = srcDir
 
-    def setDir(self, repoDir):
-        pass
+    @property
+    def srcDir(self):
+        return self._srcDir
 
     def isValidVcsDir(self):
         return True
@@ -175,8 +177,8 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
     modifiedTaskPath = os.path.join(TASKS_DIRNAME, modifiedTask.uuid + ".json")
 
     class MyVcsImpl(StubVcsImpl):
-        def __init__(self):
-            StubVcsImpl.__init__(self)
+        def __init__(self, srcDir):
+            StubVcsImpl.__init__(self, srcDir)
             self.commitAllCallCount = 0
             self.mergeCalled = False
             self.conflicts = [VcsConflict(
@@ -228,7 +230,7 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
 
     return BothModifiedConflictFixture(
         modifiedTask=modifiedTask,
-        vcsImpl=MyVcsImpl())
+        vcsImpl=MyVcsImpl(tmpDir))
 
 
 ModifiedDeletedConflictFixture = namedtuple("ModifiedDeletedConflictFixture",
@@ -254,8 +256,8 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
     modRemotelyTaskPath = os.path.join(TASKS_DIRNAME, modRemotelyTask.uuid + ".json")
 
     class MyVcsImpl(StubVcsImpl):
-        def __init__(self):
-            StubVcsImpl.__init__(self)
+        def __init__(self, srcDir):
+            StubVcsImpl.__init__(self, srcDir)
             self.commitAllCallCount = 0
             self.mergeCalled = False
             self.conflicts = [VcsConflict(
@@ -321,7 +323,7 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
         modLocallyTaskPath=modLocallyTaskPath,
         modRemotelyTask=modRemotelyTask,
         modRemotelyTaskPath=modRemotelyTaskPath,
-        vcsImpl=MyVcsImpl()
+        vcsImpl=MyVcsImpl(tmpDir)
     )
 
 
@@ -335,7 +337,7 @@ class PullTestCase(YokadiTestCase):
     def testNothingToDo(self):
         with TemporaryDirectory() as tmpDir:
             createVersionFile(tmpDir)
-            syncManager = SyncManager(tmpDir, vcsImpl=StubVcsImpl())
+            syncManager = SyncManager(vcsImpl=StubVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
     def testOnlyImportOurFiles(self):
@@ -391,7 +393,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
@@ -417,8 +419,8 @@ class PullTestCase(YokadiTestCase):
             modifiedTaskPath = os.path.join(TASKS_DIRNAME, modifiedTask.uuid + ".json")
 
             class MyVcsImpl(StubVcsImpl):
-                def __init__(self):
-                    StubVcsImpl.__init__(self)
+                def __init__(self, srcDir):
+                    StubVcsImpl.__init__(self, srcDir)
                     self.commitAllCallCount = 0
                     self.mergeCalled = False
 
@@ -460,9 +462,9 @@ class PullTestCase(YokadiTestCase):
                     self.commitAllCallCount += 1
 
             # Do the pull
-            vcsImpl = MyVcsImpl()
+            vcsImpl = MyVcsImpl(tmpDir)
             pullUi = StubPullUi()
-            syncManager = SyncManager(tmpDir, vcsImpl=vcsImpl)
+            syncManager = SyncManager(vcsImpl=vcsImpl)
             self.assertRaises(MergeError, syncManager.pull, pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
@@ -491,7 +493,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             pullUi = MyPullUi()
-            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
+            syncManager = SyncManager(vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
@@ -517,7 +519,7 @@ class PullTestCase(YokadiTestCase):
                     dct[fixture.modRemotelyTaskPath].selectRemote()
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, vcsImpl=fixture.vcsImpl)
+            syncManager = SyncManager(vcsImpl=fixture.vcsImpl)
             pullUi = MyPullUi()
             syncManager.pull(pullUi=pullUi)
 
@@ -548,7 +550,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             pullUi = StubPullUi()
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=pullUi)
 
             # Check changes
@@ -573,7 +575,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             pullUi = StubPullUi()
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=pullUi)
 
             # DB should be empty
@@ -589,12 +591,12 @@ class PullTestCase(YokadiTestCase):
 
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
+            remoteSyncManager = SyncManager(vcsImpl=GitVcsImpl(remoteDir))
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=pullUi)
 
@@ -656,7 +658,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # The project should have a new name, task1 should still be there
@@ -674,7 +676,7 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             # Create a remote repo with project "remote" and a task task1
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
+            remoteSyncManager = SyncManager(vcsImpl=GitVcsImpl(remoteDir))
             remoteSyncManager.initDumpRepository()
 
             createProjectFile(remoteDir, uuid="u-rprj", name="remote")
@@ -683,7 +685,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
@@ -725,7 +727,7 @@ class PullTestCase(YokadiTestCase):
             # Create a remote repo with project p1 (task task1) and p2 (task
             # task2)
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
+            remoteSyncManager = SyncManager(vcsImpl=GitVcsImpl(remoteDir))
             remoteSyncManager.initDumpRepository()
 
             createProjectFile(remoteDir, uuid="u-prj1", name="p1")
@@ -736,7 +738,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
@@ -772,8 +774,8 @@ class PullTestCase(YokadiTestCase):
             self.session.commit()
 
             dumpDir = os.path.join(tmpDir, "dump")
-            vcsImpl = GitVcsImpl()
-            syncManager = SyncManager(dumpDir, vcsImpl=vcsImpl)
+            vcsImpl = GitVcsImpl(dumpDir)
+            syncManager = SyncManager(vcsImpl=vcsImpl)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -802,7 +804,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
@@ -824,7 +826,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
@@ -836,12 +838,12 @@ class PullTestCase(YokadiTestCase):
             pullUi = StubPullUi()
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
+            remoteSyncManager = SyncManager(vcsImpl=GitVcsImpl(remoteDir))
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=pullUi)
 
@@ -866,12 +868,12 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
+            remoteSyncManager = SyncManager(vcsImpl=GitVcsImpl(remoteDir))
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=StubPullUi())
 
@@ -911,7 +913,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(tmpDir, vcsImpl=MyVcsImpl())
+            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes

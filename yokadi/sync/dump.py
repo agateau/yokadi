@@ -131,7 +131,6 @@ def isDumpableObject(obj):
 
 def dump(dumpDir, vcsImpl=None):
     assert os.path.exists(dumpDir), "dumpDir {} does not exist".format(dumpDir)
-    vcsImpl.setDir(dumpDir)
     checkIsValidDumpDir(dumpDir, vcsImpl)
 
     session = db.getSession()

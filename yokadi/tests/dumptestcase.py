@@ -50,7 +50,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(dumpDir))
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -88,7 +88,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(vcsImpl=GitVcsImpl(dumpDir))
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -130,7 +130,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir, session=self.session, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(dumpDir))
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -152,7 +152,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir, session=self.session, vcsImpl=GitVcsImpl())
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(dumpDir))
             syncManager.initDumpRepository()
             syncManager.dump()
 

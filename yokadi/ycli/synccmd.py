@@ -242,5 +242,5 @@ class SyncCmd(Cmd):
                 print("- {} => {}".format(old, new))
 
     def _createSyncManager(self):
-        vcsImpl = GitVcsImpl()
-        self.syncManager = SyncManager(self.dumpDir, session=db.getSession(), vcsImpl=vcsImpl)
+        vcsImpl = GitVcsImpl(self.dumpDir)
+        self.syncManager = SyncManager(session=db.getSession(), vcsImpl=vcsImpl)

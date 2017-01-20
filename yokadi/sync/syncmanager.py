@@ -21,16 +21,16 @@ BEFORE_MERGE_TAG = "before-merge"
 
 
 class SyncManager(object):
-    def __init__(self, dumpDir, *, session=None, vcsImpl=None):
+    def __init__(self, *, session=None, vcsImpl=None):
+        assert vcsImpl, "vcsImpl cannot be None"
         self.vcsImpl = vcsImpl
-        self.dumpDir = dumpDir
-        self.vcsImpl.setDir(dumpDir)
+        self.dumpDir = vcsImpl.srcDir
 
         self._pathsToDelete = set()
         self._dictsToWrite = {}
 
         if session:
-            self._dbReplicator = DbReplicator(dumpDir, session)
+            self._dbReplicator = DbReplicator(self.dumpDir, session)
             self.session = session
 
     @contextmanager

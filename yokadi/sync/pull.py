@@ -241,14 +241,12 @@ def enforceDbConstraints(session, dumpDir, pullUi):
 
 
 def importSince(dumpDir, commitId, vcsImpl=None, pullUi=None):
-    vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = vcsImpl.getChangesSince(commitId)
     _importChanges(dumpDir, changes, vcsImpl=vcsImpl, pullUi=pullUi)
 
 
 def importAll(dumpDir, vcsImpl=None, pullUi=None):
-    vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = VcsChanges()
     changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
@@ -283,12 +281,10 @@ def _importChanges(dumpDir, changes, vcsImpl=None, pullUi=None):
 
 
 def fetch(dumpDir, vcsImpl=None):
-    vcsImpl.setDir(dumpDir)
     vcsImpl.fetch()
 
 
 def merge(dumpDir, vcsImpl=None, pullUi=None):
-    vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     vcsImpl.merge()
 

@@ -68,12 +68,12 @@ def _parseStatusOutput(output):
 
 class GitVcsImpl(VcsImpl):
     name = "Git"
-
-    def getDir(self):
-        return self._srcDir
-
-    def setDir(self, srcDir):
+    def __init__(self, srcDir):
         self._srcDir = srcDir
+
+    @property
+    def srcDir(self):
+        return self._srcDir
 
     def isValidVcsDir(self):
         gitDir = os.path.join(self._srcDir, ".git")

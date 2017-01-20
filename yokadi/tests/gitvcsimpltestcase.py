@@ -67,8 +67,7 @@ def createGitRepositoryWithConflict(tmpDir, path, ancestorContent="", localConte
     """
     # Create remote repo
     remoteRepoDir = createGitRepository(tmpDir, path + "-remote")
-    remoteImpl = GitVcsImpl()
-    remoteImpl.setDir(remoteRepoDir)
+    remoteImpl = GitVcsImpl(remoteRepoDir)
     remoteFooPath = os.path.join(remoteRepoDir, "foo")
     if ancestorContent is not None:
         with open(remoteFooPath, "w") as f:
@@ -77,8 +76,7 @@ def createGitRepositoryWithConflict(tmpDir, path, ancestorContent="", localConte
 
     # Clone it
     repoDir = join(tmpDir, path)
-    impl = GitVcsImpl()
-    impl.setDir(repoDir)
+    impl = GitVcsImpl(repoDir)
     impl.clone(remoteRepoDir)
 
     # Modify remote
@@ -115,12 +113,11 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testIsValidVcsDir(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
 
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             self.assertTrue(impl.isValidVcsDir())
 
-            impl.setDir(tmpDir)
+            impl = GitVcsImpl(tmpDir)
             self.assertFalse(impl.isValidVcsDir())
 
     def testInit(self):
@@ -128,8 +125,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             repoDir = join(tmpDir, "repo")
             os.mkdir(repoDir)
 
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             impl.init()
 
             gitDir = join(repoDir, ".git")
@@ -139,8 +135,7 @@ class GitVcsImplTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
 
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             self.assertTrue(impl.isWorkTreeClean())
 
@@ -152,8 +147,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             repoDir = createGitRepository(tmpDir, "repo")
             touch(repoDir, "foo")
 
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             self.assertFalse(impl.isWorkTreeClean())
             impl.commitAll()
@@ -172,8 +166,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             repoDir = join(tmpDir, "repo")
             os.mkdir(repoDir)
 
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             impl.init()
 
             touch(repoDir, "foo")
@@ -184,13 +177,11 @@ class GitVcsImplTestCase(YokadiTestCase):
             remoteRepoDir = createGitRepository(tmpDir, "remote")
 
             touch(remoteRepoDir, "foo")
-            impl = GitVcsImpl()
-            impl.setDir(remoteRepoDir)
+            impl = GitVcsImpl(remoteRepoDir)
             impl.commitAll()
 
             repoDir = join(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             impl.clone(remoteRepoDir)
 
             fooPath = join(repoDir, "foo")
@@ -201,15 +192,13 @@ class GitVcsImplTestCase(YokadiTestCase):
             remoteRepoDir = createGitRepository(tmpDir, "remote")
 
             touch(remoteRepoDir, "foo")
-            impl = GitVcsImpl()
-            impl.setDir(remoteRepoDir)
+            impl = GitVcsImpl(remoteRepoDir)
             impl.commitAll()
 
             self._deleteGitConfig()
 
             repoDir = join(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             impl.clone(remoteRepoDir)
 
             touch(repoDir, "bar")
@@ -218,14 +207,12 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testFetchMerge(self):
         with TemporaryDirectory() as tmpDir:
             remoteRepoDir = createGitRepository(tmpDir, "remote")
-            remoteImpl = GitVcsImpl()
-            remoteImpl.setDir(remoteRepoDir)
+            remoteImpl = GitVcsImpl(remoteRepoDir)
             touch(remoteRepoDir, "bar")
             remoteImpl.commitAll()
 
             repoDir = join(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             impl.clone(remoteRepoDir)
 
             fooPath = join(repoDir, "foo")
@@ -244,8 +231,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             repoDir = createGitRepository(tmpDir, "repo")
             touch(repoDir, "foo")
 
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             self.assertFalse(impl.hasConflicts())
 
     def testHasConflicts_conflicts(self):
@@ -313,7 +299,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             impl.closeConflict(conflict.path, b"newcontent")
 
             self.assertFalse(impl.hasConflicts())
-            fullPath = os.path.join(impl.getDir(), conflict.path)
+            fullPath = os.path.join(impl.srcDir, conflict.path)
             with open(fullPath, "rb") as f:
                 self.assertEqual(f.read(), b"newcontent")
 
@@ -324,7 +310,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             conflicts = list(impl.getConflicts())
             self.assertEqual(len(conflicts), 1)
             conflict = conflicts[0]
-            fullPath = os.path.join(impl.getDir(), conflict.path)
+            fullPath = os.path.join(impl.srcDir, conflict.path)
             self.assertTrue(os.path.exists(fullPath))
 
             impl.closeConflict(conflict.path, None)
@@ -344,8 +330,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testGetStatus(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             removed = touch(repoDir, "removed")
             impl.commitAll()
@@ -367,8 +352,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testUpdateBranch(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             # Create a foo branch which lags behind master
             touch(repoDir, "file1")
@@ -392,8 +376,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testGetChangesSince(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             # Create a repo with a removed, a modified and an added file
             modifiedPath = touch(repoDir, "modified")
@@ -449,8 +432,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testGetWorkTreeChanges(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             # Create a repo with a removed, a modified and an added file
             modifiedPath = touch(repoDir, "modified")
@@ -484,8 +466,7 @@ class GitVcsImplTestCase(YokadiTestCase):
             remoteRepoDir = createBareGitRepository(tmpDir, "remote", srcRepoDir)
 
             repoDir = join(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
             impl.clone(remoteRepoDir)
 
             # Make a change
@@ -498,8 +479,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testPushNoRemote(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "src")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             # Make a change
             touch(repoDir, "foo")
@@ -515,14 +495,12 @@ class GitVcsImplTestCase(YokadiTestCase):
 
             # We clone remote repo
             ourRepoDir = join(tmpDir, "our")
-            impl = GitVcsImpl()
-            impl.setDir(ourRepoDir)
+            impl = GitVcsImpl(ourRepoDir)
             impl.clone(remoteRepoDir)
 
             # Bob clones remote repo
             bobRepoDir = join(tmpDir, "bob")
-            bobImpl = GitVcsImpl()
-            bobImpl.setDir(bobRepoDir)
+            bobImpl = GitVcsImpl(bobRepoDir)
             bobImpl.clone(remoteRepoDir)
 
             # We make a change
@@ -540,8 +518,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testGetTrackedFiles(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             touch(repoDir, "foo")
             removedPath = touch(repoDir, "removed")
@@ -559,8 +536,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testCreateTag(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             touch(repoDir, "foo")
             impl.commitAll()
@@ -575,8 +551,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testCreateTagTwiceFails(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             touch(repoDir, "foo")
             impl.commitAll()
@@ -586,8 +561,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testDeleteTag(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             touch(repoDir, "foo")
             impl.commitAll()
@@ -600,8 +574,7 @@ class GitVcsImplTestCase(YokadiTestCase):
     def testDeleteUnknownTagFails(self):
         with TemporaryDirectory() as tmpDir:
             repoDir = createGitRepository(tmpDir, "repo")
-            impl = GitVcsImpl()
-            impl.setDir(repoDir)
+            impl = GitVcsImpl(repoDir)
 
             touch(repoDir, "foo")
             self.assertRaises(VcsImplError, impl.deleteTag, "t1")

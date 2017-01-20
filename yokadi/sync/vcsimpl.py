@@ -10,9 +10,10 @@ class VcsImpl(object):
     """
     An abstract class representing a VCS
     """
-    def setDir(self, srcDir):
+    @property
+    def srcDir(self):
         """
-        Defines the directory of the VCS work tree
+        Returns the directory of the VCS work tree
         """
         raise NotImplementedError()
 
