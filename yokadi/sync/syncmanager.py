@@ -24,13 +24,13 @@ class SyncManager(object):
     def __init__(self, *, session=None, vcsImpl=None):
         assert vcsImpl, "vcsImpl cannot be None"
         self.vcsImpl = vcsImpl
-        self.dumpDir = vcsImpl.srcDir
+        self._dumpDir = vcsImpl.srcDir
 
         self._pathsToDelete = set()
         self._dictsToWrite = {}
 
         if session:
-            self._dbReplicator = DbReplicator(self.dumpDir, session)
+            self._dbReplicator = DbReplicator(self._dumpDir, session)
             self.session = session
 
     @contextmanager
@@ -40,12 +40,12 @@ class SyncManager(object):
         self.vcsImpl.deleteTag(BEFORE_MERGE_TAG)
 
     def initDumpRepository(self):
-        assert not os.path.exists(self.dumpDir), "Dump dir {} should not already exist".format(self.dumpDir)
-        os.makedirs(self.dumpDir)
+        assert not os.path.exists(self._dumpDir), "Dump dir {} should not already exist".format(self._dumpDir)
+        os.makedirs(self._dumpDir)
         self.vcsImpl.init()
-        createVersionFile(self.dumpDir)
+        createVersionFile(self._dumpDir)
         for dirname in ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME:
-            path = os.path.join(self.dumpDir, dirname)
+            path = os.path.join(self._dumpDir, dirname)
             os.mkdir(path)
         self.vcsImpl.commitAll("Created")
 
@@ -77,7 +77,7 @@ class SyncManager(object):
         return True
 
     def clearDump(self):
-        clearDump(self.dumpDir)
+        clearDump(self._dumpDir)
 
     def dump(self):
         dump(vcsImpl=self.vcsImpl)
@@ -111,7 +111,7 @@ class SyncManager(object):
 
     def _checkItems(self, dirname, table):
         print("# Checking all {} are there".format(dirname))
-        objectDir = os.path.join(self.dumpDir, dirname)
+        objectDir = os.path.join(self._dumpDir, dirname)
         dumpUuids = set()
         for name in os.listdir(objectDir):
             if not name.endswith(".json"):
@@ -136,7 +136,7 @@ class SyncManager(object):
 
     def _checkUnicity(self, dirname):
         print("# Checking {} unicity".format(dirname))
-        jsonDirPath = os.path.join(self.dumpDir, dirname)
+        jsonDirPath = os.path.join(self._dumpDir, dirname)
         conflicts = findConflicts(jsonDirPath, "name")
         for name, conflictList in conflicts.items():
             print("## {} exists {} times".format(name, len(conflictList)))
@@ -146,8 +146,8 @@ class SyncManager(object):
 
     def _checkTaskProjects(self):
         print("# Checking all tasks have an existing project")
-        projectDir = os.path.join(self.dumpDir, PROJECTS_DIRNAME)
-        taskDir = os.path.join(self.dumpDir, TASKS_DIRNAME)
+        projectDir = os.path.join(self._dumpDir, PROJECTS_DIRNAME)
+        taskDir = os.path.join(self._dumpDir, TASKS_DIRNAME)
         projectUuids = {os.path.splitext(x)[0] for x in os.listdir(projectDir)}
 
         first = True
