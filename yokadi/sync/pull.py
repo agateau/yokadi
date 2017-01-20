@@ -15,7 +15,6 @@ from yokadi.core import dbs13n
 from yokadi.core.db import Alias, Project, Task
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.conflictingobject import ConflictingObject
-from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
 from yokadi.sync.syncerrors import MergeError
 from yokadi.sync.vcschanges import VcsChanges
@@ -242,8 +241,6 @@ def enforceDbConstraints(session, dumpDir, pullUi):
 
 
 def importSince(dumpDir, commitId, vcsImpl=None, pullUi=None):
-    if vcsImpl is None:
-        vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = vcsImpl.getChangesSince(commitId)
@@ -251,8 +248,6 @@ def importSince(dumpDir, commitId, vcsImpl=None, pullUi=None):
 
 
 def importAll(dumpDir, vcsImpl=None, pullUi=None):
-    if vcsImpl is None:
-        vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
     changes = VcsChanges()

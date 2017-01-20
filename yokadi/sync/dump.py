@@ -14,7 +14,6 @@ from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task, Project, Alias, TaskKeyword
-from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync import VERSION, VERSION_FILENAME, ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 
 
@@ -132,8 +131,6 @@ def isDumpableObject(obj):
 
 def dump(dumpDir, vcsImpl=None):
     assert os.path.exists(dumpDir), "dumpDir {} does not exist".format(dumpDir)
-    if vcsImpl is None:
-        vcsImpl = GitVcsImpl()
     vcsImpl.setDir(dumpDir)
     checkIsValidDumpDir(dumpDir, vcsImpl)
 

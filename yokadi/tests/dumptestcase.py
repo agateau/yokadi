@@ -12,7 +12,7 @@ from tempfile import TemporaryDirectory
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync.pullui import PullUi
+from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
@@ -50,7 +50,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir)
+            syncManager = SyncManager(dumpDir, vcsImpl=GitVcsImpl())
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -88,7 +88,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir)
+            syncManager = SyncManager(dumpDir, vcsImpl=GitVcsImpl())
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -130,7 +130,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir, session=self.session)
+            syncManager = SyncManager(dumpDir, session=self.session, vcsImpl=GitVcsImpl())
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -152,7 +152,7 @@ class DumpTestCase(YokadiTestCase):
 
         with TemporaryDirectory() as tmpDir:
             dumpDir = os.path.join(tmpDir, "dump")
-            syncManager = SyncManager(dumpDir, session=self.session)
+            syncManager = SyncManager(dumpDir, session=self.session, vcsImpl=GitVcsImpl())
             syncManager.initDumpRepository()
             syncManager.dump()
 

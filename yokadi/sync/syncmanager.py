@@ -10,7 +10,6 @@ from contextlib import contextmanager
 
 from yokadi.core import db
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
-from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.dump import clearDump, dump, createVersionFile
 from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError
 
@@ -23,8 +22,6 @@ BEFORE_MERGE_TAG = "before-merge"
 
 class SyncManager(object):
     def __init__(self, dumpDir, *, session=None, vcsImpl=None):
-        if vcsImpl is None:
-            vcsImpl = GitVcsImpl()
         self.vcsImpl = vcsImpl
         self.dumpDir = dumpDir
         self.vcsImpl.setDir(dumpDir)

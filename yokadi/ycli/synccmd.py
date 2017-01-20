@@ -13,6 +13,7 @@ from yokadi.core import db
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
 from yokadi.sync.pullui import PullUi
+from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
@@ -241,4 +242,5 @@ class SyncCmd(Cmd):
                 print("- {} => {}".format(old, new))
 
     def _createSyncManager(self):
-        self.syncManager = SyncManager(self.dumpDir, session=db.getSession())
+        vcsImpl = GitVcsImpl()
+        self.syncManager = SyncManager(self.dumpDir, session=db.getSession(), vcsImpl=vcsImpl)

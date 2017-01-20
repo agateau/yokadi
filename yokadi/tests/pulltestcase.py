@@ -589,12 +589,12 @@ class PullTestCase(YokadiTestCase):
 
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=pullUi)
 
@@ -674,7 +674,7 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             # Create a remote repo with project "remote" and a task task1
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
             remoteSyncManager.initDumpRepository()
 
             createProjectFile(remoteDir, uuid="u-rprj", name="remote")
@@ -683,7 +683,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
             syncManager.vcsImpl.clone(remoteDir)
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
@@ -725,7 +725,7 @@ class PullTestCase(YokadiTestCase):
             # Create a remote repo with project p1 (task task1) and p2 (task
             # task2)
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
             remoteSyncManager.initDumpRepository()
 
             createProjectFile(remoteDir, uuid="u-prj1", name="p1")
@@ -736,7 +736,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
             syncManager.vcsImpl.clone(remoteDir)
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
@@ -836,12 +836,12 @@ class PullTestCase(YokadiTestCase):
             pullUi = StubPullUi()
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=pullUi)
 
@@ -866,12 +866,12 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             # Create an empty remote repo
             remoteDir = os.path.join(tmpDir, "remote")
-            remoteSyncManager = SyncManager(remoteDir)
+            remoteSyncManager = SyncManager(remoteDir, vcsImpl=GitVcsImpl())
             remoteSyncManager.initDumpRepository()
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(localDir)
+            syncManager = SyncManager(localDir, vcsImpl=GitVcsImpl())
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=StubPullUi())
 
