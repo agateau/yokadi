@@ -7,12 +7,9 @@ Text rendering of t_list output
 @license: GPL v3 or later
 """
 from datetime import datetime, timedelta
-from sqlalchemy.sql import func
 
 import yokadi.ycli.colors as C
 from yokadi.core import ydateutils
-from yokadi.core import db
-from yokadi.core.db import Task
 from yokadi.ycli import tui
 
 
@@ -203,6 +200,8 @@ class TextListRenderer(object):
         self.idColumn = self.columns[0]
         self.titleColumn = self.columns[1]
 
+        self.maxId = 0
+
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
         @param sectionName: name of the task groupment section
@@ -221,12 +220,12 @@ class TextListRenderer(object):
             if task.description:
                 titleWidth += 1
             self.maxTitleWidth = max(self.maxTitleWidth, titleWidth)
+            self.maxId = max(self.maxId, task.id)
 
     def end(self):
         today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         # Adjust idColumn
-        maxId = db.getSession().query(func.max(Task.id)).one()[0]
-        self.idColumn.width = max(2, len(str(maxId)))
+        self.idColumn.width = max(2, len(str(self.maxId)))
 
         # Adjust titleColumn
         self.titleColumn.width = self.maxTitleWidth
