@@ -105,6 +105,18 @@ pending renames and set the final names. From the SQL side it looks like this:
 
 This is less efficient, but it supports swaps.
 
+# Detecting local changes
+
+The synchronisation system relies on SQL Alchemy events to detect local
+changes: every time a database row is changed, SQL Alchemy emits an event which
+is caught by the SyncManager. If the change affects a serialized table, the
+corresponding changes are applied on the disk.
+
+This requires all database changes to go through SQL Alchemy ORM and means we
+cannot use direct database updates like `session.query(...).update(...)` or
+`session.query(...).delete()`, because those updates bypass SQL Alchemy event
+system.
+
 # Commands
 ## s_dump
 
