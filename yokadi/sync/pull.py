@@ -240,23 +240,21 @@ def enforceDbConstraints(session, dumpDir, pullUi):
     _enforceAliasConstraints(session, dumpDir, pullUi)
 
 
-def importSince(vcsImpl, commitId, pullUi=None):
+def importSince(session, vcsImpl, commitId, pullUi=None):
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(vcsImpl.srcDir)
     changes = vcsImpl.getChangesSince(commitId)
-    _importChanges(vcsImpl, changes, pullUi=pullUi)
+    _importChanges(session, vcsImpl, changes, pullUi=pullUi)
 
 
-def importAll(vcsImpl, pullUi=None):
+def importAll(session, vcsImpl, pullUi=None):
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(vcsImpl.srcDir)
     changes = VcsChanges()
     changes.added = {x for x in vcsImpl.getTrackedFiles() if x.endswith(".json")}
-    _importChanges(vcsImpl, changes, pullUi=pullUi)
+    _importChanges(session, vcsImpl, changes, pullUi=pullUi)
 
 
-def _importChanges(vcsImpl, changes, pullUi=None):
+def _importChanges(session, vcsImpl, changes, pullUi=None):
     checkIsValidDumpDir(vcsImpl)
-
-    session = db.getSession()
 
     enforceDbConstraints(session, vcsImpl.srcDir, pullUi)
     dbConstraintChanges = vcsImpl.getWorkTreeChanges()

@@ -337,7 +337,7 @@ class PullTestCase(YokadiTestCase):
     def testNothingToDo(self):
         with TemporaryDirectory() as tmpDir:
             createVersionFile(tmpDir)
-            syncManager = SyncManager(vcsImpl=StubVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=StubVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
     def testOnlyImportOurFiles(self):
@@ -393,7 +393,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
@@ -464,7 +464,7 @@ class PullTestCase(YokadiTestCase):
             # Do the pull
             vcsImpl = MyVcsImpl(tmpDir)
             pullUi = StubPullUi()
-            syncManager = SyncManager(vcsImpl=vcsImpl)
+            syncManager = SyncManager(session=self.session, vcsImpl=vcsImpl)
             self.assertRaises(MergeError, syncManager.pull, pullUi=pullUi)
 
             # Check changes. Since there was a conflict there should be no
@@ -493,7 +493,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             pullUi = MyPullUi()
-            syncManager = SyncManager(vcsImpl=fixture.vcsImpl)
+            syncManager = SyncManager(session=self.session, vcsImpl=fixture.vcsImpl)
             syncManager.pull(pullUi=pullUi)
 
             # Check changes. Conflict has been solved, there should be a merge.
@@ -519,7 +519,7 @@ class PullTestCase(YokadiTestCase):
                     dct[fixture.modRemotelyTaskPath].selectRemote()
 
             # Do the pull
-            syncManager = SyncManager(vcsImpl=fixture.vcsImpl)
+            syncManager = SyncManager(session=self.session, vcsImpl=fixture.vcsImpl)
             pullUi = MyPullUi()
             syncManager.pull(pullUi=pullUi)
 
@@ -550,7 +550,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             pullUi = StubPullUi()
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=pullUi)
 
             # Check changes
@@ -575,7 +575,7 @@ class PullTestCase(YokadiTestCase):
 
             # Do the pull
             pullUi = StubPullUi()
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=pullUi)
 
             # DB should be empty
@@ -658,7 +658,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # The project should have a new name, task1 should still be there
@@ -738,7 +738,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
@@ -804,7 +804,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
@@ -826,7 +826,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes
@@ -913,7 +913,7 @@ class PullTestCase(YokadiTestCase):
                     return changes
 
             # Do the pull
-            syncManager = SyncManager(vcsImpl=MyVcsImpl(tmpDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=MyVcsImpl(tmpDir))
             syncManager.pull(pullUi=StubPullUi())
 
             # Check changes

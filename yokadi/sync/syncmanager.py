@@ -32,6 +32,8 @@ class SyncManager(object):
         if session:
             self._dbReplicator = DbReplicator(self._dumpDir, session)
             self.session = session
+        else:
+            self.session = None
 
     @contextmanager
     def _mergeOperation(self):
@@ -80,9 +82,11 @@ class SyncManager(object):
         clearDump(self._dumpDir)
 
     def dump(self):
+        assert self.session
         dump(session=self.session, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
+        assert self.session
         self.vcsImpl.fetch()
 
         with self._mergeOperation():
@@ -90,18 +94,20 @@ class SyncManager(object):
             merge(self.vcsImpl, pullUi=pullUi)
             if self.hasChangesToImport():
                 pullUi.reportProgress("Importing changes")
-                importSince(self.vcsImpl, BEFORE_MERGE_TAG, pullUi=pullUi)
+                importSince(self.session, self.vcsImpl, BEFORE_MERGE_TAG, pullUi=pullUi)
             else:
                 pullUi.reportProgress("No remote changes")
 
     def importAll(self, pullUi):
+        assert self.session
         with self._mergeOperation():
-            importAll(self.vcsImpl, pullUi=pullUi)
+            importAll(self.session, self.vcsImpl, pullUi=pullUi)
 
     def push(self):
         self.vcsImpl.push()
 
     def checkDumpIntegrity(self):
+        assert self.session
         self._checkItems(PROJECTS_DIRNAME, db.Project)
         self._checkItems(TASKS_DIRNAME, db.Task)
         self._checkItems(ALIASES_DIRNAME, db.Alias)
