@@ -596,7 +596,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=pullUi)
 
@@ -685,7 +685,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             pullUi = StubPullUi()
             syncManager.pull(pullUi=pullUi)
@@ -775,7 +775,7 @@ class PullTestCase(YokadiTestCase):
 
             dumpDir = os.path.join(tmpDir, "dump")
             vcsImpl = GitVcsImpl(dumpDir)
-            syncManager = SyncManager(vcsImpl=vcsImpl)
+            syncManager = SyncManager(session=self.session, vcsImpl=vcsImpl)
             syncManager.initDumpRepository()
             syncManager.dump()
 
@@ -843,7 +843,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=pullUi)
 
@@ -873,7 +873,7 @@ class PullTestCase(YokadiTestCase):
 
             # Clone the remote repo
             localDir = os.path.join(tmpDir, "local")
-            syncManager = SyncManager(vcsImpl=GitVcsImpl(localDir))
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(localDir))
             syncManager.vcsImpl.clone(remoteDir)
             syncManager.pull(pullUi=StubPullUi())
 

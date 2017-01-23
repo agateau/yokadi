@@ -80,7 +80,7 @@ class SyncManager(object):
         clearDump(self._dumpDir)
 
     def dump(self):
-        dump(vcsImpl=self.vcsImpl)
+        dump(session=self.session, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
         self.vcsImpl.fetch()

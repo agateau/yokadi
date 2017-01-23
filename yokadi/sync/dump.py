@@ -130,12 +130,11 @@ def isDumpableObject(obj):
     return obj.__table__ in _DIRNAME_FOR_TABLE
 
 
-def dump(vcsImpl):
+def dump(session, vcsImpl):
     dumpDir = vcsImpl.srcDir
     assert os.path.exists(dumpDir), "dumpDir {} does not exist".format(dumpDir)
     checkIsValidDumpDir(vcsImpl)
 
-    session = db.getSession()
     for project in session.query(Project).all():
         dumpObject(project, dumpDir)
     for task in session.query(Task).all():
