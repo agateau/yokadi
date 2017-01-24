@@ -87,10 +87,10 @@ class SyncManager(object):
 
     def pull(self, pullUi):
         assert self.session
+        pullUi.reportProgress("Pulling remote changes")
         self.vcsImpl.fetch()
 
         with self._mergeOperation():
-            pullUi.reportProgress("Pulling remote changes")
             merge(self.vcsImpl, pullUi=pullUi)
             if self.hasChangesToImport():
                 pullUi.reportProgress("Importing changes")
