@@ -18,7 +18,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.types import TypeDecorator, VARCHAR
 
 from yokadi.core.recurrencerule import RecurrenceRule
@@ -27,7 +28,7 @@ from yokadi.core.yokadiexception import YokadiException
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 10
+DB_VERSION = 11
 DB_VERSION_KEY = "DB_VERSION"
 
 
@@ -96,6 +97,10 @@ class TaskKeyword(Base):
     taskId = Column("task_id", Integer, ForeignKey("task.id"), nullable=False)
     keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
     value = Column(Integer, default=None)
+
+    __table_args__ = (
+        UniqueConstraint("task_id", "keyword_id", name="task_keyword_uc"),
+    )
 
     def __repr__(self):
         return "<TaskKeyword task={} keyword={} value={}>".format(self.task, self.keyword, self.value)
@@ -202,6 +207,32 @@ class Task(Base):
         """Set recurrence and update the due date accordingly"""
         self.recurrence = rule
         self.dueDate = rule.getNext()
+
+    @staticmethod
+    def getNoteKeyword(session):
+        return session.query(Keyword).filter_by(name=NOTE_KEYWORD).one()
+
+    def toNote(self, session):
+        session.add(TaskKeyword(task=self, keyword=Task.getNoteKeyword(session), value=None))
+        try:
+            session.flush()
+        except IntegrityError:
+            # Already a note
+            session.rollback()
+            return
+
+    def toTask(self, session):
+        noteKeyword = Task.getNoteKeyword(session)
+        try:
+            taskKeyword = session.query(TaskKeyword).filter_by(task=self, keyword=noteKeyword).one()
+        except NoResultFound:
+            # Already a task
+            return
+        session.delete(taskKeyword)
+
+    def isNote(self, session):
+        noteKeyword = Task.getNoteKeyword(session)
+        return any((x.keyword == noteKeyword for x in self.taskKeywords))
 
     def __repr__(self):
         return "<Task id={} title={}>".format(self.id, self.title)

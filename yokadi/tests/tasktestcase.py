@@ -336,4 +336,30 @@ class TaskTestCase(YokadiTestCase):
         for bad_input in ("coucou", "+1s"):
             self.assertRaises(YokadiException, self.cmd.do_t_due, "1 %s" % bad_input)
 
+    def testToNote(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_t_add("x t1")
+
+        self.cmd.do_t_to_note(1)
+        task = self.session.query(Task).get(1)
+        self.assertTrue(task.isNote(self.session))
+
+        # Doing it twice should not fail
+        self.cmd.do_t_to_note(1)
+        task = self.session.query(Task).get(1)
+        self.assertTrue(task.isNote(self.session))
+
+    def testToTask(self):
+        tui.addInputAnswers("y")
+        self.cmd.do_n_add("x t1")
+
+        self.cmd.do_n_to_task(1)
+        task = self.session.query(Task).get(1)
+        self.assertFalse(task.isNote(self.session))
+
+        # Doing it twice should not fail
+        self.cmd.do_n_to_task(1)
+        task = self.session.query(Task).get(1)
+        self.assertFalse(task.isNote(self.session))
+
 # vi: ts=4 sw=4 et
