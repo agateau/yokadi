@@ -2,6 +2,7 @@ v1.x.y unreleased
 
 - New features:
     - A new command has been added: `p_merge`, to merge a project into another.
+    - It is now possible to turn a task into a note with `t_to_note` and a note into a task with `n_to_task`.
 
 v1.1.1 2016/11/11
 

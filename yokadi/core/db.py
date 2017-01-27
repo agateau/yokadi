@@ -205,6 +205,32 @@ class Task(Base):
         self.recurrence = rule
         self.dueDate = rule.getNext()
 
+    @staticmethod
+    def getNoteKeyword(session):
+        return session.query(Keyword).filter_by(name=NOTE_KEYWORD).one()
+
+    def toNote(self, session):
+        session.add(TaskKeyword(task=self, keyword=Task.getNoteKeyword(session), value=None))
+        try:
+            session.flush()
+        except IntegrityError:
+            # Already a note
+            session.rollback()
+            return
+
+    def toTask(self, session):
+        noteKeyword = Task.getNoteKeyword(session)
+        try:
+            taskKeyword = session.query(TaskKeyword).filter_by(task=self, keyword=noteKeyword).one()
+        except NoResultFound:
+            # Already a task
+            return
+        session.delete(taskKeyword)
+
+    def isNote(self, session):
+        noteKeyword = Task.getNoteKeyword(session)
+        return any((x.keyword == noteKeyword for x in self.taskKeywords))
+
     def __repr__(self):
         return "<Task id={} title={}>".format(self.id, self.title)
 

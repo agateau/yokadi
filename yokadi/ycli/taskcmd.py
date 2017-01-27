@@ -1032,4 +1032,18 @@ class TaskCmd(object):
                 prompt += " %s" % (" ".join([str(k) for k in keywordFilters]))
             self.prompt = "%s> " % prompt
 
+    def do_t_to_note(self, line):
+        """Turns a task into a note
+        """
+        task = self.getTaskFromId(line)
+        task.toNote(self.session)
+        self.session.commit()
+
+    def do_n_to_task(self, line):
+        """Turns a note into a task
+        """
+        task = self.getTaskFromId(line)
+        task.toTask(self.session)
+        self.session.commit()
+
 # vi: ts=4 sw=4 et
