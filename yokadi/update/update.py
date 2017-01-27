@@ -26,6 +26,7 @@ from yokadi.update import update6to7
 from yokadi.update import update7to8
 from yokadi.update import update8to9
 from yokadi.update import update9to10
+from yokadi.update import update10to11
 
 def getVersion(fileName):
     database = db.Database(fileName, createIfNeeded=False, updateMode=True)

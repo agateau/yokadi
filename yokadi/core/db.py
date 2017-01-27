@@ -18,7 +18,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, or_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, UniqueConstraint
 from sqlalchemy.types import TypeDecorator, VARCHAR
 
 from yokadi.core.recurrencerule import RecurrenceRule
@@ -27,7 +28,7 @@ from yokadi.core.yokadiexception import YokadiException
 # Yokadi database version needed for this code
 # If database config key DB_VERSION differs from this one a database migration
 # is required
-DB_VERSION = 10
+DB_VERSION = 11
 DB_VERSION_KEY = "DB_VERSION"
 
 
@@ -96,6 +97,10 @@ class TaskKeyword(Base):
     taskId = Column("task_id", Integer, ForeignKey("task.id"), nullable=False)
     keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
     value = Column(Integer, default=None)
+
+    __table_args__ = (
+        UniqueConstraint("task_id", "keyword_id", name="task_keyword_uc"),
+    )
 
     def __repr__(self):
         return "<TaskKeyword task={} keyword={} value={}>".format(self.task, self.keyword, self.value)
