@@ -104,7 +104,7 @@ def dumpObjectDict(dct, dumpDictDir):
     uuid = dct["uuid"]
     path = os.path.join(dumpDictDir, uuid + ".json")
     with open(path, "wt") as fp:
-        json.dump(dct, fp, indent=2, sort_keys=True)
+        jsonDump(dct, fp)
 
 
 def dumpObject(obj, dumpDir):
