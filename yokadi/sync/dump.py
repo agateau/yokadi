@@ -10,7 +10,6 @@ import shutil
 
 from collections import namedtuple
 
-from yokadi.core import db
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task, Project, Alias, TaskKeyword
@@ -82,7 +81,7 @@ def checkIsValidDumpDir(vcsImpl):
         dumpVersion = int(fp.read())
     if dumpVersion != VERSION:
         raise YokadiException("Cannot use a dump dir at version {}, expected version {}."
-            .format(dumpVersion, VERSION))
+                              .format(dumpVersion, VERSION))
 
 
 def clearDump(dstDir):
