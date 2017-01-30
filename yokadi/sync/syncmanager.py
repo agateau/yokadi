@@ -170,7 +170,7 @@ class SyncManager(object):
             try:
                 with open(taskPath) as fp:
                     dct = json.load(fp)
-                if dct["projectUuid"] not in projectUuids:
+                if dct["project_uuid"] not in projectUuids:
                     if first:
                         print("These tasks point to a non existing project")
                         first = False

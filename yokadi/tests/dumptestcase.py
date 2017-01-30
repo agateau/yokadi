@@ -69,7 +69,7 @@ class DumpTestCase(YokadiTestCase):
                 with open(taskFilePath) as f:
                     dct = json.load(f)
                 self.assertEqual(task.title, dct["title"])
-                self.assertEqual(task.project.uuid, dct["projectUuid"])
+                self.assertEqual(task.project.uuid, dct["project_uuid"])
                 if task.description:
                     self.assertEqual(task.description, dct["description"])
 
