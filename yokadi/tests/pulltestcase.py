@@ -15,7 +15,6 @@ from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
 from yokadi.sync.dump import createVersionFile, jsonDump, jsonDumps
 from yokadi.sync.pull import ChangeHandler
 from yokadi.sync.syncmanager import SyncManager
-from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsconflict import VcsConflict
@@ -23,6 +22,7 @@ from yokadi.sync.vcsimpl import VcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError
 from yokadi.sync.syncerrors import MergeError
 from yokadi.tests.yokaditestcase import YokadiTestCase
+from yokadi.tests.stubpullui import StubPullUi
 
 
 class StubVcsImpl(VcsImpl):
@@ -83,23 +83,6 @@ class StubVcsImpl(VcsImpl):
             self._tags.remove(tag)
         except KeyError:
             raise VcsImplError("tag {} does not exist".format(tag))
-
-
-class StubPullUi(PullUi):
-    def __init__(self):
-        self.renames = []
-
-    def resolveConflicts(self, conflictingObjects):
-        pass
-
-    def addRename(self, domain, old, new):
-        self.renames.append((domain, old, new))
-
-    def reportProgress(self, message):
-        pass
-
-    def reportError(self, message):
-        pass
 
 
 def createProjectFile(dirname, uuid, name, active=True):
