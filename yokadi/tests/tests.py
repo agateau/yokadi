@@ -8,12 +8,13 @@ Yokadi unit tests
 @license: GPL v3 or later
 """
 
-import unittest
+import cProfile
 import os
+import pstats
 import sys
+import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
-from yokadi.core import db
 
 try:
     import icalendar
@@ -45,9 +46,22 @@ from keywordfiltertestcase import KeywordFilterTestCase
 from recurrenceruletestcase import RecurrenceRuleTestCase
 
 
-def main():
-    unittest.main()
+def profileMain(profileFileName):
+    pr = cProfile.Profile()
+    pr.enable()
+    unittest.main(exit=False)
+    pr.disable()
+
+    with open(profileFileName, "w") as fp:
+        sortby = "cumulative"
+        ps = pstats.Stats(pr, stream=fp).sort_stats(sortby)
+        ps.print_stats()
+
 
 if __name__ == "__main__":
-    main()
+    profileFileName = os.environ.get("YOKADI_PROFILE")
+    if profileFileName:
+        profileMain(profileFileName)
+    else:
+        unittest.main()
 # vi: ts=4 sw=4 et
