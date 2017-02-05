@@ -13,7 +13,7 @@ from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core import dbs13n
 from yokadi.core.db import Alias, Project, Task
-from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, VERSION_FILENAME
 from yokadi.sync.conflictingobject import ConflictingObject
 from yokadi.sync.dump import dumpObjectDict, checkIsValidDumpDir
 from yokadi.sync.syncerrors import MergeError
@@ -301,3 +301,8 @@ def merge(vcsImpl, pullUi=None):
         vcsImpl.commitAll("Merged")
 
     assert vcsImpl.isWorkTreeClean(), "Git repository in {} is not clean".format(dumpDir)
+
+
+def getRemoteDumpVersion(vcsImpl):
+    content = vcsImpl.getFileContentAt(VERSION_FILENAME, "origin/master")
+    return int(content)

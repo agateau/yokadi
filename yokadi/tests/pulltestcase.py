@@ -11,9 +11,9 @@ from tempfile import TemporaryDirectory
 
 from yokadi.core import db, dbutils
 from yokadi.core.db import Task, Project
-from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, VERSION, VERSION_FILENAME
 from yokadi.sync.dump import createVersionFile, jsonDump, jsonDumps
-from yokadi.sync.pull import ChangeHandler
+from yokadi.sync.pull import ChangeHandler, getRemoteDumpVersion
 from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcschanges import VcsChanges
@@ -69,6 +69,12 @@ class StubVcsImpl(VcsImpl):
 
     def updateBranch(self, branch, commitId):
         pass
+
+    def getFileContentAt(self, filePath, commitId):
+        if filePath == VERSION_FILENAME and commitId == "origin/master":
+            return str(VERSION)
+        else:
+            return "lorem ipsum"
 
     def hasTag(self, tag):
         return tag in self._tags
@@ -902,3 +908,32 @@ class PullTestCase(YokadiTestCase):
             # Check changes
             dct = db.Alias.getAsDict(self.session)
             self.assertEqual(dct, dict(a1="a_two", a2="a_one"))
+
+    def testGetRemoteDumpVersion(self):
+        with TemporaryDirectory() as tmpDir:
+            # Create a remote repo
+            remoteDir = os.path.join(tmpDir, "remote")
+            remoteSyncManager = SyncManager(vcsImpl=GitVcsImpl(remoteDir))
+            remoteSyncManager.initDumpRepository()
+
+            # Clone it
+            localDir = os.path.join(tmpDir, "local")
+            syncManager = SyncManager(session=self.session, vcsImpl=GitVcsImpl(localDir))
+            syncManager.vcsImpl.clone(remoteDir)
+            syncManager.pull(pullUi=StubPullUi())
+
+            # Change version of remote repo
+            with open(os.path.join(remoteDir, VERSION_FILENAME), "w") as fp:
+                fp.write(str(VERSION + 1))
+            remoteSyncManager.vcsImpl.commitAll()
+
+            # Fetch changes, check local work tree is not affected
+            syncManager.vcsImpl.fetch()
+            with open(os.path.join(localDir, VERSION_FILENAME)) as fp:
+                localVersion = int(fp.read())
+            self.assertEqual(localVersion, VERSION)
+
+            # Check the version
+            remoteVersion = getRemoteDumpVersion(syncManager.vcsImpl)
+
+            self.assertEqual(remoteVersion, VERSION + 1)

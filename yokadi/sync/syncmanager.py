@@ -9,12 +9,12 @@ import os
 from contextlib import contextmanager
 
 from yokadi.core import db
-from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME
+from yokadi.sync import ALIASES_DIRNAME, PROJECTS_DIRNAME, TASKS_DIRNAME, VERSION
 from yokadi.sync.dump import clearDump, dump, createVersionFile
 from yokadi.sync.vcsimplerrors import NotFastForwardError, VcsImplError
 
 from yokadi.sync.dbreplicator import DbReplicator
-from yokadi.sync.pull import merge, importSince, importAll, findConflicts
+from yokadi.sync.pull import merge, importSince, importAll, findConflicts, getRemoteDumpVersion
 
 
 BEFORE_MERGE_TAG = "before-merge"
@@ -64,7 +64,8 @@ class SyncManager(object):
             self.vcsImpl.commitAll("s_sync")
 
         while True:
-            self.pull(pullUi=pullUi)
+            if not self.pull(pullUi=pullUi):
+                return False
             if not self.hasChangesToPush():
                 break
             pullUi.reportProgress("Pushing local changes")
@@ -89,6 +90,8 @@ class SyncManager(object):
         assert self.session
         pullUi.reportProgress("Pulling remote changes")
         self.vcsImpl.fetch()
+        if not self._checkDumpVersion(pullUi):
+            return False
 
         with self._mergeOperation():
             merge(self.vcsImpl, pullUi=pullUi)
@@ -180,3 +183,17 @@ class SyncManager(object):
     def hasChangesToPush(self):
         changes = self.vcsImpl.getChangesSince("origin/master")
         return changes.hasChanges()
+
+    def _checkDumpVersion(self, pullUi):
+        remoteDumpVersion = getRemoteDumpVersion(self.vcsImpl)
+        if remoteDumpVersion > VERSION:
+            msg = "Your dump version is {} but Yokadi wants version {}.\n".format(remoteDumpVersion, VERSION)
+            msg += "You need to update your version of Yokadi to be able to synchronize your database."
+            pullUi.reportError(msg)
+            return False
+        if remoteDumpVersion < VERSION:
+            msg = "Your dump version is {} but Yokadi wants version {}.\n".format(remoteDumpVersion, VERSION)
+            msg = "Please run Yokadi with the --update option to update your dump."
+            pullUi.reportError(msg)
+            return False
+        return True
