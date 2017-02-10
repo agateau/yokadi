@@ -8,10 +8,11 @@ import os
 from cmd import Cmd
 from collections import defaultdict
 
-from yokadi.core import basepaths
 from yokadi.core import db
+from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
+from yokadi.sync.dump import getDefaultDumpDir
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
@@ -131,23 +132,29 @@ class TextPullUi(PullUi):
 
 
 class SyncCmd(Cmd):
-    def __init__(self, dumpDir=None):
-        self.dumpDir = dumpDir or os.path.join(basepaths.getCacheDir(), 'db')
+    def __init__(self):
+        dumpDir = getDefaultDumpDir()
+
         # As soon as we create a SyncManager, it monitors SQL events and start
         # dumping objects. We don't want this to happen if the user has not
         # initialized sync, so do not create a SyncManager if the dump dir does
         # not exist.
-        if os.path.exists(self.dumpDir):
-            self._createSyncManager()
+        if os.path.exists(dumpDir):
+            self._createSyncManager(dumpDir)
         else:
-            self.syncManager = None
+            self._syncManager = None
+
+    @property
+    def syncManager(self):
+        self._checkSyncManager()
+        return self._syncManager
 
     def checkMergeFinished(self):
         """
         Check if any merge is running. If there is one, try to finish it.
         Returns True if no merge is running.
         """
-        if not self.syncManager:
+        if not self._syncManager:
             return True
 
         if not self.syncManager.isMergeInProgress():
@@ -185,10 +192,12 @@ class SyncCmd(Cmd):
 
     def do_s_init(self, line):
         """Create a dump directory."""
-        self._createSyncManager()
+        dumpDir = getDefaultDumpDir()
+        self._createSyncManager(dumpDir)
+
         self.syncManager.initDumpRepository()
         self.syncManager.dump()
-        print('Synchronization initialized, dump directory is in {}'.format(self.dumpDir))
+        print('Synchronization initialized, dump directory is in {}'.format(dumpDir))
 
     def do__s_dump(self, line):
         parser = self.parser__s_dump()
@@ -197,7 +206,8 @@ class SyncCmd(Cmd):
             self.syncManager.clearDump()
         self.syncManager.dump()
 
-        print("Database dumped in {}".format(self.dumpDir))
+        dumpDir = self.syncManager.vcsImpl.srcDir
+        print("Database dumped in {}".format(dumpDir))
 
     def parser__s_dump(self):
         parser = YokadiOptionParser()
@@ -241,6 +251,11 @@ class SyncCmd(Cmd):
             for old, new in renames:
                 print("- {} => {}".format(old, new))
 
-    def _createSyncManager(self):
-        vcsImpl = GitVcsImpl(self.dumpDir)
-        self.syncManager = SyncManager(session=db.getSession(), vcsImpl=vcsImpl)
+    def _checkSyncManager(self):
+        if self._syncManager is None:
+            raise YokadiException("This command is not available because the sync repository has"
+                                  " not been initialized. Use `s_init` or `s_clone` to do so.")
+
+    def _createSyncManager(self, dumpDir):
+        vcsImpl = GitVcsImpl(dumpDir)
+        self._syncManager = SyncManager(session=db.getSession(), vcsImpl=vcsImpl)

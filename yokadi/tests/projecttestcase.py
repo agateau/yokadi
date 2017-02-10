@@ -121,13 +121,14 @@ class ProjectTestCase(YokadiTestCase):
         self.session.commit()
 
         # Check dumps
+        dumpDir = dump.getDefaultDumpDir()
         for task in t1, t2:
-            path = os.path.join(self.cmd.dumpDir, dump.pathForObject(task))
+            path = os.path.join(dumpDir, dump.pathForObject(task))
             with open(path) as fp:
                 dct = json.load(fp)
             self.assertEqual(dct["projectUuid"], p2.uuid)
 
-        p1path = os.path.join(self.cmd.dumpDir, dump.pathForObject(p1))
+        p1path = os.path.join(dumpDir, dump.pathForObject(p1))
         self.assertFalse(os.path.exists(p1path), "dump file for porject p1 should be gone")
 
 
