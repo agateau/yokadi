@@ -147,4 +147,4 @@ def dump(session, vcsImpl):
 
 
 def getDefaultDumpDir():
-    return os.path.join(basepaths.getCacheDir(), 'db')
+    return os.path.join(basepaths.getDataDir(), 'db')

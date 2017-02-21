@@ -1,7 +1,7 @@
-# Configuration
+# Files
 
 - Default DB in ~/.local/share/yokadi/yokadi.db
-- Default DB dump in ~/.cache/yokadi/db/
+- Default DB dump in ~/.local/share/yokadi/db/
 - History in ~/.cache/yokadi/history
 
 # Design decisions
