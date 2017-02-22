@@ -87,6 +87,9 @@ class SyncManager(object):
         dump(session=self.session, vcsImpl=self.vcsImpl)
 
     def pull(self, pullUi):
+        """
+        Pull and import changes. Returns True in case of success.
+        """
         assert self.session
         pullUi.reportProgress("Pulling remote changes")
         self.vcsImpl.fetch()
@@ -100,6 +103,7 @@ class SyncManager(object):
                 importSince(self.session, self.vcsImpl, BEFORE_MERGE_TAG, pullUi=pullUi)
             else:
                 pullUi.reportProgress("No remote changes")
+        return True
 
     def importAll(self, pullUi):
         assert self.session

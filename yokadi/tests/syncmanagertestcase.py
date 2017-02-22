@@ -9,6 +9,7 @@ from yokadi.sync.syncmanager import SyncManager
 from yokadi.sync.vcsimpl import VcsImpl
 from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.tests.stubpullui import StubPullUi
+from yokadi.tests.stubvcsimpl import StubVcsImpl
 
 
 class SyncManagerTestCase(YokadiTestCase):
@@ -40,3 +41,8 @@ class SyncManagerTestCase(YokadiTestCase):
 
         vcsImpl.fakeVersion = VERSION
         self.assertTrue(syncManager._checkDumpVersion(pullUi=StubPullUi()))
+
+    def testPullReturnsTrue(self):
+        syncManager = SyncManager(session=self.session, vcsImpl=StubVcsImpl())
+        ok = syncManager.pull(pullUi=StubPullUi())
+        self.assertTrue(ok)
