@@ -195,19 +195,19 @@ def main():
     parser = ArgumentParser()
 
     parser.add_argument("-d", "--db", dest="filename",
-                      help="TODO database (default: %s)" % basepaths.getDbPath(), metavar="FILE")
+                        help="TODO database (default: %s)" % basepaths.getDbPath(), metavar="FILE")
 
     parser.add_argument("-c", "--create-only",
-                      dest="createOnly", default=False, action="store_true",
-                      help="Just create an empty database")
+                        dest="createOnly", default=False, action="store_true",
+                        help="Just create an empty database")
 
     parser.add_argument("-u", "--update",
-                      dest="update", action="store_true",
-                      help="Update database to the latest version")
+                        dest="update", action="store_true",
+                        help="Update database to the latest version")
 
     parser.add_argument("-v", "--version",
-                      dest="version", action="store_true",
-                      help="Display Yokadi current version")
+                        dest="version", action="store_true",
+                        help="Display Yokadi current version")
 
     parser.add_argument('cmd', nargs='*')
 
