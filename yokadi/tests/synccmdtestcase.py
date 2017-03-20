@@ -13,7 +13,6 @@ from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.sync import TASKS_DIRNAME
-from yokadi.sync.dump import getDefaultDumpDir
 from yokadi.ycli.synccmd import SyncCmd, TextPullUi
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
@@ -46,16 +45,17 @@ class SyncCmdTestCase(YokadiTestCase):
     def testNothingIsDumpedIfNotInitialized(self):
         dbutils.addTask("x", "t1", interactive=False)
         self.session.commit()
-        dumpDir = getDefaultDumpDir()
-        self.assertFalse(os.path.exists(dumpDir))
+        cmd = SyncCmd()
+        self.assertFalse(os.path.exists(cmd._dumpDir))
 
     def testTaskIsDumpedIfInitialized(self):
-        dumpDir = getDefaultDumpDir()
+        dumpDir = SyncCmd()._dumpDir
+
         os.makedirs(dumpDir)
 
         # Create cmd *after* creating the dump dir to simulate starting Yokadi
         # with an existing dump dir
-        cmd = SyncCmd()  # noqa
+        cmd = SyncCmd(dumpDir=dumpDir)  # noqa
 
         t1 = dbutils.addTask("x", "t1", interactive=False)
         self.session.commit()
@@ -65,9 +65,9 @@ class SyncCmdTestCase(YokadiTestCase):
     def testTaskIsDumpedIfInitializedLater(self):
         t1 = dbutils.addTask("x", "t1", interactive=False)
         self.session.commit()
-        dumpDir = getDefaultDumpDir()
 
         cmd = SyncCmd()
+        dumpDir = cmd._dumpDir
         cmd.do_s_init("")
         # t1 should be dumped by s_init
         path = os.path.join(dumpDir, TASKS_DIRNAME, t1.uuid + ".json")

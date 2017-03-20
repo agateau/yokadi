@@ -56,14 +56,18 @@ from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
 
 # TODO: move YokadiCmd to a separate module in ycli package
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd):
-    def __init__(self):
+    def __init__(self, dataDir=None):
+        if dataDir is None:
+            # Fallback is useful for unittests
+            dataDir = basepaths.getDataDir()
+        dumpDir = os.path.join(dataDir, "db")
         Cmd.__init__(self)
         TaskCmd.__init__(self)
         ProjectCmd.__init__(self)
         KeywordCmd.__init__(self)
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
-        SyncCmd.__init__(self)
+        SyncCmd.__init__(self, dumpDir=dumpDir)
         self.prompt = "yokadi> "
         self.historyPath = basepaths.getHistoryPath()
         self.loadHistory()
@@ -199,12 +203,49 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         return sorted(commandNames + aliasNames)
 
 
+def processPathArgs(args):
+    """
+    Process --datadir and --db arguments. Returns a tuple (dataDir, dbPath).
+
+    Only create `datadir and the parent of `db` if they were not explicitly
+    passed as arguments. This avoids silently creating dirs if the user made a
+    typo in the paths, while still making the app easy to use when using
+    default paths.
+    """
+    if args.dataDir:
+        if not os.path.isdir(args.dataDir):
+            tui.error("Directory '{}' does not exist".format(dataDir))
+            sys.exit(1)
+        dataDir = args.dataDir
+    else:
+        dataDir = basepaths.getDataDir()
+        os.makedirs(dataDir, exist_ok=True)
+
+    # If we reach this point, dataDir is a valid directory
+
+    if args.dbPath:
+        dbDir = os.path.dirname(args.dbPath)
+        if not os.path.isdir(dbDir):
+            tui.error("Directory '{}' does not exist".format(dbDir))
+            sys.exit(1)
+        dbPath = args.dbPath
+    else:
+        dbPath = os.path.join(dataDir, basepaths.DB_NAME)
+
+    return dataDir, dbPath
+
+
 def main():
     locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
     parser = ArgumentParser()
 
-    parser.add_argument("-d", "--db", dest="filename",
-                        help="TODO database (default: %s)" % basepaths.getDbPath(), metavar="FILE")
+    parser.add_argument("--datadir", dest="dataDir",
+                        help="Database dir (default: %s)" % basepaths.getDataDir(),
+                        metavar="DATADIR")
+
+    parser.add_argument("-d", "--db", dest="dbPath",
+                        help="TODO database (default: %s)" % os.path.join("$DATADIR", basepaths.DB_NAME),
+                        metavar="FILE")
 
     parser.add_argument("-c", "--create-only",
                         dest="createOnly", default=False, action="store_true",
@@ -233,15 +274,13 @@ def main():
         print(exc)
         return 1
 
-    if not args.filename:
-        args.filename = basepaths.getDbPath()
-        fileutils.createParentDirs(args.filename)
+    dataDir, dbPath = processPathArgs(args)
 
     if args.update:
-        return update.update(args.filename)
+        return update.update(dbPath)
 
     try:
-        db.connectDatabase(args.filename)
+        db.connectDatabase(dbPath)
     except db.DbUserException as exc:
         print(exc)
         return 1
@@ -250,7 +289,7 @@ def main():
         return 0
     db.setDefaultConfig()  # Set default config parameters
 
-    cmd = YokadiCmd()
+    cmd = YokadiCmd(dataDir=dataDir)
 
     try:
         if len(args.cmd) > 0:

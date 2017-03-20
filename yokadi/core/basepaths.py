@@ -19,6 +19,8 @@ from yokadi.core import fileutils
 
 _WINDOWS = os.name == "nt"
 
+DB_NAME = "yokadi.db"
+
 
 class MigrationException(Exception):
     pass
@@ -76,7 +78,7 @@ def getDbPath():
     path = os.getenv("YOKADI_DB")
     if path:
         return path
-    return os.path.join(getDataDir(), "yokadi.db")
+    return os.path.join(getDataDir(), DB_NAME)
 
 
 def _getOldHistoryPath():

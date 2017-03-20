@@ -121,7 +121,7 @@ class ProjectTestCase(YokadiTestCase):
         self.session.commit()
 
         # Check dumps
-        dumpDir = dump.getDefaultDumpDir()
+        dumpDir = self.cmd._dumpDir
         for task in t1, t2:
             path = os.path.join(dumpDir, dump.pathForObject(task))
             with open(path) as fp:

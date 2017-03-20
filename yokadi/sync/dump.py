@@ -10,7 +10,6 @@ import shutil
 
 from collections import namedtuple
 
-from yokadi.core import basepaths
 from yokadi.core import dbs13n
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.db import Task, Project, Alias, TaskKeyword
@@ -144,7 +143,3 @@ def dump(session, vcsImpl):
 
     if not vcsImpl.isWorkTreeClean():
         vcsImpl.commitAll("Dumped")
-
-
-def getDefaultDumpDir():
-    return os.path.join(basepaths.getDataDir(), 'db')

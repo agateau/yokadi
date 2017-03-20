@@ -8,11 +8,11 @@ import os
 from cmd import Cmd
 from collections import defaultdict
 
+from yokadi.core import basepaths
 from yokadi.core import db
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.core.yokadioptionparser import YokadiOptionParser
 from yokadi.sync.conflictingobject import BothModifiedConflictingObject
-from yokadi.sync.dump import getDefaultDumpDir
 from yokadi.sync.pullui import PullUi
 from yokadi.sync.gitvcsimpl import GitVcsImpl
 from yokadi.sync.vcsimplerrors import VcsImplError, NotFastForwardError
@@ -132,15 +132,15 @@ class TextPullUi(PullUi):
 
 
 class SyncCmd(Cmd):
-    def __init__(self):
-        dumpDir = getDefaultDumpDir()
+    def __init__(self, dumpDir=None):
+        self._dumpDir = dumpDir or os.path.join(basepaths.getDataDir(), "db")
 
         # As soon as we create a SyncManager, it monitors SQL events and start
         # dumping objects. We don't want this to happen if the user has not
         # initialized sync, so do not create a SyncManager if the dump dir does
         # not exist.
-        if os.path.exists(dumpDir):
-            self._createSyncManager(dumpDir)
+        if os.path.exists(self._dumpDir):
+            self._createSyncManager()
         else:
             self._syncManager = None
 
@@ -192,12 +192,11 @@ class SyncCmd(Cmd):
 
     def do_s_init(self, line):
         """Create a dump directory."""
-        dumpDir = getDefaultDumpDir()
-        self._createSyncManager(dumpDir)
+        self._createSyncManager()
 
         self.syncManager.initDumpRepository()
         self.syncManager.dump()
-        print('Synchronization initialized, dump directory is in {}'.format(dumpDir))
+        print('Synchronization initialized, dump directory is in {}'.format(self._dumpDir))
 
     def do__s_dump(self, line):
         parser = self.parser__s_dump()
@@ -256,6 +255,6 @@ class SyncCmd(Cmd):
             raise YokadiException("This command is not available because the sync repository has"
                                   " not been initialized. Use `s_init` or `s_clone` to do so.")
 
-    def _createSyncManager(self, dumpDir):
-        vcsImpl = GitVcsImpl(dumpDir)
+    def _createSyncManager(self):
+        vcsImpl = GitVcsImpl(self._dumpDir)
         self._syncManager = SyncManager(session=db.getSession(), vcsImpl=vcsImpl)
