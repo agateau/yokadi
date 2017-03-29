@@ -26,7 +26,4 @@ shift
 export XDG_CACHE_HOME=$root_dir/cache
 mkdir -p "$XDG_CACHE_HOME"
 
-export XDG_DATA_HOME=$root_dir/data
-mkdir -p "$XDG_DATA_HOME"
-
-"$yokadi_dir/bin/yokadi" "$@"
+"$yokadi_dir/bin/yokadi" --datadir "$root_dir" "$@"

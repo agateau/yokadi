@@ -228,7 +228,7 @@ Create remote repo
 
 Connect y1 to remote
 
-    cd ~/sandbox/y1/cache/yokadi/db
+    cd ~/sandbox/y1/db
     git remote add origin ~/sandbox/remote
     git push -u origin master
 
@@ -237,8 +237,8 @@ Connect y1 to remote
 
 Create a second Yokadi setup
 
-    mkdir -p ~/sandbox/y2/cache/yokadi
-    cd ~/sandbox/y2/cache/yokadi
+    mkdir -p ~/sandbox/y2
+    cd ~/sandbox/y2
     git clone ~/sandbox/remote db
 
     isolate-yokadi ~/sandbox/y2
