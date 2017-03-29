@@ -165,6 +165,13 @@ class GitVcsImpl(VcsImpl):
         output = self._run("diff", "--name-status", commitId + "..").decode("utf-8")
         return _parseStatusOutput(output)
 
+    def isUpToDate(self):
+        output = self._run("branch", "--contains", "origin/master").decode("utf-8")
+        for line in output.splitlines():
+            if line == '* master':
+                return True
+        return False
+
     def getWorkTreeChanges(self):
         output = self._run("status", "-s").decode("utf-8")
         return _parseStatusOutput(output)

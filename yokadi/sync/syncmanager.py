@@ -91,6 +91,7 @@ class SyncManager(object):
         Pull and import changes. Returns True in case of success.
         """
         assert self.session
+        assert self.vcsImpl.isWorkTreeClean()
         pullUi.reportProgress("Pulling remote changes")
         self.vcsImpl.fetch()
         if not self._checkDumpVersion(pullUi):
@@ -181,6 +182,7 @@ class SyncManager(object):
         return not self.vcsImpl.isWorkTreeClean()
 
     def hasChangesToImport(self):
+        assert self.vcsImpl.hasTag(BEFORE_MERGE_TAG)
         changes = self.vcsImpl.getChangesSince(BEFORE_MERGE_TAG)
         return changes.hasChanges()
 
@@ -191,13 +193,20 @@ class SyncManager(object):
     def _checkDumpVersion(self, pullUi):
         remoteDumpVersion = getRemoteDumpVersion(self.vcsImpl)
         if remoteDumpVersion > VERSION:
-            msg = "Your dump version is {} but Yokadi wants version {}.\n".format(remoteDumpVersion, VERSION)
-            msg += "You need to update your version of Yokadi to be able to synchronize your database."
+            msg = "Remote dump version is {remote} but Yokadi expects version {local}.\n" \
+                "You need to update your version of Yokadi to be able to synchronize your database." \
+                .format(remote=remoteDumpVersion, local=VERSION)
             pullUi.reportError(msg)
             return False
-        if remoteDumpVersion < VERSION:
-            msg = "Your dump version is {} but Yokadi wants version {}.\n".format(remoteDumpVersion, VERSION)
-            msg = "Please run Yokadi with the --update option to update your dump."
+
+        if remoteDumpVersion < VERSION and not self.vcsImpl.isUpToDate():
+            msg = "Remote dump version is {remote} but Yokadi expects version {local}.\n" \
+                "The remote dump has changes at version {remote} which have not been imported in your local Yokadi." \
+                " Your local Yokadi cannot import changes from this remote dump version. You need to update the" \
+                " version of Yokadi which made these changes and sync them again." \
+                .format(remote=remoteDumpVersion, local=VERSION)
             pullUi.reportError(msg)
             return False
+        # Note: if remoteDumpVersion is less than VERSION but remote has no changes, we allow the sync: this is how
+        # sync repo version updates are pushed.
         return True

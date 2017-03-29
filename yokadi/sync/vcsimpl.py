@@ -104,6 +104,13 @@ class VcsImpl(object):
         """
         raise NotImplementedError()
 
+    def isUpToDate(self):
+        """
+        Returns True if the current branch is up to date with the branch on the
+        remote server.
+        """
+        raise NotImplementedError()
+
     def updateBranch(self, branchName, commitId):
         """
         Makes the branch `branchName` point to `commitId`

@@ -578,3 +578,33 @@ class GitVcsImplTestCase(YokadiTestCase):
 
             touch(repoDir, "foo")
             self.assertRaises(VcsImplError, impl.deleteTag, "t1")
+
+    def testIsUpToDate(self):
+        with TemporaryDirectory() as tmpDir:
+            srcRepoDir = createGitRepository(tmpDir, "src")
+            remoteRepoDir = createBareGitRepository(tmpDir, "remote", srcRepoDir)
+
+            # We clone remote repo
+            ourRepoDir = join(tmpDir, "our")
+            impl = GitVcsImpl(ourRepoDir)
+            impl.clone(remoteRepoDir)
+
+            self.assertTrue(impl.isUpToDate())
+
+            # Add a commit => we should still be up to date
+            touch(ourRepoDir, "we-were-here")
+            impl.commitAll()
+            self.assertTrue(impl.isUpToDate())
+
+            # Bob clones remote repo and modifies it
+            bobRepoDir = join(tmpDir, "bob")
+            bobImpl = GitVcsImpl(bobRepoDir)
+            bobImpl.clone(remoteRepoDir)
+
+            touch(bobRepoDir, "bob-was-here")
+            bobImpl.commitAll()
+            bobImpl.push()
+
+            # We fetch => we are not up to date anymore
+            impl.fetch()
+            self.assertFalse(impl.isUpToDate())

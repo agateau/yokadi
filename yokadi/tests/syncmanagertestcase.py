@@ -6,6 +6,7 @@ Test cases for the SyncManager class
 from yokadi.core import db
 from yokadi.sync import VERSION
 from yokadi.sync.syncmanager import SyncManager
+from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsimpl import VcsImpl
 from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.tests.stubpullui import StubPullUi
@@ -23,6 +24,7 @@ class SyncManagerTestCase(YokadiTestCase):
         class MyVcsImpl(VcsImpl):
             def __init__(self):
                 self.fakeVersion = 0
+                self.fakeUpToDate = True
 
             def srcDir(self):
                 return ""
@@ -30,15 +32,28 @@ class SyncManagerTestCase(YokadiTestCase):
             def getFileContentAt(self, filePath, commitId):
                 return str(self.fakeVersion)
 
+            def isUpToDate(self):
+                return self.fakeUpToDate
+
         vcsImpl = MyVcsImpl()
         syncManager = SyncManager(vcsImpl=vcsImpl)
 
-        vcsImpl.fakeVersion = VERSION - 1
-        self.assertFalse(syncManager._checkDumpVersion(pullUi=StubPullUi()))
-
+        # Remote dump is newer
         vcsImpl.fakeVersion = VERSION + 1
         self.assertFalse(syncManager._checkDumpVersion(pullUi=StubPullUi()))
 
+        # Remote dump is older and has changes
+        vcsImpl.fakeVersion = VERSION - 1
+        vcsImpl.fakeUpToDate = False
+        self.assertFalse(syncManager._checkDumpVersion(pullUi=StubPullUi()))
+
+        # Remote dump is older but does not have changes.
+        # => the remote dump can be updated.
+        vcsImpl.fakeVersion = VERSION - 1
+        vcsImpl.fakeUpToDate = True
+        self.assertTrue(syncManager._checkDumpVersion(pullUi=StubPullUi()))
+
+        # Remote dump is the same version
         vcsImpl.fakeVersion = VERSION
         self.assertTrue(syncManager._checkDumpVersion(pullUi=StubPullUi()))
 
