@@ -162,7 +162,7 @@ class GitVcsImpl(VcsImpl):
         self._run("reset", "--hard", commitId)
 
     def getChangesSince(self, commitId):
-        output = self._run("diff", "--name-status", commitId + "..").decode("utf-8")
+        output = self._run("diff", "--no-renames", "--name-status", commitId + "..").decode("utf-8")
         return _parseStatusOutput(output)
 
     def isUpToDate(self):
