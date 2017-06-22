@@ -57,17 +57,13 @@ from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
 # TODO: move YokadiCmd to a separate module in ycli package
 class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd):
     def __init__(self, dataDir=None):
-        if dataDir is None:
-            # Fallback is useful for unittests
-            dataDir = basepaths.getDataDir()
-        dumpDir = os.path.join(dataDir, "db")
         Cmd.__init__(self)
         TaskCmd.__init__(self)
         ProjectCmd.__init__(self)
         KeywordCmd.__init__(self)
         AliasCmd.__init__(self)
         ConfCmd.__init__(self)
-        SyncCmd.__init__(self, dumpDir=dumpDir)
+        SyncCmd.__init__(self, basepaths.getSyncDumpDir(dataDir))
         self.prompt = "yokadi> "
         self.historyPath = basepaths.getHistoryPath()
         self.loadHistory()

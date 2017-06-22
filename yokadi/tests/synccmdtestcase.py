@@ -9,6 +9,7 @@ import textwrap
 from contextlib import redirect_stdout
 from io import StringIO
 
+from yokadi.core import basepaths
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core.yokadiexception import YokadiException
@@ -49,7 +50,7 @@ class SyncCmdTestCase(YokadiTestCase):
         self.assertFalse(os.path.exists(cmd._dumpDir))
 
     def testTaskIsDumpedIfInitialized(self):
-        dumpDir = SyncCmd()._dumpDir
+        dumpDir = basepaths.getSyncDumpDir()
 
         os.makedirs(dumpDir)
 

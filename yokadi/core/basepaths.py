@@ -67,6 +67,12 @@ def getDataDir():
     return value
 
 
+def getSyncDumpDir(dataDir=None):
+    if dataDir is None:
+        dataDir = getDataDir()
+    return os.path.join(dataDir, "db")
+
+
 def getHistoryPath():
     path = os.getenv("YOKADI_HISTORY")
     if path:
