@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from argparse import ArgumentParser
-import imp
 
 from yokadi.core import fileutils
 
@@ -28,11 +27,10 @@ except ImportError:
 
 from yokadi.core.daemon import Daemon
 from yokadi.core import basepaths
-from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
 from yokadi.core import db
-from yokadi.core.db import Config, Project, Task, getConfigKey
+from yokadi.core.db import Project, Task, getConfigKey
 
 
 # Daemon polling delay (in seconds)
