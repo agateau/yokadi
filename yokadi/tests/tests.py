@@ -43,6 +43,7 @@ from massedittestcase import MassEditTestCase
 from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase
 from keywordfiltertestcase import KeywordFilterTestCase
 from recurrenceruletestcase import RecurrenceRuleTestCase
+from argstestcase import ArgsTestCase
 
 
 def main():

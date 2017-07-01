@@ -26,29 +26,29 @@ class BasePathsUnixTestCase(YokadiTestCase):
 
     def testMigrateOldDb(self):
         oldDb = Path(self.testHomeDir) / '.yokadi.db'
-        newDb = Path(basepaths.getDbPath())
+        newDb = Path(basepaths.getDbPath(basepaths.getDataDir()))
 
         oldDb.touch()
 
-        basepaths.migrateOldDb()
+        basepaths.migrateOldDb(str(newDb))
         self.assertFalse(oldDb.exists())
         self.assertTrue(newDb.exists())
 
     def testMigrateNothingToDo(self):
-        newDb = Path(basepaths.getDbPath())
-        basepaths.migrateOldDb()
+        newDb = Path(basepaths.getDbPath(basepaths.getDataDir()))
+        basepaths.migrateOldDb(str(newDb))
         basepaths.migrateOldHistory()
         self.assertFalse(newDb.exists())
 
     def testMigrateOldDbFails(self):
         oldDb = Path(self.testHomeDir) / '.yokadi.db'
-        newDb = Path(basepaths.getDbPath())
+        newDb = Path(basepaths.getDbPath(basepaths.getDataDir()))
 
         oldDb.touch()
         newDb.parent.mkdir(parents=True)
         newDb.touch()
 
-        self.assertRaises(basepaths.MigrationException, basepaths.migrateOldDb)
+        self.assertRaises(basepaths.MigrationException, basepaths.migrateOldDb, str(newDb))
 
     def testMigrateOldHistory(self):
         old = Path(self.testHomeDir) / '.yokadi_history'
@@ -84,7 +84,7 @@ class BasePathsUnixTestCase(YokadiTestCase):
     def testDbEnvVar(self):
         path = "foo"
         os.environ["YOKADI_DB"] = path
-        self.assertEqual(basepaths.getDbPath(), path)
+        self.assertEqual(basepaths.getDbPath(basepaths.getDataDir()), path)
 
 
 class BasePathsWindowsTestCase(YokadiTestCase):

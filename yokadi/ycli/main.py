@@ -190,12 +190,49 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         return names
 
 
-def main():
-    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+def processDataDirArg(dataDir):
+    if dataDir:
+        dataDir = os.path.abspath(dataDir)
+        if not os.path.isdir(dataDir):
+            tui.error("Directory '{}' does not exist".format(dataDir))
+            sys.exit(1)
+    else:
+        # Use default dataDir, create it if necessary
+        dataDir = basepaths.getDataDir()
+        os.makedirs(dataDir, exist_ok=True)
+    return dataDir
+
+
+def processDbPathArg(dbPath, dataDir):
+    if not dbPath:
+        return basepaths.getDbPath(dataDir)
+
+    dbPath = os.path.abspath(dbPath)
+    dbDir = os.path.dirname(dbPath)
+    tui.warning("--db option is deprecated and will be removed in the next version, use --datadir instead")
+    if not os.path.isdir(dbDir):
+        tui.error("Directory '{}' does not exist".format(dbDir))
+        sys.exit(1)
+    return dbPath
+
+
+def warnYokadiDbEnvVariable():
+    if os.getenv("YOKADI_DB"):
+        tui.warning("The YOKADI_DB environment variable is deprecated and will be removed in the next version,"
+                    " use the --datadir command-line option instead")
+
+
+def processArgs(argv):
     parser = ArgumentParser()
 
-    parser.add_argument("-d", "--db", dest="filename",
-                        help="TODO database (default: %s)" % basepaths.getDbPath(), metavar="FILE")
+    parser.add_argument("--datadir", dest="dataDir",
+                        help="Database dir (default: %s)" % basepaths.getDataDir(),
+                        metavar="DATADIR")
+
+    parser.add_argument("-d", "--db", dest="dbPath",
+                        help="TODO database (default: %s). This option is deprecated and will be removed in the next"
+                             " version of Yokadi. Use --datadir instead." % os.path.join("$DATADIR", basepaths.DB_NAME),
+                        metavar="FILE")
 
     parser.add_argument("-c", "--create-only",
                         dest="createOnly", default=False, action="store_true",
@@ -211,7 +248,21 @@ def main():
 
     parser.add_argument('cmd', nargs='*')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
+    if args.dataDir and args.dbPath:
+        parser.error("You can't use both --datadir and --db options")
+
+    warnYokadiDbEnvVariable()
+    dataDir = processDataDirArg(args.dataDir)
+    dbPath = processDbPathArg(args.dbPath, dataDir)
+
+    return args, dataDir, dbPath
+
+
+def main():
+    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+    args, dataDir, dbPath = processArgs(sys.argv[1:])
 
     if args.version:
         print("Yokadi - %s" % yokadi.__version__)
@@ -219,20 +270,16 @@ def main():
 
     basepaths.migrateOldHistory()
     try:
-        basepaths.migrateOldDb()
+        basepaths.migrateOldDb(dbPath)
     except basepaths.MigrationException as exc:
         print(exc)
         return 1
 
-    if not args.filename:
-        args.filename = basepaths.getDbPath()
-        fileutils.createParentDirs(args.filename)
-
     if args.update:
-        return update.update(args.filename)
+        return update.update(dbPath)
 
     try:
-        db.connectDatabase(args.filename)
+        db.connectDatabase(dbPath)
     except db.DbUserException as exc:
         print(exc)
         return 1
