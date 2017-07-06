@@ -38,12 +38,12 @@ except ImportError:
 import yokadi
 
 from yokadi.core import db
-from yokadi.ycli import tui
 from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.update import update
 
+from yokadi.ycli import tui, commonargs
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
 from yokadi.ycli.keywordcmd import KeywordCmd
@@ -190,49 +190,9 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         return names
 
 
-def processDataDirArg(dataDir):
-    if dataDir:
-        dataDir = os.path.abspath(dataDir)
-        if not os.path.isdir(dataDir):
-            tui.error("Directory '{}' does not exist".format(dataDir))
-            sys.exit(1)
-    else:
-        # Use default dataDir, create it if necessary
-        dataDir = basepaths.getDataDir()
-        os.makedirs(dataDir, exist_ok=True)
-    return dataDir
-
-
-def processDbPathArg(dbPath, dataDir):
-    if not dbPath:
-        return basepaths.getDbPath(dataDir)
-
-    dbPath = os.path.abspath(dbPath)
-    dbDir = os.path.dirname(dbPath)
-    tui.warning("--db option is deprecated and will be removed in the next version, use --datadir instead")
-    if not os.path.isdir(dbDir):
-        tui.error("Directory '{}' does not exist".format(dbDir))
-        sys.exit(1)
-    return dbPath
-
-
-def warnYokadiDbEnvVariable():
-    if os.getenv("YOKADI_DB"):
-        tui.warning("The YOKADI_DB environment variable is deprecated and will be removed in the next version,"
-                    " use the --datadir command-line option instead")
-
-
-def processArgs(argv):
+def createArgumentParser():
     parser = ArgumentParser()
-
-    parser.add_argument("--datadir", dest="dataDir",
-                        help="Database dir (default: %s)" % basepaths.getDataDir(),
-                        metavar="DATADIR")
-
-    parser.add_argument("-d", "--db", dest="dbPath",
-                        help="TODO database (default: %s). This option is deprecated and will be removed in the next"
-                             " version of Yokadi. Use --datadir instead." % os.path.join("$DATADIR", basepaths.DB_NAME),
-                        metavar="FILE")
+    commonargs.addArgs(parser)
 
     parser.add_argument("-c", "--create-only",
                         dest="createOnly", default=False, action="store_true",
@@ -242,31 +202,15 @@ def processArgs(argv):
                         dest="update", action="store_true",
                         help="Update database to the latest version")
 
-    parser.add_argument("-v", "--version",
-                        dest="version", action="store_true",
-                        help="Display Yokadi current version")
-
     parser.add_argument('cmd', nargs='*')
-
-    args = parser.parse_args(argv)
-
-    if args.dataDir and args.dbPath:
-        parser.error("You can't use both --datadir and --db options")
-
-    warnYokadiDbEnvVariable()
-    dataDir = processDataDirArg(args.dataDir)
-    dbPath = processDbPathArg(args.dbPath, dataDir)
-
-    return args, dataDir, dbPath
+    return parser
 
 
 def main():
     locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
-    args, dataDir, dbPath = processArgs(sys.argv[1:])
-
-    if args.version:
-        print("Yokadi - %s" % yokadi.__version__)
-        return 0
+    parser = createArgumentParser()
+    args = parser.parse_args()
+    dataDir, dbPath = commonargs.processArgs(args)
 
     basepaths.migrateOldHistory()
     try:

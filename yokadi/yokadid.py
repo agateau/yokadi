@@ -31,6 +31,7 @@ from yokadi.yical.yical import YokadiIcalServer
 
 from yokadi.core import db
 from yokadi.core.db import Project, Task, getConfigKey
+from yokadi.ycli import commonargs
 
 
 # Daemon polling delay (in seconds)
@@ -119,8 +120,7 @@ def killYokadid(pidFile):
 def parseOptions(defaultPidFile, defaultLogFile):
     parser = ArgumentParser()
 
-    parser.add_argument("-d", "--db", dest="filename",
-                      help="TODO database", metavar="FILE")
+    commonargs.addArgs(parser)
 
     parser.add_argument("-i", "--icalserver",
                       dest="icalserver", default=False, action="store_true",
@@ -159,17 +159,14 @@ def parseOptions(defaultPidFile, defaultLogFile):
 
 
 class YokadiDaemon(Daemon):
-    def __init__(self, options):
+    def __init__(self, dbPath, options):
         Daemon.__init__(self, options.pidFile, stdout=options.logFile, stderr=options.logFile)
+        self.dbPath = dbPath
         self.options = options
 
     def run(self):
-        filename = self.options.filename
-        if not filename:
-            filename = basepaths.getDbPath()
-            print("Using default database (%s)" % filename)
-
-        db.connectDatabase(filename, createIfNeeded=False)
+        db.connectDatabase(self.dbPath, createIfNeeded=False)
+        print("Using %s" % self.dbPath)
         session = db.getSession()
 
         # Basic tests :
@@ -202,6 +199,7 @@ def main():
     defaultPidFile = os.path.join(basepaths.getRuntimeDir(), "yokadid.pid")
     defaultLogFile = os.path.join(basepaths.getLogDir(), "yokadid.log")
     args = parseOptions(defaultPidFile, defaultLogFile)
+    _, dbPath = commonargs.processArgs(args)
 
     if args.kill:
         killYokadid(args.pidFile)
@@ -217,10 +215,10 @@ def main():
     signal(SIGHUP, sigHupHandler)
 
     if args.restart:
-        daemon = YokadiDaemon(args)
+        daemon = YokadiDaemon(dbPath, args)
         daemon.restart()
 
-    daemon = YokadiDaemon(args)
+    daemon = YokadiDaemon(dbPath, args)
     if args.foreground:
         daemon.run()
     else:

@@ -5,12 +5,19 @@ Command line argument test cases
 """
 import os
 
+from argparse import ArgumentParser
 from tempfile import TemporaryDirectory
 
 from yokadi.tests.yokaditestcase import YokadiTestCase
 
 from yokadi.core import basepaths
-from yokadi.ycli.main import processArgs
+from yokadi.ycli import commonargs
+
+
+def parseArgs(argv):
+    parser = ArgumentParser()
+    commonargs.addArgs(parser)
+    return parser.parse_args(argv)
 
 
 class ArgsTestCase(YokadiTestCase):
@@ -20,7 +27,8 @@ class ArgsTestCase(YokadiTestCase):
         self.defaultDbPath = basepaths.getDbPath(self.defaultDataDir)
 
     def testNoArguments(self):
-        _, dataDir, dbPath = processArgs([])
+        args = parseArgs([])
+        dataDir, dbPath = commonargs.processArgs(args)
         self.assertEqual(dataDir, self.defaultDataDir)
         self.assertEqual(dbPath, self.defaultDbPath)
 
@@ -29,43 +37,50 @@ class ArgsTestCase(YokadiTestCase):
 
     def testDataDir(self):
         with TemporaryDirectory(prefix="yokadi-tests-") as tmpDir:
-            _, dataDir, dbPath = processArgs(["--datadir", tmpDir])
+            args = parseArgs(["--datadir", tmpDir])
+            dataDir, dbPath = commonargs.processArgs(args)
             self.assertEqual(dataDir, tmpDir)
             self.assertEqual(dbPath, os.path.join(tmpDir, basepaths.DB_NAME))
 
     def testRelativeDataDir(self):
         with TemporaryDirectory(prefix="yokadi-tests-") as tmpDir:
             os.chdir(tmpDir)
-            _, dataDir, dbPath = processArgs(["--datadir", "."])
+            args = parseArgs(["--datadir", "."])
+            dataDir, dbPath = commonargs.processArgs(args)
             self.assertEqual(dataDir, tmpDir)
             self.assertEqual(dbPath, os.path.join(tmpDir, basepaths.DB_NAME))
 
     def testDataDirDoesNotExist(self):
-        self.assertRaises(SystemExit, processArgs, ["--datadir", "/does/not/exist"])
+        args = parseArgs(["--datadir", "/does/not/exist"])
+        self.assertRaises(SystemExit, commonargs.processArgs, args)
 
     def testCantUseBothDataDirAndDb(self):
-        self.assertRaises(SystemExit, processArgs, ["--datadir", "foo", "--db", "bar"])
+        self.assertRaises(SystemExit, parseArgs, ["--datadir", "foo", "--db", "bar"])
 
     def testDb(self):
         with TemporaryDirectory(prefix="yokadi-tests-") as tmpDir:
-            _, dataDir, dbPath = processArgs(["--db", os.path.join(tmpDir, "foo.db")])
+            args = parseArgs(["--db", os.path.join(tmpDir, "foo.db")])
+            dataDir, dbPath = commonargs.processArgs(args)
             self.assertEqual(dataDir, self.defaultDataDir)
             self.assertEqual(dbPath, os.path.join(tmpDir, "foo.db"))
 
     def testRelativeDb(self):
         with TemporaryDirectory(prefix="yokadi-tests-") as tmpDir:
             os.chdir(tmpDir)
-            _, dataDir, dbPath = processArgs(["--db", "foo.db"])
+            args = parseArgs(["--db", "foo.db"])
+            dataDir, dbPath = commonargs.processArgs(args)
             self.assertEqual(dataDir, self.defaultDataDir)
             self.assertEqual(dbPath, os.path.join(tmpDir, "foo.db"))
 
     def testDbDirDoesNotExist(self):
-        self.assertRaises(SystemExit, processArgs, ["--db", "/does/not/exist/foo.db"])
+        args = parseArgs(["--db", "/does/not/exist/foo.db"])
+        self.assertRaises(SystemExit, commonargs.processArgs, args)
 
     def testArgsOverrideEnvVar(self):
         with TemporaryDirectory(prefix="yokadi-tests-") as tmpDir:
             os.environ["YOKADI_DB"] = os.path.join(tmpDir, "env.db")
             os.chdir(tmpDir)
-            _, dataDir, dbPath = processArgs(["--db", "arg.db"])
+            args = parseArgs(["--db", "arg.db"])
+            dataDir, dbPath = commonargs.processArgs(args)
             self.assertEqual(dataDir, self.defaultDataDir)
             self.assertEqual(dbPath, os.path.join(tmpDir, "arg.db"))
