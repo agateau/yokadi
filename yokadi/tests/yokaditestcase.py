@@ -24,7 +24,9 @@ class YokadiTestCase(unittest.TestCase):
         os.environ["XDG_CACHE_HOME"] = ""
         os.environ["YOKADI_DB"] = ""
         os.environ["YOKADI_HISTORY"] = ""
+        self.__cwd = os.getcwd()
 
     def tearDown(self):
         shutil.rmtree(self.testHomeDir)
         self.__envSaver.restore()
+        os.chdir(self.__cwd)

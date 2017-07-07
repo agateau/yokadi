@@ -14,7 +14,6 @@ from datetime import datetime, timedelta
 from signal import SIGTERM, SIGHUP, signal
 from subprocess import Popen
 from argparse import ArgumentParser
-import imp
 
 from yokadi.core import fileutils
 
@@ -28,15 +27,16 @@ except ImportError:
 
 from yokadi.core.daemon import Daemon
 from yokadi.core import basepaths
-from yokadi.ycli import tui
 from yokadi.yical.yical import YokadiIcalServer
 
 from yokadi.core import db
-from yokadi.core.db import Config, Project, Task, getConfigKey
+from yokadi.core.db import Project, Task, getConfigKey
+from yokadi.ycli import commonargs
 
 
 # Daemon polling delay (in seconds)
-DELAY = 30
+PROCESS_INTERVAL = 30
+EVENTLOOP_INTERVAL = 1
 
 # Ical daemon default port
 DEFAULT_TCP_ICAL_PORT = 8000
@@ -73,8 +73,8 @@ def eventLoop():
     activeTaskFilter = [Task.status != "done",
                         Task.projectId == Project.id,
                         Project.active == True]
-    while event[0]:
-        now = datetime.today().replace(microsecond=0)
+
+    def process(now):
         delayTasks = session.query(Task).filter(Task.dueDate < now + delta,
                                                 Task.dueDate > now,
                                                 *activeTaskFilter)
@@ -82,7 +82,14 @@ def eventLoop():
                                               *activeTaskFilter)
         processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate, suspend)
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
-        time.sleep(DELAY)
+
+    nextProcessTime = datetime.today().replace(microsecond=0)
+    while event[0]:
+        now = datetime.today().replace(microsecond=0)
+        if now > nextProcessTime:
+            process(now)
+            nextProcessTime = now + timedelta(seconds=PROCESS_INTERVAL)
+        time.sleep(EVENTLOOP_INTERVAL)
 
 
 def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
@@ -121,8 +128,7 @@ def killYokadid(pidFile):
 def parseOptions(defaultPidFile, defaultLogFile):
     parser = ArgumentParser()
 
-    parser.add_argument("-d", "--db", dest="filename",
-                      help="TODO database", metavar="FILE")
+    commonargs.addArgs(parser)
 
     parser.add_argument("-i", "--icalserver",
                       dest="icalserver", default=False, action="store_true",
@@ -161,17 +167,14 @@ def parseOptions(defaultPidFile, defaultLogFile):
 
 
 class YokadiDaemon(Daemon):
-    def __init__(self, options):
+    def __init__(self, dbPath, options):
         Daemon.__init__(self, options.pidFile, stdout=options.logFile, stderr=options.logFile)
+        self.dbPath = dbPath
         self.options = options
 
     def run(self):
-        filename = self.options.filename
-        if not filename:
-            filename = basepaths.getDbPath()
-            print("Using default database (%s)" % filename)
-
-        db.connectDatabase(filename, createIfNeeded=False)
+        db.connectDatabase(self.dbPath, createIfNeeded=False)
+        print("Using %s" % self.dbPath)
         session = db.getSession()
 
         # Basic tests :
@@ -204,6 +207,7 @@ def main():
     defaultPidFile = os.path.join(basepaths.getRuntimeDir(), "yokadid.pid")
     defaultLogFile = os.path.join(basepaths.getLogDir(), "yokadid.log")
     args = parseOptions(defaultPidFile, defaultLogFile)
+    _, dbPath = commonargs.processArgs(args)
 
     if args.kill:
         killYokadid(args.pidFile)
@@ -219,10 +223,10 @@ def main():
     signal(SIGHUP, sigHupHandler)
 
     if args.restart:
-        daemon = YokadiDaemon(args)
+        daemon = YokadiDaemon(dbPath, args)
         daemon.restart()
 
-    daemon = YokadiDaemon(args)
+    daemon = YokadiDaemon(dbPath, args)
     if args.foreground:
         daemon.run()
     else:

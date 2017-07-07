@@ -38,12 +38,12 @@ except ImportError:
 import yokadi
 
 from yokadi.core import db
-from yokadi.ycli import tui
 from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.update import update
 
+from yokadi.ycli import tui, commonargs
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias, getAliasesStartingWith
 from yokadi.ycli.confcmd import ConfCmd
 from yokadi.ycli.keywordcmd import KeywordCmd
@@ -231,17 +231,9 @@ def processPathArgs(args):
     return dataDir, dbPath
 
 
-def main():
-    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+def createArgumentParser():
     parser = ArgumentParser()
-
-    parser.add_argument("--datadir", dest="dataDir",
-                        help="Database dir (default: %s)" % basepaths.getDataDir(),
-                        metavar="DATADIR")
-
-    parser.add_argument("-d", "--db", dest="dbPath",
-                        help="TODO database (default: %s)" % os.path.join("$DATADIR", basepaths.DB_NAME),
-                        metavar="FILE")
+    commonargs.addArgs(parser)
 
     parser.add_argument("-c", "--create-only",
                         dest="createOnly", default=False, action="store_true",
@@ -251,21 +243,19 @@ def main():
                         dest="update", action="store_true",
                         help="Update database to the latest version")
 
-    parser.add_argument("-v", "--version",
-                        dest="version", action="store_true",
-                        help="Display Yokadi current version")
-
     parser.add_argument('cmd', nargs='*')
+    return parser
 
+
+def main():
+    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+    parser = createArgumentParser()
     args = parser.parse_args()
-
-    if args.version:
-        print("Yokadi - %s" % yokadi.__version__)
-        return 0
+    dataDir, dbPath = commonargs.processArgs(args)
 
     basepaths.migrateOldHistory()
     try:
-        basepaths.migrateOldDb()
+        basepaths.migrateOldDb(dbPath)
     except basepaths.MigrationException as exc:
         print(exc)
         return 1

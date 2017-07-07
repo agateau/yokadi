@@ -285,7 +285,7 @@ next version of Yokadi.
 ## Database location
 
 By default, Yokadi creates a database in `$HOME/.local/share/yokadi/yokadi.db`,
-but you can specify an alternative location with the `--db` option.
+but you can specify an alternative directory with the `--datadir` option.
 
 A convenient way to start Yokadi is by creating an alias in your `.bashrc` file
 like this:
@@ -294,11 +294,6 @@ like this:
 
 The single letter `y` will start Yokadi with your favorite database from
 wherever you are.
-
-If you do not want to use the default database location, you can define
-the `YOKADI_DB` environment variable to point to your database:
-
-    export YOKADI_DB=$HOME/work/yokadi.db
 
 ## History location
 
