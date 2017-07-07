@@ -35,7 +35,8 @@ from yokadi.ycli import commonargs
 
 
 # Daemon polling delay (in seconds)
-DELAY = 30
+PROCESS_INTERVAL = 30
+EVENTLOOP_INTERVAL = 1
 
 # Ical daemon default port
 DEFAULT_TCP_ICAL_PORT = 8000
@@ -72,8 +73,8 @@ def eventLoop():
     activeTaskFilter = [Task.status != "done",
                         Task.projectId == Project.id,
                         Project.active == True]
-    while event[0]:
-        now = datetime.today().replace(microsecond=0)
+
+    def process(now):
         delayTasks = session.query(Task).filter(Task.dueDate < now + delta,
                                                 Task.dueDate > now,
                                                 *activeTaskFilter)
@@ -81,7 +82,14 @@ def eventLoop():
                                               *activeTaskFilter)
         processTasks(delayTasks, triggeredDelayTasks, cmdDelayTemplate, suspend)
         processTasks(dueTasks, triggeredDueTasks, cmdDueTemplate, suspend)
-        time.sleep(DELAY)
+
+    nextProcessTime = datetime.today().replace(microsecond=0)
+    while event[0]:
+        now = datetime.today().replace(microsecond=0)
+        if now > nextProcessTime:
+            process(now)
+            nextProcessTime = now + timedelta(seconds=PROCESS_INTERVAL)
+        time.sleep(EVENTLOOP_INTERVAL)
 
 
 def processTasks(tasks, triggeredTasks, cmdTemplate, suspend):
