@@ -15,7 +15,13 @@ import time
 from argparse import ArgumentParser
 from tempfile import TemporaryDirectory
 
+from yokadi.core import basepaths
 from yokadi.core import db
+from yokadi.sync import VERSION as DUMP_VERSION
+from yokadi.sync.gitvcsimpl import GitVcsImpl
+from yokadi.sync.dump import readVersionFile, createVersionFile
+from yokadi.sync.syncmanager import SyncManager
+
 from yokadi.update import updateutils
 from yokadi.update import update1to2
 from yokadi.update import update2to3
@@ -27,6 +33,15 @@ from yokadi.update import update7to8
 from yokadi.update import update8to9
 from yokadi.update import update9to10
 from yokadi.update import update10to11
+from yokadi.update import update11to12
+
+
+BEFORE_UPDATE_TAG = 'before-update'
+
+
+def err(message):
+    print("error: " + message, file=sys.stderr)
+
 
 def getVersion(fileName):
     database = db.Database(fileName, createIfNeeded=False, updateMode=True)
@@ -54,6 +69,32 @@ def importTable(dstCursor, srcCursor, table):
         dstCursor.executemany(insertSql, rows)
 
 
+def updateSyncDump(dbPath, dumpDir):
+    currentDumpVersion = readVersionFile(dumpDir)
+    if currentDumpVersion == DUMP_VERSION:
+        print('Sync dump does not need to be recreated')
+        return
+    assert currentDumpVersion < DUMP_VERSION, \
+        'current dump version is greater than the target dump. This should not happen!'
+
+    db.connectDatabase(dbPath)
+
+    print('Recreating sync dump')
+    vcsImpl = GitVcsImpl(dumpDir)
+    syncManager = SyncManager(session=db.getSession(), vcsImpl=vcsImpl)
+    vcsImpl.createTag(BEFORE_UPDATE_TAG)
+    try:
+        createVersionFile(dumpDir)
+        syncManager.clearDump()
+        syncManager.dump()
+    except:
+        err('An exception has occurred while recreating dump. Resetting dump.')
+        vcsImpl.resetTo(BEFORE_UPDATE_TAG)
+        raise
+    finally:
+        vcsImpl.deleteTag(BEFORE_UPDATE_TAG)
+
+
 def recreateDb(workPath, destPath):
     assert os.path.exists(workPath)
 
@@ -71,19 +112,19 @@ def recreateDb(workPath, destPath):
     dstConn.commit()
 
 
-def err(message):
-    print("error: " + message, file=sys.stderr)
-
-
-def update(dbPath, newDbPath=None, inplace=True):
+def update(dataDir, newDataDir=None, inplace=True):
     # Check paths
+    dbPath = os.path.join(dataDir, basepaths.DB_NAME)
     if not os.path.exists(dbPath):
         err("'{}' does not exist.".format(dbPath))
         return 1
 
-    if not inplace and os.path.exists(newDbPath):
-        err("'{}' already exists.".format(newDbPath))
-        return 1
+    if not inplace:
+        if os.path.exists(newDataDir):
+            err("'{}' already exists.".format(newDataDir))
+            return 1
+        else:
+            os.mkdir(newDataDir)
 
     # Check version
     version = getVersion(dbPath)
@@ -94,10 +135,9 @@ def update(dbPath, newDbPath=None, inplace=True):
         return 0
 
     if inplace:
-        destDir = os.path.dirname(dbPath)
+        destDir = dataDir
     else:
-        destDir = os.path.dirname(newDbPath)
-
+        destDir = newDataDir
     with TemporaryDirectory(prefix="yokadi-update-", dir=destDir) as tempDir:
         # Copy the DB
         workDbPath = os.path.join(tempDir, "work.db")
@@ -112,8 +152,8 @@ def update(dbPath, newDbPath=None, inplace=True):
             for version in range(oldVersion, db.DB_VERSION):
                 moduleName = "update{}to{}".format(version, version + 1)
                 print("Updating to {}".format(version + 1))
-                function = globals()[moduleName].update
-                function(cursor)
+                module = globals()[moduleName]
+                module.update(cursor)
 
         setVersion(workDbPath, db.DB_VERSION)
 
@@ -130,7 +170,18 @@ def update(dbPath, newDbPath=None, inplace=True):
             print("Old database renamed to {}".format(backupPath))
             os.rename(recreatedDbPath, dbPath)
         else:
+            newDbPath = basepaths.getDbPath(newDataDir)
             os.rename(recreatedDbPath, newDbPath)
+
+    # Update sync dump if required
+    dumpDir = basepaths.getSyncDumpDir(dataDir)
+    if os.path.exists(dumpDir):
+        if inplace:
+            updateSyncDump(dbPath, dumpDir)
+        else:
+            newDumpDir = basepaths.getSyncDumpDir(newDataDir)
+            shutil.copytree(dumpDir, newDumpDir)
+            updateSyncDump(newDbPath, newDumpDir)
 
     return 0
 
@@ -138,25 +189,27 @@ def update(dbPath, newDbPath=None, inplace=True):
 def main():
     # Parse args
     parser = ArgumentParser()
-    parser.add_argument('current', metavar='<path/to/current.db>',
-            help="Path to the database to update.")
-    parser.add_argument('updated', metavar='<path/to/updated.db>',
-            help="Path to the destination database. Mandatory unless --inplace is used",
-            nargs="?")
+    parser.add_argument('--datadir', metavar='<path/to/current/datadir>',
+                        help="Path to the datadir to update.")
+    parser.add_argument('--updated-datadir', dest='updated', metavar='<path/to/updated/datadir>',
+                        help="Path to the destination datadir. Mandatory unless --in-place is used",
+                        nargs="?")
     parser.add_argument("-i", "--in-place",
-            dest="inplace", action="store_true",
-            help="Replace current file")
+                        dest="inplace", action="store_true",
+                        help="Replace current file")
 
     args = parser.parse_args()
 
-    dbPath = os.path.abspath(args.current)
+    dataDir = os.path.abspath(args.datadir)
 
     if args.inplace:
-        newDbPath = None
+        newDataDir = None
+        if args.updated:
+            parser.error('Cannot use --updated or with --in-place')
     else:
-        newDbPath = os.path.abspath(args.updated)
+        newDataDir = os.path.abspath(args.updated)
 
-    return update(dbPath, newDbPath, inplace=args.inplace)
+    return update(dataDir, newDataDir, inplace=args.inplace)
 
 
 if __name__ == "__main__":

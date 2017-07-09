@@ -68,17 +68,20 @@ def createVersionFile(dstDir):
         fp.write(str(VERSION))
 
 
+def readVersionFile(dumpDir):
+    versionFile = os.path.join(dumpDir, VERSION_FILENAME)
+    if not os.path.exists(versionFile):
+        raise YokadiException("{} does not contain a `{}` file".format(dumpDir, VERSION_FILENAME))
+    with open(versionFile) as fp:
+        return int(fp.read())
+
+
 def checkIsValidDumpDir(vcsImpl):
     dumpDir = vcsImpl.srcDir
     if not vcsImpl.isValidVcsDir():
         raise YokadiException("{} is not handled by {}".format(dumpDir, vcsImpl.name))
 
-    versionFile = os.path.join(dumpDir, VERSION_FILENAME)
-    if not os.path.exists(versionFile):
-        raise YokadiException("{} does not contain a `{}` file".format(dumpDir, VERSION_FILENAME))
-
-    with open(versionFile) as fp:
-        dumpVersion = int(fp.read())
+    dumpVersion = readVersionFile(dumpDir)
     if dumpVersion != VERSION:
         raise YokadiException("Cannot use a dump dir at version {}, expected version {}."
                               .format(dumpVersion, VERSION))

@@ -263,7 +263,7 @@ def main():
     dataDir, dbPath = processPathArgs(args)
 
     if args.update:
-        return update.update(dbPath)
+        return update.update(dataDir)
 
     try:
         db.connectDatabase(dbPath)
