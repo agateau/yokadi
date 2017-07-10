@@ -41,10 +41,12 @@ def createProjectFile(dirname, uuid, name, active=True):
 
 def createTaskJson(uuid, projectUuid, title, **kwargs):
     dct = {
-        "projectUuid": projectUuid,
+        "project_uuid": projectUuid,
         "uuid": uuid,
         "title": title,
-        "creationDate": "2016-01-12T19:12:00",
+        "creation_date": "2016-01-12T19:12:00",
+        "due_date": None,
+        "done_date": None,
         "keywords": {},
         "description": "",
         "recurrence": {},

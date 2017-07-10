@@ -12,29 +12,46 @@ from yokadi.core import dbutils
 from yokadi.core.db import Project
 from yokadi.core.recurrencerule import RecurrenceRule
 
-TASK_DATE_FIELDS = {"creationDate", "dueDate", "doneDate"}
+TASK_DATE_FIELDS = {"creation_date", "due_date", "done_date"}
 
 
-def _dictFromRow(row, skippedKeys=None):
-    if skippedKeys is None:
-        skippedKeys = set()
+_PROJECT_KEYS = (
+    ("uuid", "uuid"),
+    ("name", "name"),
+    ("active", "active"),
+)
+
+_TASK_KEYS = (
+    ("uuid", "uuid"),
+    ("title", "title"),
+    ("creationDate", "creation_date"),
+    ("dueDate", "due_date"),
+    ("doneDate", "done_date"),
+    ("description", "description"),
+    ("urgency", "urgency"),
+    ("status", "status"),
+)
+
+_ALIAS_KEYS = (
+    ("uuid", "uuid"),
+    ("name", "name"),
+    ("command", "command"),
+)
+
+
+def _dictFromRow(row, keyList):
     dct = dict()
-    for key, value in row.__dict__.items():
-        if key in skippedKeys or key == "id" or key.startswith("_sa_"):
-            continue
+    for rowKey, jsonKey in keyList:
+        value = getattr(row, rowKey)
         if isinstance(value, datetime):
             value = value.isoformat()
-        dct[key] = value
+        dct[jsonKey] = value
     return dct
 
 
-def _updateRowFromDict(session, row, dct, skippedKeys=None):
-    if skippedKeys is None:
-        skippedKeys = set()
-    for key, value in dct.items():
-        if key in skippedKeys:
-            continue
-        setattr(row, key, value)
+def _updateRowFromDict(session, row, dct, keyList):
+    for rowKey, jsonKey in keyList:
+        setattr(row, rowKey, dct[jsonKey])
     session.add(row)
 
 
@@ -50,28 +67,29 @@ def _convertStringsToDates(dct, keys):
 
 
 def dictFromProject(project):
-    return _dictFromRow(project, skippedKeys={"tasks"})
+    return _dictFromRow(project, _PROJECT_KEYS)
 
 
 def updateProjectFromDict(session, project, dct):
-    _updateRowFromDict(session, project, dct)
+    _updateRowFromDict(session, project, dct, _PROJECT_KEYS)
 
 
 def dictFromTask(task):
-    dct = _dictFromRow(task, skippedKeys={"recurrence", "project", "projectId", "taskKeywords"})
-    dct["projectUuid"] = task.project.uuid
+    dct = _dictFromRow(task, _TASK_KEYS)
+    dct["project_uuid"] = task.project.uuid
     dct["keywords"] = task.getKeywordDict()
     dct["recurrence"] = task.recurrence.toDict()
     return dct
 
 
 def updateTaskFromDict(session, task, dct):
-    projectUuid = dct.pop("projectUuid")
-    project = session.query(Project).filter_by(uuid=projectUuid).one()
-    dct["project"] = project
+    projectUuid = dct["project_uuid"]
+    # Set project *before* calling _updateRowFromDict because it calls session.add
+    task.project = session.query(Project).filter_by(uuid=projectUuid).one()
 
     _convertStringsToDates(dct, TASK_DATE_FIELDS)
-    _updateRowFromDict(session, task, dct, skippedKeys={"recurrence", "keywords"})
+    _updateRowFromDict(session, task, dct, _TASK_KEYS)
+
     keywords = dct["keywords"]
     dbutils.createMissingKeywords(keywords.keys(), interactive=False)
     task.setKeywordDict(keywords)
@@ -81,8 +99,8 @@ def updateTaskFromDict(session, task, dct):
 
 
 def dictFromAlias(alias):
-    return _dictFromRow(alias)
+    return _dictFromRow(alias, _ALIAS_KEYS)
 
 
 def updateAliasFromDict(session, alias, dct):
-    _updateRowFromDict(session, alias, dct)
+    _updateRowFromDict(session, alias, dct, _ALIAS_KEYS)
