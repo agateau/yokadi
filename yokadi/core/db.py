@@ -9,7 +9,6 @@ Database access layer using SQL Alchemy
 import json
 import os
 import sys
-from pickle import loads, dumps
 from datetime import datetime
 from uuid import uuid1
 
@@ -292,11 +291,13 @@ def getConfigKey(name, environ=True):
 
 _database = None
 
+
 def getSession():
     global _database
     if not _database:
         raise YokadiException("Cannot get session. Not connected to database")
     return _database.session
+
 
 def connectDatabase(dbFileName, createIfNeeded=True, memoryDatabase=False):
     global _database
@@ -338,8 +339,10 @@ class Database(object):
                 print("Creating %s" % dbFileName)
             self.createTables()
             # Set database version according to current yokadi release
-            if not updateMode: # Update script add it from dump
-                self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True, desc="Database schema release number"))
+            # Don't do it in updateMode: the update script adds the version from the dump
+            if not updateMode:
+                self.session.add(Config(name=DB_VERSION_KEY, value=str(DB_VERSION), system=True,
+                                        desc="Database schema release number"))
             self.session.commit()
 
         if not updateMode:
@@ -378,15 +381,17 @@ class Database(object):
 def setDefaultConfig():
     """Set default config parameter in database if they (still) do not exist"""
     defaultConfig = {
-        "ALARM_DELAY_CMD" : ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''', False,
-                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DUE_CMD"   : ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''', False,
-                             "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
-        "ALARM_DELAY"     : ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
-        "ALARM_SUSPEND"   : ("1", False, "Delay (in hours) before an alarm trigger again"),
-        "PURGE_DELAY"     : ("90", False, "Default delay (in days) for the t_purge command"),
+        "ALARM_DELAY_CMD":
+            ('''kdialog --passivepopup "task {TITLE} ({ID}) is due for {DATE}" 180 --title "Yokadi: {PROJECT}"''',
+             False, "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        "ALARM_DUE_CMD":
+            ('''kdialog --passivepopup "task {TITLE} ({ID}) should be done now" 1800 --title "Yokadi: {PROJECT}"''',
+             False, "Command executed by Yokadi Daemon when a tasks due date is reached soon (see ALARM_DELAY"),
+        "ALARM_DELAY": ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
+        "ALARM_SUSPEND": ("1", False, "Delay (in hours) before an alarm trigger again"),
+        "PURGE_DELAY": ("90", False, "Default delay (in days) for the t_purge command"),
         "PASSPHRASE_CACHE": ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
-        }
+    }
 
     session = getSession()
     for name, value in defaultConfig.items():

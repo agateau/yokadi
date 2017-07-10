@@ -9,7 +9,7 @@ Database utilities.
 from datetime import datetime, timedelta
 import os
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
@@ -27,8 +27,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
     @param interactive: Ask user before creating project (this is the default)
     @type interactive: Bool
     @returns : Task instance on success, None if cancelled."""
-    session = db.getSession(
-                                   )
+    session = db.getSession()
     if keywordDict is None:
         keywordDict = {}
 
@@ -42,7 +41,8 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         return None
 
     # Create task
-    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title, description="", status="new")
+    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title,
+                description="", status="new")
     session.add(task)
     task.setKeywordDict(keywordDict)
     session.merge(task)
@@ -165,7 +165,7 @@ class TaskLockManager:
         try:
             return db.getSession().query(TaskLock).filter(TaskLock.task == self.task).one()
         except NoResultFound:
-            return  None
+            return None
 
     def acquire(self, pid=None, now=None):
         """Acquire a lock for that task and remove any previous stale lock"""
@@ -235,7 +235,8 @@ class KeywordFilter(object):
         @return: a new query"""
         if self.negative:
             session = db.getSession()
-            excludedTaskIds = session.query(Task.id).join(TaskKeyword).join(Keyword).filter(Keyword.name.like(self.name))
+            excludedTaskIds = session.query(Task.id).join(TaskKeyword).join(Keyword) \
+                .filter(Keyword.name.like(self.name))
             return query.filter(~Task.id.in_(excludedTaskIds))
         else:
             keywordAlias = aliased(Keyword)
