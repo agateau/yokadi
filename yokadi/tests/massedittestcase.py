@@ -122,8 +122,8 @@ class MassEditTestCase(YokadiTestCase):
 
     def testOnlyListTasks(self):
         prj = dbutils.getOrCreateProject("p1", interactive=False)
-        t1 = dbutils.addTask("p1", "Task", {})
-        t2 = dbutils.addTask("p1", "Note", {NOTE_KEYWORD: None})
+        dbutils.addTask("p1", "Task", {})
+        dbutils.addTask("p1", "Note", {NOTE_KEYWORD: None})
 
         oldList = massedit.createEntriesForProject(prj)
         self.assertEqual(len(oldList), 1)

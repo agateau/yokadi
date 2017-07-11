@@ -9,11 +9,12 @@ from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.ycli import parseutils
 
 gTaskLineToParsedStructList = [
-    ("project some text @keyword1 @keyword2=12 some other text", ("project", "some text some other text", {"keyword1":None, "keyword2":12})),
+    ("project some text @keyword1 @keyword2=12 some other text", ("project", "some text some other text",
+                                                                  {"keyword1": None, "keyword2": 12})),
     ("project ééé", ("project", "ééé", {})),
     ("project let's include quotes\"", ("project", "let's include quotes\"", {})),
     ("   project this  one has  extra spaces  ", ("project", "this one has extra spaces", {})),
-    ]
+]
 
 
 class ParseUtilsTestCase(YokadiTestCase):

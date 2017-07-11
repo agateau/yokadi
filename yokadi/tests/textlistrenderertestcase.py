@@ -6,7 +6,7 @@ TextListRenderer test cases
 """
 from io import StringIO
 
-import yokadi.ycli.colors as C
+from yokadi.ycli import colors
 from yokadi.core import dbutils
 
 from yokadi.ycli import tui
@@ -17,7 +17,8 @@ from yokadi.tests.yokaditestcase import YokadiTestCase
 
 
 def stripColor(text):
-    for colorcode in C.BOLD, C.RED, C.GREEN, C.ORANGE, C.PURPLE, C.CYAN, C.GREY, C.RESET:
+    for colorcode in (colors.BOLD, colors.RED, colors.GREEN, colors.ORANGE, colors.PURPLE, colors.CYAN, colors.GREY,
+                      colors.RESET):
         text = text.replace(colorcode, '')
     return text
 
@@ -67,7 +68,7 @@ class TextListRendererTestCase(YokadiTestCase):
         dbutils.getOrCreateProject("x", interactive=False)
         dbutils.getOrCreateKeyword("k1", interactive=False)
         dbutils.getOrCreateKeyword("k2", interactive=False)
-        t1 = dbutils.addTask("x", "t1", {})
+        dbutils.addTask("x", "t1", {})
         t2 = dbutils.addTask("x", "t2", {"k1": None, "k2": 12})
         longTask = dbutils.addTask("x", "A longer task name", {})
         longTask.description = "And it has a description"
@@ -80,11 +81,11 @@ class TextListRendererTestCase(YokadiTestCase):
         out = stripColor(out.getvalue())
 
         expected = \
-              "                     Foo                      \n" \
-            + "ID│Title              │U  │S│Age     │Due date\n" \
-            + "──┼───────────────────┼───┼─┼────────┼────────\n" \
-            + "2 │t2 (k1, k2)        │0  │N│0m      │        \n" \
-            + "3 │A longer task name*│0  │N│0m      │        \n"
+            "                     Foo                      \n" \
+            "ID│Title              │U  │S│Age     │Due date\n" \
+            "──┼───────────────────┼───┼─┼────────┼────────\n" \
+            "2 │t2 (k1, k2)        │0  │N│0m      │        \n" \
+            "3 │A longer task name*│0  │N│0m      │        \n"
         self.assertMultiLineEqual(out, expected)
 
 

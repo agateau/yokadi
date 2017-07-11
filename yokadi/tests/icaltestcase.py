@@ -111,7 +111,7 @@ class IcalTestCase(YokadiTestCase):
     def testTaskDoneMapping(self):
         tui.addInputAnswers("y")
         t1 = dbutils.addTask("x", "t1", {})
-        v1 = yical.createVTodoFromTask(t1)
+        yical.createVTodoFromTask(t1)
 
         # v1["completed"] = datetime.datetime.now()
         # yical.updateTaskFromVTodo(t1, v1)

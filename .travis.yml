@@ -15,9 +15,7 @@ install:
 script:
   # Make sure what's already flake8-happy remains flake8-happy
   # Exclude w32_postinst.py because it uses install-specific builtin functions
-  - flake8 \
-        --exclude w32_postinst.py \
-        yokadi/core yokadi/ycli yokadi/yical yokadi/sync yokadi/update yokadi/*.py *.py
+  - flake8 --exclude build,w32_postinst.py
   - coverage run --source=yokadi --omit="yokadi/tests/*" yokadi/tests/tests.py
 after_success:
   coveralls

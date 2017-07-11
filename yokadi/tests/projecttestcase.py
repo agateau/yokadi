@@ -59,7 +59,7 @@ class ProjectTestCase(YokadiTestCase):
         # Create project p1 with one associated task
         tui.addInputAnswers("y")
         self.cmd.do_p_add("p1")
-        project = self.session.query(Project).one()
+        self.session.query(Project).one()
         task = dbutils.addTask("p1", "t1", interactive=False)
         taskId = task.id
 

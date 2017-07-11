@@ -20,7 +20,7 @@ class YDateUtilsTestCase(YokadiTestCase):
             ("5H", timedelta(hours=5)),
             ("6.5D", timedelta(days=6, hours=12)),
             ("12W", timedelta(days=12 * 7)),
-            ]
+        ]
 
         for text, expected in testData:
             output = ydateutils.parseDateTimeDelta(text)
@@ -59,7 +59,7 @@ class YDateUtilsTestCase(YokadiTestCase):
             ("-1d", None, datetime(2009, 1, 2)),
             ("+3h", None, datetime(2009, 1, 3, 3, 0)),
             ("-1M", None, datetime(2009, 1, 2, 23, 59)),
-            ]
+        ]
 
         for text, hint, expected in testData:
             output = ydateutils.parseHumaneDateTime(text, hint=hint, today=today)
@@ -71,7 +71,7 @@ class YDateUtilsTestCase(YokadiTestCase):
         testData = [
             ("1:00pm", now.replace(hour=13, minute=0)),
             ("10:00am", now.replace(hour=10, minute=0) + timedelta(days=1)),
-            ]
+        ]
 
         for text, expected in testData:
             output = ydateutils.parseHumaneDateTime(text, hint=None, today=now)
@@ -89,7 +89,7 @@ class YDateUtilsTestCase(YokadiTestCase):
             (timedelta(days=80), "2M, 20d"),
             (timedelta(days=365), "1Y"),
             (timedelta(days=400), "1Y, 1M"),
-            ]
+        ]
 
         for input, expected in testData:
             output = ydateutils.formatTimeDelta(input)
@@ -114,7 +114,7 @@ class YDateUtilsTestCase(YokadiTestCase):
             ("tomorrow 18:00", operator.__le__, today + timedelta(days=1, hours=18)),
             ("sunday", operator.__le__, datetime(2009, 1, 4).replace(**endOfDay)),
             ("tu 11:45", operator.__le__, datetime(2009, 1, 6, 11, 45)),
-            ]
+        ]
 
         for text, expectedOp, expectedDate in testData:
             output = ydateutils.parseDateLimit(text, today=today)
@@ -124,11 +124,11 @@ class YDateUtilsTestCase(YokadiTestCase):
 
     def testGuessTime(self):
         for invalidTime in ("+5M", "+1m", "+2H", "+3h", "+9D", "+14d", "+432W", "+0w",
-                     "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
+                            "01/01/2009", "10/10/2008 12", "7/7/2007 10:15", "1/2/2003 1:2:3"):
             self.assertIsNone(ydateutils.guessTime(invalidTime))
 
-
-        for text, expected in (('12:05:20', time(hour=12, minute=5, second=20)), ('10:00am', time(hour=10)), ('7:30pm', time(hour=19, minute=30))):
+        for text, expected in (('12:05:20', time(hour=12, minute=5, second=20)), ('10:00am', time(hour=10)),
+                               ('7:30pm', time(hour=19, minute=30))):
             output = ydateutils.guessTime(text)
             self.assertEqual(expected, output)
 

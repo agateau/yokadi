@@ -4,7 +4,6 @@ Project test cases
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or later
 """
-
 from yokadi.core import db
 from yokadi.core.db import Project, setDefaultConfig
 from yokadi.tests.yokaditestcase import YokadiTestCase
@@ -30,9 +29,9 @@ class CompletersTestCase(YokadiTestCase):
 
     def testCompleteParameterPosition(self):
         data = [
-                 (("bla", "t_add bla", 6, 10), 1),
-                 (("bli", "t_add bla bli", 10, 14), 2),
-               ]
+            (("bla", "t_add bla", 6, 10), 1),
+            (("bli", "t_add bla bli", 10, 14), 2),
+        ]
         for params, expectedResult in data:
             result = completers.computeCompleteParameterPosition(*params)
             self.assertEqual(result, expectedResult)
