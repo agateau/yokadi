@@ -213,7 +213,8 @@ class SyncCmd(Cmd):
         parser.usage = "_s_dump [options]"
         parser.description = "Dump database in the dump directory."
         parser.add_argument("--clear", dest="clear", default=False, action="store_true",
-                            help="Clear the current dump before. This can be dangerous: any change present in the dump but not in the database will be lost.")
+                            help="Clear the current dump before. This can be dangerous: any change present in the dump"
+                                 " but not in the database will be lost.")
         return parser
 
     def do__s_pull(self, line):
