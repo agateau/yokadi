@@ -11,7 +11,7 @@ from distutils.core import setup
 import sys
 import os
 from fnmatch import fnmatch
-from os.path import abspath, isdir, dirname, join
+from os.path import isdir, dirname, join
 
 sys.path.insert(0, dirname(__file__))
 import yokadi
@@ -46,8 +46,7 @@ data_files.append(["share/yokadi/editors/vim/syntax", ["editors/vim/syntax/yokad
 for size in os.listdir("icon"):
     if not isdir(join("icon", size)):
         continue
-    data_files.append(["share/icons/hicolor/%s/apps" % size,
-        ["icon/%s/yokadi.png" % size]])
+    data_files.append(["share/icons/hicolor/%s/apps" % size, ["icon/%s/yokadi.png" % size]])
 
 data_files.append(["share/applications", ["icon/yokadi.desktop"]])
 
@@ -59,26 +58,27 @@ if "win" in " ".join(sys.argv[1:]):
     scripts.append("w32_postinst.py")
 
 # Go for setup
-setup(name="yokadi",
-      version=yokadi.__version__,
-      description="Command line oriented todo list system",
-      author="The Yokadi Team",
-      author_email="ml-yokadi@sequanux.org",
-      url="http://yokadi.github.io/",
-      packages=[
+setup(
+    name="yokadi",
+    version=yokadi.__version__,
+    description="Command line oriented todo list system",
+    author="The Yokadi Team",
+    author_email="ml-yokadi@sequanux.org",
+    url="http://yokadi.github.io/",
+    packages=[
         "yokadi",
         "yokadi.core",
         "yokadi.tests",
         "yokadi.update",
         "yokadi.ycli",
         "yokadi.yical",
-      ],
-      # distutils does not support install_requires, but pip needs it to be
-      # able to automatically install dependencies
-      install_requires=[
+    ],
+    # distutils does not support install_requires, but pip needs it to be
+    # able to automatically install dependencies
+    install_requires=[
         "sqlalchemy",
         "python-dateutil",
-      ],
-      scripts=scripts,
-      data_files=data_files
-      )
+    ],
+    scripts=scripts,
+    data_files=data_files
+)
