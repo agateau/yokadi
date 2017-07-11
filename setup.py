@@ -27,6 +27,7 @@ def createFileList(sourceDir, *patterns):
             if fnmatch(name, pattern):
                 yield join(sourceDir, name)
 
+
 # Additional files
 data_files = []
 data_files.append(["share/yokadi",
