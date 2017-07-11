@@ -46,6 +46,7 @@ class IOStream:
         else:
             self.__original_flow.write(text)
 
+
 stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
