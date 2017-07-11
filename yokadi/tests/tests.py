@@ -48,6 +48,7 @@ from argstestcase import ArgsTestCase  # noqa: F401
 def main():
     unittest.main()
 
+
 if __name__ == "__main__":
     main()
 # vi: ts=4 sw=4 et
