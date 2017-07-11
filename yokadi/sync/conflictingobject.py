@@ -29,7 +29,7 @@ class ConflictingObject(object):
 
         def _normalized_key(key):
             # Turn V1 dump keys into V2 dump keys
-            return key.replace("Date", "_date")
+            return key.replace("Date", "_date").replace("Uuid", "_uuid")
 
         def _load_json(json_or_none):
             if json_or_none is None:
