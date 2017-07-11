@@ -84,7 +84,7 @@ def getDbPath(dataDir):
     path = os.getenv("YOKADI_DB")
     if path:
         return path
-    return os.path.join(dataDir,DB_NAME)
+    return os.path.join(dataDir, DB_NAME)
 
 
 def _getOldHistoryPath():
