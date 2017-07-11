@@ -7,8 +7,6 @@ Crypto functions test cases
 
 import unittest
 
-import testutils
-
 from yokadi.ycli import tui
 from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core.yokadiexception import YokadiException

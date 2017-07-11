@@ -11,8 +11,6 @@ import unittest
 from cmd import Cmd
 from contextlib import contextmanager
 
-import testutils
-
 from yokadi.core import db
 from yokadi.ycli.main import YokadiCmd
 

@@ -9,8 +9,6 @@ import unittest
 
 from datetime import datetime
 
-import testutils
-
 from yokadi.core import dbutils, db
 from yokadi.ycli import tui
 from yokadi.core.db import Keyword, Project
