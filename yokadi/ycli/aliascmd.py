@@ -10,7 +10,7 @@ from yokadi.core import dbutils
 from yokadi.core.yokadiexception import BadUsageException, YokadiException
 from yokadi.ycli.basicparseutils import parseOneWordName
 from yokadi.ycli import tui
-from yokadi.ycli import colors as C
+from yokadi.ycli import colors
 
 
 class AliasCmd(object):
@@ -19,12 +19,11 @@ class AliasCmd(object):
 
     def do_a_list(self, line):
         """List all aliases."""
-
         query = db.getSession().query(db.Alias).order_by(db.Alias.name)
         aliases = [(x.name, x.command) for x in query]
         if aliases:
             for name, command in aliases:
-                print(C.BOLD + name.ljust(10) + C.RESET + "=> " + command)
+                print(colors.BOLD + name.ljust(10) + colors.RESET + "=> " + command)
         else:
             print("No alias defined. Use a_add to create one")
 

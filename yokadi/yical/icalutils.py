@@ -13,6 +13,10 @@ UID_PREFIX = "yokadi"
 PROJECT_PREFIX = UID_PREFIX + "-project-"
 
 
+def _clamp(value, minimum, maximum):
+    return minimum if value < minimum else maximum if value > maximum else value
+
+
 def convertIcalType(attr):
     """Convert data from icalendar types (vDates, vInt etc.) to python standard equivalent
     @param attr: icalendar type
@@ -32,9 +36,7 @@ def icalPriorityToYokadiUrgency(priority):
     @param priority: ical priority
     @return: yokadi urgency"""
     urgency = 100 - 20 * priority
-    if urgency > 100: urgency = 100
-    if urgency < -99: urgency = -99
-    return urgency
+    return _clamp(urgency, -99, 100)
 
 
 def yokadiUrgencyToIcalPriority(urgency):
@@ -42,9 +44,7 @@ def yokadiUrgencyToIcalPriority(urgency):
     @param urgency: yokadi urgency
     @return: ical priority"""
     priority = int(-(urgency - 100) / 20)
-    if priority > 9: priority = 9
-    if priority < 1: priority = 1
-    return priority
+    return _clamp(priority, 1, 9)
 
 
 def yokadiTaskTitleToIcalSummary(title, taskId):
