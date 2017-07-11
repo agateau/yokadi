@@ -9,7 +9,7 @@ from yokadi.core import db
 from yokadi.core.yokadiexception import BadUsageException, YokadiException
 from yokadi.ycli.basicparseutils import parseOneWordName
 from yokadi.ycli import tui
-from yokadi.ycli import colors as C
+from yokadi.ycli import colors
 
 
 class AliasCmd(object):
@@ -24,7 +24,7 @@ class AliasCmd(object):
         if self.aliases:
             lst = sorted(self.aliases.items(), key=lambda x: x[0])
             for name, command in lst:
-                print(C.BOLD + name.ljust(10) + C.RESET + "=> " + command)
+                print(colors.BOLD + name.ljust(10) + colors.RESET + "=> " + command)
         else:
             print("No alias defined. Use a_add to create one")
 

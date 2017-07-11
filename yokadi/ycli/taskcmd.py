@@ -24,7 +24,7 @@ from yokadi.ycli.basicparseutils import parseOneWordName
 from yokadi.ycli import parseutils
 from yokadi.ycli import tui
 from yokadi.ycli.completers import ProjectCompleter, projectAndKeywordCompleter, \
-                       taskIdCompleter, recurrenceCompleter, dueDateCompleter
+    taskIdCompleter, recurrenceCompleter, dueDateCompleter
 from yokadi.core.dbutils import DbFilter, KeywordFilter
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.ycli.textlistrenderer import TextListRenderer
@@ -40,7 +40,7 @@ gRendererClassDict = dict(
     csv=CsvListRenderer,
     html=HtmlListRenderer,
     plain=PlainListRenderer,
-    )
+)
 
 
 class TaskCmd(object):
@@ -803,7 +803,7 @@ class TaskCmd(object):
                 ("Urgency", task.urgency),
                 ("Recurrence", recurrence),
                 ("Keywords", keywords),
-                ]
+            ]
 
             if task.status == "done":
                 fields.append(("Done", task.doneDate))

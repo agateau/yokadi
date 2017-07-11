@@ -22,7 +22,8 @@ LINE_COLOR = C.CYAN
 
 def colorizer(value, reverse=False):
     """Return a color according to value.
-    @param value: value used to determine color. Low (0) value means not urgent/visible, high (100) value means important
+    @param value: value used to determine color. Low (0) value means not urgent/visible, high (100) value means
+                  important
     @param reverse: If false low value means important and vice versa
     @return: a color code or None for no color"""
     if reverse:
@@ -189,13 +190,13 @@ class TextListRenderer(object):
 
         # All fields set to None must be defined in end()
         self.columns = [
-            Column("ID"             , None           , idFormater),
-            Column("Title"          , None           , None),
-            Column("U"              , 3              , urgencyFormater),
-            Column("S"              , 1              , statusFormater),
-            Column(creationDateTitle, creationDateColumnWidth , AgeFormater(self.today, renderAsNotes)),
-            Column("Due date"       , dueColumnWidth , DueDateFormater(self.today, shortDateFormat)),
-            ]
+            Column("ID", None, idFormater),
+            Column("Title", None, None),
+            Column("U", 3, urgencyFormater),
+            Column("S", 1, statusFormater),
+            Column(creationDateTitle, creationDateColumnWidth, AgeFormater(self.today, renderAsNotes)),
+            Column("Due date", dueColumnWidth, DueDateFormater(self.today, shortDateFormat)),
+        ]
 
         self.idColumn = self.columns[0]
         self.titleColumn = self.columns[1]

@@ -56,9 +56,7 @@ class HtmlListRenderer(object):
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:
             lst = [self.cryptoMgr.decrypt(task.title), ]
-            lst.extend([getattr(task, field) for field in TASK_FIELDS if field not in ("title",
-                                                                                  "description",
-                                                                                  "keywords")])
+            lst.extend([getattr(task, x) for x in TASK_FIELDS if x not in ("title", "description", "keywords")])
             lst.append(self.cryptoMgr.decrypt(task.description))
             lst.append(task.getKeywordsAsString())
             printRow(self.out, "td", lst)
