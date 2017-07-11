@@ -26,10 +26,17 @@ class ConflictingObject(object):
     @staticmethod
     def fromVcsConflict(conflict):
         domain = os.path.dirname(conflict.path)
+
+        def _normalized_key(key):
+            # Turn V1 dump keys into V2 dump keys
+            return key.replace("Date", "_date")
+
         def _load_json(json_or_none):
             if json_or_none is None:
                 return None
-            return json.loads(json_or_none.decode('utf-8'))
+            dct = json.loads(json_or_none.decode('utf-8'))
+            return dict((_normalized_key(k), v) for k, v in dct.items())
+
         ancestor = _load_json(conflict.ancestor)
         local = _load_json(conflict.local)
         remote = _load_json(conflict.remote)
