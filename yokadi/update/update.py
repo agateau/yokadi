@@ -17,16 +17,19 @@ from tempfile import TemporaryDirectory
 
 from yokadi.core import db
 from yokadi.update import updateutils
-from yokadi.update import update1to2
-from yokadi.update import update2to3
-from yokadi.update import update3to4
-from yokadi.update import update4to5
-from yokadi.update import update5to6
-from yokadi.update import update6to7
-from yokadi.update import update7to8
-from yokadi.update import update8to9
-from yokadi.update import update9to10
-from yokadi.update import update10to11
+
+# Those modules look unused, but they are used "dynamically"
+from yokadi.update import update1to2  # noqa
+from yokadi.update import update2to3  # noqa
+from yokadi.update import update3to4  # noqa
+from yokadi.update import update4to5  # noqa
+from yokadi.update import update5to6  # noqa
+from yokadi.update import update6to7  # noqa
+from yokadi.update import update7to8  # noqa
+from yokadi.update import update8to9  # noqa
+from yokadi.update import update9to10  # noqa
+from yokadi.update import update10to11  # noqa
+
 
 def getVersion(fileName):
     database = db.Database(fileName, createIfNeeded=False, updateMode=True)
@@ -58,7 +61,7 @@ def recreateDb(workPath, destPath):
     assert os.path.exists(workPath)
 
     print("Recreating the database")
-    database = db.Database(destPath, createIfNeeded=True, updateMode=True)
+    database = db.Database(destPath, createIfNeeded=True, updateMode=True)  # noqa
 
     print("Importing content to the new database")
     srcConn = sqlite3.connect(workPath)
@@ -139,13 +142,13 @@ def main():
     # Parse args
     parser = ArgumentParser()
     parser.add_argument('current', metavar='<path/to/current.db>',
-            help="Path to the database to update.")
+                        help="Path to the database to update.")
     parser.add_argument('updated', metavar='<path/to/updated.db>',
-            help="Path to the destination database. Mandatory unless --inplace is used",
-            nargs="?")
+                        help="Path to the destination database. Mandatory unless --inplace is used",
+                        nargs="?")
     parser.add_argument("-i", "--in-place",
-            dest="inplace", action="store_true",
-            help="Replace current file")
+                        dest="inplace", action="store_true",
+                        help="Replace current file")
 
     args = parser.parse_args()
 

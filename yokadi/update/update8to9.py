@@ -39,8 +39,7 @@ def migrateAliases(cursor):
         return
     for name, command in aliases.items():
         uuid = str(uuid1())
-        cursor.execute("insert into alias(uuid, name, command) values(?, ?, ?)",
-                (uuid, name, command))
+        cursor.execute("insert into alias(uuid, name, command) values(?, ?, ?)", (uuid, name, command))
 
     cursor.execute("delete from config where name = 'ALIASES'")
 
@@ -50,8 +49,7 @@ def addUuidColumn(cursor, tableName):
     for row in cursor.execute("select id from {}".format(tableName)).fetchall():
         id = row[0]
         uuid = str(uuid1())
-        cursor.execute("update {} set uuid = ? where id = ?".format(tableName),
-                (uuid, id))
+        cursor.execute("update {} set uuid = ? where id = ?".format(tableName), (uuid, id))
 
 
 def update(cursor):
