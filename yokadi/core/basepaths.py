@@ -114,7 +114,8 @@ def migrateOldDb(newDbPath):
         return
 
     if os.path.exists(newDbPath):
-        raise MigrationException("Tried to move %s to %s, but %s already exists. You must remove one of the two files." % (oldDbPath, newDbPath, newDbPath))
+        raise MigrationException("Tried to move %s to %s, but %s already exists."
+                                 " You must remove one of the two files." % (oldDbPath, newDbPath, newDbPath))
     fileutils.createParentDirs(newDbPath)
     shutil.move(oldDbPath, newDbPath)
     print("Moved %s to %s" % (oldDbPath, newDbPath))
