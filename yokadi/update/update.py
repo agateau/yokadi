@@ -23,17 +23,19 @@ from yokadi.sync.dump import readVersionFile, createVersionFile
 from yokadi.sync.syncmanager import SyncManager
 
 from yokadi.update import updateutils
-from yokadi.update import update1to2
-from yokadi.update import update2to3
-from yokadi.update import update3to4
-from yokadi.update import update4to5
-from yokadi.update import update5to6
-from yokadi.update import update6to7
-from yokadi.update import update7to8
-from yokadi.update import update8to9
-from yokadi.update import update9to10
-from yokadi.update import update10to11
-from yokadi.update import update11to12
+
+# Those modules look unused, but they are used "dynamically"
+from yokadi.update import update1to2  # noqa
+from yokadi.update import update2to3  # noqa
+from yokadi.update import update3to4  # noqa
+from yokadi.update import update4to5  # noqa
+from yokadi.update import update5to6  # noqa
+from yokadi.update import update6to7  # noqa
+from yokadi.update import update7to8  # noqa
+from yokadi.update import update8to9  # noqa
+from yokadi.update import update9to10  # noqa
+from yokadi.update import update10to11  # noqa
+from yokadi.update import update11to12  # noqa
 
 
 BEFORE_UPDATE_TAG = 'before-update'
@@ -99,7 +101,7 @@ def recreateDb(workPath, destPath):
     assert os.path.exists(workPath)
 
     print("Recreating the database")
-    database = db.Database(destPath, createIfNeeded=True, updateMode=True)
+    database = db.Database(destPath, createIfNeeded=True, updateMode=True)  # noqa
 
     print("Importing content to the new database")
     srcConn = sqlite3.connect(workPath)

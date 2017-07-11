@@ -5,6 +5,8 @@ Update from version 2 to version 3 of Yokadi DB
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or newer
 """
+
+
 def createProjectKeywordTable(cursor):
     cursor.execute("""
 create table project_keyword (

@@ -30,7 +30,7 @@ def deleteTableColumns(cursor, table, columnsToDelete):
         "create table {table}({columns})",
         "insert into {table} select {columns} from {table}_backup",
         "drop table {table}_backup",
-        )
+    )
     for sql in sqlCommands:
         cursor.execute(sql.format(table=table, columns=columns))
 
