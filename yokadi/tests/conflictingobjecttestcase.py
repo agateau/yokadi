@@ -6,7 +6,7 @@ ConflictingObject test cases
 import json
 
 from yokadi.sync.conflictingobject import ConflictingObject, ModifiedDeletedConflictingObject, \
-        BothModifiedConflictingObject
+    BothModifiedConflictingObject
 from yokadi.sync.vcsconflict import VcsConflict
 from yokadi.sync.vcsimpl import VcsImpl
 from yokadi.tests.yokaditestcase import YokadiTestCase

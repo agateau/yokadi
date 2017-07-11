@@ -83,7 +83,7 @@ def createAliasFile(dirname, uuid, name, command):
 
 
 BothModifiedConflictFixture = namedtuple("BothModifiedConflictFixture",
-    ["modifiedTask", "vcsImpl"])
+                                         ["modifiedTask", "vcsImpl"])
 
 
 def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, remoteChanges):
@@ -158,7 +158,8 @@ def createBothModifiedConflictFixture(testCase, session, tmpDir, localChanges, r
 
 
 ModifiedDeletedConflictFixture = namedtuple("ModifiedDeletedConflictFixture",
-    ["modLocallyTask", "modLocallyTaskPath", "modRemotelyTask", "modRemotelyTaskPath", "vcsImpl"])
+                                            ["modLocallyTask", "modLocallyTaskPath", "modRemotelyTask",
+                                             "modRemotelyTaskPath", "vcsImpl"])
 
 
 def createModifiedDeletedConflictFixture(testCase, tmpDir):
@@ -175,7 +176,7 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
     modLocallyTaskPath = os.path.join(TASKS_DIRNAME, modLocallyTask.uuid + ".json")
 
     # A task which has been modRemotely locally but modified remotely
-    modRemotelyTask = Task() #dbutils.addTask("prj", "Removed", interactive=False)
+    modRemotelyTask = Task()
     modRemotelyTask.uuid = "1234-modRemotely"
     modRemotelyTaskPath = os.path.join(TASKS_DIRNAME, modRemotelyTask.uuid + ".json")
 
@@ -184,34 +185,35 @@ def createModifiedDeletedConflictFixture(testCase, tmpDir):
             StubVcsImpl.__init__(self, srcDir)
             self.commitAllCallCount = 0
             self.mergeCalled = False
-            self.conflicts = [VcsConflict(
-                path=modLocallyTaskPath,
-                ancestor=createTaskJson(
-                    uuid=modLocallyTask.uuid,
-                    projectUuid=prj.uuid,
-                    title="Ancestor"
+            self.conflicts = [
+                VcsConflict(
+                    path=modLocallyTaskPath,
+                    ancestor=createTaskJson(
+                        uuid=modLocallyTask.uuid,
+                        projectUuid=prj.uuid,
+                        title="Ancestor"
+                    ),
+                    local=createTaskJson(
+                        uuid=modLocallyTask.uuid,
+                        projectUuid=prj.uuid,
+                        title=modLocallyTask.title
+                    ),
+                    remote=None
                 ),
-                local=createTaskJson(
-                    uuid=modLocallyTask.uuid,
-                    projectUuid=prj.uuid,
-                    title=modLocallyTask.title
-                ),
-                remote=None
-            ),
-            VcsConflict(
-                path=modRemotelyTaskPath,
-                ancestor=createTaskJson(
-                    uuid=modRemotelyTask.uuid,
-                    projectUuid=prj.uuid,
-                    title="Ancestor"
-                ),
-                local=None,
-                remote=createTaskJson(
-                    uuid=modRemotelyTask.uuid,
-                    projectUuid=prj.uuid,
-                    title="Modified remotely"
-                )
-            )]
+                VcsConflict(
+                    path=modRemotelyTaskPath,
+                    ancestor=createTaskJson(
+                        uuid=modRemotelyTask.uuid,
+                        projectUuid=prj.uuid,
+                        title="Ancestor"
+                    ),
+                    local=None,
+                    remote=createTaskJson(
+                        uuid=modRemotelyTask.uuid,
+                        projectUuid=prj.uuid,
+                        title="Modified remotely"
+                    )
+                )]
 
         def merge(self):
             self.mergeCalled = True
@@ -291,21 +293,10 @@ class PullTestCase(YokadiTestCase):
             # Prepare a fake vcs pull: create files which would result from the
             # pull and create a VcsImpl to fake it
             createVersionFile(tmpDir)
-            addedProjectPath = createProjectFile(
-                    tmpDir,
-                    name="prj2",
-                    uuid="5678-prj2")
-            addedTaskPath = createTaskFile(
-                    tmpDir,
-                    uuid="1234-added",
-                    projectUuid=prj.uuid,
-                    title="Added")
-            modifiedTaskPath = createTaskFile(
-                    tmpDir,
-                    uuid="1234-modified",
-                    projectUuid="5678-prj2",
-                    title="New task title",
-                    keywords=dict(kw1=None, kw2=2))
+            addedProjectPath = createProjectFile(tmpDir, name="prj2", uuid="5678-prj2")
+            addedTaskPath = createTaskFile(tmpDir, uuid="1234-added", projectUuid=prj.uuid, title="Added")
+            modifiedTaskPath = createTaskFile(tmpDir, uuid="1234-modified", projectUuid="5678-prj2",
+                                              title="New task title", keywords=dict(kw1=None, kw2=2))
             removedTaskPath = os.path.join(TASKS_DIRNAME, removedTask.uuid + ".json")
 
             class MyVcsImpl(StubVcsImpl):
@@ -398,7 +389,8 @@ class PullTestCase(YokadiTestCase):
     def testBothModifiedConflictSolved(self):
         testCase = self
         with TemporaryDirectory() as tmpDir:
-            fixture = createBothModifiedConflictFixture(self, self.session, tmpDir,
+            fixture = createBothModifiedConflictFixture(
+                self, self.session, tmpDir,
                 localChanges=dict(
                     title="Local title",
                     description="Local description"
@@ -433,7 +425,7 @@ class PullTestCase(YokadiTestCase):
     def testModifiedDeletedConflictSolved(self):
         testCase = self
         with TemporaryDirectory() as tmpDir:
-            fixture = createModifiedDeletedConflictFixture(testCase,tmpDir)
+            fixture = createModifiedDeletedConflictFixture(testCase, tmpDir)
 
             class MyPullUi(StubPullUi):
                 def resolveConflicts(self, conflictingObjects):
@@ -461,10 +453,7 @@ class PullTestCase(YokadiTestCase):
             self.session.commit()
 
             createVersionFile(tmpDir)
-            modifiedProjectPath = createProjectFile(
-                    tmpDir,
-                    name="prj2",
-                    uuid=prj.uuid)
+            modifiedProjectPath = createProjectFile(tmpDir, name="prj2", uuid=prj.uuid)
 
             class MyVcsImpl(StubVcsImpl):
                 def getChangesSince(self, commitId):
@@ -525,15 +514,8 @@ class PullTestCase(YokadiTestCase):
             syncManager.pull(pullUi=pullUi)
 
             # Create prj in remote repo
-            createProjectFile(
-                    remoteDir,
-                    uuid=REMOTE_PROJECT_UUID,
-                    name="prj")
-            createTaskFile(
-                    remoteDir,
-                    title="r-task",
-                    projectUuid=REMOTE_PROJECT_UUID,
-                    uuid="r-1234-task")
+            createProjectFile(remoteDir, uuid=REMOTE_PROJECT_UUID, name="prj")
+            createTaskFile(remoteDir, title="r-task", projectUuid=REMOTE_PROJECT_UUID, uuid="r-1234-task")
             remoteSyncManager.vcsImpl.commitAll()
 
             # Create prj in local repo
@@ -549,19 +531,19 @@ class PullTestCase(YokadiTestCase):
             # Local project should be renamed prj_1
             projects = list(self.session.query(Project).all())
             self.assertCountEqual(
-                    (x.uuid for x in projects),
-                    (prjUuid, REMOTE_PROJECT_UUID))
+                (x.uuid for x in projects),
+                (prjUuid, REMOTE_PROJECT_UUID))
             self.assertCountEqual(
-                    (x.name for x in projects),
-                    ("prj", "prj_1"))
+                (x.name for x in projects),
+                ("prj", "prj_1"))
 
             tasks = list(self.session.query(Task).all())
             self.assertCountEqual(
-                    (x.uuid for x in tasks),
-                    (task.uuid, "r-1234-task"))
+                (x.uuid for x in tasks),
+                (task.uuid, "r-1234-task"))
             self.assertCountEqual(
-                    (x.title for x in tasks),
-                    ("l-task", "r-task"))
+                (x.title for x in tasks),
+                ("l-task", "r-task"))
 
     def testRemoteRenamedProject(self):
         with TemporaryDirectory() as tmpDir:
@@ -570,10 +552,7 @@ class PullTestCase(YokadiTestCase):
             self.session.commit()
 
             createVersionFile(tmpDir)
-            renamedProjectPath = createProjectFile(
-                    tmpDir,
-                    name="prj2",
-                    uuid=prj.uuid)
+            renamedProjectPath = createProjectFile(tmpDir, name="prj2", uuid=prj.uuid)
 
             class MyVcsImpl(StubVcsImpl):
                 def getChangesSince(self, commitId):
@@ -693,7 +672,7 @@ class PullTestCase(YokadiTestCase):
         with TemporaryDirectory() as tmpDir:
             prj = dbutils.getOrCreateProject("prj", interactive=False)
             prj2 = dbutils.getOrCreateProject("prj2", interactive=False)
-            task1 = dbutils.addTask(prj.name, "task1", interactive=False)
+            dbutils.addTask(prj.name, "task1", interactive=False)
             modifiedTask = dbutils.addTask(prj2.name, "task2", interactive=False)
             self.session.commit()
 
@@ -704,9 +683,8 @@ class PullTestCase(YokadiTestCase):
             syncManager.dump()
 
             # Alter some files
-            modifiedTaskPath = os.path.join(dumpDir, TASKS_DIRNAME, modifiedTask.uuid + ".json")
             createTaskFile(dumpDir, modifiedTask.uuid, modifiedTask.project.uuid,
-                    title="modified", description="new description")
+                           title="modified", description="new description")
             vcsImpl.commitAll()
 
             # Import all
@@ -772,11 +750,11 @@ class PullTestCase(YokadiTestCase):
             syncManager.pull(pullUi=pullUi)
 
             # Add an alias a => t_add to the remote repo
-            aliasPath = createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
+            createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
             remoteSyncManager.vcsImpl.commitAll()
 
             # Init the local db with the same alias
-            alias = db.Alias.add(self.session, "a", "t_add")
+            db.Alias.add(self.session, "a", "t_add")
             self.session.commit()
             syncManager.dump()
 
@@ -802,11 +780,11 @@ class PullTestCase(YokadiTestCase):
             syncManager.pull(pullUi=StubPullUi())
 
             # Add an alias a => t_add to the remote repo
-            aliasPath = createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
+            createAliasFile(remoteDir, uuid="123", name="a", command="t_add")
             remoteSyncManager.vcsImpl.commitAll()
 
             # Init the local db with a different alias
-            alias = db.Alias.add(self.session, "a", "t_add -d")
+            db.Alias.add(self.session, "a", "t_add -d")
             self.session.commit()
             syncManager.dump()
 

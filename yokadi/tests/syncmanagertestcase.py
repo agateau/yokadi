@@ -6,7 +6,6 @@ Test cases for the SyncManager class
 from yokadi.core import db
 from yokadi.sync import VERSION
 from yokadi.sync.syncmanager import SyncManager
-from yokadi.sync.vcschanges import VcsChanges
 from yokadi.sync.vcsimpl import VcsImpl
 from yokadi.tests.yokaditestcase import YokadiTestCase
 from yokadi.tests.stubpullui import StubPullUi

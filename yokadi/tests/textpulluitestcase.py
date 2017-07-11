@@ -27,7 +27,8 @@ class TextPullUiTestCase(YokadiTestCase):
 
     def testPullBothModifiedConflict(self):
         with TemporaryDirectory() as tmpDir:
-            fixture = createBothModifiedConflictFixture(self, self.session, tmpDir,
+            fixture = createBothModifiedConflictFixture(
+                self, self.session, tmpDir,
                 localChanges=dict(
                     title="Local title",
                     description="Local description"
@@ -57,7 +58,7 @@ class TextPullUiTestCase(YokadiTestCase):
         renames = textPullUi.getRenames()
         self.assertEqual(renames, {
             ALIASES_DIRNAME: [("a", "a_1"), ("b", "b_1")]
-            })
+        })
 
     def testShortenText(self):
         data = (

@@ -23,7 +23,7 @@ class DbReplicatorTestCase(YokadiTestCase):
 
     def testAdd(self):
         with TemporaryDirectory() as tmpDir:
-            dbReplicator = DbReplicator(tmpDir, self.session)
+            dbReplicator = DbReplicator(tmpDir, self.session)  # noqa :F841
             prj = Project(name="prj")
             self.session.add(prj)
             self.session.commit()
@@ -33,7 +33,7 @@ class DbReplicatorTestCase(YokadiTestCase):
 
     def testUpdate(self):
         with TemporaryDirectory() as tmpDir:
-            dbReplicator = DbReplicator(tmpDir, self.session)
+            dbReplicator = DbReplicator(tmpDir, self.session)  # noqa :F841
             prj = Project(name="prj")
             self.session.add(prj)
             self.session.commit()
@@ -49,7 +49,7 @@ class DbReplicatorTestCase(YokadiTestCase):
 
     def testDelete(self):
         with TemporaryDirectory() as tmpDir:
-            dbReplicator = DbReplicator(tmpDir, self.session)
+            dbReplicator = DbReplicator(tmpDir, self.session)  # noqa :F841
             prj = Project(name="prj")
             self.session.add(prj)
             self.session.commit()
@@ -63,7 +63,7 @@ class DbReplicatorTestCase(YokadiTestCase):
 
     def testRollback_add(self):
         with TemporaryDirectory() as tmpDir:
-            dbReplicator = DbReplicator(tmpDir, self.session)
+            dbReplicator = DbReplicator(tmpDir, self.session)  # noqa :F841
             prj = Project(name="prj")
             self.session.add(prj)
             self.session.flush()
@@ -76,7 +76,7 @@ class DbReplicatorTestCase(YokadiTestCase):
 
     def testRollback_update(self):
         with TemporaryDirectory() as tmpDir:
-            dbReplicator = DbReplicator(tmpDir, self.session)
+            dbReplicator = DbReplicator(tmpDir, self.session)  # noqa :F841
             prj = Project(name="prj")
             self.session.add(prj)
             self.session.commit()
@@ -93,7 +93,7 @@ class DbReplicatorTestCase(YokadiTestCase):
 
     def testRollback_delete(self):
         with TemporaryDirectory() as tmpDir:
-            dbReplicator = DbReplicator(tmpDir, self.session)
+            dbReplicator = DbReplicator(tmpDir, self.session)  # noqa :F841
             prj = Project(name="prj")
             self.session.add(prj)
             self.session.commit()

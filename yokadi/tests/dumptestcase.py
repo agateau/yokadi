@@ -82,7 +82,7 @@ class DumpTestCase(YokadiTestCase):
                 self.assertEqual(alias.command, dct["command"])
 
     def testUpdateDump(self):
-        t1 = dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)
+        dbutils.addTask("prj1", "Foo", keywordDict=dict(kw1=1, kw2=None), interactive=False)
         t2 = dbutils.addTask("prj1", "Bar", keywordDict=dict(kw1=2), interactive=False)
         t3 = dbutils.addTask("prj2", "Baz", interactive=False)
 
