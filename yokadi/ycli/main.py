@@ -248,6 +248,7 @@ def main():
     cmd.writeHistory()
     return 0
 
+
 if __name__ == "__main__":
     sys.exit(main())
 # vi: ts=4 sw=4 et
