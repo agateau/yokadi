@@ -72,7 +72,7 @@ def eventLoop():
     triggeredDueTasks = {}
     activeTaskFilter = [Task.status != "done",
                         Task.projectId == Project.id,
-                        Project.active == True]
+                        Project.active == True]  # noqa
 
     def process(now):
         delayTasks = session.query(Task).filter(Task.dueDate < now + delta,
@@ -131,37 +131,39 @@ def parseOptions(defaultPidFile, defaultLogFile):
     commonargs.addArgs(parser)
 
     parser.add_argument("-i", "--icalserver",
-                      dest="icalserver", default=False, action="store_true",
-                      help="Start the optional HTTP Ical Server")
+                        dest="icalserver", default=False, action="store_true",
+                        help="Start the optional HTTP Ical Server")
 
     parser.add_argument("-p", "--port",
-                      dest="tcpPort", default=DEFAULT_TCP_ICAL_PORT,
-                      help="TCP port of ical server (default: %s)" % DEFAULT_TCP_ICAL_PORT,
-                      metavar="PORT")
+                        dest="tcpPort", default=DEFAULT_TCP_ICAL_PORT,
+                        help="TCP port of ical server (default: %s)" % DEFAULT_TCP_ICAL_PORT,
+                        metavar="PORT")
 
     parser.add_argument("-l", "--listen",
-                      dest="tcpListen", default=False, action="store_true",
-                      help="Listen on all interface (not only localhost) for ical server")
+                        dest="tcpListen", default=False, action="store_true",
+                        help="Listen on all interface (not only localhost) for ical server")
 
     parser.add_argument("-k", "--kill",
-                      dest="kill", default=False, action="store_true",
-                      help="Kill the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
+                        dest="kill", default=False, action="store_true",
+                        help="Kill the Yokadi daemon. The daemon is found from the process ID stored in the file"
+                             " specified with --pid")
 
     parser.add_argument("--restart",
-                      dest="restart", default=False, action="store_true",
-                      help="Restart the Yokadi daemon. The daemon is found from the process ID stored in the file specified with --pid")
+                        dest="restart", default=False, action="store_true",
+                        help="Restart the Yokadi daemon. The daemon is found from the process ID stored in the file"
+                             " specified with --pid")
 
     parser.add_argument("-f", "--foreground",
-                      dest="foreground", default=False, action="store_true",
-                      help="Don't fork background. Useful for debug")
+                        dest="foreground", default=False, action="store_true",
+                        help="Don't fork background. Useful for debug")
 
     parser.add_argument("--pid",
-                      dest="pidFile", default=defaultPidFile,
-                      help="File in which Yokadi daemon stores its process ID (default: %s)" % defaultPidFile)
+                        dest="pidFile", default=defaultPidFile,
+                        help="File in which Yokadi daemon stores its process ID (default: %s)" % defaultPidFile)
 
     parser.add_argument("--log",
-                      dest="logFile", default=defaultLogFile,
-                      help="File in which Yokadi daemon stores its log output (default: %s)" % defaultLogFile)
+                        dest="logFile", default=defaultLogFile,
+                        help="File in which Yokadi daemon stores its log output (default: %s)" % defaultLogFile)
 
     return parser.parse_args()
 
@@ -178,7 +180,7 @@ class YokadiDaemon(Daemon):
         session = db.getSession()
 
         # Basic tests :
-        if not len(session.query(db.Config).all()) >=1:
+        if not len(session.query(db.Config).all()) >= 1:
             print("Your database seems broken or not initialised properly. Start yokadi command line tool to do it")
             sys.exit(1)
 
