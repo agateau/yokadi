@@ -46,8 +46,8 @@ class GitSubprocessError(VcsImplError):
     """
     def __init__(self, error):
         output = error.output.decode('utf-8', 'replace')
-        Exception.__init__(self, "Command {} failed with error code {}. Output:\n{}" \
-            .format(error.cmd, error.returncode, output))
+        Exception.__init__(self, "Command {} failed with error code {}. Output:\n{}"
+                           .format(error.cmd, error.returncode, output))
         self.returncode = error.returncode
 
 
@@ -68,6 +68,7 @@ def _parseStatusOutput(output):
 
 class GitVcsImpl(VcsImpl):
     name = "Git"
+
     def __init__(self, srcDir):
         self._srcDir = srcDir
 

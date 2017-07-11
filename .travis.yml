@@ -14,7 +14,7 @@ install:
   - pip install coverage coveralls flake8
 script:
   # Make sure what's already flake8-happy remains flake8-happy
-  - flake8 yokadi/core yokadi/ycli yokadi/yical yokadi/*.py
+  - flake8 yokadi/core yokadi/ycli yokadi/yical yokadi/sync yokadi/*.py
   - coverage run --source=yokadi --omit="yokadi/tests/*" yokadi/tests/tests.py
 after_success:
   coveralls

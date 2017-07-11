@@ -42,18 +42,18 @@ class ConflictingObject(object):
         remote = _load_json(conflict.remote)
         if not local or not remote:
             return ModifiedDeletedConflictingObject(
-                    path=conflict.path,
-                    domain=domain,
-                    ancestor=ancestor,
-                    local=local,
-                    remote=remote)
+                path=conflict.path,
+                domain=domain,
+                ancestor=ancestor,
+                local=local,
+                remote=remote)
         else:
             return BothModifiedConflictingObject(
-                    path=conflict.path,
-                    domain=domain,
-                    ancestor=ancestor,
-                    local=local,
-                    remote=remote)
+                path=conflict.path,
+                domain=domain,
+                ancestor=ancestor,
+                local=local,
+                remote=remote)
 
     def autoResolve(self):
         raise NotImplementedError()
