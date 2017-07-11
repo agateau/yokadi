@@ -200,38 +200,6 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         return sorted(commandNames + aliasNames)
 
 
-def processPathArgs(args):
-    """
-    Process --datadir and --db arguments. Returns a tuple (dataDir, dbPath).
-
-    Only create `datadir and the parent of `db` if they were not explicitly
-    passed as arguments. This avoids silently creating dirs if the user made a
-    typo in the paths, while still making the app easy to use when using
-    default paths.
-    """
-    if args.dataDir:
-        if not os.path.isdir(args.dataDir):
-            tui.error("Directory '{}' does not exist".format(dataDir))
-            sys.exit(1)
-        dataDir = args.dataDir
-    else:
-        dataDir = basepaths.getDataDir()
-        os.makedirs(dataDir, exist_ok=True)
-
-    # If we reach this point, dataDir is a valid directory
-
-    if args.dbPath:
-        dbDir = os.path.dirname(args.dbPath)
-        if not os.path.isdir(dbDir):
-            tui.error("Directory '{}' does not exist".format(dbDir))
-            sys.exit(1)
-        dbPath = args.dbPath
-    else:
-        dbPath = os.path.join(dataDir, basepaths.DB_NAME)
-
-    return dataDir, dbPath
-
-
 def createArgumentParser():
     parser = ArgumentParser()
     commonargs.addArgs(parser)
@@ -260,8 +228,6 @@ def main():
     except basepaths.MigrationException as exc:
         print(exc)
         return 1
-
-    dataDir, dbPath = processPathArgs(args)
 
     if args.update:
         return update.update(dataDir)
