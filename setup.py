@@ -74,7 +74,6 @@ setup(
         "yokadi.ycli",
         "yokadi.yical",
         "yokadi.sync",
-      ],
     ],
     # distutils does not support install_requires, but pip needs it to be
     # able to automatically install dependencies
