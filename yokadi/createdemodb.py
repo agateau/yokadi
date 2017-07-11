@@ -19,6 +19,7 @@ PROJECTS = ["birthday", "work", "home"]
 
 KEYWORDS = ["phone", "grocery", "_note"]
 
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('db', metavar='<db>')
