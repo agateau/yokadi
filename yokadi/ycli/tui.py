@@ -20,6 +20,7 @@ from collections import namedtuple
 from getpass import getpass
 
 from yokadi.ycli import colors
+from yokadi.core.yokadiexception import YokadiException
 
 # Number of seconds between checks for end of process
 PROC_POLL_INTERVAL = 0.5
@@ -51,6 +52,14 @@ stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
 
 
+isInteractive = sys.stdin.isatty()
+
+
+def _checkIsInteractive():
+    if not isInteractive:
+        raise YokadiException("This command cannot be used in non-interactive mode")
+
+
 def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".md"):
     """Edit text with external editor
     @param onChanged: function parameter that is call whenever edited data change. Data is given as a string
@@ -58,6 +67,7 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".
     @param prefix: temporary file prefix.
     @param suffix: temporary file suffix.
     @return: newText"""
+    _checkIsInteractive()
     encoding = locale.getpreferredencoding()
 
     def readFile(name):
@@ -130,6 +140,7 @@ def editLine(line, prompt="edit> ", echo=True):
     """Edit a line using readline
     @param prompt: change prompt
     @param echo: whether to echo user text or not"""
+    _checkIsInteractive()
     if line:
         reinjectInRawInput(line)
 
@@ -200,6 +211,8 @@ def enterInt(default=None, prompt="Enter a number"):
 
 
 def confirm(prompt):
+    if not isInteractive:
+        return True
     while True:
         answer = editLine("", prompt=prompt + " (y/n)? ")
         answer = answer.lower()
