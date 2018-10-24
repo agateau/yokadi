@@ -53,17 +53,21 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
 def getTaskFromId(tid):
     """Returns a task given its id, or raise a YokadiException if it does not
     exist.
-    @param tid: taskId string
+    @param tid: Task id or uuid
     @return: Task instance or None if existingTask is False"""
     session = db.getSession()
-    # We do not use line.isdigit() because it returns True if line is '¹'!
-    try:
-        taskId = int(tid)
-    except ValueError:
-        raise YokadiException("task id should be a number")
+    if isinstance(tid, str) and '-' in tid:
+        filters = dict(uuid=tid)
+    else:
+        try:
+            # We do not use line.isdigit() because it returns True if line is '¹'!
+            taskId = int(tid)
+        except ValueError:
+            raise YokadiException("task id should be a number")
+        filters = dict(id=taskId)
 
     try:
-        task = session.query(Task).filter_by(id=taskId).one()
+        task = session.query(Task).filter_by(**filters).one()
     except NoResultFound:
         raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
     return task

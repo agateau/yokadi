@@ -28,6 +28,12 @@ class DbUtilsTestCase(unittest.TestCase):
         task = dbutils.getTaskFromId(str(t1.id))
         self.assertEqual(task, t1)
 
+        task = dbutils.getTaskFromId(t1.id)
+        self.assertEqual(task, t1)
+
+        task = dbutils.getTaskFromId(t1.uuid)
+        self.assertEqual(task, t1)
+
     def testGetOrCreateKeyword(self):
         # interactive
         tui.addInputAnswers("y")
