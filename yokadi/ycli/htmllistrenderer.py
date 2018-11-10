@@ -18,7 +18,7 @@ def escape(text):
 def printRow(out, tag, lst):
     print("<tr>", file=out)
     for value in lst:
-        text = escape(value).encode("utf-8") or "&nbsp;"
+        text = escape(value) or "&nbsp;"
         print("<%s>%s</%s>" % (tag, text, tag), file=out)
     print("</tr>", file=out)
 
@@ -51,7 +51,7 @@ class HtmlListRenderer(object):
         @type taskList: list of db.Task instances
         """
 
-        print(("<h1>%s</h1>" % escape(sectionName)).encode("utf-8"), file=self.out)
+        print("<h1>%s</h1>" % escape(sectionName), file=self.out)
         print("<table width='100%'>", file=self.out)
         printRow(self.out, "th", TASK_FIELDS)
         for task in taskList:
