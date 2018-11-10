@@ -10,7 +10,7 @@ import unittest
 import testutils
 
 from yokadi.core import db, dbutils
-from yokadi.core.db import Project, Keyword, Task
+from yokadi.core.db import Project, Task
 from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli.main import YokadiCmd
 from yokadi.ycli import tui
@@ -56,7 +56,7 @@ class ProjectTestCase(unittest.TestCase):
         # Create project p1 with one associated task
         tui.addInputAnswers("y")
         self.cmd.do_p_add("p1")
-        project = self.session.query(Project).one()
+        self.session.query(Project).one()
         task = dbutils.addTask("p1", "t1", interactive=False)
         taskId = task.id
 

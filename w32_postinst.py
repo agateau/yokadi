@@ -15,35 +15,34 @@ import sys
 # pylint: disable-msg=E0602
 
 # Description string
-desc="Command line oriented todo list system"
+desc = "Command line oriented todo list system"
 # Shortcut name
-lnk="yokadi.lnk"
+lnk = "yokadi.lnk"
 
 # Only do things at install stage, not uninstall
 if sys.argv[1] == "-install":
     # Get python.exe path
     py_path = abspath(join(sys.prefix, "python.exe"))
-    
+
     # Yokadi wrapper path
-    yokadi_dir=abspath(join(sys.prefix, "scripts"))
-    yokadi_path=join(yokadi_dir, "yokadi")
-                          
-    #TODO: create a sexy yokadi .ico file to be put in share dir
-    
-    
-    # Find desktop    
+    yokadi_dir = abspath(join(sys.prefix, "scripts"))
+    yokadi_path = join(yokadi_dir, "yokadi")
+
+    # TODO: create a sexy yokadi .ico file to be put in share dir
+
+    # Find desktop
     try:
         desktop_path = get_special_folder_path("CSIDL_COMMON_DESKTOPDIRECTORY")
     except OSError:
         desktop_path = get_special_folder_path("CSIDL_DESKTOPDIRECTORY")
-    
+
     # Desktop shortcut creation
-    create_shortcut(py_path, # program to launch
+    create_shortcut(py_path,  # program to launch
                     desc,
                     join(desktop_path, lnk),  # shortcut file
-                    yokadi_path, # Argument (pythohn script)
-                    yokadi_dir, # Current work dir
-                    "" # Ico file (nothing for now)
+                    yokadi_path,  # Argument (pythohn script)
+                    yokadi_dir,  # Current work dir
+                    ""  # Ico file (nothing for now)
                     )
 
     # Tel install process that we create a file so it can removed it during uninstallation
@@ -63,12 +62,12 @@ if sys.argv[1] == "-install":
         pass
     directory_created(programs_path)
 
-    create_shortcut(py_path, # program to launch
-                    desc, 
+    create_shortcut(py_path,  # program to launch
+                    desc,
                     join(programs_path, lnk),  # Shortcut file
-                    yokadi_path, # Argument (python script)
-                    yokadi_dir, # Cuurent work dir
-                    "" # Icone
+                    yokadi_path,  # Argument (python script)
+                    yokadi_dir,  # Cuurent work dir
+                    ""  # Icone
                     )
     file_created(join(programs_path, lnk))
 

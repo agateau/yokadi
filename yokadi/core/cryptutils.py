@@ -22,7 +22,7 @@ CRYPTO_PREFIX = "---YOKADI-ENCRYPTED-MESSAGE---"
 KEY_LENGTH = 32
 
 try:
-    from Crypto.Cipher import AES as Cypher
+    from Crypto.Cipher import AES as CRYPTO_ALGO
     CRYPT = True
 except ImportError:
     tui.warning("Python Cryptographic Toolkit module not found. You will not be able to use cryptographic function")
@@ -61,7 +61,7 @@ class YokadiCryptoManager(object):
         # Complete data with blanck
         data_length = int(1 + (len(data) / KEY_LENGTH)) * KEY_LENGTH
         data = adjustString(data, data_length)
-        cypher = Cypher.new(self.passphrase)
+        cypher = CRYPTO_ALGO.new(self.passphrase)
         return CRYPTO_PREFIX + base64.b64encode(cypher.encrypt(data)).decode(encoding='utf8')
 
     def decrypt(self, data):
@@ -92,7 +92,7 @@ class YokadiCryptoManager(object):
         """Low level decryption interface. For internal use only"""
         data = data[len(CRYPTO_PREFIX):]  # Remove crypto prefix
         data = base64.b64decode(data)
-        cypher = Cypher.new(self.passphrase)
+        cypher = CRYPTO_ALGO.new(self.passphrase)
         return cypher.decrypt(data).rstrip().decode(encoding='utf-8')
 
     def askPassphrase(self):
@@ -106,11 +106,11 @@ class YokadiCryptoManager(object):
             self.passphrase = None
             self.force_decrypt = False  # As passphrase is invalid, don't force decrypt for next time
             raise YokadiException("Passphrase differ from previous one."
-                        "If you really want to change passphrase, "
-                        "you should blank the  CRYPTO_CHECK parameter "
-                        "with c_set CRYPTO_CHECK '' "
-                        "Note that you won't be able to retrieve previous tasks you "
-                        "encrypted with your lost passphrase")
+                                  "If you really want to change passphrase, "
+                                  "you should blank the  CRYPTO_CHECK parameter "
+                                  "with c_set CRYPTO_CHECK '' "
+                                  "Note that you won't be able to retrieve previous tasks you "
+                                  "encrypted with your lost passphrase")
         else:
             # Now that passphrase is valid, we will always decrypt encrypted data
             self.force_decrypt = True
@@ -142,7 +142,7 @@ class YokadiCryptoManager(object):
 
             # Save it to database config
             db.getSession().add(db.Config(name="CRYPTO_CHECK", value=self.crypto_check, system=True,
-                      desc="Cryptographic check data of passphrase"))
+                                          desc="Cryptographic check data of passphrase"))
             return True
 
 

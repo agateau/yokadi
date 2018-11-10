@@ -9,8 +9,6 @@ import unittest
 
 from datetime import datetime
 
-import testutils
-
 from yokadi.core import dbutils, db
 from yokadi.ycli import tui
 from yokadi.core.db import Keyword, Project
@@ -28,6 +26,12 @@ class DbUtilsTestCase(unittest.TestCase):
         t1 = dbutils.addTask("x", "t1", {})
 
         task = dbutils.getTaskFromId(str(t1.id))
+        self.assertEqual(task, t1)
+
+        task = dbutils.getTaskFromId(t1.id)
+        self.assertEqual(task, t1)
+
+        task = dbutils.getTaskFromId(t1.uuid)
         self.assertEqual(task, t1)
 
     def testGetOrCreateKeyword(self):

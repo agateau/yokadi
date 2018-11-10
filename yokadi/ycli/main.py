@@ -38,12 +38,12 @@ except ImportError:
 import yokadi
 
 from yokadi.core import db
-from yokadi.ycli import tui
 from yokadi.core import basepaths
 from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.update import update
 
+from yokadi.ycli import tui, commonargs
 from yokadi.ycli.aliascmd import AliasCmd, resolveAlias
 from yokadi.ycli.confcmd import ConfCmd
 from yokadi.ycli.keywordcmd import KeywordCmd
@@ -129,7 +129,8 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         except Exception as e:
             tui.error("Unhandled exception (oups)\n\t%s" % e)
             print("This is a bug of Yokadi, sorry.")
-            print("Send the above message by email to Yokadi developers (ml-yokadi@sequanux.org) to help them make Yokadi better.")
+            print("Send the above message by email to Yokadi developers (ml-yokadi@sequanux.org) to help them make"
+                  " Yokadi better.")
             cut = "---------------------8<----------------------------------------------"
             print(cut)
             traceback.print_exc()
@@ -190,12 +191,9 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
         return names
 
 
-def main():
-    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+def createArgumentParser():
     parser = ArgumentParser()
-
-    parser.add_argument("-d", "--db", dest="filename",
-                        help="TODO database (default: %s)" % basepaths.getDbPath(), metavar="FILE")
+    commonargs.addArgs(parser)
 
     parser.add_argument("-c", "--create-only",
                         dest="createOnly", default=False, action="store_true",
@@ -205,34 +203,28 @@ def main():
                         dest="update", action="store_true",
                         help="Update database to the latest version")
 
-    parser.add_argument("-v", "--version",
-                        dest="version", action="store_true",
-                        help="Display Yokadi current version")
-
     parser.add_argument('cmd', nargs='*')
+    return parser
 
+
+def main():
+    locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+    parser = createArgumentParser()
     args = parser.parse_args()
-
-    if args.version:
-        print("Yokadi - %s" % yokadi.__version__)
-        return 0
+    dataDir, dbPath = commonargs.processArgs(args)
 
     basepaths.migrateOldHistory()
     try:
-        basepaths.migrateOldDb()
+        basepaths.migrateOldDb(dbPath)
     except basepaths.MigrationException as exc:
         print(exc)
         return 1
 
-    if not args.filename:
-        args.filename = basepaths.getDbPath()
-        fileutils.createParentDirs(args.filename)
-
     if args.update:
-        return update.update(args.filename)
+        return update.update(dbPath)
 
     try:
-        db.connectDatabase(args.filename)
+        db.connectDatabase(dbPath)
     except db.DbUserException as exc:
         print(exc)
         return 1
@@ -255,6 +247,7 @@ def main():
     # Save history
     cmd.writeHistory()
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

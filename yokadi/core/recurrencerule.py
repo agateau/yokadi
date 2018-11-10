@@ -99,11 +99,11 @@ class RecurrenceRule(object):
                 bymonthday = int(tokens[1])
                 byhour, byminute = getHourAndMinute(tokens[2])
             except ValueError:
-                POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last":-1}
+                POSITION = {"first": 1, "second": 2, "third": 3, "fourth": 4, "last": -1}
                 if tokens[1].lower() in POSITION and len(tokens) == 4:
                     byweekday = RecurrenceRule.createWeekDay(
-                            weekday=getWeekDayNumberFromDay(tokens[2].lower()),
-                            pos=POSITION[tokens[1]])
+                        weekday=getWeekDayNumberFromDay(tokens[2].lower()),
+                        pos=POSITION[tokens[1]])
                     byhour, byminute = getHourAndMinute(tokens[3])
                     bymonthday = None  # Default to current day number - need to be blanked
                 else:
@@ -118,26 +118,27 @@ class RecurrenceRule(object):
         else:
             raise YokadiException("Unknown frequency. Available: daily, weekly, monthly and yearly")
 
-        return RecurrenceRule(freq,
-                bymonth=bymonth,
-                bymonthday=bymonthday,
-                byweekday=byweekday,
-                byhour=byhour,
-                byminute=byminute,
-                )
+        return RecurrenceRule(
+            freq,
+            bymonth=bymonth,
+            bymonthday=bymonthday,
+            byweekday=byweekday,
+            byhour=byhour,
+            byminute=byminute,
+        )
 
     def toDict(self):
         if not self:
             return {}
 
         return dict(
-                freq=self._freq,
-                bymonth=self._bymonth,
-                bymonthday=self._bymonthday,
-                byweekday=self._byweekday,
-                byhour=self._byhour,
-                byminute=self._byminute
-            )
+            freq=self._freq,
+            bymonth=self._bymonth,
+            bymonthday=self._bymonthday,
+            byweekday=self._byweekday,
+            byhour=self._byhour,
+            byminute=self._byminute
+        )
 
     def _rrule(self):
         if isinstance(self._byweekday, dict):
@@ -146,14 +147,15 @@ class RecurrenceRule(object):
         else:
             byweekday = self._byweekday
 
-        return rrule.rrule(freq=self._freq,
-                bymonth=self._bymonth,
-                bymonthday=self._bymonthday,
-                byweekday=byweekday,
-                byhour=self._byhour,
-                byminute=self._byminute,
-                bysecond=0
-                )
+        return rrule.rrule(
+            freq=self._freq,
+            bymonth=self._bymonth,
+            bymonthday=self._bymonthday,
+            byweekday=byweekday,
+            byhour=self._byhour,
+            byminute=self._byminute,
+            bysecond=0
+        )
 
     def getNext(self, refDate=None):
         """Return next date of recurrence after given date

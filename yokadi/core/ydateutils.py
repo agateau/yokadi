@@ -21,13 +21,13 @@ DATE_FORMATS = [
     "%d/%m/%Y",
     "%d/%m/%y",
     "%d/%m",
-    ]
+]
 
 TIME_FORMATS = [
     "%H:%M:%S",
     "%H:%M",
     "%H",
-    ]
+]
 
 
 def parseDateTimeDelta(line):
@@ -38,7 +38,7 @@ def parseDateTimeDelta(line):
         raise YokadiException("Timeshift must be a float or an integer")
 
     suffix = line[-1].upper()
-    if   suffix == "W":
+    if suffix == "W":
         return timedelta(days=delta * 7)
     elif suffix == "D":
         return timedelta(days=delta)
@@ -92,7 +92,7 @@ def parseHumaneDateTime(line, hint=None, today=None):
         out, fmt = testFormats(text, DATE_FORMATS)
         if not out:
             return None
-        if not "%y" in fmt and not "%Y" in fmt:
+        if "%y" not in fmt and "%Y" not in fmt:
             out = out.replace(year=today.year)
         return out.date()
 
@@ -131,7 +131,7 @@ def parseHumaneDateTime(line, hint=None, today=None):
     weekdayDict = {
         "today": today.weekday(),
         "tomorrow": (today.weekday() + 1) % 7,
-        }
+    }
     weekdayDict.update(WEEKDAYS)
     weekdayDict.update(SHORT_WEEKDAYS)
     weekday = weekdayDict.get(firstWord)
@@ -245,7 +245,8 @@ def getWeekDayNumberFromDay(day):
     elif day in WEEKDAYS:
         dayNumber = WEEKDAYS[day]
     else:
-        raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday, [sa]turday, [su]nday")
+        raise YokadiException("Day must be one of the following: [mo]nday, [tu]esday, [we]nesday, [th]ursday, [fr]iday,"
+                              " [sa]turday, [su]nday")
     return dayNumber
 
 
@@ -264,7 +265,7 @@ def parseDateLimit(line, today=None):
         (">=", operator.__ge__, TIME_HINT_BEGIN),
         (">", operator.__gt__, TIME_HINT_END),
         ("<", operator.__lt__, TIME_HINT_BEGIN),
-        ]
+    ]
 
     op = operator.__le__
     hint = TIME_HINT_END

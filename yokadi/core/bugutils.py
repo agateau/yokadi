@@ -20,7 +20,7 @@ SEVERITY_LIST = [
     (5, "Minor usability: Impairs usability in secondary scenarios"),
     (6, "Major usability: Impairs usability in key scenarios"),
     (7, "Crash: Bug causes crash or data loss. Asserts in the Debug release"),
-    ]
+]
 
 LIKELIHOOD_LIST = [
     (1, "Will affect almost no one"),
@@ -28,7 +28,7 @@ LIKELIHOOD_LIST = [
     (3, "Will affect average number of users"),
     (4, "Will affect most users"),
     (5, "Will affect all users"),
-    ]
+]
 
 
 def computeUrgency(keywordDict):

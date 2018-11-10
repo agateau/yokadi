@@ -8,8 +8,6 @@ import unittest
 
 from sqlalchemy.orm.exc import NoResultFound
 
-import testutils
-
 from yokadi.core import dbutils
 from yokadi.ycli import tui
 from yokadi.ycli.keywordcmd import KeywordCmd, _listKeywords

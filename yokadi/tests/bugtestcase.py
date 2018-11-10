@@ -7,8 +7,6 @@ Bug test cases
 
 import unittest
 
-import testutils
-
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
 from yokadi.core import db, dbutils

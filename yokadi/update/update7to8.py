@@ -6,6 +6,8 @@ Drops the projectkeyword table, since we are removing this feature.
 @author: Aurélien Gâteau <mail@agateau.com>
 @license: GPL v3 or newer
 """
+
+
 def dropProjectKeywordTable(cursor):
     cursor.execute('drop table project_keyword')
 

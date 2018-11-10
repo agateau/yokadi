@@ -9,7 +9,7 @@ Database utilities.
 from datetime import datetime, timedelta
 import os
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
@@ -27,8 +27,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
     @param interactive: Ask user before creating project (this is the default)
     @type interactive: Bool
     @returns : Task instance on success, None if cancelled."""
-    session = db.getSession(
-                                   )
+    session = db.getSession()
     if keywordDict is None:
         keywordDict = {}
 
@@ -42,7 +41,8 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
         return None
 
     # Create task
-    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title, description="", status="new")
+    task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project, title=title,
+                description="", status="new")
     session.add(task)
     task.setKeywordDict(keywordDict)
     session.merge(task)
@@ -53,17 +53,21 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
 def getTaskFromId(tid):
     """Returns a task given its id, or raise a YokadiException if it does not
     exist.
-    @param tid: taskId string
+    @param tid: Task id or uuid
     @return: Task instance or None if existingTask is False"""
     session = db.getSession()
-    # We do not use line.isdigit() because it returns True if line is '¹'!
-    try:
-        taskId = int(tid)
-    except ValueError:
-        raise YokadiException("task id should be a number")
+    if isinstance(tid, str) and '-' in tid:
+        filters = dict(uuid=tid)
+    else:
+        try:
+            # We do not use line.isdigit() because it returns True if line is '¹'!
+            taskId = int(tid)
+        except ValueError:
+            raise YokadiException("task id should be a number")
+        filters = dict(id=taskId)
 
     try:
-        task = session.query(Task).filter_by(id=taskId).one()
+        task = session.query(Task).filter_by(**filters).one()
     except NoResultFound:
         raise YokadiException("Task %s does not exist. Use t_list to see all tasks" % taskId)
     return task
@@ -165,7 +169,7 @@ class TaskLockManager:
         try:
             return db.getSession().query(TaskLock).filter(TaskLock.task == self.task).one()
         except NoResultFound:
-            return  None
+            return None
 
     def acquire(self, pid=None, now=None):
         """Acquire a lock for that task and remove any previous stale lock"""
@@ -235,7 +239,8 @@ class KeywordFilter(object):
         @return: a new query"""
         if self.negative:
             session = db.getSession()
-            excludedTaskIds = session.query(Task.id).join(TaskKeyword).join(Keyword).filter(Keyword.name.like(self.name))
+            excludedTaskIds = session.query(Task.id).join(TaskKeyword).join(Keyword) \
+                .filter(Keyword.name.like(self.name))
             return query.filter(~Task.id.in_(excludedTaskIds))
         else:
             keywordAlias = aliased(Keyword)

@@ -19,7 +19,8 @@ import shutil
 from collections import namedtuple
 from getpass import getpass
 
-from yokadi.ycli import colors as C
+from yokadi.ycli import colors
+from yokadi.core.yokadiexception import YokadiException
 
 # Number of seconds between checks for end of process
 PROC_POLL_INTERVAL = 0.5
@@ -46,8 +47,17 @@ class IOStream:
         else:
             self.__original_flow.write(text)
 
+
 stdout = IOStream(sys.stdout)
 stderr = IOStream(sys.stderr)
+
+
+isInteractive = sys.stdin.isatty()
+
+
+def _checkIsInteractive():
+    if not isInteractive:
+        raise YokadiException("This command cannot be used in non-interactive mode")
 
 
 def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".md"):
@@ -57,7 +67,9 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".
     @param prefix: temporary file prefix.
     @param suffix: temporary file suffix.
     @return: newText"""
+    _checkIsInteractive()
     encoding = locale.getpreferredencoding()
+
     def readFile(name):
         with open(name, encoding=encoding) as data:
             return str(data.read())
@@ -66,9 +78,10 @@ def editText(text, onChanged=None, lockManager=None, prefix="yokadi-", suffix=".
         start = time.time()
         while (time.time() - start) < MTIME_POLL_INTERVAL:
             proc.poll()
-            if not proc.returncode is None:
+            if proc.returncode is not None:
                 return
             time.sleep(PROC_POLL_INTERVAL)
+
     prefix = NON_SIMPLE_ASCII.sub("-", prefix)
     prefix = MULTIPLE_DASH.sub("-", prefix)
     prefix = unicodedata.normalize('NFKD', prefix)
@@ -127,6 +140,7 @@ def editLine(line, prompt="edit> ", echo=True):
     """Edit a line using readline
     @param prompt: change prompt
     @param echo: whether to echo user text or not"""
+    _checkIsInteractive()
     if line:
         reinjectInRawInput(line)
 
@@ -197,6 +211,8 @@ def enterInt(default=None, prompt="Enter a number"):
 
 
 def confirm(prompt):
+    if not isInteractive:
+        return True
     while True:
         answer = editLine("", prompt=prompt + " (y/n)? ")
         answer = answer.lower()
@@ -214,7 +230,7 @@ def renderFields(fields):
     @param fields: list of tuple (caption, value)
     """
     maxWidth = max([len(x) for x, y in fields])
-    format = C.BOLD + "%" + str(maxWidth) + "s" + C.RESET + ": %s"
+    format = colors.BOLD + "%" + str(maxWidth) + "s" + colors.RESET + ": %s"
     for caption, value in fields:
         print(format % (caption, value), file=stdout)
 
@@ -229,15 +245,15 @@ def warnDeprecated(old, new):
 
 
 def error(message):
-    print(C.BOLD + C.RED + "Error: %s" % message + C.RESET, file=stderr)
+    print(colors.BOLD + colors.RED + "Error: %s" % message + colors.RESET, file=stderr)
 
 
 def warning(message):
-    print(C.RED + "Warning: " + C.RESET + message, file=stderr)
+    print(colors.RED + "Warning: " + colors.RESET + message, file=stderr)
 
 
 def info(message):
-    print(C.CYAN + "Info: " + C.RESET + message, file=stderr)
+    print(colors.CYAN + "Info: " + colors.RESET + message, file=stderr)
 
 
 def addInputAnswers(*answers):
@@ -272,10 +288,10 @@ class TextColorizer:
         self._dct[pos] = color
 
     def setResetAt(self, pos):
-        self._dct[pos] = C.RESET
+        self._dct[pos] = colors.RESET
 
     def crop(self, width):
-        self._dct = { pos: color for pos, color in self._dct.items() if pos < width }
+        self._dct = {pos: color for pos, color in self._dct.items() if pos < width}
 
     def render(self, text):
         """

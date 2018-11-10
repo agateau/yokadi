@@ -5,6 +5,8 @@ Update from version 4 to version 5 of Yokadi DB
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or newer
 """
+
+
 def updateBugsKeywordsNames(cursor):
     for keyword in ("bug", "severity", "likelihood"):
         cursor.execute("update keyword set name='_%s' where name='%s'" % (keyword, keyword))

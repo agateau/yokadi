@@ -58,7 +58,7 @@ def generateCal():
     cal.add("prodid", '-//Yokadi calendar //yokadi.github.io//')
     cal.add("version", "2.0")
     # Add projects
-    for project in session.query(Project).filter(Project.active == True):
+    for project in session.query(Project).filter(Project.active == True):  # noqa
         vTodo = icalendar.Todo()
         vTodo.add("summary", project.name)
         vTodo["uid"] = PROJECT_UID % project.id
@@ -144,6 +144,7 @@ def updateTaskFromVTodo(task, vTodo):
         dbutils.createMissingKeywords(list(newKwDict.keys()), interactive=False)
         task.setKeywordDict(newKwDict)
 
+
 class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
     """Simple Ical http request handler that only implement GET method"""
     newTask = {}  # Dict recording new task origin UID
@@ -198,7 +199,7 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
             print("New task %s (%s)" % (vTodo["summary"], vTodo["UID"]))
             keywordDict = {}
             task = dbutils.addTask(INBOX_PROJECT, vTodo["summary"],
-                               keywordDict, interactive=False)
+                                   keywordDict, interactive=False)
             session.add(task)
             session.commit()
             # Keep record of new task origin UID to avoid duplicate

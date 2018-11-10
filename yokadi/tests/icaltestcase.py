@@ -7,14 +7,11 @@ Ical features test cases
 
 
 import unittest
-import testutils
-import datetime
 
 from yokadi.ycli import tui
 from yokadi.yical import yical
 from yokadi.core import dbutils
 from yokadi.core import db
-from yokadi.core.db import Task
 
 
 class IcalTestCase(unittest.TestCase):
@@ -116,7 +113,7 @@ class IcalTestCase(unittest.TestCase):
     def testTaskDoneMapping(self):
         tui.addInputAnswers("y")
         t1 = dbutils.addTask("x", "t1", {})
-        v1 = yical.createVTodoFromTask(t1)
+        yical.createVTodoFromTask(t1)
 
         # v1["completed"] = datetime.datetime.now()
         # yical.updateTaskFromVTodo(t1, v1)

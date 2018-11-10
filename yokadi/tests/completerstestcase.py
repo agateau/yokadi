@@ -7,8 +7,6 @@ Project test cases
 
 import unittest
 
-import testutils
-
 from yokadi.core import db
 from yokadi.core.db import Project, setDefaultConfig
 from yokadi.ycli import completers
@@ -32,9 +30,9 @@ class CompletersTestCase(unittest.TestCase):
 
     def testCompleteParameterPosition(self):
         data = [
-                 (("bla", "t_add bla", 6, 10), 1),
-                 (("bli", "t_add bla bli", 10, 14), 2),
-               ]
+            (("bla", "t_add bla", 6, 10), 1),
+            (("bli", "t_add bla bli", 10, 14), 2),
+        ]
         for params, expectedResult in data:
             result = completers.computeCompleteParameterPosition(*params)
             self.assertEqual(result, expectedResult)

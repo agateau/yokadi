@@ -19,6 +19,8 @@ from yokadi.core import fileutils
 
 _WINDOWS = os.name == "nt"
 
+DB_NAME = "yokadi.db"
+
 
 class MigrationException(Exception):
     pass
@@ -55,14 +57,14 @@ def getCacheDir():
 
 
 def getDataDir():
+    xdgDataDir = os.environ.get("XDG_DATA_HOME")
+    if xdgDataDir:
+        return os.path.join(xdgDataDir, "yokadi")
+
     if _WINDOWS:
-        value = os.path.join(_getAppDataDir(), "yokadi", "data")
-    else:
-        dataBaseDir = os.environ.get("XDG_DATA_HOME")
-        if not dataBaseDir:
-            dataBaseDir = os.path.expandvars("$HOME/.local/share")
-        value = os.path.join(dataBaseDir, "yokadi")
-    return value
+        return os.path.join(_getAppDataDir(), "yokadi", "data")
+
+    return os.path.expandvars("$HOME/.local/share/yokadi")
 
 
 def getHistoryPath():
@@ -72,11 +74,11 @@ def getHistoryPath():
     return os.path.join(getCacheDir(), "history")
 
 
-def getDbPath():
+def getDbPath(dataDir):
     path = os.getenv("YOKADI_DB")
     if path:
         return path
-    return os.path.join(getDataDir(), "yokadi.db")
+    return os.path.join(dataDir, "yokadi.db")
 
 
 def _getOldHistoryPath():
@@ -100,14 +102,14 @@ def migrateOldHistory():
     print("Moved %s to %s" % (oldHistoryPath, newHistoryPath))
 
 
-def migrateOldDb():
+def migrateOldDb(newDbPath):
     oldDbPath = os.path.normcase(os.path.expandvars("$HOME/.yokadi.db"))
     if not os.path.exists(oldDbPath):
         return
 
-    newDbPath = getDbPath()
     if os.path.exists(newDbPath):
-        raise MigrationException("Tried to move %s to %s, but %s already exists. You must remove one of the two files." % (oldDbPath, newDbPath, newDbPath))
+        raise MigrationException("Tried to move %s to %s, but %s already exists."
+                                 " You must remove one of the two files." % (oldDbPath, newDbPath, newDbPath))
     fileutils.createParentDirs(newDbPath)
     shutil.move(oldDbPath, newDbPath)
     print("Moved %s to %s" % (oldDbPath, newDbPath))

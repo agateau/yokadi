@@ -43,25 +43,29 @@ TEST_DATA = [
     ),
     TestRow(
         "quarterly 2 8:27",
-        {"freq": rrule.YEARLY, "bymonth": (1, 4, 7, 10), "bymonthday": (2,), "byweekday": (), "byhour": (8,), "byminute": (27,)},
+        {"freq": rrule.YEARLY, "bymonth": (1, 4, 7, 10), "bymonthday": (2,), "byweekday": (), "byhour": (8,),
+         "byminute": (27,)},
         RecurrenceRule(rrule.YEARLY, bymonth=(1, 4, 7, 10), bymonthday=2, byhour=8, byminute=27),
         REF_DATE.replace(month=4, day=2, hour=8, minute=27)
     ),
     TestRow(
         "monthly first wednesday 8:27",
-        {"freq": rrule.MONTHLY, "bymonth": (), "bymonthday": (), "byweekday": {"pos": 1, "weekday": 2}, "byhour": (8,), "byminute": (27,)},
+        {"freq": rrule.MONTHLY, "bymonth": (), "bymonthday": (), "byweekday": {"pos": 1, "weekday": 2}, "byhour": (8,),
+         "byminute": (27,)},
         RecurrenceRule(rrule.MONTHLY, byweekday=RecurrenceRule.createWeekDay(pos=1, weekday=2), byhour=8, byminute=27),
         REF_DATE.replace(month=4, day=2, hour=8, minute=27)
     ),
     TestRow(
         "monthly last sunday 8:27",
-        {"freq": rrule.MONTHLY, "bymonth": (), "bymonthday": (), "byweekday": {"pos": -1, "weekday": 6}, "byhour": (8,), "byminute": (27,)},
+        {"freq": rrule.MONTHLY, "bymonth": (), "bymonthday": (), "byweekday": {"pos": -1, "weekday": 6}, "byhour": (8,),
+         "byminute": (27,)},
         RecurrenceRule(rrule.MONTHLY, byweekday=RecurrenceRule.createWeekDay(pos=-1, weekday=6), byhour=8, byminute=27),
         REF_DATE.replace(month=3, day=30, hour=8, minute=27)
     ),
     TestRow(
         "yearly 23/2 8:27",
-        {"freq": rrule.YEARLY, "bymonth": (2,), "bymonthday": (23,), "byweekday": (), "byhour": (8,), "byminute": (27,)},
+        {"freq": rrule.YEARLY, "bymonth": (2,), "bymonthday": (23,), "byweekday": (), "byhour": (8,),
+         "byminute": (27,)},
         RecurrenceRule(rrule.YEARLY, bymonth=2, bymonthday=23, byhour=8, byminute=27),
         REF_DATE.replace(year=2201, month=2, day=23, hour=8, minute=27)
     ),
@@ -78,18 +82,22 @@ class RecurrenceRuleTestCase(unittest.TestCase):
             ("weekly Fr 23:00", RecurrenceRule(rrule.WEEKLY, byweekday=4, byhour=23)),
             ("weekly Friday 23:00", RecurrenceRule(rrule.WEEKLY, byweekday=4, byhour=23)),
             ("monthly 3 13:00", RecurrenceRule(rrule.MONTHLY, bymonthday=3, byhour=13)),
-            ("monthly second friday 13:00", RecurrenceRule(rrule.MONTHLY, byweekday=RecurrenceRule.createWeekDay(weekday=4, pos=2), byhour=13)),
+            ("monthly second friday 13:00", RecurrenceRule(rrule.MONTHLY,
+                                                           byweekday=RecurrenceRule.createWeekDay(weekday=4, pos=2),
+                                                           byhour=13)),
             ("yearly 3/07 11:20", RecurrenceRule(rrule.YEARLY, bymonth=7, bymonthday=3, byhour=11, byminute=20)),
-            ("quarterly 14 11:20", RecurrenceRule(rrule.YEARLY, bymonth=(1, 4, 7, 10), bymonthday=14, byhour=11, byminute=20)),
-            ("quarterly first monday 23:20", RecurrenceRule(rrule.YEARLY, bymonth=(1, 4, 7, 10), byweekday=RecurrenceRule.createWeekDay(weekday=0, pos=1), byhour=23, byminute=20)),
-            ] + [(x.text, x.rule) for x in TEST_DATA]
+            ("quarterly 14 11:20", RecurrenceRule(rrule.YEARLY, bymonth=(1, 4, 7, 10), bymonthday=14, byhour=11,
+                                                  byminute=20)),
+            ("quarterly first monday 23:20", RecurrenceRule(rrule.YEARLY, bymonth=(1, 4, 7, 10),
+                                                            byweekday=RecurrenceRule.createWeekDay(weekday=0, pos=1),
+                                                            byhour=23, byminute=20)),
+        ] + [(x.text, x.rule) for x in TEST_DATA]
 
         for text, expected in testData:
             with self.subTest(text=text):
                 output = RecurrenceRule.fromHumaneString(text)
                 self.assertEqual(output, expected,
-                    '\ninput:    {}\noutput:   {}\nexpected: {}'.format(text, output, expected)
-                )
+                                 '\ninput:    {}\noutput:   {}\nexpected: {}'.format(text, output, expected))
 
     def testFromHumaneString_badInput(self):
         for badInput in ("foo",  # Unknown recurrence
@@ -109,8 +117,7 @@ class RecurrenceRuleTestCase(unittest.TestCase):
             with self.subTest(text=row.text):
                 rule = RecurrenceRule.fromDict(row.dct)
                 self.assertEqual(rule, row.rule,
-                    '\ninput:    {}\nrule:     {}\nexpected: {}'.format(row.dct, rule, row.rule)
-                )
+                                 '\ninput:    {}\nrule:     {}\nexpected: {}'.format(row.dct, rule, row.rule))
                 dct = rule.toDict()
                 self.assertEqual(dct, row.dct)
 
