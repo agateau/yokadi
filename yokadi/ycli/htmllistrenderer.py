@@ -8,7 +8,9 @@ HTML rendering of t_list output
 """
 import xml.sax.saxutils as saxutils
 
-TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "urgency", "status", "description", "keywords"]
+from collections import namedtuple
+
+TaskField = namedtuple("TaskField", ("title", "format"))
 
 
 HTML_HEADER = """
@@ -23,6 +25,7 @@ HTML_HEADER = """
         td, th {
             border: 1px solid #ccc;
             padding: 0.5em;
+            vertical-align: top;
         }
     </style>
     <title>Yokadi tasks export</title>
@@ -41,7 +44,10 @@ def escape(text):
 def printRow(out, tag, lst):
     print("<tr>", file=out)
     for value in lst:
-        text = escape(value) or "&nbsp;"
+        if value:
+            text = escape(value).replace("\n", "<br>")
+        else:
+            text = "&nbsp;"
         print("<%s>%s</%s>" % (tag, text, tag), file=out)
     print("</tr>", file=out)
 
@@ -60,18 +66,32 @@ class HtmlListRenderer(object):
         @param taskList: list of tasks to display
         @type taskList: list of db.Task instances
         """
+        TASK_FIELDS = [
+            TaskField("Id", lambda x: str(x.id)),
+            TaskField("Title", self._titleFormater),
+            TaskField("Due date", lambda x: str(x.dueDate)),
+            TaskField("Urgency", lambda x: str(x.urgency)),
+            TaskField("Status", lambda x: x.status),
+        ]
 
         print("<h1>%s</h1>" % escape(sectionName), file=self.out)
         print("<table width='100%'>", file=self.out)
-        printRow(self.out, "th", TASK_FIELDS)
+        printRow(self.out, "th", [x.title for x in TASK_FIELDS])
         for task in taskList:
-            lst = [self.cryptoMgr.decrypt(task.title), ]
-            lst.extend([getattr(task, x) for x in TASK_FIELDS if x not in ("title", "description", "keywords")])
-            lst.append(self.cryptoMgr.decrypt(task.description))
-            lst.append(task.getKeywordsAsString())
+            lst = [x.format(task) for x in TASK_FIELDS]
             printRow(self.out, "td", lst)
         print("</table>", file=self.out)
 
     def end(self):
         print(HTML_FOOTER, file=self.out)
+
+    def _titleFormater(self, task):
+        title = self.cryptoMgr.decrypt(task.title)
+        description = self.cryptoMgr.decrypt(task.description)
+        keywords = task.getKeywordsAsString()
+        if keywords:
+            title += " " + keywords
+        if description:
+            title += "\n" + description
+        return title
 # vi: ts=4 sw=4 et
