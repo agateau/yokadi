@@ -11,6 +11,25 @@ import xml.sax.saxutils as saxutils
 TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "urgency", "status", "description", "keywords"]
 
 
+HTML_HEADER = """
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+    <style>
+        td, th {
+        border: 1px solid #ccc;
+    }
+    </style>
+    <title>Yokadi tasks export</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+"""
+
+
+HTML_FOOTER = "</body></html>"
+
+
 def escape(text):
     return saxutils.escape(str(text))
 
@@ -28,20 +47,7 @@ class HtmlListRenderer(object):
         self.out = out
         self.cryptoMgr = cryptoMgr
 
-        # TODO: make this fancier
-        print("""<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-                <html>
-                <head>
-                    <style>
-                    td, th {
-                        border: 1px solid #ccc;
-                    }
-                    </style>
-                    <title>Yokadi tasks export</title>
-                    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-                </head>
-                <body>
-                """, file=self.out)
+        print(HTML_HEADER, file=self.out)
 
     def addTaskList(self, sectionName, taskList):
         """Store tasks for this section
@@ -63,5 +69,5 @@ class HtmlListRenderer(object):
         print("</table>", file=self.out)
 
     def end(self):
-        print("</body></html>", file=self.out)
+        print(HTML_FOOTER, file=self.out)
 # vi: ts=4 sw=4 et
