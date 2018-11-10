@@ -12,16 +12,20 @@ TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "urgency", "statu
 
 
 HTML_HEADER = """
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
+<html lang='en'>
 <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
     <style>
+        table {
+            border-collapse: collapse;
+        }
         td, th {
-        border: 1px solid #ccc;
-    }
+            border: 1px solid #ccc;
+            padding: 0.5em;
+        }
     </style>
     <title>Yokadi tasks export</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 </head>
 <body>
 """
