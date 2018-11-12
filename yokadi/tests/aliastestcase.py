@@ -31,8 +31,8 @@ class AliasTestCase(unittest.TestCase):
             self.cmd.do_a_list("")
             content = out.getvalue()
             self.assertEqual(content,
-                             colors.BOLD + "a".ljust(10) + colors.RESET + "=> t_list\n" +
-                             colors.BOLD + "b".ljust(10) + colors.RESET + "=> t_add\n")
+                             colors.BOLD + "a".ljust(10) + colors.RESET + "=> t_list\n"
+                             + colors.BOLD + "b".ljust(10) + colors.RESET + "=> t_add\n")
 
     def testList_empty(self):
         out = StringIO()
