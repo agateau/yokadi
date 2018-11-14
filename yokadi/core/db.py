@@ -15,7 +15,7 @@ from uuid import uuid1
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, UniqueConstraint
@@ -333,8 +333,7 @@ class Database(object):
 
         echo = os.environ.get("YOKADI_SQL_DEBUG", "0") != "0"
         self.engine = create_engine(connectionString, echo=echo)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
+        self.session = scoped_session(sessionmaker(bind=self.engine))
 
         if not os.path.exists(dbFileName) or memoryDatabase:
             if not createIfNeeded:
