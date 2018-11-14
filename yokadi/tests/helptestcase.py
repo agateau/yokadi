@@ -54,7 +54,7 @@ class HelpTestCase(YokadiTestCase):
                     # We use Cmd implementation of onecmd() because YokadiCmd
                     # overrides it to catch exceptions
                     Cmd.onecmd(cmd, "help " + yokadiCommand)
-            except Exception as exc:
+            except Exception:
                 print("'help %s' failed" % yokadiCommand)
                 raise
 

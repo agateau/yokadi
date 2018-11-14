@@ -33,7 +33,7 @@ from yokadi.core.yokadiexception import YokadiException
 
 # UID pattern
 TASK_UID = icalutils.UID_PREFIX + "-task-%s"
-TASK_RE = re.compile(TASK_UID.replace("%s", "(\d+)"))
+TASK_RE = re.compile(TASK_UID.replace(r"%s", "(\d+)"))
 
 # Default project where new task are added
 # TODO: make this a configurable items via c_set

@@ -54,7 +54,7 @@ def yokadiTaskTitleToIcalSummary(title, taskId):
 
 def icalSummaryToYokadiTaskTitle(summary, taskId):
     """Remove " (id)" part of the summary"""
-    return re.sub("\s?\({}\)".format(taskId), "", summary)
+    return re.sub(r"\s?\({}\)".format(taskId), "", summary)
 
 
 def yokadiProjectNameToIcalRelatedTo(projectName):
