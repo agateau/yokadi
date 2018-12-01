@@ -34,7 +34,7 @@ from yokadi.core.yokadiexception import YokadiException
 # UID pattern
 UID_PREFIX = "yokadi"
 TASK_UID = UID_PREFIX + "-task-%s"
-TASK_RE = re.compile(TASK_UID.replace("%s", "(\d+)"))
+TASK_RE = re.compile(TASK_UID.replace("%s", r"(\d+)"))
 PROJECT_UID = UID_PREFIX + "-project-%s"
 
 # Default project where new task are added
@@ -113,7 +113,7 @@ def updateTaskFromVTodo(task, vTodo):
             attr = icalutils.convertIcalType(attr)
             if yokadiAttribute == "title":
                 # Remove (id)
-                attr = re.sub("\s?\(%s\)" % task.id, "", attr)
+                attr = re.sub(r"\s?\(%s\)" % task.id, "", attr)
             if yokadiAttribute == "doneDate":
                 # A done date defined indicate that task is done
                 task.status = "done"

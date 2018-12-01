@@ -280,8 +280,8 @@ class TaskCmd(object):
                 line = line.replace("__", ",".join([str(i) for i in self.lastTaskIds]))
             else:
                 raise BadUsageException("You must select tasks with t_list prior to use __")
-        rangeId = re.compile("(\d+)-(\d+)")
-        tokens = re.split("[\s|,]", line)
+        rangeId = re.compile(r"(\d+)-(\d+)")
+        tokens = re.split(r"[\s|,]", line)
         if len(tokens) < 2:
             raise BadUsageException("Give at least a task id and a command")
 
