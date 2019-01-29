@@ -8,6 +8,15 @@ import sqlite3
 import sys
 
 
+class UpdateError(Exception):
+    pass
+
+
+class UpdateCanceledError(UpdateError):
+    def __init__(self):
+        super(UpdateError, self).__init__("Canceled")
+
+
 def getTableList(cursor):
     cursor.execute("select name from sqlite_master where type='table' and name!='sqlite_sequence'")
     return [x[0] for x in cursor.fetchall()]

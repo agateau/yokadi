@@ -29,6 +29,7 @@ from yokadi.update import update7to8  # noqa
 from yokadi.update import update8to9  # noqa
 from yokadi.update import update9to10  # noqa
 from yokadi.update import update10to11  # noqa
+from yokadi.update import update11to12  # noqa
 
 
 def getVersion(fileName):
@@ -159,7 +160,11 @@ def main():
     else:
         newDbPath = os.path.abspath(args.updated)
 
-    return update(dbPath, newDbPath, inplace=args.inplace)
+    try:
+        return update(dbPath, newDbPath, inplace=args.inplace)
+    except updateutils.UpdateError as exc:
+        err(str(exc))
+        return 1
 
 
 if __name__ == "__main__":
