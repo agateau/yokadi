@@ -61,8 +61,6 @@ class TaskCmd(object):
         parser = YokadiOptionParser()
         parser.usage = "%s [options] <projectName> [@<keyword1>] [@<keyword2>] <title>" % cmd
         parser.description = "Add new %s. Will prompt to create keywords if they do not exist." % cmd
-        parser.add_argument("-c", dest="crypt", default=False, action="store_true",
-                            help="Encrypt title")
         parser.add_argument("-d", "--describe", dest="describe", default=False, action="store_true",
                             help="Directly open editor to describe task")
         parser.add_argument('cmd', nargs='*')
@@ -81,15 +79,6 @@ class TaskCmd(object):
         if not title:
             raise BadUsageException("Missing title")
 
-        if args.crypt:
-            # Obfuscate line in history
-            length = readline.get_current_history_length()
-            if length > 0:  # Ensure history is positive to avoid crash with bad readline setup
-                obfuscatedLine = line.replace(title, "<...encrypted...>")
-                readline.replace_history_item(length - 1, "%s %s " % (cmd, obfuscatedLine))
-            # Encrypt title
-            title = self.cryptoMgr.encrypt(title)
-
         task = dbutils.addTask(projectName, title, keywordDict)
         if not task:
             tui.reinjectInRawInput("%s %s" % (cmd, line))
@@ -105,13 +94,9 @@ class TaskCmd(object):
         t_add <projectName> [@<keyword1>] [@<keyword2>] <title>"""
         task = self._t_add("t_add", line)
         if task:
-            if self.cryptoMgr.isEncrypted(task.title):
-                title = "<... encrypted data...>"
-            else:
-                title = task.title
             self.session.add(task)
             self.session.commit()
-            print("Added task '%s' (id=%d)" % (title, task.id))
+            print("Added task '%s' (id=%d)" % (task.title, task.id))
 
     complete_t_add = projectAndKeywordCompleter
 
@@ -128,14 +113,9 @@ class TaskCmd(object):
         task.setKeywordDict(keywordDict)
         task.urgency = bugutils.computeUrgency(keywordDict)
 
-        if self.cryptoMgr.isEncrypted(task.title):
-            title = "<... encrypted data...>"
-        else:
-            title = task.title
-
         self.session.add(task)
         self.session.commit()
-        print("Added bug '%s' (id=%d, urgency=%d)" % (title, task.id, task.urgency))
+        print("Added bug '%s' (id=%d, urgency=%d)" % (task.title, task.id, task.urgency))
 
     complete_bug_add = ProjectCompleter(1)
 
@@ -150,12 +130,8 @@ class TaskCmd(object):
         keywordDict = task.getKeywordDict()
         keywordDict[NOTE_KEYWORD] = None
         task.setKeywordDict(keywordDict)
-        if self.cryptoMgr.isEncrypted(task.title):
-            title = "<... encrypted data...>"
-        else:
-            title = task.title
         self.session.commit()
-        print("Added note '%s' (id=%d)" % (title, task.id))
+        print("Added note '%s' (id=%d)" % (task.title, task.id))
     complete_n_add = projectAndKeywordCompleter
 
     def do_bug_edit(self, line):
@@ -180,18 +156,11 @@ class TaskCmd(object):
         """Starts an editor to enter a longer description of a task.
         t_describe <id>"""
         def updateDescription(description):
-            if self.cryptoMgr.isEncrypted(task.title):
-                task.description = self.cryptoMgr.encrypt(description)
-            else:
-                task.description = description
+            task.description = description
 
         task = self.getTaskFromId(line)
         try:
-            if self.cryptoMgr.isEncrypted(task.title):
-                # As title is encrypted, we assume description will be encrypted as well
-                self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
-
-            description = tui.editText(self.cryptoMgr.decrypt(task.description),
+            description = tui.editText(task.description,
                                        onChanged=updateDescription,
                                        lockManager=dbutils.TaskLockManager(task),
                                        prefix="yokadi-%s-%s-" % (task.project, task.title))
@@ -437,8 +406,6 @@ class TaskCmd(object):
         parser.add_argument("-o", "--output", dest="output",
                             help="Output task list to <file>",
                             metavar="<file>")
-        parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
-                            help="Decrypt task title and description")
 
         parser.add_argument("filter", nargs="*", metavar="<project_or_keyword_filter>")
 
@@ -610,8 +577,6 @@ class TaskCmd(object):
                 dueOperator, dueLimit = ydateutils.parseDateLimit(due)
                 filters.append(DbFilter(dueOperator(Task.dueDate, dueLimit)))
             order = [Task.dueDate, ]
-        if args.decrypt:
-            self.cryptoMgr.force_decrypt = True
 
         # Define output
         if args.output:
@@ -622,7 +587,7 @@ class TaskCmd(object):
         # Instantiate renderer
         if renderer is None:
             rendererClass = selectRendererClass()
-            renderer = rendererClass(out, cryptoMgr=self.cryptoMgr)
+            renderer = rendererClass(out)
 
         # Fill the renderer
         self._renderList(renderer, projectList, filters, order, limit, args.keyword)
@@ -646,20 +611,16 @@ class TaskCmd(object):
         parser.add_argument("-k", "--keyword", dest="keyword",
                             help="Group tasks by given keyword instead of project. The '%%' wildcard can be used.",
                             metavar="<keyword>")
-        parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
-                            help="Decrypt note title and description")
         parser.add_argument("filter", nargs="*", metavar="<project_or_keyword_filter>")
 
         return parser
 
     def do_n_list(self, line):
         args, projectList, filters = self._parseListLine(self.parser_n_list(), line)
-        if args.decrypt:
-            self.cryptoMgr.force_decrypt = True
 
         filters.append(KeywordFilter(NOTE_KEYWORD))
         order = [Task.creationDate, ]
-        renderer = TextListRenderer(tui.stdout, cryptoMgr=self.cryptoMgr, renderAsNotes=True)
+        renderer = TextListRenderer(tui.stdout, renderAsNotes=True)
         self._renderList(renderer, projectList, filters, order, limit=None,
                          groupKeyword=args.keyword)
     complete_n_list = projectAndKeywordCompleter
@@ -757,8 +718,6 @@ class TaskCmd(object):
                             default="all",
                             help="<output> can be one of %s. If not set, it defaults to all." % ", ".join(choices),
                             metavar="<output>")
-        parser.add_argument("--decrypt", dest="decrypt", default=False, action="store_true",
-                            help="Decrypt task title and description")
         parser.add_argument("id")
         return parser
 
@@ -766,13 +725,7 @@ class TaskCmd(object):
         parser = self.parser_t_show()
         args = parser.parse_args(line)
 
-        if args.decrypt:
-            self.cryptoMgr.force_decrypt = True
-
         task = self.getTaskFromId(args.id)
-
-        title = self.cryptoMgr.decrypt(task.title)
-        description = self.cryptoMgr.decrypt(task.description)
 
         if args.output in ("all", "summary"):
             keywordDict = task.getKeywordDict()
@@ -795,7 +748,7 @@ class TaskCmd(object):
 
             fields = [
                 ("Project", task.project.name),
-                ("Title", title),
+                ("Title", task.title),
                 ("ID", task.id),
                 ("Created", task.creationDate),
                 ("Due", task.dueDate),
@@ -813,7 +766,7 @@ class TaskCmd(object):
         if args.output in ("all", "description") and task.description:
             if args.output == "all":
                 print()
-            print(description)
+            print(task.description)
 
     complete_t_show = taskIdCompleter
 
@@ -841,14 +794,10 @@ class TaskCmd(object):
 
         task = self.getTaskFromId(line)
 
-        if self.cryptoMgr.isEncrypted(task.title):
-            self.cryptoMgr.force_decrypt = True  # Decryption must be turned on to edit
-        title = self.cryptoMgr.decrypt(task.title)
-
         # Create task line
         keywordDict = task.getKeywordDict()
         userKeywordDict, keywordDict = dbutils.splitKeywordDict(keywordDict)
-        taskLine = parseutils.createLine("", title, userKeywordDict)
+        taskLine = parseutils.createLine("", task.title, userKeywordDict)
 
         oldCompleter = readline.get_completer()  # Backup previous completer to restore it in the end
         readline.set_completer(editComplete)  # Switch to specific completer
@@ -867,8 +816,6 @@ class TaskCmd(object):
                     print("Cancelled")
                     return None
                 _, title, userKeywordDict = parseutils.parseLine(task.project.name + " " + line)
-                if self.cryptoMgr.isEncrypted(task.title):
-                    title = self.cryptoMgr.encrypt(title)
 
                 if dbutils.createMissingKeywords(userKeywordDict.keys()):
                     # We were able to create missing keywords if there were any,
