@@ -6,6 +6,7 @@ v1.x.y unreleased
 - Misc:
     - Added the `--datadir` option. It replaces the `--db` option, which is now deprecated and will be removed in the next version.
     - Similarly, the `YOKADI_DB` environment variable is now deprecated.
+    - Yokadi no longer supports cryptography: encrypted databases will be decrypted at update.
 
 v1.1.1 2016/11/11
 
