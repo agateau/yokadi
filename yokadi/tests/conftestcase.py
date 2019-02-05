@@ -39,15 +39,6 @@ class ConfTestCase(unittest.TestCase):
         self.assertRaises(YokadiException, self.cmd.do_c_set, "ALARM_SUSPEND -1")
         self.assertRaises(YokadiException, self.cmd.do_c_set, "PURGE_DELAY -1")
 
-    def testPassphraseCacheValue(self):
-        # Test PASSPHRASE_CACHE error
-        self.assertRaises(YokadiException, self.cmd.do_c_set, "PASSPHRASE_CACHE 2")
-
-        # Test PASSPHRASE_CACHE valid value (if that work we don't have exception)
-        self.cmd.do_c_set("PASSPHRASE_CACHE 0")
-        self.cmd.do_c_set("PASSPHRASE_CACHE 1")
-
     def testWrongKey(self):
-        # Test PASSPHRASE_CACHE error
         self.assertRaises(YokadiException, self.cmd.do_c_set, "BAD_KEY value")
         self.assertRaises(YokadiException, self.cmd.do_c_get, "BAD_KEY")

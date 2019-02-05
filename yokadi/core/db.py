@@ -389,7 +389,6 @@ def setDefaultConfig():
         "ALARM_DELAY": ("8", False, "Delay (in hours) before due date to launch the alarm (see ALARM_CMD)"),
         "ALARM_SUSPEND": ("1", False, "Delay (in hours) before an alarm trigger again"),
         "PURGE_DELAY": ("90", False, "Default delay (in days) for the t_purge command"),
-        "PASSPHRASE_CACHE": ("1", False, "Keep passphrase in memory till Yokadi is started (0 is false else true"),
     }
 
     session = getSession()
