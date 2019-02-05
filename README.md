@@ -25,7 +25,7 @@ install them with:
 
     pip install -r extra-requirements.txt
 
-These modules are needed for the Yokadi Daemon and for the cryptography features.
+These modules are needed for the Yokadi Daemon.
 
 # Quickstart
 
@@ -178,53 +178,6 @@ If you have periodic tasks, you can tell it to Yokadi with `t_recurs`:
     yokadi> t_recurs 1 yearly 23/2 14:00
 
 Type `help t_recurs` to see all possible syntaxes.
-
-## Encrypt your tasks
-
-Whenever you want to protect your todo list data, Yokadi provides a simple
-mechanism to encrypt a task title or description. This is useful when you store
-passwords like tasks or notes.
-
-Let's encrypt a task and a note title with the -c option:
-
-    yokadi> t_add -c my_project this is a very secret task, don't tell anyone !
-    passphrase>
-    Added task '<... encrypted data...>' (id=1)
-
-Yokadi asks you for a passphrase. Don't forget it! It is a global passphrase
-for this Yokadi database.  Each time you will want to encrypt something, you
-will have to use this passphrase. For convenience, Yokadi will keep this
-passphrase in memory during your Yokadi session. If you are quite paranoiac
-and feel bad with that, don't panic, you can set the `PASSPHRASE_CACHE`
-option to 0 to disable passphrase cache:
-
-    yokadi> c_set PASSPHRASE_CACHE 0
-    Info: Parameter updated
-
-If you list encrypted stuff but haven't given your passphrase in the current
-session, Yokadi won't bother you with asking for passphrase, but won't display
-data in a clear way:
-
-    yokadi> t_list
-                                 my_project
-    ID|Title                  |U  |S|Age     |Due date
-    --------------------------------------------------------------------
-    1 |<... encrypted data...>|0  |N|5m      |
-    yokadi>
-
-To reveal secret data, you have to use the --decrypt option and type your
-passphrase when prompted to:
-
-    yokadi> t_list --decrypt
-    passphrase>
-                                             my_project
-    ID|Title                                          |U  |S|Age     |Due date
-    --------------------------------------------------------------------------------------------
-    1 |this is a very secret task, don't tell anyone !|0  |N|6m      |
-    yokadi>
-
-Note: when you encrypt a task or note title, the description will be also
-encrypted.
 
 ## Tasks range and magic __ keyword
 
