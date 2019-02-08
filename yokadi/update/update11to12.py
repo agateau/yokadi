@@ -21,9 +21,10 @@ except ImportError:
 CRYPTO_PREFIX = "---YOKADI-ENCRYPTED-MESSAGE---"
 KEY_LENGTH = 32
 
+CRYPTO_CHECK_KEY = "CRYPTO_CHECK"
 
 def getPassphrase():
-    phrase = getpass(prompt="passphrase> ")
+    phrase = getpass(prompt="Enter passphrase: ")
     phrase = phrase[:KEY_LENGTH]
     return phrase.ljust(KEY_LENGTH, " ")
 
@@ -42,6 +43,20 @@ def decryptTask(cursor, cypher, row):
     description = decryptData(cypher, description)
     cursor.execute("update task set title = ?, description = ? where id = ?",
                    (title, description, taskId))
+
+
+def getCheckText(cursor):
+    sql = "select value from config where name like ?"
+    row = cursor.execute(sql, (CRYPTO_CHECK_KEY,)).fetchone()
+    return row[0]
+
+
+def checkPassphrase(cypher, checkText):
+    try:
+        decryptData(cypher, checkText)
+        return True
+    except UnicodeDecodeError:
+        return False
 
 
 def decryptEncryptedTasks(cursor):
@@ -64,8 +79,15 @@ def decryptEncryptedTasks(cursor):
                        "Do you want to decrypt your tasks?"):
         raise updateutils.UpdateCanceledError()
 
-    phrase = getPassphrase()
-    cypher = CRYPTO_ALGO.new(phrase)
+    checkText = getCheckText(cursor)
+    while True:
+        phrase = getPassphrase()
+        cypher = CRYPTO_ALGO.new(phrase)
+        if checkPassphrase(cypher, checkText):
+            break
+        else:
+            if not tui.confirm("Wrong passphrase, try again?"):
+                raise updateutils.UpdateCanceledError()
     for row in rows:
         decryptTask(cursor, cypher, row)
 
