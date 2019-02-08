@@ -22,6 +22,8 @@ CRYPTO_PREFIX = "---YOKADI-ENCRYPTED-MESSAGE---"
 KEY_LENGTH = 32
 
 CRYPTO_CHECK_KEY = "CRYPTO_CHECK"
+CONFIG_KEYS = "PASSPHRASE_CACHE", CRYPTO_CHECK_KEY
+
 
 def getPassphrase():
     phrase = getpass(prompt="Enter passphrase: ")
@@ -92,8 +94,15 @@ def decryptEncryptedTasks(cursor):
         decryptTask(cursor, cypher, row)
 
 
+def removeCryptoConfigKeys(cursor):
+    sql = "delete from config where name like ?"
+    for key in CONFIG_KEYS:
+        cursor.execute(sql, (key,))
+
+
 def update(cursor):
     decryptEncryptedTasks(cursor)
+    removeCryptoConfigKeys(cursor)
 
 
 if __name__ == "__main__":
