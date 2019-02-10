@@ -24,12 +24,8 @@ WORK_DIR=$(mktemp -d "$DST_DIR/yokadi-dist.XXXXXX")
 log "Copying source"
 cp -a --no-target-directory "$SRC_DIR" "$WORK_DIR"
 
-log "Check we are not master"
-cd "$WORK_DIR"
-BRANCH=$(git branch | awk '$1 == "*" { print $2 }')
-[ "$BRANCH" != "master" ] || die "Source dir should point to a release branch checkout, not master!"
-
 log "Cleaning"
+cd "$WORK_DIR"
 git reset --hard HEAD
 git clean -q -dxf
 
