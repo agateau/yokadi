@@ -34,14 +34,14 @@ git reset --hard HEAD
 git clean -q -dxf
 
 log "Building archives"
-./setup.py -q sdist --formats=bztar,zip
+./setup.py -q sdist --formats=gztar,zip
 
 log "Installing archive"
 cd dist/
-YOKADI_TARBZ2=$(ls ./*.tar.bz2)
-tar xf "$YOKADI_TARBZ2"
+YOKADI_TARGZ=$(ls ./*.tar.gz)
+tar xf "$YOKADI_TARGZ"
 
-ARCHIVE_DIR="$PWD/${YOKADI_TARBZ2%.tar.bz2}"
+ARCHIVE_DIR="$PWD/${YOKADI_TARGZ%.tar.gz}"
 
 virtualenv --python python3 "$WORK_DIR/venv"
 (
@@ -62,6 +62,6 @@ virtualenv --python python3 "$WORK_DIR/venv"
 
 log "Moving archives out of work dir"
 cd "$WORK_DIR/dist"
-mv ./*.tar.bz2 ./*.zip "$DST_DIR"
+mv ./*.tar.gz ./*.zip "$DST_DIR"
 rm -rf "$WORK_DIR"
 log "Done"
