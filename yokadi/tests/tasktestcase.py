@@ -11,7 +11,6 @@ import testutils
 
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
-from yokadi.core import cryptutils
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig, Project, TaskKeyword
@@ -47,11 +46,6 @@ class TaskTestCase(unittest.TestCase):
         for bad_input in ("",  # No project
                           "x"):  # No task name
             self.assertRaises(BadUsageException, self.cmd.do_t_add, bad_input)
-
-        # Crypto stuff
-        tui.addInputAnswers("a Secret passphrase")
-        self.cmd.do_t_add("-c x encrypted t1")
-        self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
 
     def testEdit(self):
         tui.addInputAnswers("y")

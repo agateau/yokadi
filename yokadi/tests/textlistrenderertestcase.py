@@ -13,7 +13,6 @@ from yokadi.core import dbutils
 
 from yokadi.ycli import tui
 from yokadi.ycli.textlistrenderer import TextListRenderer, TitleFormater
-from yokadi.core.cryptutils import YokadiCryptoManager
 from yokadi.core import db
 
 
@@ -22,11 +21,6 @@ def stripColor(text):
                       colors.RESET):
         text = text.replace(colorcode, '')
     return text
-
-
-class StubCryptoMgr:
-    def decrypt(self, title):
-        return title
 
 
 class TextListRendererTestCase(unittest.TestCase):
@@ -57,7 +51,7 @@ class TextListRendererTestCase(unittest.TestCase):
 
         for task, width, expected in TEST_DATA:
             with self.subTest(task=task, width=width):
-                formater = TitleFormater(width, StubCryptoMgr())
+                formater = TitleFormater(width)
                 out = formater(task)[0]
                 out = stripColor(out)
 
@@ -74,7 +68,7 @@ class TextListRendererTestCase(unittest.TestCase):
         longTask.description = "And it has a description"
 
         out = StringIO()
-        renderer = TextListRenderer(out, termWidth=80, cryptoMgr=YokadiCryptoManager())
+        renderer = TextListRenderer(out, termWidth=80)
         renderer.addTaskList("Foo", [t2, longTask])
         self.assertEqual(renderer.maxTitleWidth, len(longTask.title) + 1)
         renderer.end()

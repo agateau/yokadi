@@ -8,9 +8,8 @@ Simple rendering of t_list output
 
 
 class PlainListRenderer(object):
-    def __init__(self, out, cryptoMgr):
+    def __init__(self, out):
         self.out = out
-        self.cryptoMgr = cryptoMgr
         self.first = True
 
     def addTaskList(self, sectionName, taskList):
@@ -28,8 +27,7 @@ class PlainListRenderer(object):
         print(sectionName, file=self.out)
 
         for task in taskList:
-            title = self.cryptoMgr.decrypt(task.title)
-            print(("- " + title), file=self.out)
+            print(("- " + task.title), file=self.out)
 
     def end(self):
         pass

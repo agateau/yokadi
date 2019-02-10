@@ -34,7 +34,6 @@ from textlistrenderertestcase import TextListRendererTestCase  # noqa: F401
 if hasIcalendar:
     from icaltestcase import IcalTestCase  # noqa: F401
 from keywordtestcase import KeywordTestCase  # noqa: F401
-from cryptotestcase import CryptoTestCase  # noqa: F401
 from tuitestcase import TuiTestCase  # noqa: F401
 from helptestcase import HelpTestCase  # noqa: F401
 from conftestcase import ConfTestCase  # noqa: F401

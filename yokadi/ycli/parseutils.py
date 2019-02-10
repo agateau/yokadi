@@ -76,9 +76,9 @@ def warnIfKeywordDoesNotExist(keywordFilters):
     session = db.getSession()
     doesNotExist = False
     for keyword in [k.name for k in keywordFilters]:
-            if session.query(Keyword).filter(Keyword.name.like(keyword)).count() == 0:
-                tui.error("Keyword %s is unknown." % keyword)
-                doesNotExist = True
+        if session.query(Keyword).filter(Keyword.name.like(keyword)).count() == 0:
+            tui.error("Keyword %s is unknown." % keyword)
+            doesNotExist = True
     return doesNotExist
 
 

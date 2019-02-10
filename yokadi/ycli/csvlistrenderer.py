@@ -13,7 +13,7 @@ TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description",
 
 
 class CsvListRenderer(object):
-    def __init__(self, out, cryptoMgr=None):
+    def __init__(self, out):
         self.writer = csv.writer(out, dialect="excel")
         self._writerow(TASK_FIELDS)  # Header
 
