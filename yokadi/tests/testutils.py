@@ -25,13 +25,17 @@ def assertQueryEmpty(test, query):
 
 class TestRenderer(object):
     """
-    A fake renderer, which stores all rendered tasks in taskDict
+    A fake renderer, which stores all rendered tasks in:
+    - taskDict: a dict for each section
+    - tasks: a list of all tasks
     """
     def __init__(self):
         self.taskDict = OrderedDict()
+        self.tasks = []
 
     def addTaskList(self, sectionName, taskList):
         self.taskDict[sectionName] = taskList
+        self.tasks.extend(taskList)
 
     def end(self):
         pass

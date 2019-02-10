@@ -261,6 +261,21 @@ class TaskTestCase(unittest.TestCase):
                      "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html", "-f csv"):
             self.cmd.do_t_list(line)
 
+    def testTlistUrgency0(self):
+        # Given a project with two tasks, one with a negative urgency
+        prj = Project(name="prj")
+        self.session.add(prj)
+        t1 = Task(project=prj, title="t1")
+        self.session.add(t1)
+        t2 = Task(project=prj, title="t2", urgency=-1)
+        self.session.add(t2)
+        self.session.flush()
+        # When I list tasks with -u 0
+        renderer = testutils.TestRenderer()
+        self.cmd.do_t_list("-u 0", renderer=renderer)
+        # Then the task with a negative urgency is not listed
+        self.assertEqual(renderer.tasks, [t1])
+
     def testNlist(self):
         tui.addInputAnswers("y")
         self.cmd.do_n_add("x t1")

@@ -598,7 +598,7 @@ class TaskCmd(object):
             filters.append(DbFilter(Task.status == "started"))
         else:
             filters.append(DbFilter(Task.status != "done"))
-        if args.urgency:
+        if args.urgency is not None:
             order = [desc(Task.urgency), ]
             filters.append(DbFilter(Task.urgency >= args.urgency))
         if args.topDue:
