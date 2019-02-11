@@ -1,11 +1,22 @@
-v1.x.y unreleased
-
+v1.2.0 unreleased
 - New features:
-    - A new command has been added: `p_merge`, to merge a project into another.
+    - The new `p_merge` command lets you merge a project into another.
     - It is now possible to turn a task into a note with `t_to_note` and a note into a task with `n_to_task`.
+- Bug fixes:
+    - The `k_remove` command no longer ignores unused keywords.
+    - HTML output has been fixed to no longer output strings wrapped in `b""`.
+    - `t_list` filtering has been fixed so that `t_list --urgency 0` filters out tasks with a negative urgency, as expected.
+- Improvements:
+    - HTML output has been refreshed:
+        - It looks more modern now.
+        - Some fields have been removed (doneDate, creationDate).
+        - The title, keywords and description fields have been merged.
+        - An ID field has been added (handy to run a command on a task listed in the output).
+        - Columns now use human-friendly titles.
 - Misc:
-    - Added the `--datadir` option. It replaces the `--db` option, which is now deprecated and will be removed in the next version.
-    - Similarly, the `YOKADI_DB` environment variable is now deprecated.
+    - The `--db` option is now deprecated and replaced by the `--datadir` option. `--db` will be removed in the next version.
+    - Similarly, the `YOKADI_DB` environment variable is now deprecated and will be removed in the next version.
+    - Yokadi no longer supports cryptography: encrypted databases will be decrypted at update.
 
 v1.1.1 2016/11/11
 

@@ -53,9 +53,8 @@ def printRow(out, tag, lst):
 
 
 class HtmlListRenderer(object):
-    def __init__(self, out, cryptoMgr):
+    def __init__(self, out):
         self.out = out
-        self.cryptoMgr = cryptoMgr
 
         print(HTML_HEADER, file=self.out)
 
@@ -86,12 +85,11 @@ class HtmlListRenderer(object):
         print(HTML_FOOTER, file=self.out)
 
     def _titleFormater(self, task):
-        title = self.cryptoMgr.decrypt(task.title)
-        description = self.cryptoMgr.decrypt(task.description)
+        title = task.title
         keywords = task.getKeywordsAsString()
         if keywords:
             title += " " + keywords
-        if description:
-            title += "\n" + description
+        if task.description:
+            title += "\n" + task.description
         return title
 # vi: ts=4 sw=4 et

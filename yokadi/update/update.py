@@ -211,7 +211,11 @@ def main():
     else:
         newDataDir = os.path.abspath(args.updated)
 
-    return update(dataDir, newDataDir, inplace=args.inplace)
+    try:
+        return update(dataDir, newDataDir, inplace=args.inplace)
+    except updateutils.UpdateError as exc:
+        err(str(exc))
+        return 1
 
 
 if __name__ == "__main__":

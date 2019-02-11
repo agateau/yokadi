@@ -12,7 +12,7 @@ TASK_FIELDS = ["title", "creationDate", "dueDate", "doneDate", "description", "u
 
 
 class XmlListRenderer(object):
-    def __init__(self, out, cryptoMgr=None):
+    def __init__(self, out):
         self.out = out
         self.doc = dom.Document()
         self.rootElement = self.doc.createElement("yokadi")

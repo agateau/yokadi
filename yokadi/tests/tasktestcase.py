@@ -11,7 +11,6 @@ import testutils
 
 from yokadi.ycli import tui
 from yokadi.ycli.main import YokadiCmd
-from yokadi.core import cryptutils
 from yokadi.core import db
 from yokadi.core import dbutils
 from yokadi.core.db import Task, TaskLock, Keyword, setDefaultConfig, Project, TaskKeyword
@@ -50,11 +49,6 @@ class TaskTestCase(YokadiTestCase):
         for bad_input in ("",  # No project
                           "x"):  # No task name
             self.assertRaises(BadUsageException, self.cmd.do_t_add, bad_input)
-
-        # Crypto stuff
-        tui.addInputAnswers("a Secret passphrase")
-        self.cmd.do_t_add("-c x encrypted t1")
-        self.assertTrue(self.session.query(Task).get(3).title.startswith(cryptutils.CRYPTO_PREFIX))
 
     def testEdit(self):
         tui.addInputAnswers("y")
@@ -263,6 +257,21 @@ class TaskTestCase(YokadiTestCase):
         for line in ("", "-a", "-t", "-d today", "-u 10", "-k %", "-k _%", "-s t", "--overdue",
                      "@%", "@k%", "!@%", "!@kw1", "-f plain", "-f xml", "-f html", "-f csv"):
             self.cmd.do_t_list(line)
+
+    def testTlistUrgency0(self):
+        # Given a project with two tasks, one with a negative urgency
+        prj = Project(name="prj")
+        self.session.add(prj)
+        t1 = Task(project=prj, title="t1")
+        self.session.add(t1)
+        t2 = Task(project=prj, title="t2", urgency=-1)
+        self.session.add(t2)
+        self.session.flush()
+        # When I list tasks with -u 0
+        renderer = testutils.TestRenderer()
+        self.cmd.do_t_list("-u 0", renderer=renderer)
+        # Then the task with a negative urgency is not listed
+        self.assertEqual(renderer.tasks, [t1])
 
     def testNlist(self):
         tui.addInputAnswers("y")

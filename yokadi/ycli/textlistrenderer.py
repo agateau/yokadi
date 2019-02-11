@@ -70,8 +70,7 @@ def idFormater(task):
 
 
 class TitleFormater(object):
-    def __init__(self, width, cryptoMgr):
-        self.cryptoMgr = cryptoMgr
+    def __init__(self, width):
         self.width = width
 
     def __call__(self, task):
@@ -84,8 +83,8 @@ class TitleFormater(object):
             maxWidth -= 1
 
         # Create title
-        title = self.cryptoMgr.decrypt(task.title)
-        if keywords and len(task.title) < maxWidth:
+        title = task.title
+        if keywords and len(title) < maxWidth:
             title += ' ('
             colorizer.setColorAt(len(title), C.BOLD)
             title += keywords
@@ -158,11 +157,10 @@ class DueDateFormater(object):
 
 
 class TextListRenderer(object):
-    def __init__(self, out, termWidth=None, cryptoMgr=None, renderAsNotes=False, splitOnDate=False):
+    def __init__(self, out, termWidth=None, renderAsNotes=False, splitOnDate=False):
         """
         @param out: output target
         @param termWidth: terminal width (int)
-        @param decrypt: whether to decrypt or not (bool)
         @param renderAsNotes: whether to display task as notes (with dates) instead of tasks (with age). (boot)"""
         self.out = out
         self.termWidth = termWidth or tui.getTermWidth()
@@ -170,7 +168,6 @@ class TextListRenderer(object):
         self.maxTitleWidth = len("Title")
         self.today = datetime.today().replace(microsecond=0)
         self.firstHeader = True
-        self.cryptoMgr = cryptoMgr
         self.splitOnDate = splitOnDate
 
         if self.termWidth < 100:
@@ -213,7 +210,7 @@ class TextListRenderer(object):
         self.taskLists.append((sectionName, taskList))
         # Find max title width
         for task in taskList:
-            title = self.cryptoMgr.decrypt(task.title)
+            title = task.title
             keywords = task.getUserKeywordsNameAsString()
             if keywords:
                 title = "{} ({})".format(title, keywords)
@@ -233,7 +230,7 @@ class TextListRenderer(object):
         totalWidth = sum([x.width for x in self.columns]) + len(self.columns) - 1
         if totalWidth >= self.termWidth:
             self.titleColumn.width = self.termWidth - (totalWidth - self.titleColumn.width)
-        self.titleColumn.formater = TitleFormater(self.titleColumn.width, self.cryptoMgr)
+        self.titleColumn.formater = TitleFormater(self.titleColumn.width)
 
         # Print table
         for sectionName, taskList in self.taskLists:

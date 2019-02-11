@@ -39,7 +39,6 @@ import yokadi
 
 from yokadi.core import db
 from yokadi.core import basepaths
-from yokadi.core import cryptutils
 from yokadi.core import fileutils
 from yokadi.update import update
 
@@ -67,7 +66,6 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
         self.prompt = "yokadi> "
         self.historyPath = basepaths.getHistoryPath()
         self.loadHistory()
-        self.cryptoMgr = cryptutils.YokadiCryptoManager()  # Load shared cryptographic manager
 
     def emptyline(self):
         """Executed when input is empty. Reimplemented to do nothing."""

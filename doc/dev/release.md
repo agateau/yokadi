@@ -2,71 +2,42 @@
 
 ## Introduction
 
-A series is major.minor (ex: 0.12). There is a branch for each series.
-
-A version is major.minor.patch (ex 0.12.1). There is a tag for each version.
-
 This doc assumes there is a checkout of yokadi.github.com next to the checkout
 of yokadi.
 
 ## In yokadi checkout
 
     export version=<version>
-    export series=<series>
 
-### For a new series
+Check dev is clean
+
+    git checkout dev
+    git pull
+    git status
 
 Update `NEWS` file (add changes, check release date)
 
 Ensure `yokadi/__init__.py` file contains $version
 
-Create branch:
-
-    git checkout -b $series
-    git push -u origin $series
-
-The version in master should always be bigger than the version in release
-branches, so update version in master:
-
-    git checkout master
-    vi yokadi/__init__.py
-    git commit version -m "Bump version number"
-    git push
-    git checkout -
-
-### For a new release in an existing series
-
-    git checkout <series>
-
-Update `NEWS` file (add changes, check release date)
-
-Bump version number
-
-    echo $version > version
-    git commit NEWS version -m "Getting ready for $version"
-
-### Common
-
 Build archives
 
     ./scripts/mkdist.sh ../yokadi.github.com/download
 
-Tag
-
-    git tag -a $version -m "Releasing $version"
-
 Push changes
 
     git push
-    git push --tags
 
-Merge changes in master (so that future forward merges are simpler). Be careful
-to keep version to its master value.
+When CI has checked the branch, merge changes in master
 
     git checkout master
-    git merge --no-ff $series
+    git pull
+    git merge dev
     git push
-    git checkout -
+
+Tag the release
+
+    git tag -a $version -m "Releasing $version"
+    git push --tags
 
 ## In yokadi.github.com checkout
 
