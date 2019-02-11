@@ -89,7 +89,7 @@ def updateSyncDump(dbPath, dumpDir):
         createVersionFile(dumpDir)
         syncManager.clearDump()
         syncManager.dump()
-    except:
+    except Exception:
         err('An exception has occurred while recreating dump. Resetting dump.')
         vcsImpl.resetTo(BEFORE_UPDATE_TAG)
         raise
