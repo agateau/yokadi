@@ -207,7 +207,7 @@ def main():
     if args.inplace:
         newDataDir = None
         if args.updated:
-            parser.error('Cannot use --updated or with --in-place')
+            parser.error('Cannot use --updated with --in-place')
     else:
         newDataDir = os.path.abspath(args.updated)
 
