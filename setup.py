@@ -7,7 +7,7 @@
 @license:GPL v3 or newer
 """
 
-from distutils.core import setup
+from setuptools import setup
 import sys
 import os
 from fnmatch import fnmatch
