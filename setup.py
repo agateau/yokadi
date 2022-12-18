@@ -79,6 +79,7 @@ setup(
     install_requires=[
         "sqlalchemy",
         "python-dateutil",
+        "colorama",
     ],
     scripts=scripts,
     data_files=data_files

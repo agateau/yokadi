@@ -36,6 +36,8 @@ except ImportError:
     print("Or use 'pip install sqlalchemy'")
     sys.exit(1)
 
+from colorama import just_fix_windows_console
+
 import yokadi
 
 from yokadi.core import db
@@ -208,6 +210,8 @@ def createArgumentParser():
 
 def main():
     locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+    just_fix_windows_console()
+
     parser = createArgumentParser()
     args = parser.parse_args()
     dataDir, dbPath = commonargs.processArgs(args)
