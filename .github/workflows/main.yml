@@ -1,0 +1,49 @@
+name: main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - dev
+      - sync
+  pull_request:
+    branches:
+      - master
+      - dev
+      - sync
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.8"
+          - "3.9"
+          - "3.10"
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r extra-requirements.txt
+        pip install coverage flake8
+
+    - name: Lint
+      # Make sure what's already flake8-happy remains flake8-happy
+      # Exclude w32_postinst.py because it uses install-specific builtin functions
+      run: |
+        flake8 --exclude build,w32_postinst.py
+
+    - name: Tests
+      run: |
+        coverage run --source=yokadi --omit="yokadi/tests/*" yokadi/tests/tests.py
