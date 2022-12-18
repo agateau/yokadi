@@ -10,6 +10,7 @@ Command line oriented, sqlite powered, todo list
 
 import locale
 import os
+import platform
 import sys
 
 try:
@@ -135,7 +136,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, Cmd):
             print("--")
             print("Python: %s" % sys.version.replace("\n", " "))
             print("SQL Alchemy: %s" % sqlalchemy.__version__)
-            print("OS: %s (%s)" % os.uname()[0:3:2])
+            print("OS: %s" % platform.system())
             print("Yokadi: %s" % yokadi.__version__)
             print(cut)
             print()
