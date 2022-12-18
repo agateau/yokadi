@@ -80,6 +80,7 @@ setup(
         "sqlalchemy",
         "python-dateutil",
         "colorama",
+        "pyreadline3;platform_system=='Windows'",
     ],
     scripts=scripts,
     data_files=data_files

@@ -13,14 +13,7 @@ import os
 import platform
 import sys
 
-try:
-    import readline
-except ImportError:
-    print("You don't have a working readline library.")
-    print("Windows users must install Pyreadline.")
-    print("Get it on https://launchpad.net/pyreadline/+download")
-    print("Or use 'pip install pyreadline'")
-    sys.exit(1)
+import readline
 
 readline.parse_and_bind("set show-all-if-ambiguous on")
 

@@ -33,23 +33,8 @@ MULTIPLE_DASH = re.compile("-+")
 
 _answers = []
 
-
-class IOStream:
-    def __init__(self, original_flow):
-        self.__original_flow = original_flow
-        if sys.platform == 'win32':
-            import pyreadline
-            self.__console = pyreadline.GetOutputFile()
-
-    def write(self, text):
-        if sys.platform == 'win32':
-            self.__console.write_color(text)
-        else:
-            self.__original_flow.write(text)
-
-
-stdout = IOStream(sys.stdout)
-stderr = IOStream(sys.stderr)
+stdout = sys.stdout
+stderr = sys.stderr
 
 
 isInteractive = sys.stdin.isatty()
