@@ -78,8 +78,10 @@ setup(
     # distutils does not support install_requires, but pip needs it to be
     # able to automatically install dependencies
     install_requires=[
-        "sqlalchemy",
-        "python-dateutil",
+        "sqlalchemy ~= 1.4.45",
+        "python-dateutil ~= 2.2.0",
+        "colorama ~= 0.4.6",
+        "pyreadline3 ~= 3.4.1 ; platform_system == 'Windows'",
     ],
     scripts=scripts,
     data_files=data_files

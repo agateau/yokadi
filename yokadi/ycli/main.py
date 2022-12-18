@@ -10,16 +10,10 @@ Command line oriented, sqlite powered, todo list
 
 import locale
 import os
+import platform
 import sys
 
-try:
-    import readline
-except ImportError:
-    print("You don't have a working readline library.")
-    print("Windows users must install Pyreadline.")
-    print("Get it on https://launchpad.net/pyreadline/+download")
-    print("Or use 'pip install pyreadline'")
-    sys.exit(1)
+import readline
 
 readline.parse_and_bind("set show-all-if-ambiguous on")
 
@@ -34,6 +28,8 @@ except ImportError:
     print("Get it on http://www.sqlalchemy.org/")
     print("Or use 'pip install sqlalchemy'")
     sys.exit(1)
+
+from colorama import just_fix_windows_console
 
 import yokadi
 
@@ -143,7 +139,7 @@ class YokadiCmd(TaskCmd, ProjectCmd, KeywordCmd, ConfCmd, AliasCmd, SyncCmd, Cmd
             print("--")
             print("Python: %s" % sys.version.replace("\n", " "))
             print("SQL Alchemy: %s" % sqlalchemy.__version__)
-            print("OS: %s (%s)" % os.uname()[0:3:2])
+            print("OS: %s" % platform.system())
             print("Yokadi: %s" % yokadi.__version__)
             print(cut)
             print()
@@ -216,6 +212,8 @@ def createArgumentParser():
 
 def main():
     locale.setlocale(locale.LC_ALL, os.environ.get("LANG", "C"))
+    just_fix_windows_console()
+
     parser = createArgumentParser()
     args = parser.parse_args()
     dataDir, dbPath = commonargs.processArgs(args)
