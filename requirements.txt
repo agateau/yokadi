@@ -1,4 +1,4 @@
-sqlalchemy>=0.9, <0.9.99
+sqlalchemy==1.4.45
 python-dateutil==2.2
 colorama==0.4.6
 pyreadline3==3.4.1; platform_system == 'Windows'

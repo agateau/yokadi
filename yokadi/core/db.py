@@ -319,13 +319,10 @@ class Database(object):
 
         dbFileName = os.path.abspath(dbFileName)
 
-        if sys.platform == 'win32':
-            connectionString = 'sqlite://' + dbFileName[0] + '|' + dbFileName[2:]
-        else:
-            connectionString = 'sqlite:///' + dbFileName
-
         if memoryDatabase:
             connectionString = "sqlite:///:memory:"
+        else:
+            connectionString = 'sqlite:///' + dbFileName
 
         echo = os.environ.get("YOKADI_SQL_DEBUG", "0") != "0"
         self.engine = create_engine(connectionString, echo=echo)
