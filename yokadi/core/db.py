@@ -8,7 +8,6 @@ Database access layer using SQL Alchemy
 
 import json
 import os
-import sys
 from datetime import datetime
 from uuid import uuid1
 
