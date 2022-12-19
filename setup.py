@@ -78,7 +78,7 @@ setup(
     # able to automatically install dependencies
     install_requires=[
         "sqlalchemy ~= 1.4.45",
-        "python-dateutil ~= 2.2.0",
+        "python-dateutil ~= 2.8.2",
         "colorama ~= 0.4.6",
         "pyreadline3 ~= 3.4.1 ; platform_system == 'Windows'",
     ],
