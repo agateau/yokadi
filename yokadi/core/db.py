@@ -8,11 +8,10 @@ Database access layer using SQL Alchemy
 
 import json
 import os
-import sys
 from datetime import datetime
 from uuid import uuid1
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import scoped_session, sessionmaker, relationship
@@ -349,7 +348,8 @@ class Database(object):
         Base.metadata.create_all(self.engine)
 
     def getVersion(self):
-        if not self.engine.has_table("config"):
+        inspector = inspect(self.engine)
+        if not inspector.has_table("config"):
             # There was no Config table in v1
             return 1
 

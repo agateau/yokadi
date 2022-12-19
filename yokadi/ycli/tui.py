@@ -37,11 +37,18 @@ stdout = sys.stdout
 stderr = sys.stderr
 
 
-isInteractive = sys.stdin.isatty()
+_isInteractive = sys.stdin.isatty()
+
+
+def isInteractive():
+    if _answers:
+        # We are in a test, interaction is being simulated
+        return True
+    return _isInteractive
 
 
 def _checkIsInteractive():
-    if not isInteractive:
+    if not isInteractive():
         raise YokadiException("This command cannot be used in non-interactive mode")
 
 
@@ -196,7 +203,7 @@ def enterInt(default=None, prompt="Enter a number"):
 
 
 def confirm(prompt):
-    if not isInteractive:
+    if not isInteractive():
         return True
     while True:
         answer = editLine("", prompt=prompt + " (y/n)? ")
