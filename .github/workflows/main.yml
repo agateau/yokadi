@@ -39,10 +39,8 @@ jobs:
         pip install -r requirements-dev.txt
 
     - name: Lint
-      # Make sure what's already flake8-happy remains flake8-happy
-      # Exclude w32_postinst.py because it uses install-specific builtin functions
       run: |
-        flake8 --exclude build,w32_postinst.py
+        scripts/lint
 
     - name: Tests
       run: |
