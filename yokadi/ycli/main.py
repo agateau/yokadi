@@ -15,20 +15,11 @@ import sys
 
 import readline
 
-readline.parse_and_bind("set show-all-if-ambiguous on")
-
 import traceback
 from cmd import Cmd
 from argparse import ArgumentParser
 
-try:
-    import sqlalchemy
-except ImportError:
-    print("You must install SQL Alchemy to use Yokadi")
-    print("Get it on http://www.sqlalchemy.org/")
-    print("Or use 'pip install sqlalchemy'")
-    sys.exit(1)
-
+import sqlalchemy
 from colorama import just_fix_windows_console
 
 import yokadi
@@ -47,6 +38,8 @@ from yokadi.ycli.synccmd import SyncCmd
 from yokadi.ycli.taskcmd import TaskCmd
 from yokadi.core.yokadiexception import YokadiException, BadUsageException
 from yokadi.core.yokadioptionparser import YokadiOptionParserNormalExitException
+
+readline.parse_and_bind("set show-all-if-ambiguous on")
 
 
 # TODO: move YokadiCmd to a separate module in ycli package

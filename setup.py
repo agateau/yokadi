@@ -14,7 +14,7 @@ from fnmatch import fnmatch
 from os.path import isdir, dirname, join
 
 sys.path.insert(0, dirname(__file__))
-import yokadi
+import yokadi  # noqa: E402
 
 
 def createFileList(sourceDir, *patterns):
