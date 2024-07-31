@@ -648,7 +648,7 @@ class TaskCmd(object):
 
         ids.reverse()
         for urgency, taskId in enumerate(ids):
-            task = self.session.query(Task).get(taskId)
+            task = self.session.get(Task, taskId)
             task.urgency = urgency
         self.session.commit()
     complete_t_reorder = ProjectCompleter(1)

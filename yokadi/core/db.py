@@ -12,9 +12,8 @@ from datetime import datetime
 from uuid import uuid1
 
 from sqlalchemy import create_engine, inspect
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import scoped_session, sessionmaker, relationship
+from sqlalchemy.orm import scoped_session, sessionmaker, relationship, declarative_base
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import Column, Integer, Boolean, Unicode, DateTime, Enum, ForeignKey, UniqueConstraint
@@ -54,7 +53,7 @@ class Project(Base):
     uuid = Column(Unicode, unique=True, default=uuidGenerator, nullable=False)
     name = Column(Unicode, unique=True)
     active = Column(Boolean, default=True)
-    tasks = relationship("Task", cascade="all", backref="project")
+    tasks = relationship("Task", cascade="all", backref="project", cascade_backrefs=False)
 
     def __repr__(self):
         return self.name
@@ -83,7 +82,7 @@ class Keyword(Base):
     id = Column(Integer, primary_key=True)
     name = Column(Unicode, unique=True)
     tasks = association_proxy("taskKeywords", "task")
-    taskKeywords = relationship("TaskKeyword", cascade="all", backref="keyword")
+    taskKeywords = relationship("TaskKeyword", cascade="all", backref="keyword", cascade_backrefs=False)
 
     def __repr__(self):
         return self.name
@@ -91,6 +90,7 @@ class Keyword(Base):
 
 class TaskKeyword(Base):
     __tablename__ = "task_keyword"
+    __mapper_args__ = {"confirm_deleted_rows": False}
     id = Column(Integer, primary_key=True)
     taskId = Column("task_id", Integer, ForeignKey("task.id"), nullable=False)
     keywordId = Column("keyword_id", Integer, ForeignKey("keyword.id"), nullable=False)
@@ -138,8 +138,8 @@ class Task(Base):
     status = Column(Enum("new", "started", "done"), default="new")
     recurrence = Column(RecurrenceRuleColumnType, nullable=False, default=RecurrenceRule())
     projectId = Column("project_id", Integer, ForeignKey("project.id"), nullable=False)
-    taskKeywords = relationship("TaskKeyword", cascade="all", backref="task")
-    lock = relationship("TaskLock", cascade="all", backref="task")
+    taskKeywords = relationship("TaskKeyword", cascade="all", backref="task", cascade_backrefs=False)
+    lock = relationship("TaskLock", cascade="all", backref="task", cascade_backrefs=False)
 
     def setKeywordDict(self, dct):
         """
