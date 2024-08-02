@@ -6,6 +6,7 @@ Task test cases
 @license: GPL v3 or later
 """
 import unittest
+from unittest.mock import patch
 
 import testutils
 
@@ -367,5 +368,19 @@ class TaskTestCase(unittest.TestCase):
         self.cmd.do_n_to_task(1)
         task = self.session.query(Task).get(1)
         self.assertFalse(task.isNote(self.session))
+
+    @patch("yokadi.ycli.tui.editText")
+    def testReorder(self, editTextMock):
+        t1, t2, t3 = [dbutils.addTask("x", f"t{x}", interactive=False) for x in range(1, 4)]
+
+        # Simulate moving t3 from 3rd line to the 1st
+        editTextMock.return_value = "3,t3\n1,t1\n2,t2"
+
+        self.cmd.do_t_reorder("x")
+        editTextMock.assert_called_with("1,t1\n2,t2\n3,t3")
+
+        self.assertEqual(t3.urgency, 2)
+        self.assertEqual(t1.urgency, 1)
+        self.assertEqual(t2.urgency, 0)
 
 # vi: ts=4 sw=4 et
