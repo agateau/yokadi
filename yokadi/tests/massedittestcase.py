@@ -30,7 +30,6 @@ class MassEditTestCase(YokadiTestCase):
         t2 = dbutils.addTask("p1", "Change keywords", {"k1": None, "k2": 1})
         t3 = dbutils.addTask("p1", "Done", {})
         t3.status = "started"
-        self.session.merge(t3)
         t4 = dbutils.addTask("p1", "Deleted", {})
         t5 = dbutils.addTask("p1", "Moved", {})
         self.session.commit()
