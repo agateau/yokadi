@@ -5,3 +5,4 @@ cd $(dirname $0)/..
 
 coverage run --source=yokadi --omit="yokadi/tests/*" -m pytest yokadi/tests/tests.py
 coverage report
+coverage html
