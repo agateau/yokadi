@@ -190,14 +190,11 @@ def applyChanges(project, oldList, newList, interactive=True):
             task = dbutils.getTaskFromId(newEntry.id)
         else:
             task = Task(creationDate=datetime.now().replace(second=0, microsecond=0), project=project)
+            session.add(task)
         task.title = newEntry.title
         task.setKeywordDict(newEntry.keywords)
         task.setStatus(newEntry.status)
         task.urgency = nbTasks - pos
-        if newEntry.id:
-            session.merge(task)
-        else:
-            session.add(task)
 
 
 # vi: ts=4 sw=4 et

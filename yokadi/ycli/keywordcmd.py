@@ -80,7 +80,6 @@ class KeywordCmd(object):
         if len(lst) == 0:
             # Simple case: newName does not exist, just rename the existing keyword
             keyword.name = newName
-            session.merge(keyword)
             session.commit()
             print("Keyword %s has been renamed to %s" % (oldName, newName))
             return

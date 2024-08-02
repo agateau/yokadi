@@ -190,7 +190,6 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
                     task = dbutils.getTaskFromId(id)
                     print("Task found in yokadi db: %s" % task.title)
                     updateTaskFromVTodo(task, vTodo)
-                    session.merge(task)
                     session.commit()
                 else:
                     raise YokadiException("Task %s does exist in yokadi db " % id)

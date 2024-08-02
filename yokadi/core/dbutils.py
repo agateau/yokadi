@@ -45,7 +45,7 @@ def addTask(projectName, title, keywordDict=None, interactive=True):
                 description="", status="new")
     session.add(task)
     task.setKeywordDict(keywordDict)
-    session.merge(task)
+    session.flush()
 
     return task
 
@@ -197,7 +197,6 @@ class TaskLockManager:
             now = datetime.now()
         lock = self._getLock()
         lock.updateDate = now
-        self.session.merge(lock)
         self.session.commit()
 
     def release(self):

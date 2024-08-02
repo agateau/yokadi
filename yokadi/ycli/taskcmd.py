@@ -167,7 +167,6 @@ class TaskCmd(object):
         except Exception as e:
             raise YokadiException(e)
         updateDescription(description)
-        self.session.merge(task)
         self.session.commit()
 
     complete_t_describe = taskIdCompleter
@@ -200,7 +199,6 @@ class TaskCmd(object):
             urgency = -99
 
         task.urgency = urgency
-        self.session.merge(task)
         self.session.commit()
 
     complete_t_set_urgency = taskIdCompleter
@@ -652,7 +650,6 @@ class TaskCmd(object):
         for urgency, taskId in enumerate(ids):
             task = self.session.query(Task).get(taskId)
             task.urgency = urgency
-            self.session.merge(task)
         self.session.commit()
     complete_t_reorder = ProjectCompleter(1)
 
@@ -905,7 +902,6 @@ class TaskCmd(object):
         else:
             task.dueDate = ydateutils.parseHumaneDateTime(line)
             print("Due date for task '%s' set to %s" % (task.title, task.dueDate.ctime()))
-        self.session.merge(task)
         self.session.commit()
     complete_t_set_due = dueDateCompleter
     complete_t_due = dueDateCompleter
@@ -931,7 +927,6 @@ class TaskCmd(object):
         kwDict = task.getKeywordDict()
         kwDict.update(newKwDict)
         task.setKeywordDict(kwDict)
-        self.session.merge(task)
         self.session.commit()
 
     def do_t_recurs(self, line):

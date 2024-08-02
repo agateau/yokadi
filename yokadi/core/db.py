@@ -195,8 +195,6 @@ class Task(Base):
                 self.doneDate = datetime.now().replace(second=0, microsecond=0)
             else:
                 self.doneDate = None
-        session = getSession()
-        session.merge(self)
 
     def setRecurrenceRule(self, rule):
         """Set recurrence and update the due date accordingly"""

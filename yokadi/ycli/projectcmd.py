@@ -92,7 +92,6 @@ class ProjectCmd(object):
         session = db.getSession()
         project = getProjectFromName(line)
         project.active = True
-        session.merge(project)
         session.commit()
     complete_p_set_active = ProjectCompleter(1)
 
@@ -101,7 +100,6 @@ class ProjectCmd(object):
         session = db.getSession()
         project = getProjectFromName(line)
         project.active = False
-        session.merge(project)
         session.commit()
     complete_p_set_inactive = ProjectCompleter(1)
 
