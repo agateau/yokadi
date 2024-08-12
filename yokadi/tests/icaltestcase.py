@@ -7,7 +7,9 @@ Ical features test cases
 
 
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
+
+import icalendar
 
 from yokadi.ycli import tui
 from yokadi.ycli.projectcmd import getProjectFromName
@@ -147,3 +149,50 @@ class IcalTestCase(unittest.TestCase):
         expected = sorted(["p2", f"t1 ({t1.id})", f"t2new ({t2new.id})", f"t2started ({t2started.id})"])
 
         self.assertEqual(summaries, expected)
+
+    def testHandlerProcessVTodoModifyTask(self):
+        # Create a task
+        task = dbutils.addTask("p1", "t1", interactive=False)
+        self.session.commit()
+
+        # Create a vTodo to modify the task
+        modified = datetime.now()
+        created = modified + timedelta(hours=-1)
+        vTodo = icalendar.Todo()
+        vTodo["UID"] = yical.TASK_UID % str(task.id)
+        vTodo.add("CREATED", created)
+        vTodo.add("LAST-MODIFIED", modified)
+        vTodo.add("summary", "new title")
+
+        # Process the vTodo
+        newTaskDict = {}
+        yical.IcalHttpRequestHandler.processVTodo(newTaskDict, vTodo)
+
+        # The task title must have changed
+        task = dbutils.getTaskFromId(task.id)
+        self.assertEqual(task.title, "new title")
+
+        # newTaskDict must not have changed
+        self.assertEqual(newTaskDict, {})
+
+    def testHandlerProcessVTodoCreateTask(self):
+        # Create a vTodo to add a new task
+        modified = datetime.now()
+        created = modified + timedelta(hours=-1)
+        vTodo = icalendar.Todo()
+        vTodo["UID"] = "zogzog"
+        vTodo.add("summary", "new task")
+
+        # Process the vTodo
+        newTaskDict = {}
+        yical.IcalHttpRequestHandler.processVTodo(newTaskDict, vTodo)
+
+        # The task should be in newTaskDict
+        newTaskList = list(newTaskDict.items())
+        self.assertEqual(len(newTaskList), 1)
+
+        (uid, taskId) = newTaskList[0]
+
+        # And the task can be retried
+        task = dbutils.getTaskFromId(taskId)
+        self.assertEqual(task.title, "new task")

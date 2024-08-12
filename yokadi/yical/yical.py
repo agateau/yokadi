@@ -163,7 +163,7 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
         for vTodo in cal.walk():
             if "UID" in vTodo:
                 try:
-                    self._processVTodo(vTodo)
+                    IcalHttpRequestHandler.processVTodo(self.newTask, vTodo)
                 except YokadiException as e:
                     self.send_response(503, e)
 
@@ -171,20 +171,24 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
-    def _processVTodo(self, vTodo):
+    # This is static method to make it easier to test
+    @staticmethod
+    def processVTodo(newTaskDict, vTodo):
         session = db.getSession()
-        if vTodo["UID"] in self.newTask:
+        uid = vTodo["UID"]
+        if uid in newTaskDict:
             # This is a recent new task but remote ical calendar tool is not
             # aware of new Yokadi UID. Update it here to avoid duplicate new tasks
             print("update UID to avoid duplicate task")
-            vTodo["UID"] = TASK_UID % self.newTask[vTodo["UID"]]
+            uid = TASK_UID % newTaskDict[uid]
+            vTodo["UID"] = uid
 
-        if vTodo["UID"].startswith(UID_PREFIX):
+        if uid.startswith(UID_PREFIX):
             # This is a yokadi Task.
             if vTodo["LAST-MODIFIED"].dt > vTodo["CREATED"].dt:
                 # Task has been modified
-                print("Modified task: %s" % vTodo["UID"])
-                result = TASK_RE.match(vTodo["UID"])
+                print("Modified task: %s" % uid)
+                result = TASK_RE.match(uid)
                 if result:
                     id = result.group(1)
                     task = dbutils.getTaskFromId(id)
@@ -192,10 +196,10 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
                     updateTaskFromVTodo(task, vTodo)
                     session.commit()
                 else:
-                    raise YokadiException("Task %s does exist in yokadi db " % id)
+                    raise YokadiException("Task %s does exist in yokadi db " % uid)
         else:
             # This is a new task
-            print("New task %s (%s)" % (vTodo["summary"], vTodo["UID"]))
+            print("New task %s (%s)" % (vTodo["summary"], uid))
             keywordDict = {}
             task = dbutils.addTask(INBOX_PROJECT, vTodo["summary"],
                                    keywordDict, interactive=False)
@@ -205,7 +209,7 @@ class IcalHttpRequestHandler(http.server.BaseHTTPRequestHandler):
             # if user update it right after creation without reloading the
             # yokadi UID
             # TODO: add purge for old UID
-            self.newTask[vTodo["UID"]] = task.id
+            newTaskDict[uid] = task.id
 
 
 class YokadiIcalServer(Thread):
