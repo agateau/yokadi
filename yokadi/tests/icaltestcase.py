@@ -7,8 +7,10 @@ Ical features test cases
 
 
 import unittest
+from datetime import datetime
 
 from yokadi.ycli import tui
+from yokadi.ycli.projectcmd import getProjectFromName
 from yokadi.yical import yical
 from yokadi.core import dbutils
 from yokadi.core import db
@@ -113,8 +115,35 @@ class IcalTestCase(unittest.TestCase):
     def testTaskDoneMapping(self):
         tui.addInputAnswers("y")
         t1 = dbutils.addTask("x", "t1", {})
-        yical.createVTodoFromTask(t1)
+        v1 = yical.createVTodoFromTask(t1)
 
-        # v1["completed"] = datetime.datetime.now()
-        # yical.updateTaskFromVTodo(t1, v1)
-        # self.assertEqual(t1.status, "done")
+        v1["completed"] = datetime.now()
+        yical.updateTaskFromVTodo(t1, v1)
+        self.assertEqual(t1.status, "done")
+
+    def testGenerateCal(self):
+        # Add an inactive project
+        t1 = dbutils.addTask("p1", "t1", interactive=False)
+        project = getProjectFromName("p1")
+        project.active = False
+
+        # And an active project with 3 tasks, one of them is done
+        t2new = dbutils.addTask("p2", "t2new", interactive=False)
+
+        t2started = dbutils.addTask("p2", "t2started", interactive=False)
+        t2started.setStatus("started")
+
+        t2done = dbutils.addTask("p2", "t2done", interactive=False)
+        t2done.setStatus("done")
+
+        self.session.commit()
+
+        # Generate the calendar
+        cal = yical.generateCal()
+
+        # It should contain only "p2", "t1" and "t2new" and "t2started"
+        # I am not sure that it should contain "t1" (since its project is not active), but that's the current behavior
+        summaries = sorted(str(x["SUMMARY"]) for x in cal.subcomponents)
+        expected = sorted(["p2", f"t1 ({t1.id})", f"t2new ({t2new.id})", f"t2started ({t2started.id})"])
+
+        self.assertEqual(summaries, expected)
