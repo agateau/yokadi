@@ -193,6 +193,6 @@ class IcalTestCase(unittest.TestCase):
 
         (uid, taskId) = newTaskList[0]
 
-        # And the task can be retried
+        # And the task can be retrieved
         task = dbutils.getTaskFromId(taskId)
         self.assertEqual(task.title, "new task")
