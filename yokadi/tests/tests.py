@@ -41,6 +41,7 @@ from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase  #
 from keywordfiltertestcase import KeywordFilterTestCase  # noqa: F401, E402
 from recurrenceruletestcase import RecurrenceRuleTestCase  # noqa: F401, E402
 from argstestcase import ArgsTestCase  # noqa: F401, E402
+from dbtestcase import DbTestCase  # noqa: F401, E402
 
 
 def main():
