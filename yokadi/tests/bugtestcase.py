@@ -33,7 +33,7 @@ class BugTestCase(YokadiTestCase):
         expected = ["t1"]
         self.assertEqual(result, expected)
 
-        kwDict = self.session.query(Task).get(1).getKeywordDict()
+        kwDict = self.session.get(Task, 1).getKeywordDict()
         self.assertEqual(kwDict, dict(_severity=2, _likelihood=4, _bug=123))
 
         for bad_input in ("",  # No project

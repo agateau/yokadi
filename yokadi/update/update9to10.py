@@ -35,7 +35,11 @@ def createByweekdayValue(rule):
 
 
 def createJsonStringFromRule(pickledRule):
-    rule = pickle.loads(pickledRule)
+    try:
+        rule = pickle.loads(pickledRule)
+    except UnicodeDecodeError:
+        # Some rules fails to unpickle if we don't set encoding to latin1
+        rule = pickle.loads(pickledRule, encoding="latin1")
     dct = {}
     dct["freq"] = rule._freq
     dct["bymonth"] = tuplify(rule._bymonth)

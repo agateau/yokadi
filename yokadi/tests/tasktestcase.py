@@ -6,6 +6,7 @@ Task test cases
 @license: GPL v3 or later
 """
 from yokadi.tests.yokaditestcase import YokadiTestCase
+from unittest.mock import patch
 
 import testutils
 
@@ -43,7 +44,7 @@ class TaskTestCase(YokadiTestCase):
         for x in tasks:
             self.assert_(x.uuid)
 
-        kwDict = self.session.query(Task).get(2).getKeywordDict()
+        kwDict = self.session.get(Task, 2).getKeywordDict()
         self.assertEqual(kwDict, dict(kw1=None, kw2=12))
 
         for bad_input in ("",  # No project
@@ -57,7 +58,7 @@ class TaskTestCase(YokadiTestCase):
         tui.addInputAnswers("newtxt")
         self.cmd.do_t_edit("1")
 
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertEqual(task.title, "newtxt")
         self.assertEqual(task.getKeywordDict(), {"_note": None})
 
@@ -68,7 +69,7 @@ class TaskTestCase(YokadiTestCase):
         tui.addInputAnswers("txt @kw", "y")
         self.cmd.do_t_edit("1")
 
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertEqual(task.title, "txt")
         self.assertEqual(task.getKeywordDict(), {"kw": None})
 
@@ -79,7 +80,7 @@ class TaskTestCase(YokadiTestCase):
         tui.addInputAnswers("txt")
         self.cmd.do_t_edit("1")
 
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertEqual(task.title, "txt")
         self.assertEqual(task.getKeywordDict(), {})
 
@@ -114,7 +115,7 @@ class TaskTestCase(YokadiTestCase):
     def testMark(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertEqual(task.status, "new")
         self.cmd.do_t_mark_started("1")
         self.assertEqual(task.status, "started")
@@ -126,7 +127,7 @@ class TaskTestCase(YokadiTestCase):
     def testAddKeywords(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
 
         tui.addInputAnswers("y", "y")
         self.cmd.do_t_add_keywords("1 @kw1 @kw2=12")
@@ -144,17 +145,17 @@ class TaskTestCase(YokadiTestCase):
         self.cmd.do_t_add("x t1")
         tui.addInputAnswers("y")
         self.cmd.do_t_project("1 y")
-        task1 = self.session.query(Task).get(1)
+        task1 = self.session.get(Task, 1)
         self.assertEqual(task1.project.name, "y")
 
         self.cmd.do_t_add("x t2")
         self.cmd.do_t_project("1 _")
-        task1 = self.session.query(Task).get(1)
+        task1 = self.session.get(Task, 1)
         self.assertEqual(task1.project.name, "x")
 
         tui.addInputAnswers("n")
         self.cmd.do_t_project("1 doesnotexist")
-        task1 = self.session.query(Task).get(1)
+        task1 = self.session.get(Task, 1)
         self.assertEqual(task1.project.name, "x")
 
     def testLastTaskId(self):
@@ -163,11 +164,11 @@ class TaskTestCase(YokadiTestCase):
 
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task1 = self.session.query(Task).get(1)
+        task1 = self.session.get(Task, 1)
         self.assertEqual(self.cmd.getTaskFromId("_"), task1)
 
         self.cmd.do_t_add("x t2")
-        task2 = self.session.query(Task).get(2)
+        task2 = self.session.get(Task, 2)
         self.assertEqual(self.cmd.getTaskFromId("_"), task2)
 
         self.cmd.do_t_mark_started("1")
@@ -178,15 +179,15 @@ class TaskTestCase(YokadiTestCase):
         self.assertRaises(YokadiException, self.cmd.do_t_add, "_ t1")
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task1 = self.session.query(Task).get(1)
+        task1 = self.session.get(Task, 1)
         self.cmd.do_t_add("_ t2")
-        task2 = self.session.query(Task).get(2)
+        task2 = self.session.get(Task, 2)
         self.assertEqual(task1.project, task2.project)
 
     def testRecurs(self):
         tui.addInputAnswers("y")
         self.cmd.do_t_add("x t1")
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
 
         self.cmd.do_t_recurs("1 daily 10:00")
         self.assertTrue(task.recurrence)
@@ -315,7 +316,7 @@ class TaskTestCase(YokadiTestCase):
         ids = [1, 2, 4, 5, 6, 9]
         self.cmd.do_t_apply("1 2,4-6 9 t_add_keywords @lala")
         for taskId in range(1, 10):
-            kwDict = self.session.query(Task).get(taskId).getKeywordDict()
+            kwDict = self.session.get(Task, taskId).getKeywordDict()
             if taskId in ids:
                 self.assertEqual(kwDict, dict(lala=None))
             else:
@@ -327,13 +328,13 @@ class TaskTestCase(YokadiTestCase):
         self.cmd.do_t_list("@lala")
         self.cmd.do_t_apply("__ t_add_keywords @toto")
         for taskId in range(1, 10):
-            kwDict = self.session.query(Task).get(taskId).getKeywordDict()
+            kwDict = self.session.get(Task, taskId).getKeywordDict()
             if taskId in ids:
                 self.assertEqual(kwDict, dict(lala=None, toto=None))
             else:
                 self.assertNotEqual(kwDict, dict(lala=None, toto=None))
 
-    def testReorder(self):
+    def testReorderFailsOnInvalidInputs(self):
         self.assertRaises(BadUsageException, self.cmd.do_t_reorder, "unknown_project")
         self.assertRaises(BadUsageException, self.cmd.do_t_reorder, "too much args")
 
@@ -350,12 +351,12 @@ class TaskTestCase(YokadiTestCase):
         self.cmd.do_t_add("x t1")
 
         self.cmd.do_t_to_note(1)
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertTrue(task.isNote(self.session))
 
         # Doing it twice should not fail
         self.cmd.do_t_to_note(1)
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertTrue(task.isNote(self.session))
 
     def testToTask(self):
@@ -363,12 +364,26 @@ class TaskTestCase(YokadiTestCase):
         self.cmd.do_n_add("x t1")
 
         self.cmd.do_n_to_task(1)
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertFalse(task.isNote(self.session))
 
         # Doing it twice should not fail
         self.cmd.do_n_to_task(1)
-        task = self.session.query(Task).get(1)
+        task = self.session.get(Task, 1)
         self.assertFalse(task.isNote(self.session))
+
+    @patch("yokadi.ycli.tui.editText")
+    def testReorder(self, editTextMock):
+        t1, t2, t3 = [dbutils.addTask("x", f"t{x}", interactive=False) for x in range(1, 4)]
+
+        # Simulate moving t3 from 3rd line to the 1st
+        editTextMock.return_value = "3,t3\n1,t1\n2,t2"
+
+        self.cmd.do_t_reorder("x")
+        editTextMock.assert_called_with("1,t1\n2,t2\n3,t3")
+
+        self.assertEqual(t3.urgency, 2)
+        self.assertEqual(t1.urgency, 1)
+        self.assertEqual(t2.urgency, 0)
 
 # vi: ts=4 sw=4 et

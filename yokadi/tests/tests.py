@@ -51,6 +51,7 @@ from conflictutilstestcase import ConflictUtilsTestCase  # noqa: F401, E402
 from syncmanagertestcase import SyncManagerTestCase  # noqa: F401, E402
 from argstestcase import ArgsTestCase  # noqa: F401, E402
 from dbs13ntestcase import Dbs13nTestCase  # noqa: F401, E402
+from dbtestcase import DbTestCase  # noqa: F401, E402
 
 
 def main():

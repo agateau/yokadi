@@ -4,7 +4,11 @@ Ical features test cases
 @author: Sébastien Renard <Sebastien.Renard@digitalfox.org>
 @license: GPL v3 or later
 """
+from datetime import datetime, timedelta
+
+import icalendar
 from yokadi.ycli import tui
+from yokadi.ycli.projectcmd import getProjectFromName
 from yokadi.yical import yical
 from yokadi.core import dbutils
 from yokadi.core import db
@@ -111,8 +115,87 @@ class IcalTestCase(YokadiTestCase):
     def testTaskDoneMapping(self):
         tui.addInputAnswers("y")
         t1 = dbutils.addTask("x", "t1", {})
-        yical.createVTodoFromTask(t1)
+        v1 = yical.createVTodoFromTask(t1)
 
-        # v1["completed"] = datetime.datetime.now()
-        # yical.updateTaskFromVTodo(t1, v1)
-        # self.assertEqual(t1.status, "done")
+        completed = datetime.now()
+        v1.add("COMPLETED", completed)
+        yical.updateTaskFromVTodo(t1, v1)
+        self.assertEqual(t1.status, "done")
+        self.assertEqual(t1.doneDate, completed)
+
+    def testGenerateCal(self):
+        # Add an inactive project
+        t1 = dbutils.addTask("p1", "t1", interactive=False)
+        project = getProjectFromName("p1")
+        project.active = False
+
+        # And an active project with 3 tasks, one of them is done
+        t2new = dbutils.addTask("p2", "t2new", interactive=False)
+
+        t2started = dbutils.addTask("p2", "t2started", interactive=False)
+        t2started.setStatus("started")
+
+        t2done = dbutils.addTask("p2", "t2done", interactive=False)
+        t2done.setStatus("done")
+
+        self.session.commit()
+
+        # Generate the calendar
+        cal = yical.generateCal()
+
+        # It should contain only "p2", "t1" and "t2new" and "t2started"
+        # I am not sure that it should contain "t1" (since its project is not active), but that's the current behavior
+        summaries = sorted(str(x["SUMMARY"]) for x in cal.subcomponents)
+        expected = sorted(["p2", f"t1 ({t1.id})", f"t2new ({t2new.id})", f"t2started ({t2started.id})"])
+
+        self.assertEqual(summaries, expected)
+
+    def testHandlerProcessVTodoModifyTask(self):
+        # Create a task
+        task = dbutils.addTask("p1", "t1", interactive=False)
+        self.session.commit()
+
+        # Create a vTodo to modify the task
+        modified = datetime.now()
+        created = modified + timedelta(hours=-1)
+        vTodo = icalendar.Todo()
+        vTodo["UID"] = yical.TASK_UID % str(task.id)
+        vTodo.add("CREATED", created)
+        vTodo.add("LAST-MODIFIED", modified)
+        vTodo.add("summary", "new title")
+
+        # Process the vTodo
+        newTaskDict = {}
+        yical.IcalHttpRequestHandler.processVTodo(newTaskDict, vTodo)
+
+        # The task title must have changed
+        task = dbutils.getTaskFromId(task.id)
+        self.assertEqual(task.title, "new title")
+
+        # newTaskDict must not have changed
+        self.assertEqual(newTaskDict, {})
+
+    def testHandlerProcessVTodoCreateTask(self):
+        # Create a vTodo to add a new task
+        modified = datetime.now()
+        created = modified + timedelta(hours=-1)
+        vTodo = icalendar.Todo()
+        vTodo["UID"] = "zogzog"
+        vTodo.add("summary", "new task")
+
+        # Process the vTodo
+        newTaskDict = {}
+        yical.IcalHttpRequestHandler.processVTodo(newTaskDict, vTodo)
+
+        # The task should be in newTaskDict
+        newTaskList = list(newTaskDict.items())
+        self.assertEqual(len(newTaskList), 1)
+
+        (uid, taskId) = newTaskList[0]
+
+        # And the task can be retrieved
+        task = dbutils.getTaskFromId(taskId)
+        self.assertEqual(task.title, "new task")
+
+        # And there is only one task
+        self.assertEqual(self.session.query(db.Task).count(), 1)
