@@ -100,20 +100,17 @@ def getOrCreateProject(projectName, interactive=True, createIfNeeded=True):
     @type createIfNeeded: Bool
     @return: Project instance or None if user cancel creation or createIfNeeded is False"""
     session = db.getSession()
-    result = session.query(Project).filter_by(name=projectName).all()
-    if len(result):
-        return result[0]
-
-    if not createIfNeeded:
-        return None
-
-    if interactive and not tui.confirm("Project '%s' does not exist, create it" % projectName):
-        return None
-
-    project = Project(name=projectName)
-    session.add(project)
-    print("Added project '%s'" % projectName)
-    return project
+    try:
+        return session.query(Project).filter_by(name=projectName).one()
+    except (NoResultFound, MultipleResultsFound):
+        if not createIfNeeded:
+            return None
+        if interactive and not tui.confirm("Project '%s' does not exist, create it" % projectName):
+            return None
+        project = Project(name=projectName)
+        session.add(project)
+        print("Added project '%s'" % projectName)
+        return project
 
 
 def createMissingKeywords(lst, interactive=True):
