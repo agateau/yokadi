@@ -119,9 +119,11 @@ class IcalTestCase(unittest.TestCase):
         t1 = dbutils.addTask("x", "t1", {})
         v1 = yical.createVTodoFromTask(t1)
 
-        v1["completed"] = datetime.now()
+        completed = datetime.now()
+        v1.add("COMPLETED", completed)
         yical.updateTaskFromVTodo(t1, v1)
         self.assertEqual(t1.status, "done")
+        self.assertEqual(t1.doneDate, completed)
 
     def testGenerateCal(self):
         # Add an inactive project
