@@ -175,13 +175,13 @@ class Task(Base):
 
     def getUserKeywordsNameAsString(self):
         """
-        Returns all keywords keys as a string like "key1, key2, key3...".
+        Returns all keywords keys as a string like "@key1 @key2 @key3...".
         Internal keywords (starting with _) are ignored.
         """
         keywords = [k for k in list(self.getKeywordDict().keys()) if not k.startswith("_")]
         keywords.sort()
         if keywords:
-            return ", ".join(keywords)
+            return " ".join(f"@{k}" for k in keywords)
         else:
             return ""
 
