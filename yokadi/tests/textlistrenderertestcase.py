@@ -41,7 +41,7 @@ class TextListRendererTestCase(unittest.TestCase):
 
         TEST_DATA = (
             (task, 20, "t1"),
-            (taskWithKeywords, 20, "t2 (key1, key2)"),
+            (taskWithKeywords, 20, "t2 @key1 @key2"),
             (taskWithKeywords, 4, "t2 >"),
             (longTask, 10, longTask.title[:8] + ">*"),
             (longTask, len(longTask.title), longTask.title[:-2] + ">*"),
@@ -78,7 +78,7 @@ class TextListRendererTestCase(unittest.TestCase):
             "                     Foo                      \n" \
             "ID│Title              │U  │S│Age     │Due date\n" \
             "──┼───────────────────┼───┼─┼────────┼────────\n" \
-            "2 │t2 (k1, k2)        │0  │N│0m      │        \n" \
+            "2 │t2 @k1 @k2         │0  │N│0m      │        \n" \
             "3 │A longer task name*│0  │N│0m      │        \n"
         self.assertMultiLineEqual(out, expected)
 
