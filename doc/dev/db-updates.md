@@ -8,7 +8,7 @@ The update process goes like this:
 
 - Copy yokadi.db to work.db
 - for each v between x and x + n - 1:
-     - run `update<v>to<v+1>.update()`
+    - run `update<v>to<v+1>.update()`
 - Create an empty database in recreated.db
 - Fill recreated.db with the content of work.db
 - If we are updating the database in place, rename yokadi.db to yokadi-$date.db

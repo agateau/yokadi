@@ -1,13 +1,15 @@
-# Intro
+# Tips
+
+## Introduction
 
 This document presents practical advices on how to get the best out of Yokadi.
 
-# Completion
+## Completion
 
 Yokadi supports completion of command names, and in many commands it can
 complete project names. Do not hesitate to try the `[tab]` key!
 
-# Setting up a project hierarchy
+## Setting up a project hierarchy
 
 You can set up a project hierarchy by adopting a name convention. For example if
 you want to track tasks related to a program which is made of many plugins, you
@@ -20,7 +22,7 @@ For example to list all `fooplayer` related tasks you can use:
 
     t_list fooplayer%
 
-# Using keywords
+## Using keywords
 
 Keywords are great to group tasks in different ways. For example you can create
 a keyword named `phone`, and assign it to tasks which you must accomplish on
@@ -36,13 +38,13 @@ Or even nicer, directly print your list (from the shell):
 
     yokadi "t_list @diy_store --format plain" | lp
 
-# Keep track of your meetings
+## Keep track of your meetings
 
 To track my meetings, I like to use a `meeting` keyword together with an
 assigned due date. Yokadi ability to add long descriptions to tasks is also
 handy to associate address or contact information to a meeting task.
 
-# Keep track of tasks you delegate to people
+## Keep track of tasks you delegate to people
 
 When you delegate a task to someone, add a keyword with its name to the task.
 So you can check that people really do what they promise to do even if they
@@ -56,7 +58,7 @@ To check all task that Bob should have done:
 
     t_list --overdue @bob
 
-# Some useful shortcuts
+## Some useful shortcuts
 
 Yokadi relies on readline library, so you can use very useful readline
 shortcuts such as:

@@ -1,11 +1,13 @@
-# Introduction
+# Bugtracking
+
+## Introduction
 
 Yokadi comes with a set of commands tailored to help you track bugs. These
 commands are `bug_add` and `bug_edit`. They are similar to `t_add` and `t_edit`
 except they will ask you a few questions to help you decide which bug to fix
 next.
 
-# Entering a bug
+## Entering a bug
 
 Enter a new bug like you would enter a new task:
 
@@ -48,7 +50,7 @@ If you edit the task with `t_edit 12` you will only be able to fix the task
 title. To be asked for severity, likelihood and bug id again, use
 `bug_edit 12`.
 
-# What's next?
+## What's next?
 
 Based on the severity and likelihood, Yokadi computes the urgency of the bug.
 The formula used is:
@@ -64,7 +66,7 @@ This is based on the concept of "User Pain", as described by Danc here:
 Now, when you list your tasks with `t_list`, the most urgent tasks will be
 listed first, making it easy to fix the most important bugs first.
 
-# Behind the scenes
+## Behind the scenes
 
 Likelihood, severity and bug are stored as Yokadi keywords (Yokadi keywords can
 be associated with an integer value).
@@ -74,7 +76,7 @@ task urgency field. Yes, this means there is duplication and you may get
 likelihood/severity and urgency out of sync if you manually adjust urgency with
 `t_set_urgency`. In practice, I found it was not a problem.
 
-# Tricks
+## Tricks
 
 Here are a few tricks I came up with while using Yokadi to do bug tracking:
 
