@@ -177,8 +177,6 @@ class IcalTestCase(YokadiTestCase):
 
     def testHandlerProcessVTodoCreateTask(self):
         # Create a vTodo to add a new task
-        modified = datetime.now()
-        created = modified + timedelta(hours=-1)
         vTodo = icalendar.Todo()
         vTodo["UID"] = "zogzog"
         vTodo.add("summary", "new task")
