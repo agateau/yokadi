@@ -70,4 +70,3 @@ shortcuts such as:
 - ctrl-w delete last word
 
 <!-- vim: set ts=4 sw=4 et: -->
-
