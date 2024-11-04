@@ -129,7 +129,7 @@
 
 ### Misc
 
-- Date/time commands now support %d/%m/%y date format.
+- Date/time commands now support `%d/%m/%y` date format.
 - Replaced xyokadi with a desktop file.
 - Updated README to match real output.
 
@@ -144,14 +144,14 @@
 
 ## 0.13 - 2011-04-09
 
-- cryptographic support to encrypt tasks title and description
-- t_apply now accept id range (x-y)
-- Special keyword __ can used in t_apply to affect all tasks previously select by t_list
+- cryptographic support to encrypt tasks title and description.
+- t_apply now accept id range (x-y).
+- Special keyword `__` can used in t_apply to affect all tasks previously select by t_list.
 
 ## 0.12 - 2010-07-06
 
-- Negative keyword support. Ex.: t_list !@home
-- Permanent filters on keyword or project. 't_filter @foo' will filter any further call to t_list on @foo keyword.
+- Negative keyword support. Ex.: `t_list !@home`
+- Permanent filters on keyword or project. `t_filter @foo` will filter any further call to t_list on @foo keyword.
 
 ## 0.11.1 - 2009-11-02
 
@@ -161,10 +161,10 @@
 
 - dynamic display width according to user terminal
 - display keywords in t_list
-- bugs keywords are prefixed with a '_' to distinguish them from user keywords
+- bugs keywords are prefixed with a `_` to distinguish them from user keywords
 - YOKADI_DB environment variable can be defined to set default yokadi database path
 - tasks can be grouped by keyword instead of project
-- special character _ can be used to represent last task id
+- special character `_` can be used to represent last task id
 - custom aliases can be defined for all commands with a_add
 - switch from GPL 3 to GPL v3 or newer license
 
@@ -172,12 +172,12 @@
 
 - ability to assign keywords to a project
 - shortened some commands (old ones still available but deprecated):
-    - t_set_due => t_due
-    - t_set_project => t_project
-    - t_set_urgency => t_urgency
-- changed keyword syntax: use @foo instead of -k foo
+    - `t_set_due` => `t_due`
+    - `t_set_project` => `t_project`
+    - `t_set_urgency` => `t_urgency`
+- changed keyword syntax: use `@foo` instead of `-k foo`
 - added t_recurs command to define task recursion (weekly, monthly, yearly...)
-- added full text search with t_list -s foo
+- added full text search with `t_list -s foo`
 - enhanced t_list display
 - added purge command (t_purge) to remove old tasks
 - added Windows support
