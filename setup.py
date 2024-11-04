@@ -31,7 +31,7 @@ def createFileList(sourceDir, *patterns):
 # Additional files
 data_files = []
 data_files.append(["share/yokadi",
-                  ["README.md", "NEWS", "LICENSE"]])
+                  ["README.md", "CHANGELOG.md", "LICENSE"]])
 
 # Doc
 data_files.append(["share/yokadi/doc", createFileList("doc", "*.md")])

@@ -9,6 +9,6 @@ include README.md
 include LICENSE
 include MANIFEST.in
 include version
-include NEWS
+include CHANGELOG.md
 include *requirements.txt
-include .travis.yml
+include .github

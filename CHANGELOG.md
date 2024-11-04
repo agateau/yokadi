@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 - 2024-11-05
+
+- Update SQLAlchemy to 2.0.32.
+- Use color to for keywords in tables.
+- Fix crash handler failing on Windows.
+
 ## 1.2.0 - 2019-02-10
 
 ### New features
