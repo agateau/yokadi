@@ -1,4 +1,7 @@
-v1.2.0 2019/02/10
+# Changelog
+
+## 1.2.0 - 2019-02-10
+
 - New features:
     - The new `p_merge` command lets you merge a project into another.
     - It is now possible to turn a task into a note with `t_to_note` and a note into a task with `n_to_task`.
@@ -18,7 +21,7 @@ v1.2.0 2019/02/10
     - Similarly, the `YOKADI_DB` environment variable is now deprecated and will be removed in the next version.
     - Yokadi no longer supports cryptography: encrypted databases will be decrypted at update.
 
-v1.1.1 2016/11/11
+## 1.1.1 - 2016-11-11
 
 - Improvements:
     - When listing multiple projects, order them alphabetically.
@@ -27,7 +30,7 @@ v1.1.1 2016/11/11
     - When the user edits a tasks with t_edit and removes a keyword, remove the keyword from the task.
     - Made recurrence code work with dateutil 2.6.0.
 
-v1.1.0 2016/09/03
+## 1.1.0 - 2016-09-03
 
 - New features & Improvements:
     - A new command has been added: `t_medit`. `t_medit` lets you edit all tasks of a project in one go.
@@ -44,13 +47,13 @@ v1.1.0 2016/09/03
     - Fixed `bug_edit` crash.
     - Fixed negative keyword filter: A task with two keywords k1 and k2 would not be excluded by a filter !k1.
 
-v1.0.2 2016/03/28
+## 1.0.2 - 2016-03-28
 
 - Use a more portable way to get the terminal size. This makes it possible to use Yokadi inside Android terminal emulators like Termux
 - Sometimes the task lock used to prevent editing the same task description from multiple Yokadi instances were not correctly released
 - Deleting a keyword from the database caused a crash when a t_list returned tasks which previously contained this keyword
 
-v1.0.1 2015/12/03
+## 1.0.1 - 2015-12-03
 
 - User changes:
     - Make sure installing via pip installs the required dependencies
@@ -58,7 +61,7 @@ v1.0.1 2015/12/03
 - Developer changes:
     - Improved release process
 
-v1.0.0 2015/11/29
+## 1.0.0 - 2015-11-29
 
 - User changes:
     - Fixed an issue which caused t_list to fail when filtering by keywords on large lists
@@ -70,7 +73,8 @@ v1.0.0 2015/11/29
     - Yokadi has been ported to Python 3
     - The application now uses SQLAlchemy instead of SQLObject to access the SQLite database
 
-v0.14 2014/05/03
+## 0.14 - 2014-05-03
+
 - Command changes:
     - t_add, n_add:
         - Allow creating two tasks with the same title (useful for recurrent tasks, like "buy bread").
@@ -116,19 +120,23 @@ v0.14 2014/05/03
     - The scripts in bin/ are now smart enough to run the source tree version instead of the installed version if possible.
     - We now use Travis for continuous integration.
 
-v0.13 2011/04/09
+## 0.13 - 2011-04-09
+
 - cryptographic support to encrypt tasks title and description
 - t_apply now accept id range (x-y)
 - Special keyword __ can used in t_apply to affect all tasks previously select by t_list
 
-v0.12 2010/07/06
+## 0.12 - 2010-07-06
+
 - Negative keyword support. Ex.: t_list !@home
 - Permanent filters on keyword or project. 't_filter @foo' will filter any further call to t_list on @foo keyword.
 
-v0.11.1 2009/11/02
+## 0.11.1 - 2009-11-02
+
 - yokadi symlink (useful to run yokadi without installing it) was broken
 
-v0.11 2009/11/01
+## 0.11 - 2009-11-01
+
 - dynamic display width according to user terminal
 - display keywords in t_list
 - bugs keywords are prefixed with a '_' to distinguish them from user keywords
@@ -138,12 +146,13 @@ v0.11 2009/11/01
 - custom aliases can be defined for all commands with a_add
 - switch from GPL 3 to GPL v3 or newer license
 
-v0.10 2009/07/08
+## 0.10 - 2009-07-08
+
 - ability to assign keywords to a project
 - shortened some commands (old ones still available but deprecated):
-	o t_set_due => t_due
-	o t_set_project => t_project
-	o t_set_urgency => t_urgency
+    - t_set_due => t_due
+    - t_set_project => t_project
+    - t_set_urgency => t_urgency
 - changed keyword syntax: use @foo instead of -k foo
 - added t_recurs command to define task recursion (weekly, monthly, yearly...)
 - added full text search with t_list -s foo
@@ -152,5 +161,6 @@ v0.10 2009/07/08
 - added Windows support
 - fixed install script to be more friendly to both users and packagers
 
-v0.9 2009/02/07
+## 0.9 - 2009-02-07
+
 First public release. Fully usable for home and work.

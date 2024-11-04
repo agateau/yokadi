@@ -15,7 +15,7 @@ Check dev is clean
     git pull
     git status
 
-Update `NEWS` file (add changes, check release date)
+Update `CHANGELOG.md` file (add changes, check release date)
 
 Ensure `yokadi/__init__.py` file contains $version
 
