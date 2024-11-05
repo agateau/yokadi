@@ -1,0 +1,37 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.32.2
+    hooks:
+      - id: markdownlint-fix
+
+  - repo: local
+    hooks:
+      - id: tests
+        name: tests
+        entry: bash -c ". .venv/bin/activate && scripts/tests"
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: lint
+        name: lint
+        entry: bash -c ". .venv/bin/activate && scripts/lint"
+        language: system
+        files: \.py$
+        pass_filenames: false
+
+  # Check GitHub workflows
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.23.1
+    hooks:
+      - id: check-github-workflows

@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: UTF-8 -*-
 """
 Yokadi unit tests
 
@@ -21,27 +20,28 @@ except ImportError:
     hasIcalendar = False
     print("icalendar is not installed, some tests won't be run")
 
-from parseutilstestcase import ParseUtilsTestCase  # noqa: F401
-from yokadioptionparsertestcase import YokadiOptionParserTestCase  # noqa: F401
-from ydateutilstestcase import YDateUtilsTestCase  # noqa: F401
-from dbutilstestcase import DbUtilsTestCase  # noqa: F401
-from projecttestcase import ProjectTestCase  # noqa: F401
-from completerstestcase import CompletersTestCase  # noqa: F401
-from tasktestcase import TaskTestCase  # noqa: F401
-from bugtestcase import BugTestCase  # noqa: F401
-from aliastestcase import AliasTestCase  # noqa: F401
-from textlistrenderertestcase import TextListRendererTestCase  # noqa: F401
+from parseutilstestcase import ParseUtilsTestCase  # noqa: F401, E402
+from yokadioptionparsertestcase import YokadiOptionParserTestCase  # noqa: F401, E402
+from ydateutilstestcase import YDateUtilsTestCase  # noqa: F401, E402
+from dbutilstestcase import DbUtilsTestCase  # noqa: F401, E402
+from projecttestcase import ProjectTestCase  # noqa: F401, E402
+from completerstestcase import CompletersTestCase  # noqa: F401, E402
+from tasktestcase import TaskTestCase  # noqa: F401, E402
+from bugtestcase import BugTestCase  # noqa: F401, E402
+from aliastestcase import AliasTestCase  # noqa: F401, E402
+from textlistrenderertestcase import TextListRendererTestCase  # noqa: F401, E402
 if hasIcalendar:
-    from icaltestcase import IcalTestCase  # noqa: F401
-from keywordtestcase import KeywordTestCase  # noqa: F401
-from tuitestcase import TuiTestCase  # noqa: F401
-from helptestcase import HelpTestCase  # noqa: F401
-from conftestcase import ConfTestCase  # noqa: F401
-from massedittestcase import MassEditTestCase  # noqa: F401
-from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase  # noqa: F401
-from keywordfiltertestcase import KeywordFilterTestCase  # noqa: F401
-from recurrenceruletestcase import RecurrenceRuleTestCase  # noqa: F401
-from argstestcase import ArgsTestCase  # noqa: F401
+    from icaltestcase import IcalTestCase  # noqa: F401, E402
+from keywordtestcase import KeywordTestCase  # noqa: F401, E402
+from tuitestcase import TuiTestCase  # noqa: F401, E402
+from helptestcase import HelpTestCase  # noqa: F401, E402
+from conftestcase import ConfTestCase  # noqa: F401, E402
+from massedittestcase import MassEditTestCase  # noqa: F401, E402
+from basepathstestcase import BasePathsUnixTestCase, BasePathsWindowsTestCase  # noqa: F401, E402
+from keywordfiltertestcase import KeywordFilterTestCase  # noqa: F401, E402
+from recurrenceruletestcase import RecurrenceRuleTestCase  # noqa: F401, E402
+from argstestcase import ArgsTestCase  # noqa: F401, E402
+from dbtestcase import DbTestCase  # noqa: F401, E402
 
 
 def main():

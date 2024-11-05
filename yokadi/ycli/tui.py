@@ -33,30 +33,22 @@ MULTIPLE_DASH = re.compile("-+")
 
 _answers = []
 
-
-class IOStream:
-    def __init__(self, original_flow):
-        self.__original_flow = original_flow
-        if sys.platform == 'win32':
-            import pyreadline
-            self.__console = pyreadline.GetOutputFile()
-
-    def write(self, text):
-        if sys.platform == 'win32':
-            self.__console.write_color(text)
-        else:
-            self.__original_flow.write(text)
+stdout = sys.stdout
+stderr = sys.stderr
 
 
-stdout = IOStream(sys.stdout)
-stderr = IOStream(sys.stderr)
+_isInteractive = sys.stdin.isatty()
 
 
-isInteractive = sys.stdin.isatty()
+def isInteractive():
+    if _answers:
+        # We are in a test, interaction is being simulated
+        return True
+    return _isInteractive
 
 
 def _checkIsInteractive():
-    if not isInteractive:
+    if not isInteractive():
         raise YokadiException("This command cannot be used in non-interactive mode")
 
 
@@ -211,7 +203,7 @@ def enterInt(default=None, prompt="Enter a number"):
 
 
 def confirm(prompt):
-    if not isInteractive:
+    if not isInteractive():
         return True
     while True:
         answer = editLine("", prompt=prompt + " (y/n)? ")

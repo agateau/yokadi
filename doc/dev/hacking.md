@@ -81,7 +81,7 @@ Keep import in blocks, in this order:
 Keep import blocks sorted. It makes it easier to check if an import line is
 already there.
 
-# Command docstrings
+## Command docstrings
 
 All commands are documented either through their parser or using the command
 docstring. To ensure consistency all usage string should follow the same

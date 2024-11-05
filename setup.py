@@ -14,7 +14,7 @@ from fnmatch import fnmatch
 from os.path import isdir, dirname, join
 
 sys.path.insert(0, dirname(__file__))
-import yokadi
+import yokadi  # noqa: E402
 
 
 def createFileList(sourceDir, *patterns):
@@ -31,7 +31,7 @@ def createFileList(sourceDir, *patterns):
 # Additional files
 data_files = []
 data_files.append(["share/yokadi",
-                  ["README.md", "NEWS", "LICENSE"]])
+                  ["README.md", "CHANGELOG.md", "LICENSE"]])
 
 # Doc
 data_files.append(["share/yokadi/doc", createFileList("doc", "*.md")])
@@ -77,8 +77,10 @@ setup(
     # distutils does not support install_requires, but pip needs it to be
     # able to automatically install dependencies
     install_requires=[
-        "sqlalchemy",
-        "python-dateutil",
+        "sqlalchemy ~= 2.0.32",
+        "python-dateutil ~= 2.8.2",
+        "colorama ~= 0.4.6",
+        "pyreadline3 ~= 3.4.1 ; platform_system == 'Windows'",
     ],
     scripts=scripts,
     data_files=data_files

@@ -68,7 +68,7 @@ class ConfCmd(object):
         if name in ("ALARM_DELAY", "ALARM_SUSPEND", "PURGE_DELAY"):
             try:
                 value = int(value)
-                assert(value >= 0)
+                assert value >= 0
                 return True
             except (ValueError, AssertionError):
                 return False

@@ -16,6 +16,9 @@ class TuiTestCase(unittest.TestCase):
         tui.clearInputAnswers()
 
     def testEditEmptyText(self):
+        # Add an unused input answer to pass the isInteractive() check in editText()
+        tui.addInputAnswers("")
+
         os.environ["EDITOR"] = "/bin/true"
         out = tui.editText(None)
         self.assertEqual(out, "")

@@ -85,11 +85,10 @@ class TitleFormater(object):
         # Create title
         title = task.title
         if keywords and len(title) < maxWidth:
-            title += ' ('
-            colorizer.setColorAt(len(title), C.BOLD)
+            title += ' '
+            colorizer.setColorAt(len(title), C.ORANGE)
             title += keywords
             colorizer.setResetAt(len(title))
-            title += ')'
 
         # Crop title to fit in self.width
         titleWidth = len(title)
