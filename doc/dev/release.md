@@ -37,20 +37,19 @@ of yokadi.
   git push
   ```
 
-- [ ] When CI has checked the branch, merge changes in master
+- [ ] Open PR to merge in master
 
   ```
-  git checkout master
-  git pull
-  git merge dev
-  git push
+  gh pr create --fill
   ```
 
 - [ ] Tag the release
 
   ```
+  git checkout master
+  git pull
   git tag -a $version -m "Releasing $version"
-  git push --tags
+  git push origin $version
   ```
 
 ## In yokadi.github.com checkout
