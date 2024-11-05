@@ -7,61 +7,83 @@ of yokadi.
 
 ## In yokadi checkout
 
-    export version=<version>
+- [ ] Define version
 
-Check dev is clean
+  ```
+  export version=<version>
+  ```
 
-    git checkout dev
-    git pull
-    git status
+- [ ] Check dev is clean
 
-Update `CHANGELOG.md` file (add changes, check release date)
+  ```
+  git checkout dev
+  git pull
+  git status
+    ```
 
-Ensure `yokadi/__init__.py` file contains $version
+- [ ] Update `CHANGELOG.md` file (add changes, check release date)
 
-Build archives
+- [ ] Ensure `yokadi/__init__.py` file contains $version
 
-    ./scripts/mkdist.sh ../yokadi.github.com/download
+- [ ] Build archives
 
-Push changes
+  ```
+  ./scripts/mkdist.sh ../yokadi.github.com/download
+  ```
 
-    git push
+- [ ] Push changes
 
-When CI has checked the branch, merge changes in master
+  ```
+  git push
+  ```
 
-    git checkout master
-    git pull
-    git merge dev
-    git push
+- [ ] When CI has checked the branch, merge changes in master
 
-Tag the release
+  ```
+  git checkout master
+  git pull
+  git merge dev
+  git push
+  ```
 
-    git tag -a $version -m "Releasing $version"
-    git push --tags
+- [ ] Tag the release
+
+  ```
+  git tag -a $version -m "Releasing $version"
+  git push --tags
+  ```
 
 ## In yokadi.github.com checkout
 
-Ensure checkout is up to date
+- [ ] Ensure checkout is up to date
 
-Update documentation
+- [ ] Update documentation
 
-    ./updatedoc.py ../yokadi .
+  ```
+  ./updatedoc.py ../yokadi .
+  ```
 
-Update version in download page (`download.md`)
+- [ ] Update version in download page (`download.md`)
 
-Write a blog entry in `_posts/`
+- [ ] Write a blog entry in `_posts/`
 
-Test it:
+- [ ] Test it:
 
-    jekyll serve
+  ```
+  jekyll serve
+  ```
 
-Upload archives on PyPI
+- [ ] Upload archives on PyPI
 
-    cd download/
-    twine upload yokadi-<version>.*
+  ```
+  cd download/
+  twine upload yokadi-<version>.*
+  ```
 
-Publish blog post
+- [ ] Publish blog post
 
-    git add .
-    git commit -m "Releasing $version"
-    git push
+  ```
+  git add .
+  git commit -m "Releasing $version"
+  git push
+  ```
