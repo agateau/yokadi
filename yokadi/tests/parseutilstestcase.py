@@ -6,6 +6,7 @@ Parser utilities test cases
 """
 
 import unittest
+from yokadi.core.yokadiexception import YokadiException
 from yokadi.ycli import parseutils
 
 gTaskLineToParsedStructList = [
@@ -22,6 +23,17 @@ class ParseUtilsTestCase(unittest.TestCase):
         for src, dst in gTaskLineToParsedStructList:
             result = parseutils.parseLine(src)
             self.assertEqual(result, dst)
+
+    def testParseKeywordEmptyName(self):
+        # A lone "@" (or "!@") carries no keyword name. It must raise a
+        # YokadiException (reported cleanly) rather than crashing with an
+        # AssertionError from KeywordFilter.
+        for line in ("@", "!@"):
+            with self.assertRaises(YokadiException):
+                parseutils.parseKeyword(line)
+        # Sanity check: a normal keyword still parses fine.
+        keywordFilter = parseutils.parseKeyword("@foo")
+        self.assertEqual(keywordFilter.name, "foo")
 
     def testCreateLine(self):
         for dummy, parsedStruct in gTaskLineToParsedStructList:
