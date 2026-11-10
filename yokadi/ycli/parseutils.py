@@ -117,6 +117,9 @@ def parseKeyword(line):
         # No operator found, only keyword name has been provided
         name = line
 
+    if not name:
+        raise YokadiException("Keyword name cannot be empty")
+
     return KeywordFilter(name, negative=negative, value=value, valueOperator=valueOperator)
 
 # vi: ts=4 sw=4 et
